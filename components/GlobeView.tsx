@@ -23,6 +23,7 @@ maplibregl.setWorkerUrl(
 );
 
 import { createGlobeStyle, viewToCamera } from "@/map/mapStyle";
+import { watchRegionalGeo } from "@/map/regionalGeo";
 import { WorldLayer } from "@/map/worldLayer";
 import { DEMO_SCENE } from "@/scene/demoScene";
 import { useExplorationStore } from "@/state/explorationStore";
@@ -50,6 +51,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
     let ready = false;
     let worldLayer: WorldLayer | null = null;
     let unsubscribeYear: (() => void) | null = null;
+    let stopRegionalGeo: (() => void) | null = null;
 
     const map = new maplibregl.Map({
       container,
@@ -65,6 +67,9 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
 
     map.on("load", () => {
       if (disposed) return;
+      // Lazily fetch the finer (1:10 m) land once the camera zooms into a
+      // regional view; a continental-only session never downloads it.
+      stopRegionalGeo = watchRegionalGeo(map);
       try {
         worldLayer = new WorldLayer({
           scene: DEMO_SCENE,
@@ -122,6 +127,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
     return () => {
       disposed = true;
       unsubscribeYear?.();
+      stopRegionalGeo?.();
       map.off("moveend", syncView);
       // map.remove() triggers the layer's onRemove(), disposing Three resources.
       map.remove();

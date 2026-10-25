@@ -2,66 +2,106 @@
  * MapLibre style and map configuration for the historical globe.
  *
  * This module is the single place that defines the geographic look of the
- * world: the data source, the painterly dark palette, and the base camera.
+ * world: the data sources, the painterly dark palette, and the base camera.
  * Keeping it isolated means the art direction can evolve without touching the
  * map lifecycle or the Three.js renderer.
  *
  * ──────────────────────────────────────────────────────────────────────────
- * DATA / TILE DEPENDENCY  —  MapLibre "demotiles"
+ * GEOGRAPHIC DATA  —  self-hosted Natural Earth (physical)
  * ──────────────────────────────────────────────────────────────────────────
- * We render from MapLibre's public demo vector tiles:
- *   https://demotiles.maplibre.org/tiles/{z}/{x}/{y}.pbf
+ * Landmasses, coastlines and islands come from Natural Earth's PHYSICAL `land`
+ * theme, bundled as GeoJSON under `public/geo/` and served as static assets
+ * from our own origin. See `public/geo/PROVENANCE.md` for data provenance,
+ * license (public domain), attribution and the cost/bandwidth analysis.
  *
- *   • Content:   low-detail world — country polygons (land/coastline/borders)
- *                and graticule lines. Max zoom 6. No cities, roads or terrain.
- *   • Cost/key:  free, no API key, no account.
- *   • Licensing: data © Natural Earth (public domain) via MapLibre; the tiles
- *                are served by MapLibre purely as a **demonstration** endpoint.
- *   • LIMITS:    MapLibre explicitly states demotiles are for demos/development
- *                only. There is NO uptime, rate-limit, or availability
- *                guarantee, and it is NOT suitable for production traffic.
+ *   • Content:   real land polygons (incl. major islands); the coastline is the
+ *                outline of the land fill. NO political boundaries — a
+ *                historical globe must not show modern borders as a default.
+ *   • Scales:    1:50 m for the global view (loads at startup, ~573 KB gz);
+ *                1:10 m for regional zoom, fetched lazily by `map/regionalGeo.ts`.
+ *   • Cost/key:  none. Static assets on our own origin — no API key, no rate
+ *                limit, no third-party endpoint that can throttle or disappear.
  *
- * For production, swap `GEO_SOURCE` for self-hosted tiles or a commercial
- * provider (e.g. MapTiler, Protomaps/PMTiles, Stadia). Review each provider's
- * terms, rate limits, and pricing before shipping — do not assume any style or
- * tile endpoint is free or unrestricted.
+ * This replaces the previous `demotiles.maplibre.org` dependency, which
+ * MapLibre documents as development-only with no availability guarantee.
  */
 
-import type { StyleSpecification } from "maplibre-gl";
+import type { ExpressionSpecification, StyleSpecification } from "maplibre-gl";
 import type { GlobeView } from "@/state/explorationStore";
+import { createGraticule } from "@/map/graticule";
 
-/** Demo vector tiles. See the module header for licensing/limits. */
-const GEO_SOURCE = "https://demotiles.maplibre.org/tiles/tiles.json";
-
+/** Natural Earth is public domain; we credit it by courtesy only. */
 export const GEO_ATTRIBUTION =
-  'Boundaries © <a href="https://www.naturalearthdata.com/">Natural Earth</a> · ' +
-  'demo tiles © <a href="https://maplibre.org/">MapLibre</a> (development use only)';
+  'Geography © <a href="https://www.naturalearthdata.com/">Natural Earth</a> (public domain)';
 
-/** Painterly, muted palette tuned to let the globe read as the focal object. */
-const palette = {
+/**
+ * Zoom at which the globe hands off from the 1:50 m (global) data to the
+ * 1:10 m (regional) data. Both the 1:50 m land fill and its coastline stroke
+ * stop here and their finer 1:10 m counterparts take over — the ranges meet but
+ * never overlap, so the coarser simplified geometry can never poke out from
+ * under the finer fill. Shared with {@link map/regionalGeo}.
+ *
+ * The 1:50 m cap is NOT applied in the base style: it is installed by
+ * `map/regionalGeo.ts` only once the 1:10 m data is actually ready to render,
+ * so land never goes blank while the finer data is still downloading.
+ */
+export const REGIONAL_ZOOM = 5.0;
+
+/** Source and layer ids, shared with the lazy regional loader. */
+export const GEO_IDS = {
+  land50: "land-50m",
+  land10: "land-10m",
+  graticule: "graticule",
+  landFill50: "land-fill-50m",
+  coast50: "coastline-50m",
+  landFill10: "land-fill-10m",
+  coast10: "coastline-10m",
+} as const;
+
+/** Static asset URLs for the bundled Natural Earth data. */
+export const GEO_DATA = {
+  land50: "/geo/ne_50m_land.json",
+  land10: "/geo/ne_10m_land.json",
+} as const;
+
+/**
+ * Painterly, muted palette tuned to let the globe read as the focal object.
+ * Exported so the lazily added regional layers match exactly.
+ */
+export const palette = {
   ocean: "#0a1622",
   land: "#223240",
-  landHighlight: "#2d3f4d",
   coastline: "#4a6478",
-  border: "#38506080",
   graticule: "#ffffff0d",
   skyHigh: "#060b14",
   horizon: "#213a4f",
   fog: "#0a1622",
 } as const;
 
+/** Width ramp for coastline strokes, shared by the global and regional layers. */
+export const COASTLINE_WIDTH: ExpressionSpecification = [
+  "interpolate",
+  ["linear"],
+  ["zoom"],
+  0,
+  0.5,
+  6,
+  1.6,
+];
+
 /**
  * Build the MapLibre style. It is a function (not a constant) so future phases
  * can parameterize the palette by era/time of day without mutating shared
  * state.
+ *
+ * Only the global (1:50 m) data and the graticule are in the base style; the
+ * regional (1:10 m) data is added lazily (see `map/regionalGeo.ts`) so a user
+ * who stays at a continental view never downloads it.
  */
 export function createGlobeStyle(): StyleSpecification {
   return {
     version: 8,
     name: "mankind-historical-globe",
-    // Glyphs are referenced by the (optional) country labels. MapLibre's demo
-    // font stack; omit labels entirely and this is never fetched.
-    glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
     projection: { type: "globe" },
     sky: {
       "sky-color": palette.skyHigh,
@@ -71,53 +111,61 @@ export function createGlobeStyle(): StyleSpecification {
       "horizon-fog-blend": 0.5,
       "fog-ground-blend": 0.2,
       // Subtle atmospheric halo around the globe rim.
-      "atmosphere-blend": [
-        "interpolate",
-        ["linear"],
-        ["zoom"],
-        0,
-        0.9,
-        6,
-        0.2,
-      ],
+      "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 0.9, 6, 0.2],
     },
     sources: {
-      geo: { type: "vector", url: GEO_SOURCE, attribution: GEO_ATTRIBUTION },
+      [GEO_IDS.land50]: {
+        type: "geojson",
+        data: GEO_DATA.land50,
+        attribution: GEO_ATTRIBUTION,
+      },
+      [GEO_IDS.graticule]: {
+        type: "geojson",
+        // Generated in-process (no download). See map/graticule.ts.
+        data: createGraticule(30),
+      },
     },
     layers: [
       { id: "ocean", type: "background", paint: { "background-color": palette.ocean } },
       {
-        id: "land",
+        // Global land fill — the default geometry, visible from zoom 0.
+        //
+        // It is intentionally left UNCAPPED here: if it were capped at
+        // REGIONAL_ZOOM in the base style, land would go blank at zoom ≥5 during
+        // the window before the lazily-fetched 1:10 m data arrives. Instead
+        // `map/regionalGeo.ts` installs the maxzoom cap only once the 1:10 m data
+        // is actually ready to render, handing the two scales off atomically.
+        //
+        // After that handoff the cap matters: the 1:50 m polygon is
+        // Douglas-Peucker simplified, which displaces vertices OUTWARD as well
+        // as inward, so it does not nest inside the 1:10 m polygon. Wherever a
+        // coarser edge bows seaward of the true coast it would poke out from
+        // under the finer fill as a straight-edged land wedge past the 1:10 m
+        // coastline (badly visible around Greece, the Aegean, Crete and SW
+        // Anatolia). Capping at handoff removes that overlap entirely.
+        id: GEO_IDS.landFill50,
         type: "fill",
-        source: "geo",
-        "source-layer": "countries",
+        source: GEO_IDS.land50,
         paint: { "fill-color": palette.land, "fill-opacity": 0.92 },
       },
       {
-        id: "graticule",
+        id: GEO_IDS.graticule,
         type: "line",
-        source: "geo",
-        "source-layer": "geolines",
+        source: GEO_IDS.graticule,
         paint: { "line-color": palette.graticule, "line-width": 1 },
       },
       {
-        id: "country-borders",
+        // Global coastline = outline of the land fill. Uncapped for the same
+        // reason as the fill above; `map/regionalGeo.ts` caps it at REGIONAL_ZOOM
+        // in the same handoff that caps the fill, so the fill and coastline
+        // always share one Natural Earth resolution and the finer coastline
+        // takes over without a doubled, opacity-stacked stroke.
+        id: GEO_IDS.coast50,
         type: "line",
-        source: "geo",
-        "source-layer": "countries",
-        paint: {
-          "line-color": palette.border,
-          "line-width": ["interpolate", ["linear"], ["zoom"], 0, 0.4, 6, 1.2],
-        },
-      },
-      {
-        id: "coastline",
-        type: "line",
-        source: "geo",
-        "source-layer": "countries",
+        source: GEO_IDS.land50,
         paint: {
           "line-color": palette.coastline,
-          "line-width": ["interpolate", ["linear"], ["zoom"], 0, 0.5, 6, 1.6],
+          "line-width": COASTLINE_WIDTH,
           "line-opacity": 0.85,
         },
       },

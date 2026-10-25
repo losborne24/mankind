@@ -44,8 +44,8 @@ pnpm lint           # eslint
 The globe opens on a continental view. To explore the demo settlement:
 
 - **Zoom in** on the eastern Mediterranean / northern Egypt region (around
-  **31.13 °E, 29.98 °N**). A glowing **beacon** marks the settlement from
-  orbital/regional zoom.
+  **31.13 °E, 29.98 °N**). From orbital/regional zoom the settlement is a
+  sub-pixel speck on the landscape — there is no beacon or pin marking it.
 - As you zoom into the region, the settlement **resolves naturally** from a
   compact built-up silhouette into individual buildings, then (past ~zoom
   10–11) into the full **miniature settlement**: groves, paths, drifting
@@ -84,13 +84,19 @@ scene/                  Declarative world model (pure data — no Three.js)
   rng.ts                Seeded, deterministic PRNG (hashSeed + mulberry32)
 
 map/                    Rendering modules
-  mapStyle.ts           Painterly dark style + data source + base camera
+  mapStyle.ts           Painterly dark style + Natural Earth sources + base camera
+  regionalGeo.ts        Lazy loader for the finer (1:10 m) land, by zoom
+  graticule.ts          Procedural meridians/parallels (no download)
   worldLayer.ts         The living-world custom layer (lifecycle + orchestration)
   anchoring.ts          lng/lat → globe/mercator model matrices + horizon cull
   geometry.ts           Shared materials + procedural buildings/trees/roads/ship
   animation.ts          Deterministic ambient systems (smoke, ship, foliage sway)
   lod.ts                Zoom → level-of-detail policy (configurable thresholds)
   webglSupport.ts       WebGL 2 capability probe
+
+public/geo/             Bundled Natural Earth land (GeoJSON) + PROVENANCE.md
+scripts/
+  fetch-natural-earth.mjs  Reproducible, pinned fetch of the geographic data
 
 lib/                    Pure utilities (no React/renderer deps)
   historicalDate.ts     Astronomical-year ↔ BCE/CE conversion & bounds
@@ -235,24 +241,53 @@ BCE/CE boundary is continuous and off-by-one-free (`-2999` → `3000 BCE`,
 
 ---
 
-## Map data / style dependency, licensing & cost
+## Geographic data: Natural Earth, self-hosted
 
-The globe renders from MapLibre's public **demo vector tiles**:
+The globe's physical geography — **landmasses, coastlines and islands** — is
+drawn from **[Natural Earth](https://www.naturalearthdata.com/)**'s *physical*
+`land` theme, bundled as GeoJSON under `public/geo/` and served as static assets
+from the application's own origin. Full provenance, checksums, license and a
+cost/bandwidth analysis live in [`public/geo/PROVENANCE.md`](public/geo/PROVENANCE.md);
+the headlines:
 
-- **Endpoint:** `https://demotiles.maplibre.org/tiles/{z}/{x}/{y}.pbf`
-- **Content:** low-detail world — country polygons (land, coastline, borders)
-  and graticule lines. **Max zoom 6.** No cities, roads, labels, or terrain.
-- **Cost / key:** free, no API key, no account.
-- **Licensing:** boundary data © [Natural Earth](https://www.naturalearthdata.com/)
-  (public domain); tiles served by MapLibre **as a demonstration endpoint**.
-- **Limits (important):** MapLibre states demotiles are for **demos/development
-  only** — no uptime, rate-limit, or availability guarantee, not suitable for
-  production traffic.
+- **Content:** real land polygons (incl. major islands). The **coastline is the
+  outline of the land fill**; no separate coastline/ocean file is shipped.
+- **Physical only — no political boundaries.** A historical globe must not
+  present modern national borders as a default, so none are fetched or drawn.
+  (Era-specific, evidence-backed geography is Phase 3's job.)
+- **Scales, chosen per view:**
+  - **1:50 m** (`ne_50m_land.json`, ~2.2 MB raw / ~573 KB gzip) for the
+    **global** view — loaded at startup, visible from zoom 0.
+  - **1:10 m** (`ne_10m_land.json`, ~16 MB raw / ~5.0 MB gzip) for **regional**
+    zoom (≥5) — fetched **lazily** by `map/regionalGeo.ts` the first time the
+    camera nears zoom 5, then browser-cached. A continental-only session never
+    downloads it. The 1:50 m fill + coastline are only capped (handed off to
+    1:10 m) **once the 1:10 m data is ready to render**, so land never goes
+    blank mid-load, and both always switch resolution together.
+  - The graticule is **generated in-process** (`map/graticule.ts`), not
+    downloaded (Natural Earth's graticule GeoJSON is ~1.1 MB for a few lines).
+- **License & redistribution:** Natural Earth is **public domain** — no
+  permission, **no attribution requirement**, and **no redistribution
+  restriction**, so the files are safe to commit and ship. We credit Natural
+  Earth by courtesy in the on-globe attribution control.
+- **Cost / key:** **none.** Static assets on our own origin — no API key, no
+  rate limit, no usage quota, and no third-party endpoint that can throttle or
+  disappear.
 
-**For production**, replace `GEO_SOURCE` in `map/mapStyle.ts` with self-hosted
-tiles (e.g. Protomaps/PMTiles) or a commercial provider (MapTiler, Stadia, …).
-The painterly styling lives entirely in `map/mapStyle.ts` and is independent of
-the data source.
+This **replaces the previous `demotiles.maplibre.org` dependency** (which
+MapLibre documents as development-only, max zoom 6, no availability guarantee).
+The data files are committed and generated by
+[`scripts/fetch-natural-earth.mjs`](scripts/fetch-natural-earth.mjs) from a
+pinned source, so `pnpm install && pnpm build` never touches the network; re-run
+that script only to refresh the data.
+
+**Close-up & production path.** The regional 1:10 m data provides real
+coastline under the settlement at close range. For fidelity *finer* than 1:10 m
+worldwide — or to avoid shipping a single ~5 MB download at all — the next step
+is **self-hosted vector tiles** (e.g. PMTiles built from Natural Earth), which
+serve only visible tiles over range requests and stay self-hosted with no paid
+dependency. That is intentionally out of scope here. The painterly styling lives
+entirely in `map/mapStyle.ts` and is independent of the data source.
 
 ### The MapLibre worker
 
@@ -270,9 +305,17 @@ asset and rewrite the URL at build time. No extra copy step is required.
 - `pnpm lint` — ESLint (Next core-web-vitals + TS), **clean**.
 - `pnpm build` — production build succeeds; `/` prerenders as static.
 - **Live browser verification** (Chrome, WebGL2) against the dev server:
+  - **Geography loads self-hosted**: only `ne_50m_land` at startup; **zero**
+    requests to `demotiles.maplibre.org` or any external tile host. The finer
+    `ne_10m_land` is added **only after** the camera nears regional zoom.
+  - **Coastlines read correctly at every scale**: continents + graticule and
+    **no political borders** at global zoom; Cyprus, the Aegean islands and the
+    Sinai gulfs resolve at regional zoom (1:10 m, ≥5); real land fills under the
+    settlement at close-up zoom.
   - Settlement renders at real coordinates and is **locked** through rotate /
-    tilt / zoom and the globe→mercator transition (anchors projected to screen
-    stay glued to the geometry across bearings 0–220°).
+    tilt / zoom and the globe→mercator transition — the projected anchor stays
+    over the same land under bearing 55° / pitch 45°, confirming the Three.js
+    geometry stays aligned to the new Natural Earth data.
   - **LOD transitions** behave: a cheap massing silhouette at far, individual
     buildings + organic footprint at mid, groves/ship/animation added at near —
     with no beacons or pins at any level.
@@ -287,8 +330,11 @@ asset and rewrite the URL at build time. No extra copy step is required.
 
 ## Known limitations
 
-- **Demo tiles only** (see above): low detail, max zoom 6, not production-grade.
-  Below the built-up area the ground is a flat style colour, not real terrain.
+- **Vector-level detail, two scales** (see above): 1:50 m + 1:10 m Natural
+  Earth land. Credible at global, regional and close zoom; fidelity finer than
+  1:10 m worldwide needs self-hosted vector tiles, deferred to a later phase.
+  Below the land fill the ground is a flat style colour, not real terrain
+  (terrain is out of scope).
 - **Exaggerated miniature scale.** Buildings are tens-to-hundreds of metres so
   the settlement reads as a legible, tactile miniature at the zoom levels the
   demo globe supports, rather than as invisible real-scale structures. This is an
