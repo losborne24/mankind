@@ -6,8 +6,8 @@
  *
  *   • three.js      — the living-world custom layer (settlements, groves, ship).
  *   • Natural Earth — the self-hosted vector land + ocean polygons.
- *   • Terrarium DEM — the stylised relief (color-relief + hillshade).
- *   • Elevation     — real 3D terrain fed by the same bundled DEM.
+ *   • DEM Shading   — optional heavy color-relief + hillshade overlays.
+ *   • 3D Elevation  — real terrain and its subtle surface illumination.
  *
  * Everything already coexists in one running map and one bundle; each toggle
  * just flips what is *drawn* (layer `visibility` / `setTerrain`), so you can
@@ -24,10 +24,7 @@
 
 import type { ControlPosition, IControl, Map as MaplibreMap } from "maplibre-gl";
 import { GEO_IDS } from "./mapStyle";
-import { TERRAIN_IDS } from "./terrain";
-
-/** Locked 3D terrain exaggeration, re-applied whenever elevation is toggled on. */
-const TERRAIN_EXAGGERATION = 1.5;
+import { TERRAIN_IDS, TERRAIN_EXAGGERATION } from "./terrain";
 
 /** Default id of the three.js custom layer (see {@link ../map/worldLayer}). */
 const DEFAULT_WORLD_LAYER_ID = "world-layer";
@@ -58,7 +55,7 @@ export class DebugControl implements IControl {
 
   private threeOn = true;
   private naturalEarthOn = true;
-  private demOn = true;
+  private demOn = false;
   private elevationOn = true;
 
   constructor(options: DebugControlOptions = {}) {
@@ -121,9 +118,9 @@ export class DebugControl implements IControl {
       }),
     );
 
-    // ── Terrarium DEM (relief + hillshade) ──
+    // ── Optional DEM shading (never changes the elevation source) ──
     el.appendChild(
-      this.buildToggle("Terrarium DEM", () => this.demOn, (next) => {
+      this.buildToggle("DEM Shading", () => this.demOn, (next) => {
         this.demOn = next;
         this.applyDem();
       }),
@@ -131,7 +128,7 @@ export class DebugControl implements IControl {
 
     // ── Elevation (3D terrain) ──
     el.appendChild(
-      this.buildToggle("Elevation", () => this.elevationOn, (next) => {
+      this.buildToggle("3D Elevation", () => this.elevationOn, (next) => {
         this.elevationOn = next;
         this.applyElevation();
       }),
@@ -229,5 +226,6 @@ export class DebugControl implements IControl {
     } else {
       map.setTerrain(null);
     }
+    this.setLayerVisible(TERRAIN_IDS.light, this.elevationOn);
   }
 }

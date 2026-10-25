@@ -33,6 +33,7 @@ import {
   demSource,
   hillshadeLayer,
   reliefLayer,
+  terrainLightLayer,
   TERRAIN_IDS,
 } from "@/map/terrain";
 
@@ -178,6 +179,9 @@ export function createGlobeStyle(): StyleSpecification {
       // map/regionalGeo.ts) so the relief covers both vector resolutions.
       reliefLayer(),
       hillshadeLayer(),
+      // Faint surface illumination; the legacy DEM overlays above are hidden
+      // by default so environmental materials own the surface palette.
+      terrainLightLayer(),
       // Ocean mask — repaint clean, opaque water over the terrain relief using
       // Natural Earth's physical ocean polygon (NOT the DEM elevation, which
       // would also mask inland below-sea-level land — Qattara, the Jordan Rift —

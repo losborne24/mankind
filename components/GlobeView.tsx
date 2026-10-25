@@ -25,7 +25,7 @@ maplibregl.setWorkerUrl(
 import { createGlobeStyle, viewToCamera, GEO_IDS, palette } from "@/map/mapStyle";
 import { CoastlineLayer } from "@/map/coastlineLayer";
 import { watchRegionalGeo } from "@/map/regionalGeo";
-import { TERRAIN_IDS } from "@/map/terrain";
+import { TERRAIN_IDS, TERRAIN_EXAGGERATION } from "@/map/terrain";
 import { DebugControl } from "@/map/debugControl";
 import { WorldLayer } from "@/map/worldLayer";
 import { DEMO_SCENE } from "@/scene/demoScene";
@@ -100,7 +100,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
       // drives the colour-relief and hillshade. The DEM's ocean is clamped to a
       // flat sea level (see scripts/fetch-dem.mjs), so water stays flat and the
       // coast has no bathymetry cliff.
-      map.setTerrain({ source: TERRAIN_IDS.dem, exaggeration: 1.5 });
+      map.setTerrain({ source: TERRAIN_IDS.dem, exaggeration: TERRAIN_EXAGGERATION });
 
       try {
         worldLayer = new WorldLayer({

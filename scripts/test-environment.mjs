@@ -13,7 +13,8 @@ function load(path) {
   const compiled = { exports: {} };
   new Function('require', 'module', 'exports', result.outputText)(
     (name) => name === './styles.json' ? require('../map/environment/styles.json')
-      : name.startsWith('@/') ? load(`../${name.slice(2)}.ts`) : require(name), compiled, compiled.exports,
+      : name.startsWith('@/') ? load(`../${name.slice(2)}.ts`)
+        : name.startsWith('./') ? load(new URL(`${name}.ts`, new URL(path, import.meta.url))) : require(name), compiled, compiled.exports,
   );
   return compiled.exports;
 }
@@ -91,10 +92,64 @@ for (const record of ancient.layers) {
 }
 assert(indexOf('relief') < indexOf('hillshade'));
 assert(indexOf('hillshade') < indexOf('ocean-fill-50m'));
+assert(indexOf('terrain-light') > indexOf('hillshade'));
+assert(indexOf('terrain-light') < indexOf('ocean-fill-50m'));
+assert.equal(orderedLayers[indexOf('relief')].layout.visibility, 'none');
+assert.equal(orderedLayers[indexOf('hillshade')].layout.visibility, 'none');
+assert.notEqual(orderedLayers[indexOf('terrain-light')].layout?.visibility, 'none');
 assert.equal(style.sources.dem.type, 'raster-dem');
 assert.equal(style.sources.dem.encoding, 'terrarium');
 assert.equal(style.sources.dem.maxzoom, 4);
 assert.deepEqual(JSON.parse(terrainSources).dem, style.sources.dem);
 assert.deepEqual(JSON.parse(terrainSources)['dem-shading'], style.sources['dem-shading']);
-console.log('Native raster drape integration passed: surface < relief < hillshade < NE ocean; unchanged Terrarium z0–4 sources.');
+console.log('Native raster drape integration passed: surface < optional DEM shading < subtle light < NE ocean; unchanged Terrarium z0–4 sources.');
+
+// Exercise the actual debug buttons: shading must never remove/change terrain
+// or its sources; elevation must restore the same source and exaggeration.
+const { DebugControl } = load('../map/debugControl.ts');
+const { TERRAIN_EXAGGERATION } = load('../map/terrain.ts');
+class Element {
+  children = [];
+  style = {};
+  attributes = {};
+  listeners = {};
+  appendChild(child) { this.children.push(child); }
+  setAttribute(key, value) { this.attributes[key] = value; }
+  addEventListener(key, callback) { this.listeners[key] = callback; }
+  set innerHTML(value) { if (value === '') this.children = []; }
+  remove() {}
+}
+globalThis.document = { createElement: () => new Element() };
+let terrain = {source:'dem', exaggeration:TERRAIN_EXAGGERATION}, terrainChanges = 0;
+const debugMap = {
+  getLayer: id => orderedLayers.find(l=>l.id===id),
+  getLayoutProperty: (id,key) => orderedLayers.find(l=>l.id===id)?.layout?.[key],
+  setLayoutProperty: (id,key,value) => {
+    const layer=orderedLayers.find(l=>l.id===id); layer.layout ??= {}; layer.layout[key]=value;
+  },
+  getTerrain: () => terrain,
+  setTerrain: value => {terrain=value; terrainChanges++;},
+};
+const debug = new DebugControl();
+const panel = debug.onAdd(debugMap);
+const button = label => panel.children.find(el => el.children[0]?.textContent === label);
+assert.equal(button('DEM Shading').attributes['aria-pressed'], 'false');
+assert.equal(button('3D Elevation').attributes['aria-pressed'], 'true');
+button('DEM Shading').listeners.click();
+assert.equal(debugMap.getLayoutProperty('relief','visibility'), 'visible');
+assert.equal(debugMap.getLayoutProperty('hillshade','visibility'), 'visible');
+button('DEM Shading').listeners.click();
+assert.equal(terrainChanges, 0);
+assert.equal(debugMap.getLayoutProperty('relief','visibility'), 'none');
+assert.equal(debugMap.getLayoutProperty('terrain-light','visibility'), undefined);
+button('3D Elevation').listeners.click();
+assert.equal(terrain, null);
+assert.equal(debugMap.getLayoutProperty('terrain-light','visibility'), 'none');
+button('3D Elevation').listeners.click();
+assert.deepEqual(terrain, {source:'dem',exaggeration:1.5});
+assert.equal(debugMap.getLayoutProperty('terrain-light','visibility'), 'visible');
+assert.equal(debugMap.getLayoutProperty('hillshade','visibility'), 'none');
+debug.onRemove();
+delete globalThis.document;
+console.log('Independent debug controls passed: 3D Elevation ON / DEM Shading OFF; shading never changes terrain or sources.');
 console.log('Environment checks passed: classification, unknown validity, 5,024 timeline years without source mutations, dataset replacement, independent visibility.');

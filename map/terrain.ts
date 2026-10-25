@@ -1,7 +1,8 @@
 /**
- * Phase 2 elevation and neutral lighting; historical surface colours belong to
- * Phase 3. Terrarium drives physical displacement independently of the Natural
- * Earth land/ocean geometry. No elevation threshold defines a shoreline.
+ * Physical elevation is independent of visual shading. Phase 3 controls surface
+ * colours; only faint neutral slope lighting is enabled by default. The legacy
+ * colour-relief/hillshade pair remains available through DEM Shading. Terrarium
+ * displaces the existing terrain; Natural Earth alone defines the shoreline.
  *
  * Terrain and lighting use separate raster-dem source instances reading the
  * same unchanged tiles. This avoids MapLibre's shared-source rendering-quality
@@ -21,7 +22,11 @@ export const TERRAIN_IDS = {
   shading: "dem-shading",
   relief: "relief",
   hillshade: "hillshade",
+  light: "terrain-light",
 } as const;
+
+/** Shared by initial terrain setup and the independent elevation debug toggle. */
+export const TERRAIN_EXAGGERATION = 1.5;
 
 /**
  * Root-relative tile template for the bundled Terrarium DEM pyramid. Served as
@@ -108,6 +113,7 @@ export function reliefLayer(): LayerSpecification {
     id: TERRAIN_IDS.relief,
     type: "color-relief",
     source: TERRAIN_IDS.shading,
+    layout: { visibility: "none" },
     paint: {
       "color-relief-color": RELIEF_RAMP,
       // Global strength of the tonal lift — kept gentle so the land reads as
@@ -135,6 +141,7 @@ export function hillshadeLayer(): LayerSpecification {
     id: TERRAIN_IDS.hillshade,
     type: "hillshade",
     source: TERRAIN_IDS.shading,
+    layout: { visibility: "none" },
     paint: {
       "hillshade-method": "igor",
       // Softened a touch from 0.55: enough slope contrast to keep ridges and
@@ -149,6 +156,30 @@ export function hillshadeLayer(): LayerSpecification {
       "hillshade-highlight-color": "rgba(198,210,222,0.26)",
       "hillshade-shadow-color": "rgba(8,16,26,0.42)",
       "hillshade-accent-color": "rgba(12,24,36,0.22)",
+    },
+  };
+}
+
+/**
+ * Subtle neutral illumination of the biome material on the native terrain mesh.
+ * MapLibre's terrain shader has no independent Lambert/normal-light control;
+ * this faint DEM-derived pass is composited into its surface texture and shares
+ * the existing displacement. No height colours, second mesh or Three.js plane.
+ * Kept independent of the optional, heavier DEM Shading diagnostic overlays.
+ */
+export function terrainLightLayer(): LayerSpecification {
+  return {
+    id: TERRAIN_IDS.light,
+    type: "hillshade",
+    source: TERRAIN_IDS.shading,
+    paint: {
+      "hillshade-method": "igor",
+      "hillshade-exaggeration": 0.18,
+      "hillshade-illumination-direction": 335,
+      "hillshade-illumination-altitude": 45,
+      "hillshade-highlight-color": "rgba(225,230,220,0.07)",
+      "hillshade-shadow-color": "rgba(8,16,22,0.12)",
+      "hillshade-accent-color": "rgba(8,16,22,0.04)",
     },
   };
 }
