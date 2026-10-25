@@ -3,9 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "sync-worker": "node scripts/sync-maplibre-worker.mjs",
-    "predev": "node scripts/sync-maplibre-worker.mjs",
-    "prebuild": "node scripts/sync-maplibre-worker.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

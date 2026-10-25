@@ -14,10 +14,13 @@ import { useEffect, useRef } from "react";
 import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-// MapLibre resolves its worker from a runtime-computed filename relative to its
-// own module URL, which Turbopack cannot emit — so we serve the worker as a
-// static asset (see scripts/sync-maplibre-worker.mjs) and point MapLibre at it.
-maplibregl.setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
+// MapLibre's internal worker resolution uses a runtime-computed filename that
+// Turbopack cannot statically analyze. Pointing at the worker with a static
+// `new URL(..., import.meta.url)` specifier lets the bundler emit it as an
+// asset and rewrite the URL at build time.
+maplibregl.setWorkerUrl(
+  new URL("maplibre-gl/dist/maplibre-gl-worker.mjs", import.meta.url).toString(),
+);
 
 import { createGlobeStyle, TEST_MARKER_LNGLAT, viewToCamera } from "@/map/mapStyle";
 import { ThreeTestLayer } from "@/map/threeTestLayer";
