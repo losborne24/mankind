@@ -1,23 +1,24 @@
 /**
  * Debug control (TEMPORARY).
  *
- * A small, self-contained MapLibre control for inspecting the three rendering
+ * A small, self-contained MapLibre control for inspecting the rendering
  * systems that make up the world by toggling each one live, independently:
  *
  *   • three.js      — the living-world custom layer (settlements, groves, ship).
  *   • Natural Earth — the self-hosted vector land + ocean polygons.
  *   • DEM Shading   — optional heavy color-relief + hillshade overlays.
- *   • 3D Elevation  — real terrain and its subtle surface illumination.
+ *   • 3D Elevation  — real terrain displacement.
+ *   • Terrain Lighting — soft northwest slope illumination.
  *
  * Everything already coexists in one running map and one bundle; each toggle
  * just flips what is *drawn* (layer `visibility` / `setTerrain`), so you can
  * compare any combination instantly without a reload or a rebuild. The terrain
  * exaggeration is now locked at {@link TERRAIN_EXAGGERATION}, so there is no
- * live tuning slider — just the four on/off toggles.
+ * live tuning slider — independent on/off toggles.
  *
  * It is a plain `IControl` (no React plumbing) added by
  * {@link ../components/GlobeView}, so it can be removed in one line once the
- * look is locked. It does not own any of the three systems — GlobeView sets
+ * look is locked. It does not own any of the rendering systems — GlobeView sets
  * them up at load; the control reads the live state on add and writes back
  * through the same public APIs, so removing it leaves the map exactly as it was.
  */
@@ -57,6 +58,7 @@ export class DebugControl implements IControl {
   private naturalEarthOn = true;
   private demOn = false;
   private elevationOn = true;
+  private lightingOn = true;
 
   constructor(options: DebugControlOptions = {}) {
     this.worldLayerId = options.worldLayerId ?? DEFAULT_WORLD_LAYER_ID;
@@ -75,6 +77,7 @@ export class DebugControl implements IControl {
     this.naturalEarthOn = NATURAL_EARTH_LAYERS.some((id) => this.isLayerVisible(id));
     this.demOn = DEM_LAYERS.some((id) => this.isLayerVisible(id));
     this.elevationOn = !!map.getTerrain();
+    this.lightingOn = this.isLayerVisible(TERRAIN_IDS.light);
 
     const el = document.createElement("div");
     el.className = "maplibregl-ctrl maplibregl-ctrl-group";
@@ -131,6 +134,14 @@ export class DebugControl implements IControl {
       this.buildToggle("3D Elevation", () => this.elevationOn, (next) => {
         this.elevationOn = next;
         this.applyElevation();
+      }),
+    );
+
+    // Lighting compares the same camera, biome material and physical elevation.
+    el.appendChild(
+      this.buildToggle("Terrain Lighting", () => this.lightingOn, (next) => {
+        this.lightingOn = next;
+        this.setLayerVisible(TERRAIN_IDS.light, next);
       }),
     );
 
@@ -226,6 +237,5 @@ export class DebugControl implements IControl {
     } else {
       map.setTerrain(null);
     }
-    this.setLayerVisible(TERRAIN_IDS.light, this.elevationOn);
   }
 }

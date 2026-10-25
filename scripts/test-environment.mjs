@@ -144,10 +144,27 @@ assert.equal(debugMap.getLayoutProperty('relief','visibility'), 'none');
 assert.equal(debugMap.getLayoutProperty('terrain-light','visibility'), undefined);
 button('3D Elevation').listeners.click();
 assert.equal(terrain, null);
-assert.equal(debugMap.getLayoutProperty('terrain-light','visibility'), 'none');
+assert.equal(debugMap.getLayoutProperty('terrain-light','visibility'), undefined);
 button('3D Elevation').listeners.click();
 assert.deepEqual(terrain, {source:'dem',exaggeration:1.5});
+assert.equal(debugMap.getLayoutProperty('terrain-light','visibility'), undefined);
+// Lighting compares an identical physical surface, and keeps its chosen state
+// across elevation toggles. It never enables the legacy cloudy DEM overlays.
+assert.equal(button('Terrain Lighting').attributes['aria-pressed'], 'true');
+const changesBeforeLighting = terrainChanges;
+button('Terrain Lighting').listeners.click();
+assert.equal(debugMap.getLayoutProperty('terrain-light','visibility'), 'none');
+assert.equal(button('Terrain Lighting').attributes['aria-pressed'], 'false');
+assert.equal(terrainChanges, changesBeforeLighting);
+button('3D Elevation').listeners.click();
+button('3D Elevation').listeners.click();
+assert.equal(debugMap.getLayoutProperty('terrain-light','visibility'), 'none');
+assert.deepEqual(terrain, {source:'dem',exaggeration:1.5});
+const changesAfterElevation = terrainChanges;
+button('Terrain Lighting').listeners.click();
 assert.equal(debugMap.getLayoutProperty('terrain-light','visibility'), 'visible');
+assert.equal(terrainChanges, changesAfterElevation);
+assert.equal(debugMap.getLayoutProperty('relief','visibility'), 'none');
 assert.equal(debugMap.getLayoutProperty('hillshade','visibility'), 'none');
 debug.onRemove();
 delete globalThis.document;

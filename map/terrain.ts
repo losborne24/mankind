@@ -1,6 +1,6 @@
 /**
  * Physical elevation is independent of visual shading. Phase 3 controls surface
- * colours; only faint neutral slope lighting is enabled by default. The legacy
+ * colours; soft northwest slope lighting is enabled by default. The legacy
  * colour-relief/hillshade pair remains available through DEM Shading. Terrarium
  * displaces the existing terrain; Natural Earth alone defines the shoreline.
  *
@@ -163,8 +163,12 @@ export function hillshadeLayer(): LayerSpecification {
 /**
  * Subtle neutral illumination of the biome material on the native terrain mesh.
  * MapLibre's terrain shader has no independent Lambert/normal-light control;
- * this faint DEM-derived pass is composited into its surface texture and shares
+ * this DEM-derived pass is composited into its surface texture and shares
  * the existing displacement. No height colours, second mesh or Three.js plane.
+ * Map-anchored light keeps the same geographic slopes shaded while rotating or
+ * pitching the camera. Igor leaves flat ground transparent; nearly transparent
+ * highlights avoid the cloudy wash of the legacy elevation-colour overlay.
+ * Igor ignores altitude and accent, so neither is used as a lighting control.
  * Kept independent of the optional, heavier DEM Shading diagnostic overlays.
  */
 export function terrainLightLayer(): LayerSpecification {
@@ -174,12 +178,12 @@ export function terrainLightLayer(): LayerSpecification {
     source: TERRAIN_IDS.shading,
     paint: {
       "hillshade-method": "igor",
-      "hillshade-exaggeration": 0.18,
-      "hillshade-illumination-direction": 335,
-      "hillshade-illumination-altitude": 45,
-      "hillshade-highlight-color": "rgba(225,230,220,0.07)",
-      "hillshade-shadow-color": "rgba(8,16,22,0.12)",
-      "hillshade-accent-color": "rgba(8,16,22,0.04)",
+      // Lighting strength only: physical terrain exaggeration stays at 1.5×.
+      "hillshade-exaggeration": 0.38,
+      "hillshade-illumination-anchor": "map",
+      "hillshade-illumination-direction": 315,
+      "hillshade-highlight-color": "rgba(255,255,255,0.045)",
+      "hillshade-shadow-color": "rgba(0,0,0,0.32)",
     },
   };
 }
