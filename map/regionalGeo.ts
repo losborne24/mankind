@@ -26,7 +26,6 @@
 
 import type { Map as MaplibreMap, MapSourceDataEvent } from "maplibre-gl";
 import {
-  COASTLINE_WIDTH,
   GEO_ATTRIBUTION,
   GEO_DATA,
   GEO_IDS,
@@ -52,7 +51,6 @@ function handOffToRegional(map: MaplibreMap): void {
   // coast scale — a coarser 1:50 m ocean left on at regional zoom would spill
   // over, or pull back from, the finer 1:10 m coastline.
   map.setLayerZoomRange(GEO_IDS.landFill50, 0, REGIONAL_ZOOM);
-  map.setLayerZoomRange(GEO_IDS.coast50, 0, REGIONAL_ZOOM);
   map.setLayerZoomRange(GEO_IDS.oceanFill50, 0, REGIONAL_ZOOM);
 }
 
@@ -72,7 +70,7 @@ function installRegionalGeo(map: MaplibreMap): () => void {
 
   // Finer land fill, inserted beneath the stylised relief so it sits above the
   // 1:50 m fill (covering it during the brief ready-but-not-yet-capped frame)
-  // while the relief, graticule and both coastline strokes stay on top. Were it
+  // while the relief, ocean fill and graticule stay on top. Were it
   // inserted above the relief it would paint over the terrain at regional zoom,
   // flattening exactly the view where the relief matters most. minzoom
   // REGIONAL_ZOOM so it never renders below the handoff.
@@ -88,9 +86,9 @@ function installRegionalGeo(map: MaplibreMap): () => void {
   );
 
   // Finer ocean mask, taking over exactly where the 1:50 m one is capped.
-  // Inserted BELOW the graticule (and thus below both coastline strokes) so it
-  // masks the terrain relief but never paints over the graticule or the coast,
-  // mirroring the 1:50 m ocean fill's slot in the base style.
+  // Inserted BELOW the graticule so it masks the terrain relief but never paints
+  // over the graticule, mirroring the 1:50 m ocean fill's slot in the base style.
+  // Its edge against the land fill IS the coast.
   map.addSource(GEO_IDS.ocean10, {
     type: "geojson",
     data: GEO_DATA.ocean10,
@@ -107,18 +105,9 @@ function installRegionalGeo(map: MaplibreMap): () => void {
     GEO_IDS.graticule,
   );
 
-  // Finer coastline, taking over exactly where the 1:50 m one is capped.
-  map.addLayer({
-    id: GEO_IDS.coast10,
-    type: "line",
-    source: GEO_IDS.land10,
-    minzoom: REGIONAL_ZOOM,
-    paint: {
-      "line-color": palette.coastline,
-      "line-width": COASTLINE_WIDTH,
-      "line-opacity": 0.85,
-    },
-  });
+  // No finer coastline STROKE: like the global coast, the 1:10 m coast is the
+  // edge between the land fill and the opaque ocean fill above it, not a draped
+  // line layer (which spikes over 3D terrain — see map/mapStyle.ts).
 
   let handedOff = false;
   const doHandoff = () => {

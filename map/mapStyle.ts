@@ -150,7 +150,11 @@ export function createGlobeStyle(): StyleSpecification {
       [TERRAIN_IDS.dem]: demSource(),
     },
     layers: [
-      { id: "ocean", type: "background", paint: { "background-color": palette.ocean } },
+      {
+        id: "ocean",
+        type: "background",
+        paint: { "background-color": palette.ocean },
+      },
       {
         // Global land fill — the default geometry, visible from zoom 0.
         //
@@ -200,21 +204,15 @@ export function createGlobeStyle(): StyleSpecification {
         source: GEO_IDS.graticule,
         paint: { "line-color": palette.graticule, "line-width": 1 },
       },
-      {
-        // Global coastline = outline of the land fill. Uncapped for the same
-        // reason as the fill above; `map/regionalGeo.ts` caps it at REGIONAL_ZOOM
-        // in the same handoff that caps the fill, so the fill and coastline
-        // always share one Natural Earth resolution and the finer coastline
-        // takes over without a doubled, opacity-stacked stroke.
-        id: GEO_IDS.coast50,
-        type: "line",
-        source: GEO_IDS.land50,
-        paint: {
-          "line-color": palette.coastline,
-          "line-width": COASTLINE_WIDTH,
-          "line-opacity": 0.85,
-        },
-      },
+      // NO coastline STROKE. The coast is drawn by the boundary between the land
+      // fill and the opaque ocean fill above — a draped *fill* edge, which stays
+      // crisp and seam-free on 3D terrain. A separate coastline *line* layer, by
+      // contrast, is draped per-vertex over the terrain mesh and MapLibre assigns
+      // occasional coast vertices a non-physical elevation, drawing them as thin
+      // vertical spikes into the sky (independent of exaggeration; gone the
+      // instant terrain is off — the DEM, mesh and vector data are all clean).
+      // The `coast50`/`coast10` ids, the `coastline` palette colour and
+      // COASTLINE_WIDTH are kept so a non-terrain-draped stroke can be restored.
     ],
   };
 }

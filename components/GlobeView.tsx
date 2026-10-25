@@ -25,7 +25,7 @@ maplibregl.setWorkerUrl(
 import { createGlobeStyle, viewToCamera } from "@/map/mapStyle";
 import { watchRegionalGeo } from "@/map/regionalGeo";
 import { TERRAIN_IDS } from "@/map/terrain";
-import { TerrainDebugControl } from "@/map/terrainDebugControl";
+import { DebugControl } from "@/map/debugControl";
 import { WorldLayer } from "@/map/worldLayer";
 import { DEMO_SCENE } from "@/scene/demoScene";
 import { useExplorationStore } from "@/state/explorationStore";
@@ -80,10 +80,8 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
       // Raise the land into real 3D using the same self-hosted DEM that already
       // drives the colour-relief and hillshade. The DEM's ocean is clamped to a
       // flat sea level (see scripts/fetch-dem.mjs), so water stays flat and the
-      // coast has no bathymetry cliff. A temporary debug control toggles 2D/3D
-      // and tunes exaggeration; it reads this initial state on add.
+      // coast has no bathymetry cliff.
       map.setTerrain({ source: TERRAIN_IDS.dem, exaggeration: 1.5 });
-      map.addControl(new TerrainDebugControl(), "bottom-left");
 
       try {
         worldLayer = new WorldLayer({
@@ -91,6 +89,11 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
           year: useExplorationStore.getState().year,
         });
         map.addLayer(worldLayer);
+        // Temporary debug control: toggle each of the three render systems
+        // (three.js / Natural Earth / Terrarium DEM) live, plus tune the 3D
+        // exaggeration. Added after the world layer so it reads three.js as on.
+        // It reads the live state on add and is removable in one line.
+        map.addControl(new DebugControl({ worldLayerId: worldLayer.id }), "bottom-left");
         // Feed historical-year changes into the renderer (it decides visibility,
         // not the store). Subscribing to a single slice avoids extra work.
         unsubscribeYear = useExplorationStore.subscribe((state, prev) => {

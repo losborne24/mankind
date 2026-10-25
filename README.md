@@ -86,7 +86,7 @@ scene/                  Declarative world model (pure data — no Three.js)
 map/                    Rendering modules
   mapStyle.ts           Painterly dark style + Natural Earth sources + base camera
   terrain.ts            Stylised relief: DEM source + colour-relief + hillshade
-  terrainDebugControl.ts  Temporary 2D/3D + exaggeration control (removable)
+  debugControl.ts       Temporary three.js / Natural Earth / DEM on-off toggles (removable)
   regionalGeo.ts        Lazy loader for the finer (1:10 m) land, by zoom
   graticule.ts          Procedural meridians/parallels (no download)
   worldLayer.ts         The living-world custom layer (lifecycle + orchestration)
@@ -343,9 +343,14 @@ the stylised shading and the real geometry reinforce each other.
   clamps every below-sea-level pixel to exactly 0 m: water is a flat plane, land
   rises cleanly out of it, and there are no underwater artefacts. (Bonus: it
   roughly halves the bundle.)
-- **Temporary debug control.** [`map/terrainDebugControl.ts`](map/terrainDebugControl.ts)
-  adds a small bottom-left panel to toggle 2D/3D and tune exaggeration live. It
-  is a plain `IControl`, removable in one line once the look is locked.
+- **Temporary debug control.** [`map/debugControl.ts`](map/debugControl.ts)
+  adds a small bottom-left panel that toggles each of the three render systems
+  live and independently — **three.js** (the world layer), **Natural Earth**
+  (the vector land/ocean fills) and **Terrarium DEM** (the relief/hillshade plus
+  the real 3D terrain). Everything already coexists in one bundle, so each
+  toggle just flips what is drawn and any combination can be compared instantly
+  without a reload. The exaggeration is locked at 1.5×. It is a plain
+  `IControl`, removable in one line once the look is locked.
 - **Geometry evaluation (why still z0–4).** The DEM stops at native z4; MapLibre
   *overzooms* past it. Overzoom smooths — it does **not** add mountain detail —
   so close-ups (≥ ~z8) read as soft, rounded massifs rather than sharp peaks.
