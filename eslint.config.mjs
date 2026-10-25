@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated/static assets: the MapLibre worker is copied verbatim from
+    // node_modules (minified) and must not be linted.
+    "public/**",
   ]),
 ]);
 
