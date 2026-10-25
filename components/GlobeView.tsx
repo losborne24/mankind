@@ -30,6 +30,10 @@ import { DebugControl } from "@/map/debugControl";
 import { WorldLayer } from "@/map/worldLayer";
 import { DEMO_SCENE } from "@/scene/demoScene";
 import { useExplorationStore } from "@/state/explorationStore";
+import { useEnvironmentStore } from "@/state/environmentStore";
+import { EnvironmentRenderer } from "@/map/environment/renderer";
+import { getEnvironmentForYear } from "@/map/environment/catalog";
+import type { EnvironmentClass } from "@/map/environment/model";
 
 export type GlobeStatus = "loading" | "ready" | "error";
 
@@ -55,6 +59,8 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
     let worldLayer: WorldLayer | null = null;
     let unsubscribeYear: (() => void) | null = null;
     let stopRegionalGeo: (() => void) | null = null;
+    let environment: EnvironmentRenderer | null = null;
+    let unsubscribeEnvironment: (() => void) | null = null;
 
     const map = new maplibregl.Map({
       container,
@@ -74,6 +80,17 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
 
     map.on("load", () => {
       if (disposed) return;
+      environment = new EnvironmentRenderer(map, TERRAIN_IDS.relief);
+      environment.setState(getEnvironmentForYear(useExplorationStore.getState().year));
+      const applyEnvironmentVisibility = () => {
+        const settings = useEnvironmentStore.getState();
+        for (const key of Object.keys(settings.visibility) as EnvironmentClass[])
+          environment?.setVisible(key, settings.visibility[key]);
+      };
+      applyEnvironmentVisibility();
+      unsubscribeEnvironment = useEnvironmentStore.subscribe((state, prev) => {
+        if (state.visibility !== prev.visibility) applyEnvironmentVisibility();
+      });
       // Lazily fetch the finer (1:10 m) land once the camera zooms into a
       // regional view; a continental-only session never downloads it.
       map.addLayer(new CoastlineLayer(GEO_IDS.coast50, GEO_IDS.land50, palette.coastline));
@@ -99,7 +116,10 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
         // Feed historical-year changes into the renderer (it decides visibility,
         // not the store). Subscribing to a single slice avoids extra work.
         unsubscribeYear = useExplorationStore.subscribe((state, prev) => {
-          if (state.year !== prev.year) worldLayer?.setYear(state.year);
+          if (state.year !== prev.year) {
+            worldLayer?.setYear(state.year);
+            environment?.setState(getEnvironmentForYear(state.year));
+          }
         });
       } catch (err) {
         onStatusRef.current(
@@ -123,6 +143,10 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
     // Surface only fatal startup failures (e.g. the demo style/tiles endpoint
     // being unreachable). Transient errors after the map is ready are ignored.
     map.on("error", (e: maplibregl.ErrorEvent) => {
+      if ("sourceId" in e && String(e.sourceId).startsWith("environment-")) {
+        useEnvironmentStore.getState().setUnavailable(true);
+        return;
+      }
       if (disposed || ready) return;
       onStatusRef.current(
         "error",
@@ -147,6 +171,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
     return () => {
       disposed = true;
       unsubscribeYear?.();
+      unsubscribeEnvironment?.();
       stopRegionalGeo?.();
       map.off("moveend", syncView);
       // map.remove() triggers the layer's onRemove(), disposing Three resources.

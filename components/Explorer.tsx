@@ -17,6 +17,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import { TopBar } from "@/components/TopBar";
+import { EnvironmentPanel } from "@/components/EnvironmentPanel";
 import { Timeline } from "@/components/Timeline";
 import {
   ErrorOverlay,
@@ -55,6 +56,7 @@ export function Explorer() {
 
       {/* Interface */}
       <TopBar />
+      <EnvironmentPanel />
       <Timeline />
 
       {/* States (topmost) */}

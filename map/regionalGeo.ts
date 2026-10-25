@@ -34,6 +34,7 @@ import {
 } from "@/map/mapStyle";
 import { CoastlineLayer } from "@/map/coastlineLayer";
 import { TERRAIN_IDS } from "@/map/terrain";
+import { FIRST_ENVIRONMENT_LAYER } from "@/map/environment/renderer";
 
 /**
  * Start fetching the 1:10 m data a little before {@link REGIONAL_ZOOM} so it is
@@ -94,7 +95,8 @@ function installRegionalGeo(map: MaplibreMap): () => void {
         "fill-antialias": false,
       },
     },
-    TERRAIN_IDS.relief,
+    // Keep the regional base beneath environmental surfaces as well as relief.
+    map.getLayer(FIRST_ENVIRONMENT_LAYER) ? FIRST_ENVIRONMENT_LAYER : TERRAIN_IDS.relief,
   );
 
   // Finer ocean mask, taking over exactly where the 1:50 m one is capped.

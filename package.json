@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "environment:prepare": "node scripts/prepare-environment.mjs",
+    "environment:test": "node scripts/test-environment.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

@@ -1,0 +1,9 @@
+{
+  "forest": { "label": "Forest & woodland", "color": "#345747", "opacity": 0.88, "texture": "canopy" },
+  "grassland": { "label": "Grassland & savanna", "color": "#68724d", "opacity": 0.78, "texture": "grass" },
+  "shrubland": { "label": "Mediterranean woodland & scrub", "color": "#636c51", "opacity": 0.78, "texture": "grass" },
+  "desert": { "label": "Desert & dry regions", "color": "#9b8058", "opacity": 0.82, "texture": "sand" },
+  "wetland": { "label": "Flooded grassland & mangrove", "color": "#416963", "opacity": 0.88, "texture": "marsh" },
+  "water": { "label": "Rivers & natural lakes", "color": "#32617a", "opacity": 0.94, "texture": "none" },
+  "ice": { "label": "Snow & ice — no reconstruction", "color": "#a8bbc1", "opacity": 0.65, "texture": "none" }
+}

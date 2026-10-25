@@ -456,3 +456,8 @@ fixtures first, an API later), so the renderer — already time- and
 LOD-aware — can present many evidence-backed places that appear, grow and fade as
 the timeline moves, instead of one inline demo. The anchoring, LOD, animation and
 disposal proven here carry over unchanged; only the *source* of scene data grows.
+# Environmental layers (Phase 3A)
+
+The map now supports independent, viewport-loaded biome and hydrographic surfaces. The baseline is visibly marked provisional, not a reconstruction of 3000 BCE. Run `pnpm environment:prepare` once before local use to produce the ignored static assets; ordinary `pnpm build` does not prepare geographic data. Deployment must supply those assets or configure a separate static asset host.
+
+See [the Phase 3A report](docs/phase-3a/README.md) for sources, historical limitations, exact sizes, deployment, screenshots and verification.

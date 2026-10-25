@@ -42,3 +42,7 @@ next-env.d.ts
 
 # Generated: MapLibre worker copied from node_modules on predev/prebuild
 /public/maplibre/
+
+# Offline environmental inputs and generated tiles are hosted separately.
+/.cache/environment/
+/public/geo/environment/
