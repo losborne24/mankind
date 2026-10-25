@@ -5,7 +5,14 @@ import styles from "./styles.json";
 export const FIRST_ENVIRONMENT_LAYER = "environment-forest";
 const escapeText = (text: string) => text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
 
-/** Only environment sources change. Never setStyle/setTerrain or recreate the map. */
+/**
+ * These are MapLibre raster layers, not screen-space images or Three.js planes.
+ * With setTerrain active, MapLibre's RenderToTexture composites them with the
+ * land/relief/hillshade and draws that texture on the existing DEM terrain mesh.
+ * Keep them below relief (the `before` slot) and the Natural Earth ocean masks:
+ * colour changes the surface material, never its elevation or lighting.
+ * Only environment sources change. Never setStyle/setTerrain or recreate the map.
+ */
 export class EnvironmentRenderer {
   private active?: EnvironmentState;
   private hidden = new Set<EnvironmentClass>();
