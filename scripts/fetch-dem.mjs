@@ -53,6 +53,14 @@
  * oceans are a flat plane, coastlines lie flat at the shore, and the land rises
  * cleanly out of the water. It also makes the 2D hillshade's ocean naturally
  * flat (no submarine shading). Land elevation is left untouched.
+ *
+ * CORRUPT HIGH OUTLIERS ARE FLOORED TOO
+ * ─────────────────────────────────────
+ * The open DEM composite leaves occasional NoData / corrupt pixels — absurdly
+ * large positive heights — at small islands and high-latitude coasts. Under 3D
+ * terrain a single such pixel renders as a thin vertical spike. The same clamp
+ * floors any pixel above a physically-impossible elevation (> MAX_LAND_M, well
+ * above Everest) to sea level, removing the spikes without touching real land.
  */
 
 import { createHash } from "node:crypto";
@@ -72,6 +80,14 @@ const TILE_BASE = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium";
  */
 const MAX_ZOOM = 4;
 
+/**
+ * Highest physically-plausible land elevation, in metres. Everest is 8,849 m, so
+ * any DEM pixel above this is corrupt / NoData (the open composite leaves such
+ * slivers at small islands and high-latitude coasts) and is floored to sea level
+ * — otherwise a single bad pixel becomes a thin vertical spike under 3D terrain.
+ */
+const MAX_LAND_M = 9000;
+
 /** Parallel request budget. Kept modest to stay polite to the open mirror. */
 const CONCURRENCY = 24;
 
@@ -89,12 +105,15 @@ function* tileCoords() {
 }
 
 /**
- * Clamp every below-sea-level pixel of a Terrarium tile to exactly 0 m so the
- * ocean becomes a flat plane under 3D terrain (see the header note). Terrarium
- * 0 m is RGB (128, 0, 0): (128*256 + 0 + 0/256) − 32768 = 0. Land is untouched.
- * Idempotent — re-clamping already-clamped tiles is a no-op.
+ * Clamp a Terrarium tile's pixels so the 3D terrain stays clean:
+ *   • every below-sea-level (bathymetry) pixel → exactly 0 m, so the ocean is a
+ *     flat plane and land rises cleanly out of the water (see the header note);
+ *   • every physically-impossible high pixel (> {@link MAX_LAND_M}, i.e. corrupt
+ *     / NoData) → 0 m too, so isolated bad pixels can't spike up as needles.
+ * Terrarium 0 m is RGB (128, 0, 0): (128*256 + 0 + 0/256) − 32768 = 0. Valid
+ * land is untouched. Idempotent — re-clamping already-clamped tiles is a no-op.
  */
-async function clampOceanToSeaLevel(buf) {
+async function clampTileHeights(buf) {
   const { data, info } = await sharp(buf)
     .raw()
     .toBuffer({ resolveWithObject: true });
@@ -103,7 +122,7 @@ async function clampOceanToSeaLevel(buf) {
     // height = R*256 + G + B/256 − 32768 ; below sea level ⇔ R < 128
     // (R=128,G=0,B=0 is exactly 0 m; any R<128, or R==128 with G==B==0 already 0).
     const height = data[i] * 256 + data[i + 1] + data[i + 2] / 256 - 32768;
-    if (height < 0) {
+    if (height < 0 || height > MAX_LAND_M) {
       data[i] = 128;
       data[i + 1] = 0;
       data[i + 2] = 0;
@@ -157,7 +176,7 @@ async function main() {
 
   await pool(coords, CONCURRENCY, async (c, idx) => {
     const raw = await fetchTile(c);
-    const buf = await clampOceanToSeaLevel(raw);
+    const buf = await clampTileHeights(raw);
     const dir = join(OUT_DIR, String(c.z), String(c.x));
     await mkdir(dir, { recursive: true });
     await writeFile(join(dir, `${c.y}.png`), buf);

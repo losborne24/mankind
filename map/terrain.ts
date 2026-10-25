@@ -42,6 +42,19 @@
  * resolution is active beneath it. Past {@link DEM_MAXZOOM} MapLibre overzooms
  * the coarse DEM, which is exactly what gives the close-up relief its smooth,
  * non-noisy, painterly character instead of harsh micro-detail.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * WHERE THE OCEAN MASK LIVES (not here)
+ * ─────────────────────────────────────────────────────────────────────────────
+ * The relief fades to transparent at/below sea level, so it never tints the
+ * water — but the hillshade would still shade the (flat, clamped) sea floor and
+ * the coastal cliff. Clean, opaque water is painted back over the relief by a
+ * Natural Earth OCEAN-POLYGON fill drawn above the hillshade (see map/mapStyle.ts
+ * + map/regionalGeo.ts). That mask is deliberately VECTOR, not DEM-elevation:
+ * masking the sea by "elevation ≤ 0" would also repaint inland below-sea-level
+ * land (the Qattara Depression, the Jordan Rift / Dead Sea, flat near-sea desert)
+ * as ocean, dropping black patches on the land. The ocean polygon knows those
+ * are land, so the water mask stays geographically correct.
  */
 
 import type {
@@ -55,7 +68,6 @@ export const TERRAIN_IDS = {
   dem: "dem",
   relief: "relief",
   hillshade: "hillshade",
-  seaCover: "sea-cover",
 } as const;
 
 /**
@@ -178,49 +190,6 @@ export function hillshadeLayer(): LayerSpecification {
       "hillshade-highlight-color": "rgba(228,216,189,0.45)",
       "hillshade-shadow-color": "rgba(6,13,22,0.5)",
       "hillshade-accent-color": "rgba(10,22,34,0.3)",
-    },
-  };
-}
-
-/**
- * Sea cover — the clean-ocean mask, and the reason the relief never muddies the
- * water.
- *
- * MapLibre cannot clip a raster to a vector polygon, so instead of drawing the
- * ocean's inverse geometry we re-use the DEM itself: a second color-relief layer
- * with the OPPOSITE alpha ramp — opaque ocean colour at and below sea level,
- * transparent above it. Drawn ABOVE the hillshade, it repaints clean ocean over
- * every scrap of submarine (bathymetry) relief the hillshade would otherwise
- * show, while staying fully transparent over land so the land relief reads
- * through untouched.
- *
- * The fade sits right at the waterline (0 → ~30 m), so it barely touches land;
- * the handful of pixels where the coarse DEM's 0 m contour and the fine vector
- * coast disagree are hidden under the crisp coastline stroke drawn on top. The
- * colour matches the ocean background exactly, so the cover is seamless.
- */
-export function seaCoverLayer(oceanColor: string): LayerSpecification {
-  const opaque = `${oceanColor}ff`;
-  const clear = `${oceanColor}00`;
-  const ramp: ExpressionSpecification = [
-    "interpolate",
-    ["linear"],
-    ["elevation"],
-    -12000,
-    opaque,
-    0,
-    opaque,
-    // Fade out just above the waterline so land relief is left untouched.
-    30,
-    clear,
-  ];
-  return {
-    id: TERRAIN_IDS.seaCover,
-    type: "color-relief",
-    source: TERRAIN_IDS.dem,
-    paint: {
-      "color-relief-color": ramp,
-      "color-relief-opacity": 1,
     },
   };
 }

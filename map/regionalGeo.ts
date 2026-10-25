@@ -43,12 +43,17 @@ import { TERRAIN_IDS } from "@/map/terrain";
  */
 export const PREFETCH_ZOOM = 4.25;
 
-/** Cap the 1:50 m fill + coastline at REGIONAL_ZOOM so the 1:10 m data owns the
- * close-up view. Runs once, only after the 1:10 m source is ready to render. */
+/** Cap the 1:50 m fill + coastline + ocean mask at REGIONAL_ZOOM so the 1:10 m
+ * data owns the close-up view. Runs once, only after the 1:10 m source is ready
+ * to render. */
 function handOffToRegional(map: MaplibreMap): void {
-  // Both layers switch together: identical [0, REGIONAL_ZOOM] range.
+  // All three switch together: identical [0, REGIONAL_ZOOM] range. The ocean
+  // mask is capped alongside the land so the water edge always matches the land
+  // coast scale — a coarser 1:50 m ocean left on at regional zoom would spill
+  // over, or pull back from, the finer 1:10 m coastline.
   map.setLayerZoomRange(GEO_IDS.landFill50, 0, REGIONAL_ZOOM);
   map.setLayerZoomRange(GEO_IDS.coast50, 0, REGIONAL_ZOOM);
+  map.setLayerZoomRange(GEO_IDS.oceanFill50, 0, REGIONAL_ZOOM);
 }
 
 /**
@@ -80,6 +85,26 @@ function installRegionalGeo(map: MaplibreMap): () => void {
       paint: { "fill-color": palette.land, "fill-opacity": 0.92 },
     },
     TERRAIN_IDS.relief,
+  );
+
+  // Finer ocean mask, taking over exactly where the 1:50 m one is capped.
+  // Inserted BELOW the graticule (and thus below both coastline strokes) so it
+  // masks the terrain relief but never paints over the graticule or the coast,
+  // mirroring the 1:50 m ocean fill's slot in the base style.
+  map.addSource(GEO_IDS.ocean10, {
+    type: "geojson",
+    data: GEO_DATA.ocean10,
+    attribution: GEO_ATTRIBUTION,
+  });
+  map.addLayer(
+    {
+      id: GEO_IDS.oceanFill10,
+      type: "fill",
+      source: GEO_IDS.ocean10,
+      minzoom: REGIONAL_ZOOM,
+      paint: { "fill-color": palette.ocean, "fill-opacity": 1 },
+    },
+    GEO_IDS.graticule,
   );
 
   // Finer coastline, taking over exactly where the 1:50 m one is capped.

@@ -10,16 +10,28 @@ access. Re-run the script only to refresh the data.
 
 ## Source
 
-| File                | Natural Earth theme        | Scale   | Used for       |
-| ------------------- | -------------------------- | ------- | -------------- |
-| `ne_50m_land.json`  | `ne_50m_land` (physical)   | 1:50 m  | global view    |
-| `ne_10m_land.json`  | `ne_10m_land` (physical)   | 1:10 m  | regional view  |
+| File                | Natural Earth theme        | Scale   | Used for               |
+| ------------------- | -------------------------- | ------- | ---------------------- |
+| `ne_50m_land.json`  | `ne_50m_land` (physical)   | 1:50 m  | land, global view      |
+| `ne_10m_land.json`  | `ne_10m_land` (physical)   | 1:10 m  | land, regional view    |
+| `ne_50m_ocean.json` | `ne_50m_ocean` (physical)  | 1:50 m  | ocean mask, global view|
+| `ne_10m_ocean.json` | `ne_10m_ocean` (physical)  | 1:10 m  | ocean mask, regional   |
 
-Both are the Natural Earth **physical `land`** polygon theme, which already
-includes major islands. The coastline is rendered as the **outline of the land
-fill** in `map/mapStyle.ts`; no separate coastline, ocean, or boundary file is
+The `land` theme is the Natural Earth **physical `land`** polygon set, which
+already includes major islands. The coastline is rendered as the **outline of
+the land fill** in `map/mapStyle.ts`; no separate coastline or boundary file is
 downloaded. Per-feature attributes are stripped at fetch time (the globe renders
 geometry only).
+
+**Why the `ocean` theme is also fetched.** The stylised terrain relief is a DEM
+raster MapLibre cannot clip to the land polygon. Masking the sea by DEM elevation
+(treating every pixel ≤ 0 m as water) is geographically wrong: large *inland*
+areas sit at or below sea level — the Qattara Depression, the Jordan Rift / Dead
+Sea, flat near-sea desert — and an elevation mask repaints them as ocean, drawing
+black patches across the land. The fix uses Natural Earth's physical **`ocean`**
+polygon as the mask, drawn opaque over the relief (see `map/terrain.ts` and
+`map/regionalGeo.ts`): it covers exactly the water and knows those inland lows are
+land. It is fetched at both scales so the ocean edge matches the land coastline.
 
 **Only physical themes are used.** No political/boundary data is fetched or
 rendered, by design: a historical globe must not present modern national borders
@@ -33,6 +45,8 @@ as a default (Phase 3 supplies era-specific, evidence-backed geography).
 - **Checksums (sha256 of the committed, compacted files):**
   - `ne_50m_land.json`  — `e581ead3c9dfcfa36d752203798b4e4dfba83348f4a1bf4d8d09ad021d7dfb9d`
   - `ne_10m_land.json`  — `fa698825adb6bac934d039aea75d1f22ae0c3ce45bc772f5374da6d9b9e42fac`
+  - `ne_50m_ocean.json` — `6620012719d9a5e956c9703fa9f3855594849223581fd9dad7aaf19dfa57faa8`
+  - `ne_10m_ocean.json` — `6e8d8c107a2a7969b8bacd7259a34dcc57408436b404e18dfc1b0e0b34a15fb6`
 
 ## License, attribution & redistribution
 
@@ -55,14 +69,17 @@ as a default (Phase 3 supplies era-specific, evidence-backed geography).
   or per-request cost, and no external endpoint that can rate-limit or disappear.
   (This replaces the previous `demotiles.maplibre.org` dependency, which
   MapLibre documents as development-only with no availability guarantee.)
-- **Transfer is bounded and progressive.** Only `ne_50m_land.json` (~2.2 MB raw,
-  ~573 KB gzip) loads at startup. `ne_10m_land.json` (~16 MB raw, ~5.0 MB gzip,
-  ~3.6 MB brotli) is fetched **lazily**, the first time the user zooms to a
-  regional view (just before zoom 5), and is then browser-cached and reused for
-  the rest of the session — a user who stays at a continental view never
-  downloads it. The only hosting cost is static bandwidth for these two files.
-  **Serve both with HTTP compression** (gzip/brotli): it reduces the 1:10 m
-  transfer roughly 3× and is the figure that matters for real-world cost.
+- **Transfer is bounded and progressive.** At startup only the two 1:50 m files
+  load — `ne_50m_land.json` (~2.2 MB raw, ~573 KB gzip) and `ne_50m_ocean.json`
+  (~2.3 MB raw), both small after compression. The 1:10 m `land` and `ocean`
+  (~16–17 MB raw, ~5 MB gzip each) are fetched **lazily**, together, the first
+  time the user zooms to a regional view (just before zoom 5), then browser-cached
+  and reused for the rest of the session — a user who stays at a continental view
+  never downloads them. The only hosting cost is static bandwidth for these files.
+  **Serve all with HTTP compression** (gzip/brotli): it reduces the 1:10 m
+  transfer roughly 3× and is the figure that matters for real-world cost. (The
+  ocean polygon compresses even better than land — it is one big polygon with
+  island holes rather than thousands of separate landmasses.)
 
 ## Rendering cost of the 1:10 m data
 

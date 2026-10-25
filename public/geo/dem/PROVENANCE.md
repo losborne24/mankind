@@ -29,6 +29,12 @@ access. Re-run the script only to refresh the data.
   layers — the coastline stroke especially — would trace as vertical walls).
   Land elevation is untouched. Clamping also happens to shrink the bundle
   (flat ocean compresses well), roughly halving it.
+- **Corrupt high outliers are floored too.** The open composite leaves occasional
+  NoData / corrupt pixels (absurdly large positive heights) at small islands and
+  high-latitude coasts, which render as thin vertical spikes under 3D terrain. The
+  same clamp floors any pixel above a physically-impossible elevation (Everest is
+  8,849 m; the cutoff is 9,000 m) to sea level, removing the spikes without
+  altering real land.
 - **Deliberately coarse.** The native maximum is z4 (≈4 km/px near the equator);
   MapLibre **overzooms** past it for closer views. That coarseness, smoothed by
   overzoom, is exactly what gives the hillshade its soft, painterly, non-noisy

@@ -25,9 +25,21 @@
  *   • Source of the GeoJSON conversion: martynafford/natural-earth-geojson,
  *     pinned to the commit below (conversion scripts are MIT; the data they
  *     emit remains Natural Earth public domain).
- *   • We intentionally take only PHYSICAL themes (land → coastline/islands).
- *     No political boundaries are fetched: the historical globe must not show
- *     modern borders as a default.
+ *   • We intentionally take only PHYSICAL themes (land → coastline/islands,
+ *     and ocean → the terrain's sea mask). No political boundaries are fetched:
+ *     the historical globe must not show modern borders as a default.
+ *
+ * WHY OCEAN TOO (and not just land)
+ * ─────────────────────────────────
+ * The stylised terrain relief is a DEM raster MapLibre cannot clip to the land
+ * polygon. Masking the sea by DEM elevation instead (≤ 0 m ⇒ ocean) is wrong:
+ * large INLAND areas sit at or below sea level — the Qattara Depression, the
+ * Jordan Rift / Dead Sea, flat near-sea desert — so an elevation mask repaints
+ * them as sea, dropping black patches on the land. The geographically correct
+ * mask is Natural Earth's physical `ocean` polygon, drawn opaque OVER the relief:
+ * it covers exactly the water (hiding submarine relief) and never the land. We
+ * fetch it at the same two scales as the land so the ocean coast and the land
+ * coast always share one Natural Earth resolution.
  */
 
 import { createHash } from "node:crypto";
@@ -56,13 +68,25 @@ const DATASETS = [
     out: "ne_50m_land.json",
     url: `${MIRROR_BASE}/50m/physical/ne_50m_land.json`,
     scale: "1:50m",
-    note: "global view",
+    note: "land, global view",
   },
   {
     out: "ne_10m_land.json",
     url: `${MIRROR_BASE}/10m/physical/ne_10m_land.json`,
     scale: "1:10m",
-    note: "regional view",
+    note: "land, regional view",
+  },
+  {
+    out: "ne_50m_ocean.json",
+    url: `${MIRROR_BASE}/50m/physical/ne_50m_ocean.json`,
+    scale: "1:50m",
+    note: "ocean mask, global view",
+  },
+  {
+    out: "ne_10m_ocean.json",
+    url: `${MIRROR_BASE}/10m/physical/ne_10m_ocean.json`,
+    scale: "1:10m",
+    note: "ocean mask, regional view",
   },
 ];
 
@@ -80,7 +104,7 @@ async function main() {
   const manifest = [];
 
   for (const ds of DATASETS) {
-    process.stdout.write(`Fetching ${ds.scale} land … `);
+    process.stdout.write(`Fetching ${ds.scale} ${ds.note} … `);
     const res = await fetch(ds.url);
     if (!res.ok) throw new Error(`HTTP ${res.status} for ${ds.url}`);
     const source = await res.text();

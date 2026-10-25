@@ -33,7 +33,6 @@ import {
   demSource,
   hillshadeLayer,
   reliefLayer,
-  seaCoverLayer,
   TERRAIN_IDS,
 } from "@/map/terrain";
 
@@ -58,17 +57,23 @@ export const REGIONAL_ZOOM = 5.0;
 export const GEO_IDS = {
   land50: "land-50m",
   land10: "land-10m",
+  ocean50: "ocean-50m",
+  ocean10: "ocean-10m",
   graticule: "graticule",
   landFill50: "land-fill-50m",
   coast50: "coastline-50m",
   landFill10: "land-fill-10m",
   coast10: "coastline-10m",
+  oceanFill50: "ocean-fill-50m",
+  oceanFill10: "ocean-fill-10m",
 } as const;
 
 /** Static asset URLs for the bundled Natural Earth data. */
 export const GEO_DATA = {
   land50: "/geo/ne_50m_land.json",
   land10: "/geo/ne_10m_land.json",
+  ocean50: "/geo/ne_50m_ocean.json",
+  ocean10: "/geo/ne_10m_ocean.json",
 } as const;
 
 /**
@@ -126,6 +131,14 @@ export function createGlobeStyle(): StyleSpecification {
         data: GEO_DATA.land50,
         attribution: GEO_ATTRIBUTION,
       },
+      // Ocean polygon — the geographically-correct mask that repaints clean
+      // water over the terrain relief (see the ocean fill layer below). Fetched
+      // at the same scale as the land so their coastlines agree exactly.
+      [GEO_IDS.ocean50]: {
+        type: "geojson",
+        data: GEO_DATA.ocean50,
+        attribution: GEO_ATTRIBUTION,
+      },
       [GEO_IDS.graticule]: {
         type: "geojson",
         // Generated in-process (no download). See map/graticule.ts.
@@ -168,9 +181,19 @@ export function createGlobeStyle(): StyleSpecification {
       // map/regionalGeo.ts) so the relief covers both vector resolutions.
       reliefLayer(),
       hillshadeLayer(),
-      // Repaint clean ocean over any submarine relief (see seaCoverLayer): the
-      // hillshade shades the sea floor too, so this masks it back to flat water.
-      seaCoverLayer(palette.ocean),
+      // Ocean mask — repaint clean, opaque water over the terrain relief using
+      // Natural Earth's physical ocean polygon (NOT the DEM elevation, which
+      // would also mask inland below-sea-level land — Qattara, the Jordan Rift —
+      // as sea). Drawn above the hillshade so it hides every scrap of submarine
+      // relief, and below the graticule + coastline so those stay crisp on top.
+      // Capped at REGIONAL_ZOOM by map/regionalGeo.ts in the same handoff as the
+      // land, where the finer 1:10 m ocean takes over.
+      {
+        id: GEO_IDS.oceanFill50,
+        type: "fill",
+        source: GEO_IDS.ocean50,
+        paint: { "fill-color": palette.ocean, "fill-opacity": 1 },
+      },
       {
         id: GEO_IDS.graticule,
         type: "line",
