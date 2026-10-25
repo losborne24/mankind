@@ -26,7 +26,7 @@
  * MapLibre documents as development-only with no availability guarantee.
  */
 
-import type { ExpressionSpecification, StyleSpecification } from "maplibre-gl";
+import type { StyleSpecification } from "maplibre-gl";
 import type { GlobeView } from "@/state/explorationStore";
 import { createGraticule } from "@/map/graticule";
 import {
@@ -90,17 +90,6 @@ export const palette = {
   fog: "#0a1622",
 } as const;
 
-/** Width ramp for coastline strokes, shared by the global and regional layers. */
-export const COASTLINE_WIDTH: ExpressionSpecification = [
-  "interpolate",
-  ["linear"],
-  ["zoom"],
-  0,
-  0.5,
-  6,
-  1.6,
-];
-
 /**
  * Build the MapLibre style. It is a function (not a constant) so future phases
  * can parameterize the palette by era/time of day without mutating shared
@@ -144,10 +133,13 @@ export function createGlobeStyle(): StyleSpecification {
         // Generated in-process (no download). See map/graticule.ts.
         data: createGraticule(30),
       },
-      // Elevation for the stylised relief. A single tiled raster-dem source, so
-      // only visible tiles load and the relief is continuous across the 1:50 m ↔
+      // Elevation for physical displacement. Only visible tiles load, and
+      // terrain remains continuous across the 1:50 m ↔
       // 1:10 m vector handoff. See map/terrain.ts.
       [TERRAIN_IDS.dem]: demSource(),
+      // Independent tile processing for lighting and displacement. Both read
+      // the same unchanged, browser-cached Terrarium tile URLs.
+      [TERRAIN_IDS.shading]: demSource(),
     },
     layers: [
       {
@@ -174,7 +166,8 @@ export function createGlobeStyle(): StyleSpecification {
         id: GEO_IDS.landFill50,
         type: "fill",
         source: GEO_IDS.land50,
-        paint: { "fill-color": palette.land, "fill-opacity": 0.92 },
+        // Outlines are drawn by CoastlineLayer outside the terrain drape.
+        paint: { "fill-color": palette.land, "fill-opacity": 1, "fill-antialias": false },
       },
       // ── Stylised terrain (Phase 2) ───────────────────────────────────────────
       // Composited ADDITIVELY over the opaque land fill and BELOW the graticule
@@ -196,7 +189,7 @@ export function createGlobeStyle(): StyleSpecification {
         id: GEO_IDS.oceanFill50,
         type: "fill",
         source: GEO_IDS.ocean50,
-        paint: { "fill-color": palette.ocean, "fill-opacity": 1 },
+        paint: { "fill-color": palette.ocean, "fill-opacity": 1, "fill-antialias": false },
       },
       {
         id: GEO_IDS.graticule,
@@ -204,15 +197,6 @@ export function createGlobeStyle(): StyleSpecification {
         source: GEO_IDS.graticule,
         paint: { "line-color": palette.graticule, "line-width": 1 },
       },
-      // NO coastline STROKE. The coast is drawn by the boundary between the land
-      // fill and the opaque ocean fill above — a draped *fill* edge, which stays
-      // crisp and seam-free on 3D terrain. A separate coastline *line* layer, by
-      // contrast, is draped per-vertex over the terrain mesh and MapLibre assigns
-      // occasional coast vertices a non-physical elevation, drawing them as thin
-      // vertical spikes into the sky (independent of exaggeration; gone the
-      // instant terrain is off — the DEM, mesh and vector data are all clean).
-      // The `coast50`/`coast10` ids, the `coastline` palette colour and
-      // COASTLINE_WIDTH are kept so a non-terrain-draped stroke can be restored.
     ],
   };
 }

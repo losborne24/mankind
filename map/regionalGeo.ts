@@ -32,6 +32,7 @@ import {
   palette,
   REGIONAL_ZOOM,
 } from "@/map/mapStyle";
+import { CoastlineLayer } from "@/map/coastlineLayer";
 import { TERRAIN_IDS } from "@/map/terrain";
 
 /**
@@ -47,11 +48,13 @@ export const PREFETCH_ZOOM = 4.25;
  * to render. */
 function handOffToRegional(map: MaplibreMap): void {
   // All three switch together: identical [0, REGIONAL_ZOOM] range. The ocean
-  // mask is capped alongside the land so the water edge always matches the land
-  // coast scale — a coarser 1:50 m ocean left on at regional zoom would spill
-  // over, or pull back from, the finer 1:10 m coastline.
+  // mask and the coastline stroke are capped alongside the land so the water
+  // edge and the outline always match the land coast scale — a coarser 1:50 m
+  // ocean/coast left on at regional zoom would spill over, or pull back from,
+  // the finer 1:10 m coastline.
   map.setLayerZoomRange(GEO_IDS.landFill50, 0, REGIONAL_ZOOM);
   map.setLayerZoomRange(GEO_IDS.oceanFill50, 0, REGIONAL_ZOOM);
+  map.setLayerZoomRange(GEO_IDS.coast50, 0, REGIONAL_ZOOM);
 }
 
 /**
@@ -80,7 +83,7 @@ function installRegionalGeo(map: MaplibreMap): () => void {
       type: "fill",
       source: GEO_IDS.land10,
       minzoom: REGIONAL_ZOOM,
-      paint: { "fill-color": palette.land, "fill-opacity": 0.92 },
+      paint: { "fill-color": palette.land, "fill-opacity": 1, "fill-antialias": false },
     },
     TERRAIN_IDS.relief,
   );
@@ -100,26 +103,39 @@ function installRegionalGeo(map: MaplibreMap): () => void {
       type: "fill",
       source: GEO_IDS.ocean10,
       minzoom: REGIONAL_ZOOM,
-      paint: { "fill-color": palette.ocean, "fill-opacity": 1 },
+      paint: { "fill-color": palette.ocean, "fill-opacity": 1, "fill-antialias": false },
     },
     GEO_IDS.graticule,
   );
 
-  // No finer coastline STROKE: like the global coast, the 1:10 m coast is the
-  // edge between the land fill and the opaque ocean fill above it, not a draped
-  // line layer (which spikes over 3D terrain — see map/mapStyle.ts).
+  // Read the fill's exact polygon edges but draw outside the terrain drape.
+  const coast = new CoastlineLayer(
+    GEO_IDS.coast10, GEO_IDS.land10, palette.coastline, REGIONAL_ZOOM,
+    () => doHandoff(),
+  );
+  map.addLayer(coast);
+
+  // Until both sources and the independent coastline are ready, keep all fine layers hidden. A
+  // partly loaded ocean mask would expose global DEM shading over water, and
+  // overlapping coarse/fine polygons can leave wedges at the coast.
+  const regionalLayers = [GEO_IDS.landFill10, GEO_IDS.oceanFill10, GEO_IDS.coast10];
+  for (const id of regionalLayers) map.setLayoutProperty(id, "visibility", "none");
 
   let handedOff = false;
+  let disposed = false;
   const doHandoff = () => {
-    if (handedOff) return;
+    if (disposed || handedOff || !coast.ready) return;
+    if (!map.isSourceLoaded(GEO_IDS.land10) || !map.isSourceLoaded(GEO_IDS.ocean10)) return;
     handedOff = true;
     map.off("sourcedata", onSourceData);
+    const visibility = map.getLayoutProperty(GEO_IDS.landFill50, "visibility") === "none"
+      ? "none" : "visible";
+    for (const id of regionalLayers) map.setLayoutProperty(id, "visibility", visibility);
     handOffToRegional(map);
   };
 
   const onSourceData = (e: MapSourceDataEvent) => {
-    if (e.sourceId !== GEO_IDS.land10) return;
-    if (!map.isSourceLoaded(GEO_IDS.land10)) return;
+    if (e.sourceId !== GEO_IDS.land10 && e.sourceId !== GEO_IDS.ocean10) return;
     doHandoff();
   };
 
@@ -127,9 +143,10 @@ function installRegionalGeo(map: MaplibreMap): () => void {
   // can resolve so fast the first `sourcedata` arrives before we attach — guard
   // by checking the current state too.
   map.on("sourcedata", onSourceData);
-  if (map.isSourceLoaded(GEO_IDS.land10)) doHandoff();
+  doHandoff();
 
   return () => {
+    disposed = true;
     map.off("sourcedata", onSourceData);
   };
 }

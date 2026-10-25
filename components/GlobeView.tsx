@@ -22,7 +22,8 @@ maplibregl.setWorkerUrl(
   new URL("maplibre-gl/dist/maplibre-gl-worker.mjs", import.meta.url).toString(),
 );
 
-import { createGlobeStyle, viewToCamera } from "@/map/mapStyle";
+import { createGlobeStyle, viewToCamera, GEO_IDS, palette } from "@/map/mapStyle";
+import { CoastlineLayer } from "@/map/coastlineLayer";
 import { watchRegionalGeo } from "@/map/regionalGeo";
 import { TERRAIN_IDS } from "@/map/terrain";
 import { DebugControl } from "@/map/debugControl";
@@ -75,6 +76,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
       if (disposed) return;
       // Lazily fetch the finer (1:10 m) land once the camera zooms into a
       // regional view; a continental-only session never downloads it.
+      map.addLayer(new CoastlineLayer(GEO_IDS.coast50, GEO_IDS.land50, palette.coastline));
       stopRegionalGeo = watchRegionalGeo(map);
 
       // Raise the land into real 3D using the same self-hosted DEM that already

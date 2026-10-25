@@ -36,6 +36,8 @@ const DEFAULT_WORLD_LAYER_ID = "world-layer";
 const NATURAL_EARTH_LAYERS = [
   GEO_IDS.landFill50,
   GEO_IDS.landFill10,
+  GEO_IDS.coast50,
+  GEO_IDS.coast10,
   GEO_IDS.oceanFill50,
   GEO_IDS.oceanFill10,
 ];
