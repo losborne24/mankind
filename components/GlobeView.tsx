@@ -91,9 +91,9 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
           year: useExplorationStore.getState().year,
         });
         map.addLayer(worldLayer);
-        // Temporary debug control: toggle each of the three render systems
-        // (three.js / Natural Earth / Terrarium DEM) live, plus tune the 3D
-        // exaggeration. Added after the world layer so it reads three.js as on.
+        // Temporary debug control: toggle three.js, Natural Earth, Terrarium
+        // DEM shading, and 3D elevation independently. Added after the world
+        // layer so it reads three.js as on.
         // It reads the live state on add and is removable in one line.
         map.addControl(new DebugControl({ worldLayerId: worldLayer.id }), "bottom-left");
         // Feed historical-year changes into the renderer (it decides visibility,

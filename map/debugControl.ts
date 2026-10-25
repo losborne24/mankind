@@ -6,14 +6,14 @@
  *
  *   • three.js      — the living-world custom layer (settlements, groves, ship).
  *   • Natural Earth — the self-hosted vector land + ocean polygons.
- *   • Terrarium DEM — the stylised relief (color-relief + hillshade) AND the
- *                     real 3D terrain, both fed by the same bundled DEM.
+ *   • Terrarium DEM — the stylised relief (color-relief + hillshade).
+ *   • Elevation     — real 3D terrain fed by the same bundled DEM.
  *
  * Everything already coexists in one running map and one bundle; each toggle
  * just flips what is *drawn* (layer `visibility` / `setTerrain`), so you can
  * compare any combination instantly without a reload or a rebuild. The terrain
  * exaggeration is now locked at {@link TERRAIN_EXAGGERATION}, so there is no
- * live tuning slider — just the three on/off toggles.
+ * live tuning slider — just the four on/off toggles.
  *
  * It is a plain `IControl` (no React plumbing) added by
  * {@link ../components/GlobeView}, so it can be removed in one line once the
@@ -26,7 +26,7 @@ import type { ControlPosition, IControl, Map as MaplibreMap } from "maplibre-gl"
 import { GEO_IDS } from "./mapStyle";
 import { TERRAIN_IDS } from "./terrain";
 
-/** Locked 3D terrain exaggeration, re-applied whenever the DEM is toggled on. */
+/** Locked 3D terrain exaggeration, re-applied whenever elevation is toggled on. */
 const TERRAIN_EXAGGERATION = 1.5;
 
 /** Default id of the three.js custom layer (see {@link ../map/worldLayer}). */
@@ -59,6 +59,7 @@ export class DebugControl implements IControl {
   private threeOn = true;
   private naturalEarthOn = true;
   private demOn = true;
+  private elevationOn = true;
 
   constructor(options: DebugControlOptions = {}) {
     this.worldLayerId = options.worldLayerId ?? DEFAULT_WORLD_LAYER_ID;
@@ -75,7 +76,8 @@ export class DebugControl implements IControl {
     // reality and we never fight it.
     this.threeOn = this.isLayerVisible(this.worldLayerId);
     this.naturalEarthOn = NATURAL_EARTH_LAYERS.some((id) => this.isLayerVisible(id));
-    this.demOn = !!map.getTerrain();
+    this.demOn = DEM_LAYERS.some((id) => this.isLayerVisible(id));
+    this.elevationOn = !!map.getTerrain();
 
     const el = document.createElement("div");
     el.className = "maplibregl-ctrl maplibregl-ctrl-group";
@@ -119,11 +121,19 @@ export class DebugControl implements IControl {
       }),
     );
 
-    // ── Terrarium DEM (relief + hillshade + 3D terrain) ──
+    // ── Terrarium DEM (relief + hillshade) ──
     el.appendChild(
       this.buildToggle("Terrarium DEM", () => this.demOn, (next) => {
         this.demOn = next;
         this.applyDem();
+      }),
+    );
+
+    // ── Elevation (3D terrain) ──
+    el.appendChild(
+      this.buildToggle("Elevation", () => this.elevationOn, (next) => {
+        this.elevationOn = next;
+        this.applyElevation();
       }),
     );
 
@@ -162,6 +172,7 @@ export class DebugControl implements IControl {
     ].join(";");
     const render = () => {
       const on = get();
+      btn.setAttribute("aria-pressed", String(on));
       btn.innerHTML = "";
       const name = document.createElement("span");
       name.textContent = label;
@@ -204,12 +215,16 @@ export class DebugControl implements IControl {
     for (const id of NATURAL_EARTH_LAYERS) this.setLayerVisible(id, this.naturalEarthOn);
   }
 
-  /** Terrarium DEM — toggle the draped relief layers and the real 3D terrain. */
+  /** Terrarium DEM — toggle the draped relief layers independently of height. */
   private applyDem(): void {
+    for (const id of DEM_LAYERS) this.setLayerVisible(id, this.demOn);
+  }
+
+  /** Elevation — toggle real 3D terrain independently of the draped relief. */
+  private applyElevation(): void {
     const map = this.map;
     if (!map) return;
-    for (const id of DEM_LAYERS) this.setLayerVisible(id, this.demOn);
-    if (this.demOn) {
+    if (this.elevationOn) {
       map.setTerrain({ source: TERRAIN_IDS.dem, exaggeration: TERRAIN_EXAGGERATION });
     } else {
       map.setTerrain(null);
