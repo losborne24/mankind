@@ -29,6 +29,13 @@
 import type { ExpressionSpecification, StyleSpecification } from "maplibre-gl";
 import type { GlobeView } from "@/state/explorationStore";
 import { createGraticule } from "@/map/graticule";
+import {
+  demSource,
+  hillshadeLayer,
+  reliefLayer,
+  seaCoverLayer,
+  TERRAIN_IDS,
+} from "@/map/terrain";
 
 /** Natural Earth is public domain; we credit it by courtesy only. */
 export const GEO_ATTRIBUTION =
@@ -124,6 +131,10 @@ export function createGlobeStyle(): StyleSpecification {
         // Generated in-process (no download). See map/graticule.ts.
         data: createGraticule(30),
       },
+      // Elevation for the stylised relief. A single tiled raster-dem source, so
+      // only visible tiles load and the relief is continuous across the 1:50 m ↔
+      // 1:10 m vector handoff. See map/terrain.ts.
+      [TERRAIN_IDS.dem]: demSource(),
     },
     layers: [
       { id: "ocean", type: "background", paint: { "background-color": palette.ocean } },
@@ -148,6 +159,18 @@ export function createGlobeStyle(): StyleSpecification {
         source: GEO_IDS.land50,
         paint: { "fill-color": palette.land, "fill-opacity": 0.92 },
       },
+      // ── Stylised terrain (Phase 2) ───────────────────────────────────────────
+      // Composited ADDITIVELY over the opaque land fill and BELOW the graticule
+      // and coastline, so the authoritative Natural Earth land shape and its
+      // crisp coast always win and the DEM only shades what is already land.
+      // The relief tone sits under the sculptural hillshade light. The lazily
+      // added 1:10 m land fill is inserted *below* these layers (see
+      // map/regionalGeo.ts) so the relief covers both vector resolutions.
+      reliefLayer(),
+      hillshadeLayer(),
+      // Repaint clean ocean over any submarine relief (see seaCoverLayer): the
+      // hillshade shades the sea floor too, so this masks it back to flat water.
+      seaCoverLayer(palette.ocean),
       {
         id: GEO_IDS.graticule,
         type: "line",

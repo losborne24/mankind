@@ -24,6 +24,8 @@ maplibregl.setWorkerUrl(
 
 import { createGlobeStyle, viewToCamera } from "@/map/mapStyle";
 import { watchRegionalGeo } from "@/map/regionalGeo";
+import { TERRAIN_IDS } from "@/map/terrain";
+import { TerrainDebugControl } from "@/map/terrainDebugControl";
 import { WorldLayer } from "@/map/worldLayer";
 import { DEMO_SCENE } from "@/scene/demoScene";
 import { useExplorationStore } from "@/state/explorationStore";
@@ -59,6 +61,10 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
       ...viewToCamera(initialView),
       attributionControl: { compact: true },
       canvasContextAttributes: { antialias: true },
+      // Allow a steep near-horizon tilt so the 3D terrain reads as raised
+      // landforms. Kept below MapLibre's 85° ceiling for rendering stability
+      // (very low grazing angles stress the terrain mesh and depth buffer).
+      maxPitch: 70,
       // MapLibre already observes container resize (trackResize default true).
     });
 
@@ -70,6 +76,15 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
       // Lazily fetch the finer (1:10 m) land once the camera zooms into a
       // regional view; a continental-only session never downloads it.
       stopRegionalGeo = watchRegionalGeo(map);
+
+      // Raise the land into real 3D using the same self-hosted DEM that already
+      // drives the colour-relief and hillshade. The DEM's ocean is clamped to a
+      // flat sea level (see scripts/fetch-dem.mjs), so water stays flat and the
+      // coast has no bathymetry cliff. A temporary debug control toggles 2D/3D
+      // and tunes exaggeration; it reads this initial state on add.
+      map.setTerrain({ source: TERRAIN_IDS.dem, exaggeration: 1.5 });
+      map.addControl(new TerrainDebugControl(), "bottom-left");
+
       try {
         worldLayer = new WorldLayer({
           scene: DEMO_SCENE,

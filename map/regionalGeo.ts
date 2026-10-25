@@ -33,6 +33,7 @@ import {
   palette,
   REGIONAL_ZOOM,
 } from "@/map/mapStyle";
+import { TERRAIN_IDS } from "@/map/terrain";
 
 /**
  * Start fetching the 1:10 m data a little before {@link REGIONAL_ZOOM} so it is
@@ -64,10 +65,12 @@ function installRegionalGeo(map: MaplibreMap): () => void {
     attribution: GEO_ATTRIBUTION,
   });
 
-  // Finer land fill, inserted beneath the 1:50 m coastline so it sits above the
+  // Finer land fill, inserted beneath the stylised relief so it sits above the
   // 1:50 m fill (covering it during the brief ready-but-not-yet-capped frame)
-  // while both coastline strokes stay on top. minzoom REGIONAL_ZOOM so it never
-  // renders below the handoff.
+  // while the relief, graticule and both coastline strokes stay on top. Were it
+  // inserted above the relief it would paint over the terrain at regional zoom,
+  // flattening exactly the view where the relief matters most. minzoom
+  // REGIONAL_ZOOM so it never renders below the handoff.
   map.addLayer(
     {
       id: GEO_IDS.landFill10,
@@ -76,7 +79,7 @@ function installRegionalGeo(map: MaplibreMap): () => void {
       minzoom: REGIONAL_ZOOM,
       paint: { "fill-color": palette.land, "fill-opacity": 0.92 },
     },
-    GEO_IDS.coast50,
+    TERRAIN_IDS.relief,
   );
 
   // Finer coastline, taking over exactly where the 1:50 m one is capped.

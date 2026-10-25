@@ -85,6 +85,8 @@ scene/                  Declarative world model (pure data — no Three.js)
 
 map/                    Rendering modules
   mapStyle.ts           Painterly dark style + Natural Earth sources + base camera
+  terrain.ts            Stylised relief: DEM source + colour-relief + hillshade
+  terrainDebugControl.ts  Temporary 2D/3D + exaggeration control (removable)
   regionalGeo.ts        Lazy loader for the finer (1:10 m) land, by zoom
   graticule.ts          Procedural meridians/parallels (no download)
   worldLayer.ts         The living-world custom layer (lifecycle + orchestration)
@@ -95,8 +97,10 @@ map/                    Rendering modules
   webglSupport.ts       WebGL 2 capability probe
 
 public/geo/             Bundled Natural Earth land (GeoJSON) + PROVENANCE.md
+  dem/                  Bundled Terrarium DEM tile pyramid (z0–4) + PROVENANCE.md
 scripts/
   fetch-natural-earth.mjs  Reproducible, pinned fetch of the geographic data
+  fetch-dem.mjs            Reproducible fetch of the bundled elevation tiles
 
 lib/                    Pure utilities (no React/renderer deps)
   historicalDate.ts     Astronomical-year ↔ BCE/CE conversion & bounds
@@ -288,6 +292,79 @@ is **self-hosted vector tiles** (e.g. PMTiles built from Natural Earth), which
 serve only visible tiles over range requests and stay self-hosted with no paid
 dependency. That is intentionally out of scope here. The painterly styling lives
 entirely in `map/mapStyle.ts` and is independent of the data source.
+
+## Stylised terrain (Phase 2)
+
+The land is no longer a flat polygon: it is a **sculpted, strategy-game relief**
+— readable landforms, soft dimensional shading, and a clear separation of
+lowlands, uplands and mountains — deliberately *more expressive than a flat
+fill, less realistic than a physical atlas*. All of the terrain art direction
+lives in [`map/terrain.ts`](map/terrain.ts); full data provenance is in
+[`public/geo/dem/PROVENANCE.md`](public/geo/dem/PROVENANCE.md). The essentials:
+
+- **Physical input — real elevation, self-hosted.** A **bounded** pyramid
+  (z0–4) of public-domain **Terrarium DEM tiles** is bundled under
+  `public/geo/dem/` and served from our own origin, exactly like the Natural
+  Earth land. MapLibre consumes it as a single `raster-dem` source, so only the
+  visible tiles load and the relief is **viewport-driven for free** and
+  continuous across the 1:50 m ↔ 1:10 m vector handoff. There is no runtime tile
+  service. Fetched reproducibly by [`scripts/fetch-dem.mjs`](scripts/fetch-dem.mjs).
+- **Deliberately coarse.** A low-resolution DEM, **overzoomed** by MapLibre past
+  z4, is what gives the relief its smooth, painterly, non-noisy character —
+  landforms read clearly without the harsh micro-detail of a scientific
+  hillshade. Coarseness is the style, not a limitation (~12 MB bundled, with the
+  ocean clamped to a flat sea level — see below).
+- **Two stylising layers.** A **`color-relief`** layer applies a near-grayscale
+  *value* ramp keyed to elevation — it lifts the land's tone with height so the
+  plains↔hills↔mountains break reads, **without painting biomes** (forests,
+  deserts, grasslands are Phase 3). A soft **`hillshade`** (the `igor` method, a
+  single warm NW key light, low exaggeration) supplies the sculptural form.
+- **The coast stays authoritative.** Relief is composited **additively over** the
+  opaque Natural Earth land fill, with the crisp coastline stroked **on top**, so
+  the land shape and coast come entirely from the vector data — the coarse DEM
+  only shades what is already land, and its own sea-level contour never has to
+  agree with the vector coast. A second, inverse `color-relief` **"sea cover"**
+  paints the flat ocean surface (opaque at/below sea level, transparent above),
+  which also gives the ocean a surface colour when draped onto 3D terrain. The
+  result has no seams, wedges, or doubled tide lines.
+
+### Real 3D terrain
+
+The same DEM also **physically raises the land** via MapLibre's built-in terrain
+(`map.setTerrain`, exaggeration **1.5**), turning the shaded map into a tilt-able,
+Civilization-like raised surface. It works in the **globe** projection, and the
+camera tilts up to **70°** (`maxPitch`, kept below MapLibre's 85° ceiling for
+stability). The `color-relief` and `hillshade` above drape onto this surface, so
+the stylised shading and the real geometry reinforce each other.
+
+- **Ocean is clamped flat.** The DEM's raw bathymetry would sink the sea floor
+  below the land under exaggeration, cutting a cliff at every shoreline that
+  draped layers trace as vertical walls. So [`scripts/fetch-dem.mjs`](scripts/fetch-dem.mjs)
+  clamps every below-sea-level pixel to exactly 0 m: water is a flat plane, land
+  rises cleanly out of it, and there are no underwater artefacts. (Bonus: it
+  roughly halves the bundle.)
+- **Temporary debug control.** [`map/terrainDebugControl.ts`](map/terrainDebugControl.ts)
+  adds a small bottom-left panel to toggle 2D/3D and tune exaggeration live. It
+  is a plain `IControl`, removable in one line once the look is locked.
+- **Geometry evaluation (why still z0–4).** The DEM stops at native z4; MapLibre
+  *overzooms* past it. Overzoom smooths — it does **not** add mountain detail —
+  so close-ups (≥ ~z8) read as soft, rounded massifs rather than sharp peaks.
+  For the *stylised* goal that reads well at world, Mediterranean and regional
+  scales, and it keeps the bundle lean; the soft close-up is the main trade-off.
+  Bumping `MAX_ZOOM` in the fetch script to **z5** is the one-knob upgrade if
+  sharper close-ups (and marginally cleaner steep-coast draping) are wanted — it
+  costs ~3–4× the tiles.
+- **Known limitation — steep-coast coastline draping.** Because MapLibre 6.15
+  has no `line-elevation-reference`, the coastline stroke is draped onto the
+  terrain. Over the *steepest* coasts (e.g. the Dalmatian coast) viewed at a near
+  grazing tilt, the coarse DEM lifts the dense coast vertices unevenly and the
+  stroke can shimmer into short vertical segments. It is absent at the primary
+  test framings (Mediterranean scale, and Alps/Greece close-ups) and would be
+  reduced by the z5 bump above.
+
+**What's deferred to Phase 3.** Biome colouring (forests, deserts, grasslands,
+wetlands, farmland), rivers, and any time-varying or political overlays. This
+phase is only the *terrain base* those layers will sit on.
 
 ### The MapLibre worker
 
