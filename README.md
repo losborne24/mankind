@@ -46,9 +46,11 @@ The globe opens on a continental view. To explore the demo settlement:
 - **Zoom in** on the eastern Mediterranean / northern Egypt region (around
   **31.13 °E, 29.98 °N**). A glowing **beacon** marks the settlement from
   orbital/regional zoom.
-- Keep zooming (past ~zoom 10–11) and the beacon is replaced by the full
-  **miniature settlement**: individual buildings, groves, paths, drifting
-  chimney smoke, and a slow ambient ship.
+- As you zoom into the region, the settlement **resolves naturally** from a
+  compact built-up silhouette into individual buildings, then (past ~zoom
+  10–11) into the full **miniature settlement**: groves, paths, drifting
+  chimney smoke, and a slow ambient ship. There are **no map pins or beacons** —
+  a settlement is always a physical feature of the landscape.
 - **Scrub the timeline.** At **3000 BCE** only the main town exists. Move to
   **2000 BCE or later** and a second **outpost** plus the **road** linking it
   appear — a demonstration of time-dependent visibility.
@@ -169,15 +171,22 @@ A single configurable policy maps the live zoom to a detail level — no scatter
 `zoom > N` checks. Each region builds its content once and toggles slot
 visibility:
 
-| level  | zoom (default)      | shown                                             |
-| ------ | ------------------- | ------------------------------------------------- |
-| `far`  | `< 5.5`             | a **screen-stable beacon** marking the settlement |
-| `mid`  | `5.5 – 10.5`        | beacon + ground-pad footprint + roads/paths       |
-| `near` | `≥ 10.5`            | individual buildings, groves, ships + animation   |
+| level  | zoom (default)      | shown                                                     |
+| ------ | ------------------- | --------------------------------------------------------- |
+| `far`  | `< 5.5`             | a cheap **instanced massing** silhouette of the built-up area |
+| `mid`  | `5.5 – 10.5`        | individual buildings + organic ground footprint + roads   |
+| `near` | `≥ 10.5`            | adds groves/trees, ships, and ambient animation           |
 
-Thresholds live in `DEFAULT_LOD` and can be overridden per layer. The far beacon
-is rescaled each frame to a roughly constant on-screen size, so it reads as a
-marker from orbit without ballooning as you approach.
+Thresholds live in `DEFAULT_LOD` and can be overridden per layer. **There are no
+beacons or pins** — a settlement's presence comes entirely from its physical
+geometry. All three levels share one deterministic building layout, so the far
+massing, the mid/near buildings, and the footprint occupy the same footprint and
+positions: the far→mid step swaps a merged silhouette for individual buildings at
+the same spots (imperceptible while the settlement is a distant speck), and the
+mid→near step is **purely additive** — vegetation and life fade in over the same,
+unchanged buildings. Geometry behaves as a real-world feature (no constant
+screen-space scaling): from full orbit a settlement is a sub-pixel speck and
+resolves into a cluster as you zoom into its region.
 
 ### Deterministic ambient animation (`map/animation.ts`)
 
@@ -264,8 +273,9 @@ asset and rewrite the URL at build time. No extra copy step is required.
   - Settlement renders at real coordinates and is **locked** through rotate /
     tilt / zoom and the globe→mercator transition (anchors projected to screen
     stay glued to the geometry across bearings 0–220°).
-  - **LOD transitions** behave: a beacon at far zoom, footprint at mid,
-    individual buildings/groves/ship at near.
+  - **LOD transitions** behave: a cheap massing silhouette at far, individual
+    buildings + organic footprint at mid, groves/ship/animation added at near —
+    with no beacons or pins at any level.
   - **Time visibility** works: the outpost + road are hidden at 3000 BCE and
     appear at 2000 BCE onward.
   - **Ambient animation** runs smoothly (~60 fps at near) and the render loop
@@ -283,6 +293,13 @@ asset and rewrite the URL at build time. No extra copy step is required.
   the settlement reads as a legible, tactile miniature at the zoom levels the
   demo globe supports, rather than as invisible real-scale structures. This is an
   art-direction choice, not final real-world scale.
+- **Settlements are physical features, not markers.** By design there are no
+  beacons/pins and no constant-size scaling, so from full orbit a settlement is a
+  sub-pixel speck; it becomes a visible cluster only as you zoom into its region
+  (roughly zoom 7+). The far-level massing therefore serves mainly as a cheap LOD
+  for distant settlements. A gentle minimum-visibility floor could be added
+  later if settlements should be discoverable from further out, without
+  reintroducing fixed screen-space markers.
 - **Per-object (not per-vertex) projection blend.** The globe↔mercator MVP blend
   is applied per anchored object. It is exact at both endpoints and imperceptible
   for a compact settlement; a single object spanning the seam mid-transition

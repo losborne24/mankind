@@ -42,7 +42,7 @@ export class MaterialLibrary {
   readonly ground: THREE.MeshStandardMaterial;
   readonly hull: THREE.MeshStandardMaterial;
   readonly sail: THREE.MeshStandardMaterial;
-  readonly indicator: THREE.MeshStandardMaterial;
+  readonly massing: THREE.MeshStandardMaterial;
   readonly smoke: THREE.MeshStandardMaterial;
 
   private readonly all: THREE.Material[] = [];
@@ -103,12 +103,12 @@ export class MaterialLibrary {
         side: THREE.DoubleSide,
       }),
     );
-    this.indicator = this.track(
+    // Massing: a single muted tone for the far-LOD built-up silhouette.
+    this.massing = this.track(
       new THREE.MeshStandardMaterial({
-        color: 0xf0b64a,
-        emissive: 0xf0b64a,
-        emissiveIntensity: 0.6,
-        roughness: 0.4,
+        color: 0xb9a079,
+        roughness: 0.95,
+        metalness: 0,
         flatShading: true,
       }),
     );
@@ -126,7 +126,7 @@ export class MaterialLibrary {
     // left-handed), which would otherwise back-face-cull front faces. Normals
     // are unaffected (the model transform lives in the projection, not the
     // model-view), so lighting stays correct.
-    for (const m of [...this.walls, ...this.roofs, this.trunk, this.foliage, this.road, this.path, this.hull, this.indicator]) {
+    for (const m of [...this.walls, ...this.roofs, this.trunk, this.foliage, this.road, this.path, this.hull, this.massing]) {
       m.side = THREE.DoubleSide;
     }
   }
@@ -374,11 +374,29 @@ export function buildRoad(
 
 // ── Ground pad ──────────────────────────────────────────────────────────────
 
-/** A soft disc seating a settlement into the terrain, hiding the hard cutoff
- * between built geometry and the flat map surface. */
-export function buildGroundPad(mats: MaterialLibrary, radiusMeters: number): THREE.Mesh {
-  const geo = new THREE.CircleGeometry(radiusMeters, 40);
-  geo.rotateX(-Math.PI / 2); // lie flat in the X/Z plane
+/**
+ * A soft, **organically shaped** patch seating a settlement into the terrain,
+ * hiding the hard cutoff between built geometry and the flat map surface. The
+ * outline is an irregular jittered polygon (seeded), so settlements do not all
+ * share an identical circular footprint.
+ */
+export function buildGroundPad(
+  mats: MaterialLibrary,
+  rng: Rng,
+  radiusMeters: number,
+): THREE.Mesh {
+  const segments = 26;
+  const pts: THREE.Vector2[] = [];
+  // A slowly varying radius gives a lobed, natural edge rather than a circle.
+  const phase = rng.range(0, Math.PI * 2);
+  for (let i = 0; i < segments; i++) {
+    const a = (i / segments) * Math.PI * 2;
+    const wobble = 0.82 + 0.18 * Math.sin(a * 3 + phase) + rng.range(-0.06, 0.06);
+    const r = radiusMeters * wobble;
+    pts.push(new THREE.Vector2(Math.cos(a) * r, Math.sin(a) * r));
+  }
+  const geo = new THREE.ShapeGeometry(new THREE.Shape(pts));
+  geo.rotateX(-Math.PI / 2); // Shape authored in XY → lay flat in the X/Z plane
   const pad = new THREE.Mesh(geo, mats.ground);
   pad.position.y = 0.5;
   return pad;
@@ -428,32 +446,55 @@ export function buildShip(mats: MaterialLibrary, lengthMeters: number): THREE.Gr
   return group;
 }
 
-// ── Far-LOD indicator ───────────────────────────────────────────────────────
+// ── Far-LOD massing ─────────────────────────────────────────────────────────
+
+/** Minimal footprint description needed to build a far-LOD massing block. */
+export interface MassingBlock {
+  x: number;
+  z: number;
+  w: number;
+  d: number;
+  h: number;
+}
 
 /**
- * Base height of a unit indicator, in metres. The renderer scales the whole
- * beacon per frame so it keeps a roughly constant on-screen size (see
- * {@link ../map/worldLayer}); authoring at a finite base avoids tiny-geometry
- * precision issues.
+ * The far-level settlement representation: the built-up area as a single
+ * instanced cluster of simple flat-topped blocks, one per building, at the real
+ * building positions. There is **no beacon, pin, or billboard** — the
+ * settlement reads purely as a compact, organically shaped physical silhouette
+ * whose outline and density come from the same layout the detailed levels use,
+ * so zooming in refines what is already there rather than swapping it out.
+ *
+ * One InstancedMesh ⇒ one draw call regardless of building count; cheap enough
+ * to leave on for distant settlements. No roofs, trees, or animation.
  */
-export const INDICATOR_BASE_METERS = 1000;
-
-/**
- * A simple, symmetric glowing beacon marking a settlement from orbital and
- * regional zoom in place of the full geometry. Authored at
- * {@link INDICATOR_BASE_METERS}; the layer rescales it to stay legible.
- * `importance` (≈1 for a town) nudges the relative size.
- */
-export function buildIndicator(mats: MaterialLibrary, importance = 1): THREE.Group {
+export function buildFarMassing(
+  mats: MaterialLibrary,
+  blocks: readonly MassingBlock[],
+): THREE.Group {
   const group = new THREE.Group();
-  const h = INDICATOR_BASE_METERS * importance;
-  const r = h * 0.14;
-  const coneGeo = new THREE.ConeGeometry(r, h, 6);
-  const cone = new THREE.Mesh(coneGeo, mats.indicator);
-  cone.position.y = h / 2;
-  const capGeo = new THREE.IcosahedronGeometry(r * 1.2, 0);
-  const cap = new THREE.Mesh(capGeo, mats.indicator);
-  cap.position.y = h + r;
-  group.add(cone, cap);
+  const n = blocks.length;
+  if (n === 0) return group;
+
+  const geo = new THREE.BoxGeometry(1, 1, 1);
+  const mesh = new THREE.InstancedMesh(geo, mats.massing, n);
+  mesh.frustumCulled = false;
+
+  const m = new THREE.Matrix4();
+  const q = new THREE.Quaternion();
+  const p = new THREE.Vector3();
+  const s = new THREE.Vector3();
+  for (let i = 0; i < n; i++) {
+    const b = blocks[i];
+    // Flatten slightly so the massing reads as simplified blocks, not towers.
+    const h = b.h * 0.8;
+    p.set(b.x, h / 2, b.z);
+    s.set(b.w, h, b.d);
+    m.compose(p, q, s);
+    mesh.setMatrixAt(i, m);
+  }
+  mesh.instanceMatrix.needsUpdate = true;
+
+  group.add(mesh);
   return group;
 }

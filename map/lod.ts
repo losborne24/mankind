@@ -6,12 +6,12 @@
  * anchored object builds all three levels once and simply toggles which subtree
  * is visible per frame based on {@link zoomToLod}.
  *
- *   far    — orbital / continental view: a simplified settlement *indicator*
- *            only. No individual buildings or trees; avoids clutter and cost.
- *   mid    — regional view: building clusters / footprints, roads, some
- *            vegetation; no per-object ambient animation.
- *   near   — close view: individual buildings and vegetation, full roads, and
- *            subtle ambient animation.
+ *   far    — orbital / continental view: a cheap, merged settlement *massing*
+ *            silhouette only (no beacons). No individual buildings or trees.
+ *   mid    — regional view: individual buildings + organic footprint + roads;
+ *            no vegetation or ambient animation yet.
+ *   near   — close view: adds vegetation, ships, and subtle ambient animation
+ *            over the same buildings — detail is revealed, not swapped in.
  *
  * Thresholds are tuned for MapLibre's globe (the globe→mercator transition sits
  * around zoom 5–6; settlement geometry only reads clearly once essentially

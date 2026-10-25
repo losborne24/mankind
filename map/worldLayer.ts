@@ -55,14 +55,14 @@ import { makeRng, type Rng } from "@/scene/rng";
 import { Anchor, ProjectionScratch, resolveProjection } from "./anchoring";
 import {
   buildBuilding,
+  buildFarMassing,
   buildGroundPad,
-  buildIndicator,
   buildRoad,
   buildShip,
   buildTrees,
   disposeObject3D,
-  INDICATOR_BASE_METERS,
   MaterialLibrary,
+  type MassingBlock,
   type TreeScatter,
 } from "./geometry";
 import {
@@ -74,17 +74,19 @@ import {
 } from "./animation";
 import { DEFAULT_LOD, lodHasAnimation, zoomToLod, type LodThresholds, type LodLevel } from "./lod";
 
-/** On-screen target height for a settlement indicator beacon, in pixels. */
-const INDICATOR_TARGET_PX = 42;
-/** Web-mercator ground resolution constant (metres/pixel at zoom 0, equator). */
-const EQUATOR_MPP = 156543.03392;
-
 /**
- * One anchored scene object. Holds up to four LOD slots, shown as follows:
- *   indicator  — a screen-stable beacon: visible at `far` and `mid`
- *   footprint  — ground pad, roads/paths (cluster hint): visible at `mid`+`near`
- *   structures — individual buildings: visible at `near`
+ * One anchored scene object. Holds up to four LOD slots. There are **no
+ * beacons** — a settlement's presence is conveyed entirely by physical
+ * geometry, which gains detail as the camera approaches:
+ *   far        — a cheap instanced massing silhouette of the built-up area
+ *   footprint  — organic ground pad + roads/paths: visible at `mid` + `near`
+ *   structures — individual buildings: visible at `mid` + `near`
  *   detail     — vegetation, ships + ambient animation: visible at `near`
+ *
+ * The far→mid step swaps the merged massing for individual buildings at the
+ * same positions (imperceptible while the settlement is a distant speck); the
+ * mid→near step is purely additive (vegetation and life fade in over the same,
+ * unchanged buildings), so the world reveals detail rather than being replaced.
  */
 class Region {
   readonly anchor: Anchor;
@@ -93,7 +95,7 @@ class Region {
   readonly animations: AnimationSystem[] = [];
   readonly latDeg: number;
 
-  private indicator?: THREE.Object3D;
+  private far?: THREE.Object3D;
   private footprint?: THREE.Object3D;
   private structures?: THREE.Object3D;
   private detail?: THREE.Object3D;
@@ -105,8 +107,8 @@ class Region {
     this.group.matrixAutoUpdate = true;
   }
 
-  setIndicator(o: THREE.Object3D) {
-    this.indicator = o;
+  setFar(o: THREE.Object3D) {
+    this.far = o;
     this.group.add(o);
   }
   setFootprint(o: THREE.Object3D) {
@@ -127,22 +129,10 @@ class Region {
 
   /** Apply a detail level by toggling slot visibility. */
   applyLod(level: LodLevel): void {
-    if (this.indicator) this.indicator.visible = level !== "near";
+    if (this.far) this.far.visible = level === "far";
     if (this.footprint) this.footprint.visible = level !== "far";
-    if (this.structures) this.structures.visible = level === "near";
+    if (this.structures) this.structures.visible = level !== "far";
     if (this.detail) this.detail.visible = level === "near";
-  }
-
-  /** Scale the beacon so it keeps a roughly constant on-screen size. Called
-   * only while the indicator is visible (far/mid). */
-  scaleIndicator(zoom: number): void {
-    if (!this.indicator) return;
-    const mpp = (EQUATOR_MPP * Math.cos((this.latDeg * Math.PI) / 180)) / 2 ** zoom;
-    const targetMeters = Math.min(
-      180_000,
-      Math.max(3_000, INDICATOR_TARGET_PX * mpp),
-    );
-    this.indicator.scale.setScalar(targetMeters / INDICATOR_BASE_METERS);
   }
 }
 
@@ -279,7 +269,6 @@ export class WorldLayer implements CustomLayerInterface {
       }
 
       region.applyLod(level);
-      if (level !== "near") region.scaleIndicator(zoom);
       if (animate && region.animations.length > 0) {
         for (const anim of region.animations) anim.update(this.clockSeconds);
         anyAnimatedVisible = true;
@@ -332,13 +321,16 @@ export class WorldLayer implements CustomLayerInterface {
 
     const unit = s.variant === "town" ? 1 : s.variant === "village" ? 0.8 : 0.62;
 
-    // ── footprint: ground pad + internal paths (cluster hint, mid + near) ──
+    // ── footprint: organic ground pad + internal paths (mid + near) ──
     const footprint = new THREE.Group();
-    footprint.add(buildGroundPad(mats, s.radiusMeters * 1.08));
+    footprint.add(buildGroundPad(mats, rng, s.radiusMeters * 1.08));
 
-    // ── structures: individual buildings (near) ──
+    // Deterministic building layout, shared by the far massing (one instanced
+    // silhouette) and the mid/near individual buildings, so the shape stays
+    // continuous across LOD levels.
     const structures = new THREE.Group();
     const placed: Array<{ x: number; z: number; top: number; scale: number }> = [];
+    const massing: MassingBlock[] = [];
     const roofs = ["flat", "hipped", "gabled"] as const;
     let attempts = 0;
     while (placed.length < s.buildingCount && attempts < s.buildingCount * 20) {
@@ -359,6 +351,7 @@ export class WorldLayer implements CustomLayerInterface {
       building.rotation.y = rng.range(-0.25, 0.25);
       structures.add(building);
       placed.push({ x, z, top: h, scale: unit });
+      massing.push({ x, z, w, d, h });
     }
 
     // One or two internal paths from an edge building toward the centre.
@@ -401,8 +394,8 @@ export class WorldLayer implements CustomLayerInterface {
     }
     region.setDetail(detail);
 
-    // ── far/mid: a screen-stable beacon marking the settlement ──
-    region.setIndicator(buildIndicator(mats, s.variant === "town" ? 1 : s.variant === "village" ? 0.8 : 0.6));
+    // ── far: a cheap instanced massing silhouette (no beacon) ──
+    region.setFar(buildFarMassing(mats, massing));
 
     this.initVisibility(region);
     return region;
@@ -416,7 +409,7 @@ export class WorldLayer implements CustomLayerInterface {
     detail.add(trees);
     region.setDetail(detail);
     region.animations.push(new SwaySystem(trees, rng, 0.02));
-    // Groves have no indicator — they simply fade out above regional zoom.
+    // Groves are close-range detail only — they appear at near zoom.
     this.initVisibility(region);
     return region;
   }
@@ -448,7 +441,7 @@ export class WorldLayer implements CustomLayerInterface {
     region.rotateY(l.orientationDeg);
     const rng = makeRng(`${this.scene.seed}:${l.id}`);
     const footprint = new THREE.Group();
-    footprint.add(buildGroundPad(mats, l.footprintMeters * 1.4));
+    footprint.add(buildGroundPad(mats, rng, l.footprintMeters * 1.4));
     region.setFootprint(footprint);
     const structures = new THREE.Group();
     structures.add(
@@ -460,7 +453,12 @@ export class WorldLayer implements CustomLayerInterface {
       }),
     );
     region.setStructures(structures);
-    region.setIndicator(buildIndicator(mats, 1));
+    // Far: a single massing block at the landmark's footprint (no beacon).
+    region.setFar(
+      buildFarMassing(mats, [
+        { x: 0, z: 0, w: l.footprintMeters, d: l.footprintMeters, h: l.heightMeters },
+      ]),
+    );
     this.initVisibility(region);
     return region;
   }
