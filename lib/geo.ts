@@ -89,6 +89,31 @@ export function metersToGlobeUnits(meters: number): number {
   return meters / GLOBE_RADIUS_METERS;
 }
 
+/**
+ * Approximate the local tangent-plane offset, in metres, of `point` relative to
+ * an `anchor` coordinate, using an equirectangular ("flat-earth") approximation
+ * valid over the small distances a single settlement spans (≲ a few km).
+ *
+ * Returns `[east, south]`: metres toward local east (+X) and local south (+Z),
+ * matching the basis order of {@link globeSurfaceFrame} (`xAxis` = east,
+ * `zAxis` ≈ south). This lets a scene object whose parts are given in geographic
+ * coordinates be placed in one settlement's local metre-space relative to its
+ * anchor, so the whole cluster shares a single anchored frame.
+ *
+ * Accuracy degrades for points far from the anchor (the Earth's curvature and
+ * meridian convergence are ignored); keep per-anchor extents modest.
+ */
+export function localOffsetMeters(
+  anchor: readonly [number, number],
+  point: readonly [number, number],
+): readonly [number, number] {
+  const metersPerDegLat = GLOBE_RADIUS_METERS * DEG_TO_RAD;
+  const cosLat = Math.cos(anchor[1] * DEG_TO_RAD);
+  const east = (point[0] - anchor[0]) * metersPerDegLat * cosLat;
+  const south = -(point[1] - anchor[1]) * metersPerDegLat;
+  return [east, south];
+}
+
 /** Linear interpolation of two column-major 4×4 matrices, component-wise.
  *
  * Because matrix–vector multiplication is linear,

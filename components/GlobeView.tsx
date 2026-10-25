@@ -22,8 +22,9 @@ maplibregl.setWorkerUrl(
   new URL("maplibre-gl/dist/maplibre-gl-worker.mjs", import.meta.url).toString(),
 );
 
-import { createGlobeStyle, TEST_MARKER_LNGLAT, viewToCamera } from "@/map/mapStyle";
-import { ThreeTestLayer } from "@/map/threeTestLayer";
+import { createGlobeStyle, viewToCamera } from "@/map/mapStyle";
+import { WorldLayer } from "@/map/worldLayer";
+import { DEMO_SCENE } from "@/scene/demoScene";
 import { useExplorationStore } from "@/state/explorationStore";
 
 export type GlobeStatus = "loading" | "ready" | "error";
@@ -47,6 +48,8 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
     const initialView = useExplorationStore.getState().view;
     let disposed = false;
     let ready = false;
+    let worldLayer: WorldLayer | null = null;
+    let unsubscribeYear: (() => void) | null = null;
 
     const map = new maplibregl.Map({
       container,
@@ -63,7 +66,16 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
     map.on("load", () => {
       if (disposed) return;
       try {
-        map.addLayer(new ThreeTestLayer({ lngLat: TEST_MARKER_LNGLAT }));
+        worldLayer = new WorldLayer({
+          scene: DEMO_SCENE,
+          year: useExplorationStore.getState().year,
+        });
+        map.addLayer(worldLayer);
+        // Feed historical-year changes into the renderer (it decides visibility,
+        // not the store). Subscribing to a single slice avoids extra work.
+        unsubscribeYear = useExplorationStore.subscribe((state, prev) => {
+          if (state.year !== prev.year) worldLayer?.setYear(state.year);
+        });
       } catch (err) {
         onStatusRef.current(
           "error",
@@ -109,7 +121,9 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
 
     return () => {
       disposed = true;
+      unsubscribeYear?.();
       map.off("moveend", syncView);
+      // map.remove() triggers the layer's onRemove(), disposing Three resources.
       map.remove();
     };
   }, []);
