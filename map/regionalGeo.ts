@@ -11,13 +11,13 @@
  *
  * Handoff without blank land or coastline wedges
  * ──────────────────────────────────────────────
- * The 1:50 m fill and coastline are left UNCAPPED in the base style. We cap
+ * The 1:50 m layers initially render at every camera zoom. We gate
  * them at {@link REGIONAL_ZOOM} only once the 1:10 m data has actually finished
  * loading and is ready to render. That matters in two directions:
  *
  *   • Before the data is ready, the 1:50 m layers still render at zoom ≥5, so
  *     land never goes blank during a delayed load or a rapid zoom-in.
- *   • The moment the data is ready we cap both 1:50 m layers in a single step,
+ *   • The moment the data is ready we switch the 1:50 m layers in a single step,
  *     so the two scales meet at REGIONAL_ZOOM without overlapping. The coarser
  *     simplified 1:50 m fill can therefore never poke out from under the finer
  *     1:10 m fill as a straight-edged wedge, and the fill and coastline always
@@ -43,22 +43,27 @@ import { TERRAIN_IDS } from "@/map/terrain";
  */
 export const PREFETCH_ZOOM = 4.25;
 
-/** Cap the 1:50 m fill + coastline + ocean mask at REGIONAL_ZOOM so the 1:10 m
+/** Gate the 1:50 m fill + coastline + ocean mask at REGIONAL_ZOOM so the 1:10 m
  * data owns the close-up view. Runs once, only after the 1:10 m source is ready
  * to render. */
 function handOffToRegional(map: MaplibreMap): void {
-  // All three switch together: identical [0, REGIONAL_ZOOM] range. The ocean
-  // mask and the coastline stroke are capped alongside the land so the water
-  // edge and the outline always match the land coast scale — a coarser 1:50 m
-  // ocean/coast left on at regional zoom would spill over, or pull back from,
-  // the finer 1:10 m coastline.
-  map.setLayerZoomRange(GEO_IDS.landFill50, 0, REGIONAL_ZOOM);
-  map.setLayerZoomRange(GEO_IDS.oceanFill50, 0, REGIONAL_ZOOM);
+  // Land, water and coastline switch together at the same camera zoom so
+  // coarse geometry never spills beyond the finer coastline.
+  // Fill layer zoom ranges also control worker bucket creation. A tilted globe
+  // mixes tile zooms within one viewport, so minzoom=5 drops the regional fill
+  // from distant z4 tiles even when the camera is above zoom 5. Use camera-zoom
+  // paint expressions instead: both resolutions retain geometry at every tile
+  // zoom, but only one resolution paints the whole viewport at a time.
+  for (const id of [GEO_IDS.landFill50, GEO_IDS.oceanFill50]) {
+    map.setPaintProperty(id, "fill-opacity-transition", { duration: 0, delay: 0 });
+    map.setPaintProperty(id, "fill-opacity", ["step", ["zoom"], 1, REGIONAL_ZOOM, 0]);
+  }
+  // The custom coastline has no worker buckets; its zoom range is camera-only.
   map.setLayerZoomRange(GEO_IDS.coast50, 0, REGIONAL_ZOOM);
 }
 
 /**
- * Add the 1:10 m source + layers once, then cap the 1:50 m layers as soon as the
+ * Add the 1:10 m source + layers once, then gate the 1:50 m layers as soon as the
  * source has loaded. Safe to call repeatedly. Returns a disposer that detaches
  * the source-loaded listener if the handoff has not happened yet.
  */
@@ -75,15 +80,19 @@ function installRegionalGeo(map: MaplibreMap): () => void {
   // 1:50 m fill (covering it during the brief ready-but-not-yet-capped frame)
   // while the relief, ocean fill and graticule stay on top. Were it
   // inserted above the relief it would paint over the terrain at regional zoom,
-  // flattening exactly the view where the relief matters most. minzoom
-  // REGIONAL_ZOOM so it never renders below the handoff.
+  // flattening exactly the view where the relief matters most. A paint
+  // expression gates the handoff without discarding distant low-zoom buckets.
   map.addLayer(
     {
       id: GEO_IDS.landFill10,
       type: "fill",
       source: GEO_IDS.land10,
-      minzoom: REGIONAL_ZOOM,
-      paint: { "fill-color": palette.land, "fill-opacity": 1, "fill-antialias": false },
+      paint: {
+        "fill-color": palette.land,
+        "fill-opacity": ["step", ["zoom"], 0, REGIONAL_ZOOM, 1],
+        "fill-opacity-transition": { duration: 0, delay: 0 },
+        "fill-antialias": false,
+      },
     },
     TERRAIN_IDS.relief,
   );
@@ -102,8 +111,12 @@ function installRegionalGeo(map: MaplibreMap): () => void {
       id: GEO_IDS.oceanFill10,
       type: "fill",
       source: GEO_IDS.ocean10,
-      minzoom: REGIONAL_ZOOM,
-      paint: { "fill-color": palette.ocean, "fill-opacity": 1, "fill-antialias": false },
+      paint: {
+        "fill-color": palette.ocean,
+        "fill-opacity": ["step", ["zoom"], 0, REGIONAL_ZOOM, 1],
+        "fill-opacity-transition": { duration: 0, delay: 0 },
+        "fill-antialias": false,
+      },
     },
     GEO_IDS.graticule,
   );

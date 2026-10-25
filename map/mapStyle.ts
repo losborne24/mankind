@@ -47,7 +47,7 @@ export const GEO_ATTRIBUTION =
  * never overlap, so the coarser simplified geometry can never poke out from
  * under the finer fill. Shared with {@link map/regionalGeo}.
  *
- * The 1:50 m cap is NOT applied in the base style: it is installed by
+ * The 1:50 m handoff is NOT applied in the base style: it is installed by
  * `map/regionalGeo.ts` only once the 1:10 m data is actually ready to render,
  * so land never goes blank while the finer data is still downloading.
  */
@@ -153,7 +153,7 @@ export function createGlobeStyle(): StyleSpecification {
         // It is intentionally left UNCAPPED here: if it were capped at
         // REGIONAL_ZOOM in the base style, land would go blank at zoom ≥5 during
         // the window before the lazily-fetched 1:10 m data arrives. Instead
-        // `map/regionalGeo.ts` installs the maxzoom cap only once the 1:10 m data
+        // `map/regionalGeo.ts` installs a camera-zoom opacity gate once the 1:10 m data
         // is actually ready to render, handing the two scales off atomically.
         //
         // After that handoff the cap matters: the 1:50 m polygon is
