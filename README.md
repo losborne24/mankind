@@ -139,10 +139,14 @@ the shared context in `onAdd`, resets GL state each frame (`resetState()` +
 
 ## Map data, styling and licensing
 
-The globe uses locally hosted **Natural Earth 1:50m physical geography** from
-release v5.1.2: land, natural lakes and rivers. The compact GeoJSON totals 2.46 MB
-(about 850 KB gzip). MapLibre simplifies it per zoom in its worker. Coastlines
-reuse land geometry; ocean is a solid background. There are no political layers,
+The globe uses locally hosted **Natural Earth v5.1.2 physical geography**:
+50m land, natural lakes and rivers for global/continental views (2.46 MB GeoJSON,
+about 850 KB gzip), plus **10m land for regional views**. Visible regional vector
+tiles start loading at zoom 4 and fade in across zooms 4.5–5.5 once loaded, with
+a 300 ms transition for camera jumps. The complete regional tileset is 2.94 MB;
+only nearby tiles are requested. Both resolutions derive coastlines from their
+own land polygons; regional ocean masks remove the old shoreline during the fade.
+No dependencies were added. There are no political layers,
 labels, remote map tiles, sprite requests or font requests from the map style.
 
 The dark ocean (`#0a1622`), land (`#223240`), globe projection, atmosphere and
@@ -169,19 +173,24 @@ renderer or dependency. DEM/elevation is reserved for Phase 2, Step 2.
 - `pnpm build` — production build; `/` prerenders as static.
 - `node scripts/check-geography.mjs` — validates the actual style with MapLibre's
   installed validator, checks local-only physical sources, geometry types,
-  coordinate ranges, closed polygon rings, data budget and 30° grid/fade.
+  coordinate ranges, closed polygon rings, data budget and 30° grid/fade. It also
+  decodes all regional tiles, checks shared land/coast vertices, complementary
+  masks and triangulation, and exercises the loading gate, zoom fade and cleanup.
 
-For this step, the above checks pass. Live browser visual, interaction and
-network inspection could not be completed because browser automation timed out;
-these checks remain a manual verification item. Source/style checks confirm no
+For this step, the above checks pass and a regional tile serves successfully
+over HTTP. Live visual and interaction checks remain manual because no browser
+is available to the automation in this session. Source/style checks confirm no
 MapLibre demo endpoint remains in the runtime configuration.
 
 ---
 
 ## Known limitations
 
-- **Generalised geography.** Natural Earth 1:50m supports global/regional views,
-  not local navigation; zooms above 8 overzoom the base. Geography represents a
+- **Generalised geography.** Natural Earth 50m supports global/continental views
+  and 10m improves regional coastlines, including France. Regional tiles overzoom
+  above z4 while retaining 10m source detail; this is not local navigation.
+  Higher-resolution OSM coastlines are deferred until settlement-scale detail
+  is required. Geography represents a
   static physical baseline, not historically reconstructed coastlines or rivers.
 - **Exaggerated marker scale.** The test marker is ~150 km tall — deliberately
   oversized so it reads as a beacon from orbital zoom. It is a geometry/anchoring

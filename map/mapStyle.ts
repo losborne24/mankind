@@ -5,10 +5,13 @@
  */
 
 import type { Feature, FeatureCollection, LineString, Position } from "geojson";
-import type { StyleSpecification } from "maplibre-gl";
+import type { ExpressionSpecification, StyleSpecification } from "maplibre-gl";
 import type { GlobeView } from "@/state/explorationStore";
 
 const GEOGRAPHY_ROOT = "/geo/natural-earth-v5.1.2";
+export const REGIONAL_LAND_SOURCE = "physical-land-regional";
+export const COAST_DETAIL_STATE = "coast-detail";
+const detail: ExpressionSpecification = ["coalesce", ["global-state", COAST_DETAIL_STATE], 0];
 
 export const GEO_ATTRIBUTION =
   'Made with <a href="https://www.naturalearthdata.com/">Natural Earth</a> (public domain)';
@@ -76,8 +79,8 @@ const palette = {
 
 /**
  * Build a fresh style without mutating shared state. MapLibre tiles/simplifies
- * the compact 1:50m GeoJSON in its worker for each zoom (up to z8, then overzoom).
- * Reuse land rings for the subtle coast: no duplicate coastline/ocean dataset.
+ * the compact 1:50m base in its worker. Regional 1:10m vector tiles only load
+ * from z4; land, ocean masks and outlines derive from the same land rings.
  */
 export function createGlobeStyle(): StyleSpecification {
   return {
@@ -110,6 +113,13 @@ export function createGlobeStyle(): StyleSpecification {
         attribution: GEO_ATTRIBUTION,
         maxzoom: 8,
       },
+      [REGIONAL_LAND_SOURCE]: {
+        type: "vector",
+        tiles: [`${GEOGRAPHY_ROOT}/land-10m/{z}/{x}/{y}.pbf`],
+        attribution: GEO_ATTRIBUTION,
+        minzoom: 4,
+        maxzoom: 4,
+      },
       "physical-lakes": {
         type: "geojson",
         data: `${GEOGRAPHY_ROOT}/ne_50m_lakes.geojson`,
@@ -140,7 +150,48 @@ export function createGlobeStyle(): StyleSpecification {
         paint: {
           "line-color": palette.coastline,
           "line-width": ["interpolate", ["linear"], ["zoom"], 0, 0.8, 2, 1.1, 6, 1.4],
-          "line-opacity": 0.8,
+          "line-opacity": ["*", 0.8, ["-", 1, detail]],
+          "line-opacity-transition": { duration: 300 },
+        },
+      },
+      {
+        id: "regional-ocean",
+        type: "fill",
+        source: REGIONAL_LAND_SOURCE,
+        "source-layer": "ocean",
+        minzoom: 4,
+        paint: {
+          "fill-color": palette.ocean,
+          "fill-antialias": false,
+          "fill-opacity": detail,
+          "fill-opacity-transition": { duration: 300 },
+        },
+      },
+      {
+        id: "regional-land",
+        type: "fill",
+        source: REGIONAL_LAND_SOURCE,
+        "source-layer": "land",
+        minzoom: 4,
+        paint: {
+          "fill-color": palette.land,
+          "fill-antialias": false,
+          "fill-opacity": detail,
+          "fill-opacity-transition": { duration: 300 },
+        },
+      },
+      {
+        id: "regional-coastline",
+        type: "line",
+        source: REGIONAL_LAND_SOURCE,
+        "source-layer": "coastline",
+        minzoom: 4,
+        layout: { "line-join": "round", "line-cap": "round" },
+        paint: {
+          "line-color": palette.coastline,
+          "line-width": ["interpolate", ["linear"], ["zoom"], 0, 0.8, 2, 1.1, 6, 1.4],
+          "line-opacity": ["*", 0.8, detail],
+          "line-opacity-transition": { duration: 300 },
         },
       },
       {

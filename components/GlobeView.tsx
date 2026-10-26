@@ -24,6 +24,7 @@ maplibregl.setWorkerUrl(
 
 import { createGlobeStyle, TEST_MARKER_LNGLAT, viewToCamera } from "@/map/mapStyle";
 import { ThreeTestLayer } from "@/map/threeTestLayer";
+import { attachCoastlineDetail } from "@/map/coastlineDetail";
 import { useExplorationStore } from "@/state/explorationStore";
 
 export type GlobeStatus = "loading" | "ready" | "error";
@@ -59,6 +60,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
 
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "top-right");
     map.dragRotate.enable();
+    const detachCoastlineDetail = attachCoastlineDetail(map);
 
     map.on("load", () => {
       if (disposed) return;
@@ -109,6 +111,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
 
     return () => {
       disposed = true;
+      detachCoastlineDetail();
       map.off("moveend", syncView);
       map.remove();
     };
