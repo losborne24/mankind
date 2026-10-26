@@ -15,7 +15,29 @@ const { validateStyleMin, classifyRings } = require("@maplibre/maplibre-gl-style
 const style = createGlobeStyle();
 assert.deepEqual(validateStyleMin(style), [], "MapLibre style must validate");
 assert.equal(style.projection.type, "globe");
-assert.ok(!style.terrain && !style.glyphs && !style.sprite);
+assert.ok(!style.glyphs && !style.sprite);
+assert.deepEqual(style.terrain, { source: "physical-elevation", exaggeration: 1 });
+assert.equal(style.sources[style.terrain.source].encoding, "terrarium");
+assert.equal(style.sources[style.terrain.source].tileSize, 512);
+assert.equal(style.sources[style.terrain.source].maxzoom, 12);
+assert.equal(style.sources[style.terrain.source].type, "raster-dem");
+assert.deepEqual(style.sources[style.terrain.source].tiles, ["https://tiles.mapterhorn.com/{z}/{x}/{y}.webp"]);
+// MapLibre 6 queries include exaggeration. Future object placement must be
+// able to distinguish physical metres from the displayed surface height.
+const terrainModule = ts.transpileModule(await readFile(new URL("../map/terrain.ts", import.meta.url), "utf8"), {
+  compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020 },
+});
+const { queryTerrainHeights } = await import(`data:text/javascript;base64,${Buffer.from(terrainModule.outputText).toString("base64")}`);
+for (const exaggeration of [1, 1.5, 2, 2.5]) {
+  const sampleMap = {
+    getTerrain: () => ({ exaggeration }),
+    queryTerrainElevation: () => 1234 * exaggeration,
+  };
+  assert.deepEqual(queryTerrainHeights(sampleMap, [7, 46]), {
+    elevationMeters: 1234, displayMeters: 1234 * exaggeration,
+  });
+}
+assert.equal(queryTerrainHeights({ getTerrain: () => null, queryTerrainElevation: () => null }, [0, 0]), null);
 assert.ok(!JSON.stringify(style).includes("demotiles"));
 assert.ok(style.layers.every((layer) => layer.type !== "symbol"));
 assert.equal(style.layers.find(({ id }) => id === "coastline").source, "physical-land");
@@ -24,6 +46,7 @@ assert.equal(style.layers.find(({ id }) => id === "land").source, "physical-land
 let bytes = 0;
 let compressed = 0;
 for (const [id, source] of Object.entries(style.sources)) {
+  if (id === style.terrain.source) continue;
   if (id === "physical-land-regional") continue;
   assert.equal(source.type, "geojson");
   if (id === "graticule") continue;

@@ -147,7 +147,7 @@ a 300 ms transition for camera jumps. The complete regional tileset is 2.94 MB;
 only nearby tiles are requested. Both resolutions derive coastlines from their
 own land polygons; regional ocean masks remove the old shoreline during the fade.
 No dependencies were added. There are no political layers,
-labels, remote map tiles, sprite requests or font requests from the map style.
+labels, sprite requests or font requests from the map style. Elevation now uses remote Mapterhorn DEM tiles.
 
 The dark ocean (`#0a1622`), land (`#223240`), globe projection, atmosphere and
 camera defaults are preserved. The existing intentional coordinate overlay now
@@ -162,7 +162,7 @@ checksums, transformations, resolution tradeoffs and reproducible rebuild steps.
 MapLibre demonstration tiles and their attribution have been removed.
 
 The existing Phase 1 Three.js marker is retained; this geography step adds no
-renderer or dependency. DEM/elevation is reserved for Phase 2, Step 2.
+renderer or dependency. Mapterhorn elevation is implemented in Phase 2, Step 2.
 
 ---
 
@@ -172,15 +172,13 @@ renderer or dependency. DEM/elevation is reserved for Phase 2, Step 2.
 - `pnpm lint` — ESLint.
 - `pnpm build` — production build; `/` prerenders as static.
 - `node scripts/check-geography.mjs` — validates the actual style with MapLibre's
-  installed validator, checks local-only physical sources, geometry types,
+  installed validator, checks local Natural Earth sources and Mapterhorn DEM configuration, geometry types,
   coordinate ranges, closed polygon rings, data budget and 30° grid/fade. It also
   decodes all regional tiles, checks shared land/coast vertices, complementary
   masks and triangulation, and exercises the loading gate, zoom fade and cleanup.
 
-For this step, the above checks pass and a regional tile serves successfully
-over HTTP. Live visual and interaction checks remain manual because no browser
-is available to the automation in this session. Source/style checks confirm no
-MapLibre demo endpoint remains in the runtime configuration.
+The geography checks also verify the terrain source/encoding, the 1× default,
+and physical versus displayed height separation at every supported exaggeration.
 
 ---
 
@@ -212,7 +210,69 @@ MapLibre demo endpoint remains in the runtime configuration.
 
 ---
 
-## Next step (Phase 2, Step 2)
+## Mapterhorn elevation (Phase 2, Step 2)
 
-Add Mapterhorn raster DEM independently of the physical geography sources.
-Elevation and terrain shading are not implemented in Step 1.
+MapLibre's built-in `raster-dem` terrain uses
+`https://tiles.mapterhorn.com/{z}/{x}/{y}.webp`, **Terrarium encoding**, 512 px,
+XYZ tiles. See [Mapterhorn data access](https://mapterhorn.com/data-access/) and
+[data attribution](https://mapterhorn.com/attribution). Requests stop at native
+z12, the globally available archive; MapLibre overzooms automatically beyond it.
+Higher native zooms have partial coverage and are intentionally not requested.
+No additional dependencies, terrain meshes, or custom LOD were introduced.
+
+The default is **1.0×**. The **Debug tools** panel opens by default at top left; its **Terrain** section lets you choose 1.0×,
+1.5×, 2.0× or 2.5×. It changes one constant exaggeration through `setTerrain`;
+it never varies with zoom or timeline year. Optional **Hillshade**
+is off by default and lazily loads its own DEM source when enabled. It is only
+a relief inspection aid; the Step 3 landscape styling remains deferred.
+
+DEM errors show a nonfatal warning inside this panel. Navigation and Natural
+Earth remain usable with parent/zero-height fallback managed by MapLibre.
+**Retry elevation tiles** refreshes the DEM requests. The warning records a
+failure until explicitly retried, even if subsequent navigation loads new tiles.
+
+`map/terrain.ts` exposes `queryTerrainHeights(map, location)` for future object
+placement: `elevationMeters` removes MapLibre 6's exaggeration, while
+`displayMeters` matches the rendered surface. It samples the currently loaded
+DEM/mesh, not an independent authoritative elevation service. MapLibre can
+return zero for unloaded locations; resample after source data arrives.
+The existing Three.js proof marker is unchanged and still anchored at sea level.
+
+Live Chrome checks on 26 October 2026 tested all four exaggerations at z11,
+with a 60° pitched camera and changing bearings:
+
+| Region / sample centre (longitude, latitude) | Peak-area sample at 1× | Lower sample |
+| --- | ---: | ---: |
+| Alps / Matterhorn (7.6586, 45.9763) | 4,369 m | 1,611 m |
+| Himalayas / Everest (86.9250, 27.9881) | 8,673 m | 4,922 m |
+| Highlands / Ben Nevis (-5.0036, 56.7969) | 1,329 m | 11 m |
+| Mediterranean / Corsica (8.9450, 42.3820) | 2,349 m | 0 m offshore |
+
+All 16 combinations reached loaded state without source errors. Coastal pan/zoom
+checks at z8, z10 and z13 and globe rotations at z2.1 also completed. One
+coastal DEM request returned 404; MapLibre silently handles missing tiles using
+parent/child fallback. A deliberate invalid-image DEM response produced the
+nonfatal panel warning, kept the map usable, and recovered through Retry.
+Timeline play/pause advanced the year successfully; search remains the existing
+disabled placeholder. Displayed
+heights scaled with exaggeration; raw samples can vary slightly as camera
+coverage selects a different DEM/mesh resolution. Diagnostic visual checks
+showed raised ridges and valleys in all four regions, including Highlands at
+z10. These are sampled elevations, not claims of exact summit heights.
+
+Known rendering limits: Natural Earth coastlines and water polygons remain
+generalised and are draped onto the DEM. At close zoom they can cross slopes
+rather than coincide with the DEM's exact sea-level contour; exaggerated terrain
+makes that mismatch more visible. Water polygons are not flattened. Faint tile tint seams are visible at globe scale. Fine mesh
+faceting becomes apparent at high exaggeration. Uniform land fill without
+hillshade makes interior relief difficult to see. MapLibre emits
+`calculateFogMatrix is not supported on globe projection` with terrain enabled;
+the existing sky/atmosphere configuration is retained. No performance benchmark
+has been recorded; terrain necessarily adds DEM requests and GPU work.
+
+Final validation: `pnpm typecheck`, `pnpm lint`,
+`node scripts/check-geography.mjs` and `pnpm exec next build --webpack` pass.
+An earlier `pnpm build` passed; a subsequent Turbopack rebuild failed on local
+CSS worker port binding permissions (including an escalated retry), so the
+final production build was verified with Webpack. No bundler configuration
+was changed.

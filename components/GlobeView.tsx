@@ -10,7 +10,7 @@
  * objects and are kept out of the serializable store by design.
  */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
@@ -22,7 +22,12 @@ maplibregl.setWorkerUrl(
   new URL("maplibre-gl/dist/maplibre-gl-worker.mjs", import.meta.url).toString(),
 );
 
-import { createGlobeStyle, TEST_MARKER_LNGLAT, viewToCamera } from "@/map/mapStyle";
+import {
+  createGlobeStyle, TEST_MARKER_LNGLAT, viewToCamera,
+  TERRAIN_SOURCE,
+} from "@/map/mapStyle";
+import { DebugPanel } from "@/components/DebugPanel";
+import { queryTerrainHeights } from "@/map/terrain";
 import { ThreeTestLayer } from "@/map/threeTestLayer";
 import { attachCoastlineDetail } from "@/map/coastlineDetail";
 import { useExplorationStore } from "@/state/explorationStore";
@@ -35,6 +40,8 @@ interface GlobeViewProps {
 
 export default function GlobeView({ onStatus }: GlobeViewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [debugMap, setDebugMap] = useState<maplibregl.Map | null>(null);
+  const [terrainWarning, setTerrainWarning] = useState(false);
   // Keep the latest callback without re-running the init effect.
   const onStatusRef = useRef(onStatus);
   useEffect(() => {
@@ -73,14 +80,15 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
         );
         return;
       }
+      setDebugMap(map);
       ready = true;
       onStatusRef.current("ready");
 
       // Dev-only debug handle (stripped from production bundles) so tooling can
       // inspect the live map, e.g. project coordinates during integration tests.
       if (process.env.NODE_ENV === "development") {
-        (window as unknown as { __globe?: { map: maplibregl.Map } }).__globe = {
-          map,
+        (window as unknown as { __globe?: unknown }).__globe = {
+          map, queryTerrainHeights: (location: maplibregl.LngLatLike) => queryTerrainHeights(map, location),
         };
       }
     });
@@ -88,7 +96,14 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
     // Surface only fatal startup failures (e.g. a local geography resource
     // being unavailable). Transient errors after the map is ready are ignored.
     map.on("error", (e: maplibregl.ErrorEvent) => {
-      if (disposed || ready) return;
+      if (disposed) return;
+      // DEM is optional for navigation. MapLibre keeps loaded parent DEMs or
+      // falls back to zero elevation for missing tiles; geography stays usable.
+      if ("sourceId" in e && e.sourceId === TERRAIN_SOURCE) {
+        setTerrainWarning(true);
+        return;
+      }
+      if (ready) return;
       onStatusRef.current(
         "error",
         e.error?.message ?? "A map resource failed to load.",
@@ -113,6 +128,9 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
       disposed = true;
       detachCoastlineDetail();
       map.off("moveend", syncView);
+      if (process.env.NODE_ENV === "development") {
+        delete (window as unknown as { __globe?: unknown }).__globe;
+      }
       map.remove();
     };
   }, []);
@@ -120,5 +138,17 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
   // Size with h-full/w-full rather than absolute inset-0: MapLibre's stylesheet
   // sets `.maplibregl-map { position: relative }`, which would override an
   // `absolute` class and collapse the container's height to 0.
-  return <div ref={containerRef} className="h-full w-full" aria-hidden />;
+  return (
+    <>
+      <div ref={containerRef} className="h-full w-full" aria-hidden />
+      <DebugPanel
+        map={debugMap}
+        terrainWarning={terrainWarning}
+        onRetryTerrain={() => {
+          setTerrainWarning(false);
+          debugMap?.refreshTiles(TERRAIN_SOURCE);
+        }}
+      />
+    </>
+  );
 }

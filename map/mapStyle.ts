@@ -1,7 +1,7 @@
 /**
  * Static physical geography, palette, atmosphere and camera conversion.
  * Local Natural Earth data is independent of historical timeline state.
- * Future raster DEM/terrain can be added alongside these physical sources.
+ * Mapterhorn DEM stays independent of the Natural Earth surface layers.
  */
 
 import type { Feature, FeatureCollection, LineString, Position } from "geojson";
@@ -9,6 +9,9 @@ import type { ExpressionSpecification, StyleSpecification } from "maplibre-gl";
 import type { GlobeView } from "@/state/explorationStore";
 
 const GEOGRAPHY_ROOT = "/geo/natural-earth-v5.1.2";
+export const TERRAIN_SOURCE = "physical-elevation";
+export const DEFAULT_TERRAIN_EXAGGERATION = 1;
+export const TERRAIN_EXAGGERATIONS = [1, 1.5, 2, 2.5] as const;
 export const REGIONAL_LAND_SOURCE = "physical-land-regional";
 export const COAST_DETAIL_STATE = "coast-detail";
 const detail: ExpressionSpecification = ["coalesce", ["global-state", COAST_DETAIL_STATE], 0];
@@ -87,6 +90,7 @@ export function createGlobeStyle(): StyleSpecification {
     version: 8,
     name: "mankind-historical-globe",
     projection: { type: "globe" },
+    terrain: { source: TERRAIN_SOURCE, exaggeration: DEFAULT_TERRAIN_EXAGGERATION },
     sky: {
       "sky-color": palette.skyHigh,
       "horizon-color": palette.horizon,
@@ -106,7 +110,17 @@ export function createGlobeStyle(): StyleSpecification {
       ],
     },
     sources: {
-      // Reserved namespace for physical geography; later DEM sources are separate.
+      // https://mapterhorn.com/data-access/ — Terrarium, NOT Mapbox Terrain RGB.
+      [TERRAIN_SOURCE]: {
+        type: "raster-dem",
+        tiles: ["https://tiles.mapterhorn.com/{z}/{x}/{y}.webp"],
+        encoding: "terrarium",
+        tileSize: 512,
+        // Global archive covers z0–12; higher native zooms have partial coverage.
+        // MapLibre handles overzooming and terrain mesh detail itself.
+        maxzoom: 12,
+        attribution: '<a href="https://mapterhorn.com/attribution">© Mapterhorn</a>',
+      },
       "physical-land": {
         type: "geojson",
         data: `${GEOGRAPHY_ROOT}/ne_50m_land.geojson`,
