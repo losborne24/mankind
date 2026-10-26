@@ -81,7 +81,8 @@ const integratedMap = {
     orderedLayers.splice(index, 0, layer);
   },
 };
-new EnvironmentRenderer(integratedMap, 'relief').setState(ancient);
+const integratedRenderer = new EnvironmentRenderer(integratedMap, 'relief');
+integratedRenderer.setState(ancient);
 const indexOf = (id) => orderedLayers.findIndex(l => l.id === id);
 for (const record of ancient.layers) {
   const layer = orderedLayers[indexOf(record.id)];
@@ -130,9 +131,28 @@ const debugMap = {
   getTerrain: () => terrain,
   setTerrain: value => {terrain=value; terrainChanges++;},
 };
-const debug = new DebugControl();
+// Route renderer visibility updates to the same live map used by the control.
+integratedMap.getLayer = debugMap.getLayer;
+integratedMap.setLayoutProperty = debugMap.setLayoutProperty;
+const debug = new DebugControl({ environment: integratedRenderer });
 const panel = debug.onAdd(debugMap);
 const button = label => panel.children.find(el => el.children[0]?.textContent === label);
+assert.equal(button('RESOLVE 2017').attributes['aria-pressed'], 'true');
+integratedRenderer.setVisible('forest', false);
+button('RESOLVE 2017').listeners.click();
+assert.equal(button('RESOLVE 2017').attributes['aria-pressed'], 'false');
+for (const record of ancient.layers.filter(l => l.classification !== 'water'))
+  assert.equal(debugMap.getLayoutProperty(record.id, 'visibility'), 'none');
+assert.equal(debugMap.getLayoutProperty('environment-water', 'visibility'), 'visible');
+integratedRenderer.setVisible('desert', false);
+integratedRenderer.setVisible('grassland', true);
+assert.equal(debugMap.getLayoutProperty('environment-grassland', 'visibility'), 'none');
+assert.equal(terrainChanges, 0);
+button('RESOLVE 2017').listeners.click();
+assert.equal(debugMap.getLayoutProperty('environment-forest', 'visibility'), 'none');
+assert.equal(debugMap.getLayoutProperty('environment-desert', 'visibility'), 'none');
+assert.equal(debugMap.getLayoutProperty('environment-grassland', 'visibility'), 'visible');
+assert.equal(debugMap.getLayoutProperty('environment-water', 'visibility'), 'visible');
 assert.equal(button('DEM Shading').attributes['aria-pressed'], 'false');
 assert.equal(button('3D Elevation').attributes['aria-pressed'], 'true');
 button('DEM Shading').listeners.click();

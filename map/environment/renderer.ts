@@ -16,6 +16,7 @@ const escapeText = (text: string) => text.replaceAll("&", "&amp;").replaceAll("<
 export class EnvironmentRenderer {
   private active?: EnvironmentState;
   private hidden = new Set<EnvironmentClass>();
+  private resolveSurfaceVisible = true;
   constructor(private map: MapLibreMap, private before: string) {}
 
   setState(state: EnvironmentState): void {
@@ -38,7 +39,7 @@ export class EnvironmentRenderer {
       this.map.addLayer({
         id: layer.id, type: "raster", source: layer.id,
         paint: { "raster-opacity": styles[layer.style].opacity, "raster-fade-duration": 200, "raster-resampling": "linear" },
-        layout: { visibility: this.hidden.has(layer.classification) ? "none" : "visible" },
+        layout: { visibility: this.isVisible(layer.classification) ? "visible" : "none" },
       }, this.before);
     }
     this.active = state;
@@ -48,7 +49,24 @@ export class EnvironmentRenderer {
     if (visible) this.hidden.delete(classification); else this.hidden.add(classification);
     for (const layer of this.active?.layers ?? []) {
       if (layer.classification === classification && this.map.getLayer(layer.id))
-        this.map.setLayoutProperty(layer.id, "visibility", visible ? "visible" : "none");
+        this.map.setLayoutProperty(layer.id, "visibility", this.isVisible(classification) ? "visible" : "none");
     }
+  }
+
+  isResolveSurfaceVisible(): boolean {
+    return this.resolveSurfaceVisible;
+  }
+
+  /** Toggle the biome surface while preserving individual choices and hydrography. */
+  setResolveSurfaceVisible(visible: boolean): void {
+    this.resolveSurfaceVisible = visible;
+    for (const layer of this.active?.layers ?? []) {
+      if (layer.classification !== "water" && this.map.getLayer(layer.id))
+        this.map.setLayoutProperty(layer.id, "visibility", this.isVisible(layer.classification) ? "visible" : "none");
+    }
+  }
+
+  private isVisible(classification: EnvironmentClass): boolean {
+    return !this.hidden.has(classification) && (classification === "water" || this.resolveSurfaceVisible);
   }
 }

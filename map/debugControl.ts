@@ -6,6 +6,7 @@
  *
  *   • three.js      — the living-world custom layer (settlements, groves, ship).
  *   • Natural Earth — the self-hosted vector land + ocean polygons.
+ *   • RESOLVE 2017  — biome surface, preserving individual biome selections.
  *   • DEM Shading   — optional heavy color-relief + hillshade overlays.
  *   • 3D Elevation  — real terrain displacement.
  *   • Terrain Lighting — soft northwest slope illumination.
@@ -26,6 +27,7 @@
 import type { ControlPosition, IControl, Map as MaplibreMap } from "maplibre-gl";
 import { GEO_IDS } from "./mapStyle";
 import { TERRAIN_IDS, TERRAIN_EXAGGERATION } from "./terrain";
+import type { EnvironmentRenderer } from "./environment/renderer";
 
 /** Default id of the three.js custom layer (see {@link ../map/worldLayer}). */
 const DEFAULT_WORLD_LAYER_ID = "world-layer";
@@ -46,6 +48,7 @@ const DEM_LAYERS = [TERRAIN_IDS.relief, TERRAIN_IDS.hillshade];
 export interface DebugControlOptions {
   /** Id the WorldLayer was added with. Defaults to `"world-layer"`. */
   worldLayerId?: string;
+  environment?: EnvironmentRenderer;
 }
 
 export class DebugControl implements IControl {
@@ -60,7 +63,7 @@ export class DebugControl implements IControl {
   private elevationOn = true;
   private lightingOn = true;
 
-  constructor(options: DebugControlOptions = {}) {
+  constructor(private readonly options: DebugControlOptions = {}) {
     this.worldLayerId = options.worldLayerId ?? DEFAULT_WORLD_LAYER_ID;
   }
 
@@ -120,6 +123,16 @@ export class DebugControl implements IControl {
         this.applyNaturalEarth();
       }),
     );
+
+    // ── RESOLVE biome surface (independent of Natural Earth water) ──
+    if (this.options.environment) {
+      const environment = this.options.environment;
+      el.appendChild(
+        this.buildToggle("RESOLVE 2017", () => environment.isResolveSurfaceVisible(), (next) => {
+          environment.setResolveSurfaceVisible(next);
+        }),
+      );
+    }
 
     // ── Optional DEM shading (never changes the elevation source) ──
     el.appendChild(
