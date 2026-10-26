@@ -143,8 +143,14 @@ the shared context in `onAdd`, resets GL state each frame (`resetState()` +
 The globe renders from MapLibre's public **demo vector tiles**:
 
 - **Endpoint:** `https://demotiles.maplibre.org/tiles/{z}/{x}/{y}.pbf`
-- **Content:** low-detail world — country polygons (land, coastline, borders)
-  and graticule lines. **Max zoom 6.** No cities, roads, labels, or terrain.
+- **Content:** low-detail world — country polygons and a few named geo lines.
+  **Max zoom 6.** No cities, roads, labels, or terrain.
+- **Style note:** the style draws no polygon outlines. The source's only polygon
+  layer is per-country, so a coastline stroke would also trace every political
+  border; landmasses are rendered as flat, opaque fills instead.
+- **Graticule:** generated locally (`createGraticule` in `map/mapStyle.ts`), not
+  taken from the tiles — the source has no meridians, caps at zoom 4, and its
+  date-line feature is malformed.
 - **Cost / key:** free, no API key, no account.
 - **Licensing:** boundary data © [Natural Earth](https://www.naturalearthdata.com/)
   (public domain); tiles served by MapLibre **as a demonstration endpoint**.
