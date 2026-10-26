@@ -83,8 +83,8 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
       }
     });
 
-    // Surface only fatal startup failures (e.g. the demo style/tiles endpoint
-    // being unreachable). Transient errors after the map is ready are ignored.
+    // Surface only fatal startup failures (e.g. a local geography resource
+    // being unavailable). Transient errors after the map is ready are ignored.
     map.on("error", (e: maplibregl.ErrorEvent) => {
       if (disposed || ready) return;
       onStatusRef.current(

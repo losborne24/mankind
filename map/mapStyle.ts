@@ -1,56 +1,20 @@
 /**
- * MapLibre style and map configuration for the historical globe.
- *
- * This module is the single place that defines the geographic look of the
- * world: the data source, the painterly dark palette, and the base camera.
- * Keeping it isolated means the art direction can evolve without touching the
- * map lifecycle or the Three.js renderer.
- *
- * ──────────────────────────────────────────────────────────────────────────
- * DATA / TILE DEPENDENCY  —  MapLibre "demotiles"
- * ──────────────────────────────────────────────────────────────────────────
- * We render from MapLibre's public demo vector tiles:
- *   https://demotiles.maplibre.org/tiles/{z}/{x}/{y}.pbf
- *
- *   • Content:   low-detail world — country polygons and a few named geo
- *                lines. Max zoom 6. No cities, roads or terrain.
- *   • Cost/key:  free, no API key, no account.
- *   • Licensing: data © Natural Earth (public domain) via MapLibre; the tiles
- *                are served by MapLibre purely as a **demonstration** endpoint.
- *   • LIMITS:    MapLibre explicitly states demotiles are for demos/development
- *                only. There is NO uptime, rate-limit, or availability
- *                guarantee, and it is NOT suitable for production traffic.
- *
- * For production, swap `GEO_SOURCE` for self-hosted tiles or a commercial
- * provider (e.g. MapTiler, Protomaps/PMTiles, Stadia). Review each provider's
- * terms, rate limits, and pricing before shipping — do not assume any style or
- * tile endpoint is free or unrestricted.
- *
- * Two consequences of that source shape are worth knowing:
- *   • Its only polygon layer is per-country, so there is no land-only geometry
- *     to stroke. We draw no outlines at all — a coastline stroke would also
- *     trace every political border — and landmasses read as flat, opaque fills.
- *   • Its `geolines` layer has no meridians, so the graticule is generated
- *     locally instead. See {@link createGraticule}.
+ * Static physical geography, palette, atmosphere and camera conversion.
+ * Local Natural Earth data is independent of historical timeline state.
+ * Future raster DEM/terrain can be added alongside these physical sources.
  */
 
 import type { Feature, FeatureCollection, LineString, Position } from "geojson";
 import type { StyleSpecification } from "maplibre-gl";
 import type { GlobeView } from "@/state/explorationStore";
 
-/** Demo vector tiles. See the module header for licensing/limits. */
-const GEO_SOURCE = "https://demotiles.maplibre.org/tiles/tiles.json";
+const GEOGRAPHY_ROOT = "/geo/natural-earth-v5.1.2";
 
 export const GEO_ATTRIBUTION =
-  'Geometry © <a href="https://www.naturalearthdata.com/">Natural Earth</a> · ' +
-  'demo tiles © <a href="https://maplibre.org/">MapLibre</a> (development use only)';
+  'Made with <a href="https://www.naturalearthdata.com/">Natural Earth</a> (public domain)';
 
-/**
- * Graticule geometry is generated locally rather than taken from the tiles:
- * the demo source's `geolines` layer has no meridians at all (only the five
- * named latitude rings and a malformed date line), and it stops at zoom 4.
- */
-const GRATICULE_STEP = 15;
+/** Independent coordinate overlay; intermediate vertices curve on the globe. */
+const GRATICULE_STEP = 30;
 /** Web Mercator — and therefore the tile grid MapLibre projects from — ends here. */
 const GRATICULE_LAT_LIMIT = 85;
 /** Vertex spacing. Lines need intermediate points to curve on the globe. */
@@ -100,26 +64,25 @@ function createGraticule(): FeatureCollection<LineString> {
 const palette = {
   ocean: "#0a1622",
   land: "#223240",
-  landHighlight: "#2d3f4d",
-  graticule: "#ffffff0d",
-  graticuleMajor: "#ffffff1a",
+  coastline: "#314655",
+  inlandWater: "#0e1e2b",
+  river: "#122330",
+  graticule: "#7e95a8",
+  graticuleMajor: "#8da5b8",
   skyHigh: "#060b14",
   horizon: "#213a4f",
   fog: "#0a1622",
 } as const;
 
 /**
- * Build the MapLibre style. It is a function (not a constant) so future phases
- * can parameterize the palette by era/time of day without mutating shared
- * state.
+ * Build a fresh style without mutating shared state. MapLibre tiles/simplifies
+ * the compact 1:50m GeoJSON in its worker for each zoom (up to z8, then overzoom).
+ * Reuse land rings for the subtle coast: no duplicate coastline/ocean dataset.
  */
 export function createGlobeStyle(): StyleSpecification {
   return {
     version: 8,
     name: "mankind-historical-globe",
-    // Glyphs are referenced by the (optional) country labels. MapLibre's demo
-    // font stack; omit labels entirely and this is never fetched.
-    glyphs: "https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf",
     projection: { type: "globe" },
     sky: {
       "sky-color": palette.skyHigh,
@@ -140,7 +103,25 @@ export function createGlobeStyle(): StyleSpecification {
       ],
     },
     sources: {
-      geo: { type: "vector", url: GEO_SOURCE, attribution: GEO_ATTRIBUTION },
+      // Reserved namespace for physical geography; later DEM sources are separate.
+      "physical-land": {
+        type: "geojson",
+        data: `${GEOGRAPHY_ROOT}/ne_50m_land.geojson`,
+        attribution: GEO_ATTRIBUTION,
+        maxzoom: 8,
+      },
+      "physical-lakes": {
+        type: "geojson",
+        data: `${GEOGRAPHY_ROOT}/ne_50m_lakes.geojson`,
+        attribution: GEO_ATTRIBUTION,
+        maxzoom: 8,
+      },
+      "physical-rivers": {
+        type: "geojson",
+        data: `${GEOGRAPHY_ROOT}/ne_50m_rivers_lake_centerlines.geojson`,
+        attribution: GEO_ATTRIBUTION,
+        maxzoom: 8,
+      },
       graticule: { type: "geojson", data: createGraticule() },
     },
     layers: [
@@ -148,19 +129,49 @@ export function createGlobeStyle(): StyleSpecification {
       {
         id: "land",
         type: "fill",
-        source: "geo",
-        "source-layer": "countries",
-        // Fully opaque: the source only has per-country polygons, so any
-        // translucency lets ocean bleed through shared edges and the political
-        // borders reappear as hairlines.
+        source: "physical-land",
         paint: { "fill-color": palette.land, "fill-opacity": 1 },
+      },
+      {
+        id: "coastline",
+        type: "line",
+        source: "physical-land",
+        paint: {
+          "line-color": palette.coastline,
+          "line-width": ["interpolate", ["linear"], ["zoom"], 0, 0.35, 6, 0.7],
+          "line-opacity": 0.4,
+        },
+      },
+      {
+        id: "rivers",
+        type: "line",
+        source: "physical-rivers",
+        // Natural Earth's visibility ranks keep minor features out of global views.
+        filter: ["<=", ["get", "min_zoom"], ["zoom"]],
+        paint: {
+          "line-color": palette.river,
+          "line-width": ["interpolate", ["linear"], ["zoom"], 0, 0.3, 4, 0.7, 8, 1.2],
+          "line-opacity": ["interpolate", ["linear"], ["zoom"], 0, 0.3, 4, 0.8],
+        },
+      },
+      {
+        id: "lakes",
+        type: "fill",
+        source: "physical-lakes",
+        filter: ["<=", ["get", "min_zoom"], ["zoom"]],
+        paint: { "fill-color": palette.inlandWater },
       },
       {
         id: "graticule",
         type: "line",
         source: "graticule",
         filter: ["!=", ["get", "degrees"], 0],
-        paint: { "line-color": palette.graticule, "line-width": 1 },
+        maxzoom: 5,
+        paint: {
+          "line-color": palette.graticule,
+          "line-width": 1,
+          "line-opacity": ["interpolate", ["linear"], ["zoom"], 0, 0.07, 2.5, 0.07, 5, 0],
+        },
       },
       {
         // Equator and prime meridian, picked out a touch brighter.
@@ -168,7 +179,12 @@ export function createGlobeStyle(): StyleSpecification {
         type: "line",
         source: "graticule",
         filter: ["==", ["get", "degrees"], 0],
-        paint: { "line-color": palette.graticuleMajor, "line-width": 1 },
+        maxzoom: 5,
+        paint: {
+          "line-color": palette.graticuleMajor,
+          "line-width": 1,
+          "line-opacity": ["interpolate", ["linear"], ["zoom"], 0, 0.12, 2.5, 0.12, 5, 0],
+        },
       },
     ],
   };

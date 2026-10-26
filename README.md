@@ -1,11 +1,10 @@
-# Mankind — a living historical world (Phase 1)
+# Mankind — a living historical world
 
 A web-based historical exploration experience: a beautiful, stylized 3D globe
 you can rotate, zoom, and move through time on, from **3000 BCE to the present**.
 
-This repository currently contains **Phase 1 only** — the frontend rendering
-foundation. The goal of this phase is to prove that the three hard pieces work
-together cleanly:
+This repository contains the Phase 1 rendering foundation and **Phase 2, Step 1**
+local Natural Earth physical geography. The rendering foundation combines:
 
 1. An interactive **MapLibre globe** with real geographic context.
 2. A **historical timeline** using a correct BCE/CE calendar model.
@@ -138,58 +137,52 @@ the shared context in `onAdd`, resets GL state each frame (`resetState()` +
 
 ---
 
-## Map data / style dependency, licensing & cost
+## Map data, styling and licensing
 
-The globe renders from MapLibre's public **demo vector tiles**:
+The globe uses locally hosted **Natural Earth 1:50m physical geography** from
+release v5.1.2: land, natural lakes and rivers. The compact GeoJSON totals 2.46 MB
+(about 850 KB gzip). MapLibre simplifies it per zoom in its worker. Coastlines
+reuse land geometry; ocean is a solid background. There are no political layers,
+labels, remote map tiles, sprite requests or font requests from the map style.
 
-- **Endpoint:** `https://demotiles.maplibre.org/tiles/{z}/{x}/{y}.pbf`
-- **Content:** low-detail world — country polygons and a few named geo lines.
-  **Max zoom 6.** No cities, roads, labels, or terrain.
-- **Style note:** the style draws no polygon outlines. The source's only polygon
-  layer is per-country, so a coastline stroke would also trace every political
-  border; landmasses are rendered as flat, opaque fills instead.
-- **Graticule:** generated locally (`createGraticule` in `map/mapStyle.ts`), not
-  taken from the tiles — the source has no meridians, caps at zoom 4, and its
-  date-line feature is malformed.
-- **Cost / key:** free, no API key, no account.
-- **Licensing:** boundary data © [Natural Earth](https://www.naturalearthdata.com/)
-  (public domain); tiles served by MapLibre **as a demonstration endpoint**.
-- **Limits (important):** MapLibre states demotiles are for **demos/development
-  only**. There is **no uptime, rate-limit, or availability guarantee**, and it
-  is **not suitable for production traffic**.
+The dark ocean (`#0a1622`), land (`#223240`), globe projection, atmosphere and
+camera defaults are preserved. The existing intentional coordinate overlay now
+uses 30° spacing and fades away by zoom 5. The palette remains centralised in
+`map/mapStyle.ts`; physical sources are independent of timeline state.
 
-**For production**, replace `GEO_SOURCE` in `map/mapStyle.ts` with self-hosted
-tiles (e.g. Protomaps/PMTiles) or a commercial provider (MapTiler, Stadia, …).
-Review each provider's terms, rate limits, and pricing before shipping — do not
-assume any style or tile endpoint is free or unrestricted. The painterly styling
-lives entirely in `map/mapStyle.ts` and is independent of the data source.
+Natural Earth is public domain; attribution is optional. The globe voluntarily
+credits “Made with Natural Earth (public domain)”. See the
+[verified terms](https://www.naturalearthdata.com/about/terms-of-use/) and the
+[vendored data notes](public/geo/natural-earth-v5.1.2/README.md) for provenance,
+checksums, transformations, resolution tradeoffs and reproducible rebuild steps.
+MapLibre demonstration tiles and their attribution have been removed.
 
-The MapLibre globe atmosphere/sky is configured in the style; no external
-assets are fetched for it.
+The existing Phase 1 Three.js marker is retained; this geography step adds no
+renderer or dependency. DEM/elevation is reserved for Phase 2, Step 2.
 
 ---
 
-## Checks run
+## Geography checks
 
-All run on this codebase and passing:
+- `pnpm typecheck` — TypeScript strict.
+- `pnpm lint` — ESLint.
+- `pnpm build` — production build; `/` prerenders as static.
+- `node scripts/check-geography.mjs` — validates the actual style with MapLibre's
+  installed validator, checks local-only physical sources, geometry types,
+  coordinate ranges, closed polygon rings, data budget and 30° grid/fade.
 
-- `pnpm typecheck` — TypeScript strict, **no errors**.
-- `pnpm lint` — ESLint (Next core-web-vitals + TS), **clean**.
-- `pnpm build` — production build succeeds; `/` prerenders as static.
-- **Headless browser integration test** (real Chrome, WebGL2 via SwiftShader),
-  against both dev and the production build, verifying:
-  globe loads with a full-viewport WebGL2 canvas; the Three.js beacon renders at
-  the correct projected location of Giza; the beacon is culled on the far side
-  of the globe; the marker stays anchored through rotate/zoom/tilt and the
-  globe→mercator transition (up to zoom 11); and **zero console/page errors**
-  across all interactions. The dev-only debug handle is confirmed stripped from
-  the production bundle.
+For this step, the above checks pass. Live browser visual, interaction and
+network inspection could not be completed because browser automation timed out;
+these checks remain a manual verification item. Source/style checks confirm no
+MapLibre demo endpoint remains in the runtime configuration.
 
 ---
 
 ## Known limitations
 
-- **Demo tiles only** (see above): low detail, max zoom 6, not production-grade.
+- **Generalised geography.** Natural Earth 1:50m supports global/regional views,
+  not local navigation; zooms above 8 overzoom the base. Geography represents a
+  static physical baseline, not historically reconstructed coastlines or rivers.
 - **Exaggerated marker scale.** The test marker is ~150 km tall — deliberately
   oversized so it reads as a beacon from orbital zoom. It is a geometry/anchoring
   proof, not final art; at street-level zoom it dominates the view. Real objects
@@ -210,10 +203,7 @@ All run on this codebase and passing:
 
 ---
 
-## Next step (Phase 2)
+## Next step (Phase 2, Step 2)
 
-With the rendering foundation proven, Phase 2 should introduce the **historical
-data layer**: a schema for time-bounded places/events, a small API + caching
-layer, and wiring the timeline's year changes to fetch and display
-evidence-backed features (settlements, then borders/trade routes) — reusing the
-geo-anchoring proven here to place them on the globe.
+Add Mapterhorn raster DEM independently of the physical geography sources.
+Elevation and terrain shading are not implemented in Step 1.

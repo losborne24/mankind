@@ -33,8 +33,8 @@ export function ErrorOverlay({ message }: { message: string }) {
       </h2>
       <p className="text-sm leading-relaxed text-white/70">{message}</p>
       <p className="mt-4 text-xs text-white/40">
-        Check your network connection and reload. The development map tiles are
-        served by MapLibre&apos;s public demo endpoint and may be unavailable.
+        Reload to try again. If the problem persists, the application&apos;s
+        geography resources may be unavailable.
       </p>
     </Scrim>
   );
