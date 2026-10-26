@@ -128,6 +128,16 @@ export class DebugControl implements IControl {
     if (this.options.environment) {
       const environment = this.options.environment;
       el.appendChild(
+        this.buildToggle("PBR Shading", () => environment.isPbrEnabled(), (next) => {
+          environment.setPbrEnabled(next);
+        }),
+      );
+      el.appendChild(
+        this.buildToggle("Natural Materials", () => environment.getSurfaceMode() === "natural", (next) => {
+          environment.setSurfaceMode(next ? "natural" : "resolve");
+        }),
+      );
+      el.appendChild(
         this.buildToggle("RESOLVE 2017", () => environment.isResolveSurfaceVisible(), (next) => {
           environment.setResolveSurfaceVisible(next);
         }),

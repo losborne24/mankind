@@ -31,6 +31,7 @@ import { WorldLayer } from "@/map/worldLayer";
 import { DEMO_SCENE } from "@/scene/demoScene";
 import { useExplorationStore } from "@/state/explorationStore";
 import { useEnvironmentStore } from "@/state/environmentStore";
+import { naturalSurfaceProvider } from "@/map/surface/provider";
 import { EnvironmentRenderer } from "@/map/environment/renderer";
 import { getEnvironmentForYear } from "@/map/environment/catalog";
 import type { EnvironmentClass } from "@/map/environment/model";
@@ -80,7 +81,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
 
     map.on("load", () => {
       if (disposed) return;
-      environment = new EnvironmentRenderer(map, TERRAIN_IDS.relief);
+      environment = new EnvironmentRenderer(map, TERRAIN_IDS.relief, naturalSurfaceProvider, true);
       environment.setState(getEnvironmentForYear(useExplorationStore.getState().year));
       const applyEnvironmentVisibility = () => {
         const settings = useEnvironmentStore.getState();
@@ -134,8 +135,9 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
       // Dev-only debug handle (stripped from production bundles) so tooling can
       // inspect the live map, e.g. project coordinates during integration tests.
       if (process.env.NODE_ENV === "development") {
-        (window as unknown as { __globe?: { map: maplibregl.Map } }).__globe = {
+        (window as unknown as { __globe?: { map: maplibregl.Map; environment: EnvironmentRenderer } }).__globe = {
           map,
+          environment,
         };
       }
     });
@@ -144,6 +146,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
     // being unreachable). Transient errors after the map is ready are ignored.
     map.on("error", (e: maplibregl.ErrorEvent) => {
       if ("sourceId" in e && String(e.sourceId).startsWith("environment-")) {
+        environment?.handleSourceError(String(e.sourceId));
         useEnvironmentStore.getState().setUnavailable(true);
         return;
       }

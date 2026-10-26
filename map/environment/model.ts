@@ -23,6 +23,12 @@ export interface EnvironmentalRecord {
     | { kind: "raster"; tileTemplate: string; tileSize: 256 | 512; minzoom: number; maxzoom: number };
   provenance: EnvironmentProvenance;
   style: EnvironmentClass;
+  /** Optional dataset-independent material inputs supplied by the surface adapter. */
+  surface?: {
+    propertyTileTemplate: string;
+    normalStrength: number;
+    canopy: number;
+  };
 }
 
 export interface EnvironmentState {

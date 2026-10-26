@@ -1,6 +1,8 @@
 import type { Map as MapLibreMap } from "maplibre-gl";
 import type { EnvironmentState, EnvironmentClass } from "./model";
 import styles from "./styles.json";
+import { GroundMaterialLayer, PBR_LAYER_ID } from "../surface/groundLayer";
+import { naturalSurfaceProvider, resolveSurfaceProvider, type NaturalSurfaceProvider, type SurfaceMode } from "../surface/provider";
 
 export const FIRST_ENVIRONMENT_LAYER = "environment-forest";
 const escapeText = (text: string) => text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
@@ -15,13 +17,39 @@ const escapeText = (text: string) => text.replaceAll("&", "&amp;").replaceAll("<
  */
 export class EnvironmentRenderer {
   private active?: EnvironmentState;
+  private reference?: EnvironmentState;
+  private ground?: GroundMaterialLayer;
+  private pbrEnabled = true;
   private hidden = new Set<EnvironmentClass>();
   private resolveSurfaceVisible = true;
-  constructor(private map: MapLibreMap, private before: string) {}
+  constructor(private map: MapLibreMap, private before: string, private provider: NaturalSurfaceProvider = resolveSurfaceProvider, private usePbr = false) {}
 
-  setState(state: EnvironmentState): void {
+  isPbrEnabled(): boolean { return this.pbrEnabled; }
+  setPbrEnabled(enabled: boolean): void { this.pbrEnabled = enabled; this.ground?.setEnabled(enabled); }
+  getMaterialStats() { return this.ground?.stats; }
+
+  getSurfaceMode(): SurfaceMode { return this.provider.mode; }
+
+  /** Missing optional material assets must keep the working reference renderer. */
+  handleSourceError(sourceId: string): boolean {
+    if (this.provider.mode !== 'natural' || !this.active?.layers.some(layer => layer.id === sourceId && layer.classification !== 'water')) return false;
+    this.setSurfaceMode('resolve');
+    return true;
+  }
+
+  setSurfaceMode(mode: SurfaceMode): void {
+    if (mode === this.provider.mode) return;
+    this.provider = mode === 'natural' ? naturalSurfaceProvider : resolveSurfaceProvider;
+    if (this.reference) this.setState(this.reference);
+  }
+
+  setState(reference: EnvironmentState): void {
+    this.reference = reference;
+    const state = this.provider.adapt(reference);
     // Timeline playback must not re-upload identical textures.
     if (state.id === this.active?.id) return;
+    if (this.ground && this.map.getLayer(PBR_LAYER_ID)) this.map.removeLayer(PBR_LAYER_ID);
+    this.ground = undefined;
     for (const previous of this.active?.layers ?? []) {
       if (this.map.getLayer(previous.id)) {
         this.map.removeLayer(previous.id);
@@ -38,15 +66,26 @@ export class EnvironmentRenderer {
       });
       this.map.addLayer({
         id: layer.id, type: "raster", source: layer.id,
-        paint: { "raster-opacity": styles[layer.style].opacity, "raster-fade-duration": 200, "raster-resampling": "linear" },
+        paint: { "raster-opacity": this.provider.mode === "natural" && layer.classification !== "water" ? 1 : styles[layer.style].opacity, "raster-fade-duration": 200, "raster-resampling": "linear" },
         layout: { visibility: this.isVisible(layer.classification) ? "visible" : "none" },
       }, this.before);
     }
     this.active = state;
+    if (this.usePbr && this.provider.mode === 'natural') {
+      const inputs = state.layers.flatMap(layer => {
+        if (!layer.surface || layer.geography.kind !== 'raster') return [];
+        return [{ ...layer.surface, classification: layer.classification, template: layer.geography.tileTemplate, maxzoom: layer.geography.maxzoom }];
+      });
+      this.ground = new GroundMaterialLayer(inputs, (message) => console.warn(message));
+      this.ground.setEnabled(this.pbrEnabled);
+      for (const input of inputs) this.ground.setVisible(input.classification, this.isVisible(input.classification));
+      this.map.addLayer(this.ground, state.layers.find(layer => layer.classification === 'water')?.id ?? this.before);
+    }
   }
 
   setVisible(classification: EnvironmentClass, visible: boolean): void {
     if (visible) this.hidden.delete(classification); else this.hidden.add(classification);
+    this.ground?.setVisible(classification, this.isVisible(classification));
     for (const layer of this.active?.layers ?? []) {
       if (layer.classification === classification && this.map.getLayer(layer.id))
         this.map.setLayoutProperty(layer.id, "visibility", this.isVisible(classification) ? "visible" : "none");
@@ -60,6 +99,7 @@ export class EnvironmentRenderer {
   /** Toggle the biome surface while preserving individual choices and hydrography. */
   setResolveSurfaceVisible(visible: boolean): void {
     this.resolveSurfaceVisible = visible;
+    for (const layer of this.active?.layers ?? []) this.ground?.setVisible(layer.classification, this.isVisible(layer.classification));
     for (const layer of this.active?.layers ?? []) {
       if (layer.classification !== "water" && this.map.getLayer(layer.id))
         this.map.setLayoutProperty(layer.id, "visibility", this.isVisible(layer.classification) ? "visible" : "none");

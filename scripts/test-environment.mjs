@@ -8,13 +8,13 @@ import { classifyEcoregion } from '../map/environment/classification.mjs';
 const require = createRequire(import.meta.url);
 function load(path) {
   const result = ts.transpileModule(readFileSync(new URL(path, import.meta.url), 'utf8'), {
-    compilerOptions: { module: ts.ModuleKind.CommonJS, esModuleInterop: true },
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2017, esModuleInterop: true },
   });
   const compiled = { exports: {} };
   new Function('require', 'module', 'exports', result.outputText)(
     (name) => name === './styles.json' ? require('../map/environment/styles.json')
       : name.startsWith('@/') ? load(`../${name.slice(2)}.ts`)
-        : name.startsWith('./') ? load(new URL(`${name}.ts`, new URL(path, import.meta.url))) : require(name), compiled, compiled.exports,
+        : name.startsWith('.') ? load(new URL(`${name}.ts`, new URL(path, import.meta.url))) : require(name), compiled, compiled.exports,
   );
   return compiled.exports;
 }
@@ -190,3 +190,60 @@ debug.onRemove();
 delete globalThis.document;
 console.log('Independent debug controls passed: 3D Elevation ON / DEM Shading OFF; shading never changes terrain or sources.');
 console.log('Environment checks passed: classification, unknown validity, 5,024 timeline years without source mutations, dataset replacement, independent visibility.');
+
+// Natural material adapter must preserve hydrography, terrain, visibility and time stability.
+const { naturalSurfaceProvider } = load('../map/surface/provider.ts');
+const natural = naturalSurfaceProvider.adapt(ancient);
+assert.equal(natural.reconstructed, false);
+assert.equal(natural.requestedYear, -2999);
+assert.equal(natural.layers.find(l => l.classification === 'water'), ancient.layers.find(l => l.classification === 'water'));
+renderer.setSurfaceMode('natural');
+assert.equal(sources.get('environment-forest').tiles[0], '/geo/environment/natural-v1/forest/{z}/{x}/{y}.png');
+assert.equal(layers.get('environment-forest').layout.visibility, 'none');
+assert.equal(layers.get('environment-grassland').paint['raster-opacity'], 1);
+const naturalMutations = mutations;
+for (let year = -2999; year <= 2026; year++) renderer.setState(getEnvironmentForYear(year));
+const afterFirstBaseline = mutations;
+// Previous state was the replacement test period: only the first update changes sources.
+for (let year = -2999; year <= 2026; year++) renderer.setState(getEnvironmentForYear(year));
+assert.equal(mutations, afterFirstBaseline);
+assert(afterFirstBaseline >= naturalMutations);
+assert.equal(renderer.handleSourceError('environment-water'), false);
+assert.equal(renderer.getSurfaceMode(), 'natural');
+assert.equal(renderer.handleSourceError('environment-forest'), true);
+assert.equal(renderer.getSurfaceMode(), 'resolve');
+assert(sources.get('environment-forest').tiles[0].includes('/reference-v1/'));
+assert.equal(renderer.handleSourceError('environment-forest'), false);
+assert.equal(layers.get('environment-forest').layout.visibility, 'none');
+console.log('Natural provider passed: hydrography preserved, dates reuse material tiles, missing material tiles restore RESOLVE, filters survive comparison.');
+
+const { materialTileAddress, GroundMaterialLayer } = load('../map/surface/groundLayer.ts');
+assert.deepEqual(materialTileAddress(6, 35, 22), {z:4,x:8,y:5,uv:[.75,.5,.25]});
+assert.deepEqual(materialTileAddress(6,35,22,2), {z:2,x:2,y:1,uv:[.1875,.375,.0625]});
+assert.deepEqual(materialTileAddress(4, -1, 8), materialTileAddress(4, 15, 8));
+assert.deepEqual(materialTileAddress(4, 0, -1), materialTileAddress(4, 0, 0));
+assert.throws(() => materialTileAddress(NaN,0,0), RangeError);
+const ground = new GroundMaterialLayer([{classification:'forest',template:'/forest/{z}/{x}/{y}.png',normalStrength:.5}], () => {});
+const revision = ground.terrainTileRevision;
+ground.setVisible('forest',true);
+assert.equal(ground.terrainTileRevision,revision);
+ground.setVisible('forest',false);
+assert.equal(ground.terrainTileRevision,revision+1);
+ground.setEnabled(false);
+assert.equal(ground.terrainTileRevision,revision+2);
+ground.setEnabled(false);
+assert.equal(ground.terrainTileRevision,revision+2);
+ground.onRemove();
+console.log('PBR contracts passed: overzoom UVs, antimeridian/polar addressing, stable cache revisions and safe disposal.');
+
+// Resource lifecycle: pending network work and both texture channels are released.
+const released = [];
+const pending = new AbortController();
+ground.gl = {deleteTexture: value => released.push(value),deleteProgram: value => released.push(value),deleteVertexArray: value => released.push(value)};
+ground.cache.set('test', {abort:pending,albedo:'albedo',properties:'properties'});
+ground.program = 'program'; ground.vao = 'vao';
+ground.onRemove();
+assert.equal(pending.signal.aborted,true);
+assert.deepEqual(released,['albedo','properties','program','vao']);
+assert.equal(ground.cache.size,0);
+console.log('PBR cleanup passed: textures, program, VAO and pending requests released.');
