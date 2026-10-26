@@ -29,6 +29,7 @@ export const naturalSurfaceProvider: NaturalSurfaceProvider = {
       ...layer,
       surface: priors[layer.classification] ? {
         ...priors[layer.classification],
+        fallbackTileTemplate: `${root}/natural-v1/${layer.classification}-appearance/{z}/{x}/{y}.png`,
         manifestUrl: `${root}/natural-v1/manifest.json`,
         propertyTileTemplate: `${root}/natural-v1/${layer.classification}-properties/{z}/{x}/{y}.png`,
       } : undefined,

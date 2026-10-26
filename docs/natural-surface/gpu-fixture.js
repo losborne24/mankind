@@ -51,18 +51,27 @@
   const smooth = draw(128, 30, 0);
   const sloped = draw(210, 240, 0);
   const detail = draw(128, 240, 1);
+  gl.uniform1f(uniform('u_canopy'), 1);
+  gl.uniform3f(uniform('u_canopyColor'), .2, .3, .15);
+  gl.uniform1f(uniform('u_lighting'), 0);
+  gl.uniform1f(uniform('u_pixelMetres'), 10000);
+  const canopyFar = draw(128, 240, 0);
+  gl.uniform1f(uniform('u_pixelMetres'), 1);
+  const canopyNear = draw(128, 240, 0);
   const result = {
     flat: flat.slice(0, 4), smooth: smooth.slice(0, 4), sloped: sloped.slice(0, 4),
     roughnessChangesPixels: flat.some((v, i) => v !== smooth[i]),
     normalChangesPixels: flat.some((v, i) => v !== sloped[i]),
     detailChangesPixels: flat.some((v, i) => v !== detail[i]),
+    canopyStableAcrossZoom: canopyFar.every((v, i) => v === canopyNear[i]),
+    canopyIsGreen: canopyFar[1] > canopyFar[0] && canopyFar[1] > canopyFar[2],
     glError: gl.getError(),
   };
   textures.forEach(handle => gl.deleteTexture(handle));
   gl.deleteProgram(program);
   gl.deleteVertexArray(vao);
   gl.getExtension('WEBGL_lose_context')?.loseContext();
-  console.assert(result.roughnessChangesPixels && result.normalChangesPixels && result.detailChangesPixels && result.glError === 0, result);
+  console.assert(result.roughnessChangesPixels && result.normalChangesPixels && result.detailChangesPixels && result.canopyStableAcrossZoom && result.canopyIsGreen && result.glError === 0, result);
   console.log(JSON.stringify(result));
   return result;
 })()

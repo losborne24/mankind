@@ -35,9 +35,10 @@ subpixel detail. A uniform footprint gate avoids evaluating micro detail on
 distant tiles. Materials remain geographic across tile boundaries and dates.
 
 The shared environment's potential canopy prior supplies a distant aggregate
-tint, fading smoothly as crowns become resolvable. Exposed slopes reduce it.
-This keeps brown forest-floor ground at local scale and broad canopy appearance
-at distance. It creates no trees or new vegetation observations. Local vegetation
+tint retained at every zoom until visible vegetation geometry can replace it.
+Exposed slopes reduce it; zoom alone never clears forests.
+Brown forest floor remains the independent underlying ground material; aggregate
+cover stays visible until a real vegetation handoff is available. It creates no trees or new vegetation observations. Local vegetation
 assets remain Phase 3 work. No snowline, climate, wetness or soil is inferred
 from altitude or depressions. Source-omitted tundra/rock/ice remain neutral.
 
@@ -65,10 +66,12 @@ and procedural detail stay fixed. Existing optional hillshade diagnostics still
 compose after the material pass. No material textures or shaders rebuild when
 the historical date changes on this static baseline.
 
-Albedo rasters stay beneath the shader while material inputs load. Missing or
+Matching natural appearance rasters stay beneath the shader while material
+inputs load. They use the same ground albedo, normals, roughness, canopy and
+shared lighting constants as the shader at its default view. RESOLVE is the
+ecological baseline, not a separate palette in the live renderer. Missing or
 incompatible property manifests, failed shader initialization or property tiles
-leave that fallback visible and report a console warning. Missing albedo assets
-restore the original RESOLVE renderer. With physical terrain disabled, the
+leave that fallback visible and report a console warning. With physical terrain disabled, the
 native raster surface remains available. Generated tiles must be deployed with
 the manifest; there is no runtime scientific archive download.
 
@@ -94,16 +97,21 @@ Generated material assets live in the already ignored
 `public/geo/environment/natural-v1`. Deploy the whole directory alongside
 `reference-v1` under `NEXT_PUBLIC_ENVIRONMENT_ASSET_BASE`, using the existing
 asset-hosting process. Builds never prepare or download tiles. The pyramid has
-1,705 albedo and 1,705 packed-property PNGs; its highest source grid is 8192².
+1,705 albedo, 1,705 packed-property and 1,705 matching appearance PNGs; its highest source grid is 8192².
 Final full preparation with properties took about 238 seconds locally;
-albedo plus property assets occupied about 174 MiB. The manifest records actual
-output counts/bytes. `--parents-only` rebuilds parents and the coverage index
+albedo plus property assets occupied about 174 MiB; the matching appearance
+drape adds about 12 MiB. The manifest records actual
+output counts/bytes, including the appearance drape. Existing albedo/property
+assets can gain the matching drape via `node scripts/prepare-surface-appearance.mjs`
+without decoding DEM again. Deploy the new `*-appearance` directories too. `--parents-only` rebuilds parents and the coverage index
 without recalculating native terrain properties (about 40 seconds locally).
 
-- **Natural Materials ON/OFF**: new provider / original RESOLVE colours.
 - **PBR Shading ON/OFF**: BRDF lighting / unlit material appearance. This retains
   material variation and distant potential canopy while comparing illumination.
-- **RESOLVE 2017** and per-class filters: ecological visibility in both modes.
+- **RESOLVE 2017** and per-class filters control the single natural surface.
+  The duplicate Natural Materials comparison switch has been removed. Live
+  `resolve`/`natural` selections share tiles and shader instances, avoiding reload
+  flashes; the original reference catalog/data remain available for diagnostics.
 - Water, DEM Shading, Terrain Lighting and 3D Elevation remain independently
   controlled. Terrain Lighting also controls the shader's illumination.
 
@@ -117,6 +125,11 @@ Automated checks cover derivatives, normalized blends, geographic continuity,
 coverage masks, linear property channels, independent source LOD, overzoom UVs,
 cache invalidation, cancellation/disposal, source replacement, comparison
 controls and thousands of historical dates without source mutations.
+
+An actual forest pixel from the native loading drape matched the live GPU shader
+exactly at the default view: both returned RGB 65, 80, 51, with no WebGL errors.
+Regression checks also verify that live RESOLVE/natural selections retain the
+same source and material-layer instances.
 
 The isolated synthetic browser fixture in `gpu-fixture.js` compiles the actual
 live shaders into a temporary offscreen WebGL2 context. Paste it into the local

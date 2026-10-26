@@ -5,6 +5,7 @@
 import { mkdir, readFile, writeFile, stat } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import sharp from 'sharp';
+import { prepareSurfaceAppearance } from './prepare-surface-appearance.mjs';
 import { materialWeights, sampleGround, geographicVariation } from '../map/surface/materials.ts';
 import { aggregateCoverageRgba } from '../map/surface/raster.ts';
 import { RESOLVE_ENVIRONMENTS } from '../map/surface/resolve.ts';
@@ -144,16 +145,18 @@ for (let z = 3; z >= 0; z--) for (const key of classes) {
     await save(`${key}-properties`, z, x, y, await sharp(parent, {raw: {width:512, height:512, channels:3}}).png().toBuffer());
   }
 }
+const appearance = await prepareSurfaceAppearance(output, classes);
 const manifest = {
-  version: 'natural-v1', emptyTiles: [...emptyTiles], propertiesVersion: 1, propertyEncoding: 'RGB: east normal ×0.5+0.5, south normal ×0.5+0.5, roughness; linear data', tileSize: 512, maxzoom, tiles: classes.length * 341 * 2, albedoTiles: classes.length * 341, propertyTiles: classes.length * 341,
-  preparation: { regeneratedTiles: tiles, regeneratedBytes: bytes, seconds: (performance.now() - start) / 1000 },
-  bytes: (await Promise.all(classes.flatMap(key => [key, `${key}-properties`]).flatMap(key => Array.from({length: 5}, (_, z) =>
+  appearanceVersion: 1, appearanceTiles: appearance.tiles, appearanceBytes: appearance.bytes,
+  version: 'natural-v1', emptyTiles: [...emptyTiles], propertiesVersion: 1, propertyEncoding: 'RGB: east normal ×0.5+0.5, south normal ×0.5+0.5, roughness; linear data', tileSize: 512, maxzoom, tiles: classes.length * 341 * 3, albedoTiles: classes.length * 341, propertyTiles: classes.length * 341,
+  preparation: { regeneratedTiles: tiles + appearance.tiles, regeneratedBytes: bytes + appearance.bytes, seconds: (performance.now() - start) / 1000 },
+  bytes: appearance.bytes + (await Promise.all(classes.flatMap(key => [key, `${key}-properties`]).flatMap(key => Array.from({length: 5}, (_, z) =>
     Array.from({length: 2 ** z}, (_, x) => Array.from({length: 2 ** z}, (_, y) =>
       stat(`${output}/${key}/${z}/${x}/${y}.png`).then(s => s.size))).flat()).flat()))).reduce((a, b) => a + b, 0),
   referenceSha256: createHash('sha256').update(inputManifest).digest('hex'),
   temporalValidity: null, reconstructed: false,
   notice: 'Artistic natural ground materials using modern RESOLVE ecological priors and Terrarium derivatives. NOT historical reconstruction. No inferred snow, climate, soil survey, geology, or local forest boundaries.',
-  rendering: 'Native terrain-tile PBR shader; albedo drape fallback; no extra geometry.',
+  rendering: 'Native terrain-tile PBR shader; matching material drape fallback; no extra geometry.',
 };
 await writeFile(`${output}/manifest.json`, JSON.stringify(manifest, null, 2) + '\n');
 console.log(JSON.stringify({...manifest, emptyTiles: `${emptyTiles.size} empty tiles omitted at runtime`}));

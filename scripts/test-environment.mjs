@@ -247,3 +247,32 @@ assert.equal(pending.signal.aborted,true);
 assert.deepEqual(released,['albedo','properties','program','vao']);
 assert.equal(ground.cache.size,0);
 console.log('PBR cleanup passed: textures, program, VAO and pending requests released.');
+
+// Cold PBR tiles must show forest/woodland cover, not the brown floor texture.
+// Shader inputs still receive the physical ground albedo, independently.
+const pbrSources = new Map(), pbrLayers = new Map();
+const pbrMap = {
+  addSource: (id, value) => pbrSources.set(id, value),
+  addLayer: (layer) => pbrLayers.set(layer.id, layer),
+  getLayer: id => pbrLayers.get(id),
+};
+const pbrRenderer = new EnvironmentRenderer(pbrMap, 'relief', naturalSurfaceProvider, true);
+pbrRenderer.setState(ancient);
+assert(pbrSources.get('environment-forest').tiles[0].includes('/natural-v1/forest-appearance/'));
+const materialLayer = pbrLayers.get('natural-ground-pbr');
+assert(materialLayer.inputs.find(input => input.classification === 'forest').template.includes('/natural-v1/forest/'));
+const pbrSourceCount = pbrSources.size;
+pbrRenderer.setState(getEnvironmentForYear(2026));
+assert.equal(pbrLayers.get('natural-ground-pbr'), materialLayer);
+assert.equal(pbrSources.size,pbrSourceCount);
+console.log('PBR loading fallback passed: biome cover during loading, independent ground textures, no date-driven layer replacement.');
+
+// RESOLVE and natural selections share the same live surface, with no unload/reload flash.
+const forestSource = pbrSources.get('environment-forest');
+pbrRenderer.setSurfaceMode('resolve');
+assert.equal(pbrSources.get('environment-forest'),forestSource);
+assert.equal(pbrLayers.get('natural-ground-pbr'),materialLayer);
+pbrRenderer.setSurfaceMode('natural');
+assert.equal(pbrSources.get('environment-forest'),forestSource);
+assert.equal(pbrLayers.get('natural-ground-pbr'),materialLayer);
+console.log('Unified surface passed: RESOLVE/natural use matching material appearance without source or shader replacement.');

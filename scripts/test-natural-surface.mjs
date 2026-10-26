@@ -45,7 +45,9 @@ console.log('Terrain/material checks passed: physical derivatives, normals, anti
 // Optional generated-asset validation, never silently skipped when assets are expected.
 if (process.argv.includes('--assets')) {
   const manifest = JSON.parse(await readFile('public/geo/environment/natural-v1/manifest.json'));
-  assert.equal(manifest.tiles, 10 * 341);
+  assert.equal(manifest.tiles, 15 * 341);
+  assert.equal(manifest.appearanceTiles, 5 * 341);
+  assert.equal(manifest.appearanceVersion, 1);
   assert.equal(manifest.propertyTiles, 5 * 341);
   assert.equal(manifest.propertiesVersion, 1);
   assert.equal(manifest.reconstructed, false);
@@ -55,6 +57,12 @@ if (process.argv.includes('--assets')) {
     const source = await sharp(`public/geo/environment/reference-v1/${key}/4/8/5.png`).ensureAlpha().raw().toBuffer();
     const result = await sharp(`public/geo/environment/natural-v1/${key}/4/8/5.png`).ensureAlpha().raw().toBuffer();
     for (let i = 3; i < result.length; i += 4) assert.equal(result[i], source[i], 'Do not change ecological coverage');
+  }
+  // The display drape changes appearance only; ecological coverage is identical.
+  for (const key of Object.keys(RESOLVE_ENVIRONMENTS)) {
+    const source = await sharp(`public/geo/environment/natural-v1/${key}/4/8/5.png`).ensureAlpha().raw().toBuffer();
+    const display = await sharp(`public/geo/environment/natural-v1/${key}-appearance/4/8/5.png`).ensureAlpha().raw().toBuffer();
+    for(let i=3;i<source.length;i+=4) assert.equal(display[i],source[i]);
   }
   // Property maps must preserve RGB as linear data, with physically valid roughness.
   for (const key of Object.keys(RESOLVE_ENVIRONMENTS)) {

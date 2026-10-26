@@ -20,6 +20,7 @@ export class EnvironmentRenderer {
   private reference?: EnvironmentState;
   private ground?: GroundMaterialLayer;
   private pbrEnabled = true;
+  private materialAssetsUnavailable = false;
   private hidden = new Set<EnvironmentClass>();
   private resolveSurfaceVisible = true;
   constructor(private map: MapLibreMap, private before: string, private provider: NaturalSurfaceProvider = resolveSurfaceProvider, private usePbr = false) {}
@@ -32,20 +33,26 @@ export class EnvironmentRenderer {
 
   /** Missing optional material assets must keep the working reference renderer. */
   handleSourceError(sourceId: string): boolean {
-    if (this.provider.mode !== 'natural' || !this.active?.layers.some(layer => layer.id === sourceId && layer.classification !== 'water')) return false;
-    this.setSurfaceMode('resolve');
+    if (!this.active?.layers.some(layer => layer.surface && layer.id === sourceId && layer.classification !== 'water')) return false;
+    this.materialAssetsUnavailable = true;
+    this.provider = resolveSurfaceProvider;
+    if (this.reference) this.setState(this.reference);
     return true;
   }
 
   setSurfaceMode(mode: SurfaceMode): void {
     if (mode === this.provider.mode) return;
     this.provider = mode === 'natural' ? naturalSurfaceProvider : resolveSurfaceProvider;
+    this.materialAssetsUnavailable = false;
     if (this.reference) this.setState(this.reference);
   }
 
   setState(reference: EnvironmentState): void {
     this.reference = reference;
-    const state = this.provider.adapt(reference);
+    // In the live PBR renderer both debug modes share one material surface.
+    // RESOLVE remains ecological input, not a second palette that flashes on load.
+    const adapter = this.usePbr && !this.materialAssetsUnavailable ? naturalSurfaceProvider : this.provider;
+    const state = adapter.adapt(reference);
     // Timeline playback must not re-upload identical textures.
     if (state.id === this.active?.id) return;
     if (this.ground && this.map.getLayer(PBR_LAYER_ID)) this.map.removeLayer(PBR_LAYER_ID);
@@ -60,18 +67,18 @@ export class EnvironmentRenderer {
       const geo = layer.geography;
       if (geo.kind !== "raster") continue; // Future vector adapter uses the same record.
       this.map.addSource(layer.id, {
-        type: "raster", tiles: [geo.tileTemplate], tileSize: geo.tileSize,
+        type: "raster", tiles: [this.usePbr ? layer.surface?.fallbackTileTemplate ?? geo.tileTemplate : geo.tileTemplate], tileSize: geo.tileSize,
         minzoom: geo.minzoom, maxzoom: geo.maxzoom,
         attribution: escapeText(`${layer.provenance.dataset} · ${layer.provenance.licence} · ${layer.provenance.temporalBasis}`),
       });
       this.map.addLayer({
         id: layer.id, type: "raster", source: layer.id,
-        paint: { "raster-opacity": this.provider.mode === "natural" && layer.classification !== "water" ? 1 : styles[layer.style].opacity, "raster-fade-duration": 200, "raster-resampling": "linear" },
+        paint: { "raster-opacity": !!layer.surface && layer.classification !== "water" ? 1 : styles[layer.style].opacity, "raster-fade-duration": 200, "raster-resampling": "linear" },
         layout: { visibility: this.isVisible(layer.classification) ? "visible" : "none" },
       }, this.before);
     }
     this.active = state;
-    if (this.usePbr && this.provider.mode === 'natural') {
+    if (this.usePbr && state.layers.some(layer => layer.surface)) {
       const inputs = state.layers.flatMap(layer => {
         if (!layer.surface || layer.geography.kind !== 'raster') return [];
         return [{ ...layer.surface, classification: layer.classification, template: layer.geography.tileTemplate, maxzoom: layer.geography.maxzoom }];

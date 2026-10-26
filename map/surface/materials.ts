@@ -13,6 +13,8 @@ export const GROUND_MATERIALS = {
 } as const;
 /** Distant potential canopy tint; coverage comes from the shared environment. */
 export const NATURAL_CANOPY_ALBEDO = [48, 76, 43] as const;
+/** Shared by cached PBR shading and its native raster appearance. */
+export const GROUND_LIGHTING = { sunDirection: [-.45,.82,-.35], irradiance: 1.9, ambient: .40, sky: .16 } as const;
 export type GroundMaterial = keyof typeof GROUND_MATERIALS;
 export type MaterialWeights = Record<GroundMaterial, number>;
 

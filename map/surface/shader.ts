@@ -1,3 +1,5 @@
+import { GROUND_LIGHTING } from './materials';
+
 export const groundVertexShader = `#version 300 es
 precision highp float;
 precision highp int;
@@ -77,7 +79,7 @@ void main() {
   }
   N=vec3(dot(worldNormal,east),dot(worldNormal,up),dot(worldNormal,south));
   vec3 V=normalize(u_view);
-  vec3 L=normalize(vec3(-.45,.82,-.35));
+  vec3 L=normalize(vec3(${GROUND_LIGHTING.sunDirection.map(v => v.toFixed(8)).join(',')}));
   vec3 H=normalize(V+L);
   float nl=max(dot(N,L),0.0), nv=max(dot(N,V),.05), nh=max(dot(N,H),0.0), vh=max(dot(V,H),0.0);
   float roughness=clamp(properties.b+variation*.06,.08,1.0);
@@ -87,14 +89,14 @@ void main() {
   float geometry=(nv/(nv*(1.0-k)+k))*(nl/(nl*(1.0-k)+k));
   vec3 F=vec3(.04)+vec3(.96)*pow(1.0-vh,5.0);
   vec3 albedo=toLinear(texel.rgb)*(1.0+variation);
-  // Aggregate potential canopy only while individual crowns are subpixel.
-  // Local ground stays visible; no individual plants or exact forest boundaries.
+  // Keep aggregate cover until visible vegetation geometry can replace it.
+  // Zoom alone must not clear forests; ground materials remain independent.
   float slope=atan(length(en)/max(.001,sqrt(max(0.0,1.0-dot(en,en)))));
-  float canopy=u_canopy*smoothstep(2.0,20.0,u_pixelMetres)*(1.0-clamp((slope-.22)/.65,0.0,1.0));
+  float canopy=u_canopy*(1.0-clamp((slope-.22)/.65,0.0,1.0));
   albedo=mix(albedo,toLinear(u_canopyColor),canopy);
   vec3 specular=d*geometry*F/max(4.0*nv*nl,.001);
-  vec3 direct=((vec3(1)-F)*albedo/PI+specular)*nl*1.9;
-  vec3 ambient=albedo*(.40+.16*max(N.y,0.0));
+  vec3 direct=((vec3(1)-F)*albedo/PI+specular)*nl*${GROUND_LIGHTING.irradiance};
+  vec3 ambient=albedo*(${GROUND_LIGHTING.ambient}+${GROUND_LIGHTING.sky}*max(N.y,0.0));
   vec3 color=mix(albedo,ambient+direct,u_lighting);
   fragColor=vec4(clamp(toSrgb(color),0.0,1.0)*texel.a,texel.a);
 }`;

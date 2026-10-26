@@ -26,6 +26,8 @@ export interface EnvironmentalRecord {
   /** Optional dataset-independent material inputs supplied by the surface adapter. */
   surface?: {
     propertyTileTemplate: string;
+    /** Visible native drape while optional PBR inputs load or are unavailable. */
+    fallbackTileTemplate?: string;
     manifestUrl: string;
     normalStrength: number;
     canopy: number;
