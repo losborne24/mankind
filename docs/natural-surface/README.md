@@ -122,9 +122,7 @@ The isolated synthetic browser fixture in `gpu-fixture.js` compiles the actual
 live shaders into a temporary offscreen WebGL2 context. Paste it into the local
 development preview's DevTools Console. Roughness, terrain normal and detail
 must each change pixels; WebGL error must be zero. This fixture is test input,
-not invented scientific raster data. A Chrome run produced flat RGB 132,
-smooth RGB 255 and tilted RGB 111, with all three comparisons passing and
-`glError: 0`.
+not invented scientific raster data. A Chrome run passed all three comparisons with `glError: 0`.
 
 A warm-cache globe camera-motion smoke test at 1970×1786 recorded 254 render
 intervals: median 8.3 ms, p95 9.9 ms. The run loaded 38 material pairs, with zero

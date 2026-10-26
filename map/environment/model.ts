@@ -26,6 +26,7 @@ export interface EnvironmentalRecord {
   /** Optional dataset-independent material inputs supplied by the surface adapter. */
   surface?: {
     propertyTileTemplate: string;
+    manifestUrl: string;
     normalStrength: number;
     canopy: number;
   };

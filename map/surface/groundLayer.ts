@@ -3,7 +3,7 @@ import type { EnvironmentClass } from '../environment/model';
 import { NATURAL_CANOPY_ALBEDO } from './materials';
 import { groundVertexShader, groundFragmentShader } from './shader';
 
-interface MaterialInput { classification: EnvironmentClass; template: string; propertyTileTemplate: string; maxzoom?: number; canopy?: number; normalStrength: number }
+interface MaterialInput { classification: EnvironmentClass; template: string; propertyTileTemplate: string; manifestUrl: string; maxzoom?: number; canopy?: number; normalStrength: number }
 interface TexturePair { albedo?: WebGLTexture; properties?: WebGLTexture; abort: AbortController; failed?: boolean }
 export const PBR_LAYER_ID = 'natural-ground-pbr';
 
@@ -90,9 +90,8 @@ export class GroundMaterialLayer implements CustomLayerInterface {
       map.on('moveend', this.updateCamera); map.on('styledata', this.updateCamera);
       map.on('webglcontextlost', this.contextLost); map.on('webglcontextrestored', this.contextRestored);
       const metadataAbort = this.metadataAbort = new AbortController();
-      const input = this.inputs[0];
-      const url = input?.template.split(`/${input.classification}/`)[0];
-      if (url) void fetch(`${url}/manifest.json`, {signal:metadataAbort.signal}).then(async response => {
+      const url = this.inputs[0]?.manifestUrl;
+      if (url) void fetch(url, {signal:metadataAbort.signal}).then(async response => {
         if (!response.ok) throw Error('PBR manifest unavailable');
         const manifest = await response.json();
         if (manifest.propertiesVersion !== 1 || !Array.isArray(manifest.emptyTiles)) throw Error('PBR properties require surface:prepare');
