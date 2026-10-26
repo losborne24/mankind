@@ -64,7 +64,7 @@ function createGraticule(): FeatureCollection<LineString> {
 const palette = {
   ocean: "#0a1622",
   land: "#223240",
-  coastline: "#314655",
+  coastline: "#587083",
   inlandWater: "#0e1e2b",
   river: "#122330",
   graticule: "#7e95a8",
@@ -136,10 +136,11 @@ export function createGlobeStyle(): StyleSpecification {
         id: "coastline",
         type: "line",
         source: "physical-land",
+        layout: { "line-join": "round", "line-cap": "round" },
         paint: {
           "line-color": palette.coastline,
-          "line-width": ["interpolate", ["linear"], ["zoom"], 0, 0.35, 6, 0.7],
-          "line-opacity": 0.4,
+          "line-width": ["interpolate", ["linear"], ["zoom"], 0, 0.8, 2, 1.1, 6, 1.4],
+          "line-opacity": 0.8,
         },
       },
       {
