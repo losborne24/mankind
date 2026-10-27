@@ -25,7 +25,9 @@ maplibregl.setWorkerUrl(
 import {
   createGlobeStyle, viewToCamera,
   TERRAIN_SOURCE,
+  TEST_MARKER_LNGLAT,
 } from "@/map/mapStyle";
+import { ThreeTestLayer } from "@/map/threeTestLayer";
 import { DebugPanel } from "@/components/DebugPanel";
 import { MapReadout } from "@/components/MapReadout";
 import { queryTerrainHeights } from "@/map/terrain";
@@ -72,6 +74,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
 
     map.on("load", () => {
       if (disposed) return;
+      map.addLayer(new ThreeTestLayer({ lngLat: TEST_MARKER_LNGLAT }));
       setDebugMap(map);
       ready = true;
       onStatusRef.current("ready");
