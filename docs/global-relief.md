@@ -81,8 +81,9 @@ classification shapes remain. Mapterhorn returns 404s for some ocean DEM
 tiles; the ocean masks keep those areas dark. No claim of complete worldwide
 DEM availability is made.
 
-Contact sheet and per-zoom review PNGs are kept locally in ignored
-`.biome-data/review/global-relief/`, outside Git and the production build.
+The final contact sheet (`final.png`) and per-zoom PNGs (`final-z*.png`) are
+kept locally in ignored `.biome-data/review/global-relief/`, outside Git and
+the production build. Earlier trial captures are retained separately.
 For repeatable full-resolution captures, paste `scripts/biomes/capture.js`
 into the local app's DevTools and call `captureTerrain(name, camera)` with the
 coordinates and zoom levels above. It records the actual hillshade expression,
