@@ -306,3 +306,5 @@ was changed.
 ## Natural biomes regional prototype
 
 The real OpenLandMap PNV preprocessing pipeline, local tile server, source/licence verification, validation results and proposed R2 deployment are documented in [docs/biomes.md](docs/biomes.md). Generated rasters and tiles are ignored and remain outside the Next.js build.
+
+The [Step 3B terrain refinement report](docs/terrain-refinement.md) documents the current `pnv-v4` palette/materials, matched before-and-after captures, validation and rollback.

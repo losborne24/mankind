@@ -18,9 +18,11 @@ export function attachDiagnosticHillshade(map: Map, intensity = 0.25): () => voi
     layout: { visibility: "none" },
     paint: {
       "hillshade-exaggeration": intensity,
-      "hillshade-shadow-color": "#0a1622",
-      "hillshade-highlight-color": "#587083",
-      "hillshade-accent-color": "#122330",
+      "hillshade-illumination-direction": 315,
+      "hillshade-illumination-anchor": "map",
+      "hillshade-shadow-color": "rgba(46, 49, 43, 0.65)",
+      "hillshade-highlight-color": "rgba(239, 229, 207, 0.55)",
+      "hillshade-accent-color": "rgba(71, 65, 53, 0.45)",
     },
   }, "regional-ocean");
 

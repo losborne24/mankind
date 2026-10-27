@@ -2,7 +2,6 @@
 Build max zoom first, then alpha-weighted RGB parent pyramid. No ID averaging.
 """
 import argparse
-import csv
 import hashlib
 import json
 import math
@@ -14,9 +13,10 @@ from PIL import Image
 import rasterio as rio
 from rasterio.features import rasterize, bounds as geometry_bounds
 from rasterio.transform import from_bounds
-from rasterio.warp import reproject, transform_bounds, transform_geom, Resampling
+from rasterio.warp import reproject, transform_geom, Resampling
 from rasterio.windows import from_bounds as window_bounds, Window
 from scipy.ndimage import gaussian_filter, distance_transform_edt
+from materials import surface
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / '.biome-data/source'
@@ -37,14 +37,14 @@ def tile_xy(lon,lat,z):
     return (min(n-1,max(0,int((lon+180)/360*n))),
             min(n-1,max(0,int((1-math.asinh(math.tan(math.radians(lat)))/math.pi)/2*n))))
 
-def dem_mosaic():
-    paths=list(SOURCE.glob('dem-5-*.webp'))
+def dem_mosaic(zoom=6):
+    paths=list(SOURCE.glob(f'dem-{zoom}-*.webp'))
     if not paths: raise RuntimeError('Run fetch.py for regional Mapterhorn cache, or supply --dem EPSG:3857 GeoTIFF')
     indices=[tuple(map(int,p.stem.split('-')[2:])) for p in paths]
     x0,y0=min(x for x,y in indices),min(y for x,y in indices)
     x1,y1=max(x for x,y in indices),max(y for x,y in indices)
-    output=SOURCE/'dem.tif'
-    b0=tile_bounds(5,x0,y1); b1=tile_bounds(5,x1,y0)
+    output=SOURCE/f'dem-z{zoom}.tif'
+    b0=tile_bounds(zoom,x0,y1); b1=tile_bounds(zoom,x1,y0)
     shape=((y1-y0+1)*512,(x1-x0+1)*512)
     with rio.open(output,'w',driver='GTiff',width=shape[1],height=shape[0],count=1,dtype='float32',crs='EPSG:3857',transform=from_bounds(b0[0],b0[1],b1[2],b1[3],shape[1],shape[0]),nodata=-9999,compress='deflate',tiled=True) as dst:
         dst.write(np.full(shape,-9999,dtype='float32'),1)
@@ -75,7 +75,26 @@ def fill_render_source(source, coverage):
             dst.write(ids[64:-64,64:-64],1,window=core)
     return path
 
-def render(source,dem,geometries,z,x,y,palette,coverage,variation,core_size=SIZE):
+def projected_shapes(path):
+    geometries=[]
+    for f in json.loads(Path(path).read_text())['features']:
+        g=f['geometry']
+        for coords in g['coordinates'] if g['type']=='MultiPolygon' else [g['coordinates']]:
+            projected=transform_geom('EPSG:4326','EPSG:3857',{'type':'Polygon','coordinates':coords})
+            geometries.append((projected,geometry_bounds(projected)))
+    return geometries
+
+def coverage_mask(geometries,padded,n):
+    candidates=[g for g,gb in geometries if gb[0]<padded[2] and gb[2]>padded[0] and gb[1]<padded[3] and gb[3]>padded[1]]
+    if not candidates: return np.zeros((n,n),dtype='float32')
+    mask=rasterize(((g,255) for g in candidates),out_shape=(n*2,n*2),transform=from_bounds(*padded,n*2,n*2),fill=0,dtype='uint8')
+    return np.asarray(Image.fromarray(mask).resize((n,n),Image.Resampling.BOX)).astype('float32')
+
+def render(source,dem,geometries,z,x,y,palette,coverage,variation,core_size=SIZE,settings=None,materials_palette=None,ice_geometries=()):
+    settings=settings or json.loads(Path(__file__).with_name('surface.json').read_text())
+    if materials_palette is None:
+        colors=json.loads(Path(__file__).with_name('palette.json').read_text())
+        materials_palette={k:tuple(bytes.fromhex(colors[k][1:])) for k in ['rock','soil','ice']}
     b=tile_bounds(z,x,y); pixel=(b[2]-b[0])/SIZE
     b=(b[0],b[3]-core_size*pixel,b[0]+core_size*pixel,b[3])
     padded=(b[0]-PAD*pixel,b[1]-PAD*pixel,b[2]+PAD*pixel,b[3]+PAD*pixel)
@@ -90,29 +109,38 @@ def render(source,dem,geometries,z,x,y,palette,coverage,variation,core_size=SIZE
     # Fill ocean/nodata only in render buffer, before RGB smoothing. Never alter IDs.
     nearest=distance_transform_edt(~valid,return_distances=False,return_indices=True)
     filled=ids[tuple(nearest)]
-    rgb=np.zeros((n,n,3),dtype='float32')
-    for k,color in palette.items(): rgb[filled==k]=color
-    sigma=1.5  # ~1.8 km Mercator at z7; padding exceeds 4-sigma support
-    rgb=gaussian_filter(rgb,(sigma,sigma,0),mode='nearest',truncate=4)
+    # Supersample categorical coverage before mapping colours. Subpixel cells
+    # contribute RGB area, never averaged numeric IDs. This avoids stair steps
+    # when a narrower blend is overzoomed, without another runtime tile level.
+    fine_ids=np.full((n*2,n*2),255,dtype='uint8')
+    reproject(rio.band(source,1),fine_ids,src_nodata=255,dst_nodata=255,
+              dst_transform=from_bounds(*padded,n*2,n*2),dst_crs='EPSG:3857',resampling=Resampling.nearest)
+    fine_valid=(fine_ids!=255)&(fine_ids!=0)
+    if fine_valid.any():
+        nearest=distance_transform_edt(~fine_valid,return_distances=False,return_indices=True)
+        fine_ids=fine_ids[tuple(nearest)]
+    unknown=set(np.unique(fine_ids))-set(palette)
+    if unknown: raise ValueError(f'Unmapped supersampled classes {unknown}')
+    rgb=np.zeros((n*2,n*2,3),dtype='float32')
+    for k,color in palette.items(): rgb[fine_ids==k]=color
+    # Fixed world distance, not an increasing blur footprint at lower tile zooms.
+    sigma=settings['blend_metres_mercator']/pixel
+    if math.ceil(sigma*4)>PAD: raise ValueError('Blend support exceeds tile padding')
+    rgb=gaussian_filter(rgb,(sigma*2,sigma*2,0),mode='nearest',truncate=4)
+    rgb=rgb.reshape(n,2,n,2,3).mean(axis=(1,3))
     gx=x*SIZE+np.arange(-PAD,core_size+PAD)+.5
     gy=y*SIZE+np.arange(-PAD,core_size+PAD)+.5
     lon=np.broadcast_to(gx[None,:]/(SIZE*2**z)*360-180,(n,n))
     lat=np.broadcast_to(np.degrees(np.arctan(np.sinh(math.pi*(1-2*gy[:,None]/(SIZE*2**z))))),(n,n))
-    wave=(np.sin(np.radians(lon)*113)*np.cos(np.radians(lat)*97)+.5*np.sin(np.radians(lon)*347+np.sin(np.radians(lat)*181)))/1.5
-    rgb*=1+variation*wave[:,:,None]
     h=np.full((n,n),-9999,dtype='float32')
     reproject(rio.band(dem,1),h,dst_transform=transform,dst_crs='EPSG:3857',src_nodata=-9999,dst_nodata=-9999,resampling=Resampling.bilinear)
-    dy,dx=np.gradient(np.where(h==-9999,0,h),pixel)
-    slope=np.hypot(dx,dy)/np.maximum(.1,np.cos(np.radians(lat)))
-    rock=np.clip((h-1100)/2300,0,.45)*np.clip(slope/.22,0,1)
-    rock[h==-9999]=0
-    rock_color=np.array(tuple(bytes.fromhex(json.loads(Path(__file__).with_name('palette.json').read_text())['rock'][1:])))
-    rgb=rgb*(1-rock[:,:,None])+rock_color*rock[:,:,None]
-    # No altitude snow rule: the PNV product has no snow/ice class.
-    candidates=[g for g,gb in geometries if gb[0]<padded[2] and gb[2]>padded[0] and gb[1]<padded[3] and gb[3]>padded[1]]
+    rgb=surface(rgb,filled,h,pixel,lon,lat,materials_palette,settings,variation)
+    # Mapped glaciated areas, including recently deglaciated land: a restrained
+    # cartographic ice cue, never a universal altitude-based snow threshold.
+    ice=coverage_mask(ice_geometries,padded,n)/255*settings['ice_strength']
+    rgb=rgb*(1-ice[:,:,None])+np.array(materials_palette['ice'])*ice[:,:,None]
     # 2x coverage antialiasing; alpha never blurred into sea.
-    mask=rasterize(((g,255) for g in candidates),out_shape=(n*2,n*2),transform=from_bounds(*padded,n*2,n*2),fill=0,dtype='uint8') if candidates else np.zeros((n*2,n*2),dtype='uint8')
-    alpha=np.asarray(Image.fromarray(mask).resize((n,n),Image.Resampling.BOX)).astype('float32')
+    alpha=coverage_mask(geometries,padded,n)
     west,south,east,north=coverage
     fade=np.clip(np.minimum.reduce([lon-west,east-lon,lat-south,north-lat]),0,1)
     alpha*=fade
@@ -129,9 +157,9 @@ def main():
     p=argparse.ArgumentParser()
     p.add_argument('--bounds',nargs=4,type=float,default=[-18,17,41,56],metavar=('W','S','E','N'))
     p.add_argument('--maxzoom',type=int,default=7)
-    p.add_argument('--output',type=Path,default=ROOT/'.biome-data/tiles/pnv-v2')
+    p.add_argument('--output',type=Path,default=ROOT/'.biome-data/tiles/pnv-v4')
     p.add_argument('--dem',type=Path)
-    p.add_argument('--variation',type=float,default=.035)
+    p.add_argument('--variation',type=float,default=None)
     args=p.parse_args()
     w,s,e,n=args.bounds
     if not (-180<=w<e<=180 and -85.051<=s<n<=85.051): p.error('Use non-wrapping Web Mercator bounds')
@@ -143,15 +171,13 @@ def main():
     out.mkdir(parents=True)
     start=time.monotonic()
     colors=json.loads((Path(__file__).with_name('palette.json')).read_text())
+    settings=json.loads(Path(__file__).with_name('surface.json').read_text())
+    variation=args.variation if args.variation is not None else settings['variation_strength']
+    materials_palette={k:tuple(bytes.fromhex(colors[k][1:])) for k in ['rock','soil','ice']}
     palette={int(k):tuple(bytes.fromhex(v[1:])) for k,v in colors.items() if k.isdigit()}
     # Same pinned 10m coastline as app; split global multipolygons for cheap bbox indexing.
-    land=json.loads((SOURCE/'ne_10m_land.geojson').read_text())
-    geometries=[]
-    for f in land['features']:
-        g=f['geometry']
-        for coords in (g['coordinates'] if g['type']=='MultiPolygon' else [g['coordinates']]):
-            projected=transform_geom('EPSG:4326','EPSG:3857',{'type':'Polygon','coordinates':coords})
-            geometries.append((projected,geometry_bounds(projected)))
+    geometries=projected_shapes(SOURCE/'ne_10m_land.geojson')
+    ice_geometries=projected_shapes(SOURCE/'ne_10m_glaciated_areas.geojson')
     with rio.open(SOURCE/'pnv-1km.tif') as original:
         render_path=fill_render_source(original,args.bounds)
     with rio.open(SOURCE/'pnv-1km.tif') as src, rio.open(render_path) as filled_src, rio.open(args.dem or dem_mosaic()) as dem:
@@ -166,7 +192,7 @@ def main():
         tiles=set()
         for x in range(x0,x1+1):
             for y in range(y0,y1+1):
-                im=render(filled_src,dem,geometries,z,x,y,palette,args.bounds,args.variation)
+                im=render(filled_src,dem,geometries,z,x,y,palette,args.bounds,variation,settings=settings,materials_palette=materials_palette,ice_geometries=ice_geometries)
                 path=out/str(z)/str(x)/f'{y}.png'; path.parent.mkdir(parents=True,exist_ok=True)
                 im.save(path,optimize=True); tiles.add((x,y))
             print(f'z{z}: column {x-x0+1}/{x1-x0+1}',flush=True)
@@ -186,9 +212,12 @@ def main():
     for name in ['classes.csv','metadata.json','README-upstream.md']:
         shutil.copy(SOURCE/name,out/name)
     shutil.copy(__file__,out/'build.py')
+    for name in ['materials.py','surface.json','requirements.txt']:
+        shutil.copy(Path(__file__).with_name(name),out/name)
+    shutil.copy(SOURCE/'ne_10m_glaciated_areas.geojson',out/'ne_10m_glaciated_areas.geojson')
     shutil.copy(Path(__file__).with_name('palette.json'),out/'palette.json')
     (out/'NOTICE.txt').write_text(ATTRIBUTION+'\nDerivative categorical data is offered under ODbL 1.0.\n')
-    manifest={'tilejson':'3.0.0','name':'MANKIND OpenLandMap PNV regional prototype','scheme':'xyz','format':'png','tileSize':256,'minzoom':0,'maxzoom':args.maxzoom,'bounds':args.bounds,'tiles':['{z}/{x}/{y}.png'],'attribution':ATTRIBUTION,'tileCount':count,'tileBytes':sum(p.stat().st_size for p in out.glob('*/*/*.png')),'seconds':round(time.monotonic()-start,2),'sourceMD5':hashlib.md5((SOURCE/'pnv-1km.tif').read_bytes()).hexdigest(),'variation':args.variation,'palette':colors}
+    manifest={'tilejson':'3.0.0','name':'MANKIND OpenLandMap PNV regional prototype','scheme':'xyz','format':'png','tileSize':256,'minzoom':0,'maxzoom':args.maxzoom,'bounds':args.bounds,'tiles':['{z}/{x}/{y}.png'],'attribution':ATTRIBUTION,'tileCount':count,'tileBytes':sum(p.stat().st_size for p in out.glob('*/*/*.png')),'seconds':round(time.monotonic()-start,2),'sourceMD5':hashlib.md5((SOURCE/'pnv-1km.tif').read_bytes()).hexdigest(),'variation':variation,'palette':colors,'surface':settings,'demFile':str(args.dem or SOURCE/'dem-z6.tif'),'iceSource':'Natural Earth v5.1.2 glaciated areas (public domain), includes recently deglaciated land'}
     (out/'tilejson.json').write_text(json.dumps(manifest,indent=2))
     print(json.dumps(manifest,indent=2))
 

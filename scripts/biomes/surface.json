@@ -1,0 +1,7 @@
+{
+  "blend_metres_mercator": 1100,
+  "variation_strength": 0.025,
+  "soil_strength": 0.075,
+  "rock_strength": 0.62,
+  "ice_strength": 0.88
+}

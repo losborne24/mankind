@@ -4,7 +4,7 @@ import { createRequire } from 'node:module';
 import ts from 'typescript';
 const compile = async p => ts.transpileModule(await readFile(new URL(p, import.meta.url),'utf8'), {compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2020}}).outputText;
 const moduleURL = s => `data:text/javascript;base64,${Buffer.from(s).toString('base64')}`;
-process.env.NEXT_PUBLIC_BIOME_TILE_BASE_URL='http://localhost:8766/pnv-v2';
+process.env.NEXT_PUBLIC_BIOME_TILE_BASE_URL='http://localhost:8766/pnv-v4';
 const {attachBiomes,BIOME_SOURCE,BIOME_LAYER}=await import(moduleURL(await compile('../map/biomes.ts')));
 const {createGlobeStyle}=await import(moduleURL(await compile('../map/mapStyle.ts')));
 const require=createRequire(import.meta.resolve('maplibre-gl'));
@@ -18,7 +18,7 @@ const map={
  removeLayer:id=>style.layers=style.layers.filter(l=>l.id!==id),removeSource:id=>delete style.sources[id],
  moveLayer:(id,before)=>{const layer=map.getLayer(id);map.removeLayer(id);map.addLayer(layer,before);},
 };
-const metadata=JSON.parse(await readFile(new URL('../.biome-data/tiles/pnv-v2/tilejson.json',import.meta.url)));
+const metadata=JSON.parse(await readFile(new URL('../.biome-data/tiles/pnv-v4/tilejson.json',import.meta.url)));
 const originalFetch=globalThis.fetch;
 globalThis.fetch=async()=>({ok:true,json:async()=>metadata});
 const detach=await attachBiomes(map,new AbortController().signal);

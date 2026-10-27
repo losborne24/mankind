@@ -1,5 +1,7 @@
 # Phase 2, Step 3 — regional PNV prototype
 
+**Current refinement:** Step 3B now uses `pnv-v4`; see [terrain-refinement.md](terrain-refinement.md) for the updated blending/material pipeline, matched screenshots and measurements. This document records the original `pnv-v2` baseline and hosting architecture.
+
 Implemented and locally validated on 27 October 2026. No cloud resources were created and no global colour pyramid was generated.
 
 ## Source, rights and limitations
