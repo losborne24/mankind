@@ -14,14 +14,25 @@ import {
 } from "@/map/hillshade";
 import { attachBiomes, BIOME_BASE_URL } from "@/map/biomes";
 
+import type { RomanTestStatus } from "@/map/threeTestLayer";
+import { ROMAN_TEST_CENTER } from "@/map/romanTestScene";
+
+import type { SettlementStatus } from "@/map/settlements/SettlementScene";
+import { ROMAN_SETTLEMENT, ROMAN_SETTLEMENT_ALTERNATE, type Coordinate } from "@/map/settlements/romanSettlement";
+
 interface DebugPanelProps {
   map: Map | null;
   terrainWarning: boolean;
+  romanStatus: RomanTestStatus;
+  settlementStatus: SettlementStatus;
+  onSettlementEnabled: (enabled: boolean) => void;
+  onVisitSettlement: (origin?: Coordinate) => void;
+  onRomanTestEnabled: (enabled: boolean) => void;
   onRetryTerrain: () => void;
 }
 
 /** Shared debug panel; add future map controls as separate fieldsets here. */
-export function DebugPanel({ map, terrainWarning, onRetryTerrain }: DebugPanelProps) {
+export function DebugPanel({ map, terrainWarning, onRetryTerrain, romanStatus, onRomanTestEnabled, settlementStatus, onSettlementEnabled, onVisitSettlement }: DebugPanelProps) {
   const [exaggeration, setExaggeration] = useState(DEFAULT_TERRAIN_EXAGGERATION);
   const [diagnosticShading, setDiagnosticShading] = useState(true);
   const [hillshadeIntensity, setHillshadeIntensity] = useState(0.25);
@@ -53,7 +64,7 @@ export function DebugPanel({ map, terrainWarning, onRetryTerrain }: DebugPanelPr
   }, [map, globalHillshadeStrength, hillshadeIntensity]);
 
   return (
-    <details open className="absolute top-16 left-4 z-20 w-56 rounded-lg border border-panel-border bg-panel p-3 text-xs text-white/70 backdrop-blur-md sm:left-6">
+    <details open className="absolute top-16 left-4 z-20 max-h-[calc(100%-12rem)] w-56 overflow-y-auto rounded-lg border border-panel-border bg-panel p-3 text-xs text-white/70 backdrop-blur-md sm:left-6">
       <summary className="cursor-pointer tracking-wide">Debug tools</summary>
       <fieldset disabled={!map} className="disabled:opacity-50">
         <legend className="mt-3 text-white/40">Terrain</legend>
@@ -97,6 +108,48 @@ export function DebugPanel({ map, terrainWarning, onRetryTerrain }: DebugPanelPr
             onChange={(event) => setGlobalHillshadeStrength(Number(event.target.value))} />
         </label>
         <p className="mt-1 text-white/40">Global relief blends into regional detail from zoom 4 to 6.</p>
+      </fieldset>
+      <fieldset disabled={!map} className="mt-3 border-t border-panel-border pt-2 disabled:opacity-50">
+        <legend className="text-white/40">Roman integration test</legend>
+        <label className="mt-2 flex items-center gap-2">
+          <input type="checkbox" checked={romanStatus.state !== "disabled"}
+            onChange={(event) => onRomanTestEnabled(event.target.checked)} />
+          Roman models
+        </label>
+        <button className="mt-2 underline" onClick={() => {
+          if (romanStatus.state === "disabled") onRomanTestEnabled(true);
+          map?.flyTo({ center: [...ROMAN_TEST_CENTER], zoom: 19, pitch: 55, bearing: -25 });
+        }}>Visit Roman test</button>
+        <p className="mt-2 text-white/40">Prototype placement near Giza; no historical claim. Metre-scale models appear at close zoom.</p>
+        <p role="status" className="mt-2">{romanStatus.state === "waiting" ? "Visit the test to load models." :
+          romanStatus.state === "disabled" ? "Models unloaded." : `${romanStatus.loaded}/3 models · ${romanStatus.state}`}</p>
+        {romanStatus.errors.length > 0 && <>
+          <p className="mt-2 text-amber-200/80">Models unavailable. Check asset URLs and try again.</p>
+          <ul className="mt-1 break-words text-amber-200/80">{romanStatus.errors.map((error) => <li key={error}>{error}</li>)}</ul>
+          <button className="mt-2 underline" onClick={() => { onRomanTestEnabled(false); onRomanTestEnabled(true); }}>Retry models</button>
+        </>}
+      </fieldset>
+      <fieldset disabled={!map} className="mt-3 border-t border-panel-border pt-2 disabled:opacity-50">
+        <legend className="text-white/40">Roman settlement layout</legend>
+        <label className="mt-2 flex items-center gap-2">
+          <input type="checkbox" checked={settlementStatus.state !== "unloaded"}
+            onChange={(event) => onSettlementEnabled(event.target.checked)} />
+          Settlement scene
+        </label>
+        <button className="mt-2 block underline" onClick={() => onVisitSettlement()}>Visit settlement</button>
+        <button className="mt-2 block underline" onClick={() => onVisitSettlement(
+          settlementStatus.origin[0] === ROMAN_SETTLEMENT.origin[0] ? ROMAN_SETTLEMENT_ALTERNATE : ROMAN_SETTLEMENT.origin,
+        )}>Relocate nearby</button>
+        <p role="status" className="mt-2">{settlementStatus.loaded}/{settlementStatus.total} buildings · {settlementStatus.state}</p>
+        <p className="mt-1 text-white/40">{settlementStatus.origin.map((value) => value.toFixed(4)).join(", ")} · Generic prototype near Rome.</p>
+        {settlementStatus.terrainPending > 0 && <p className="mt-2 text-amber-200/80">Waiting for terrain on {settlementStatus.terrainPending} surfaces. Unknown ground stays hidden.</p>}
+        {settlementStatus.terrainRetained > 0 && <p className="mt-2 text-amber-200/80">Terrain updating; retaining known heights on {settlementStatus.terrainRetained} surfaces.</p>}
+        {settlementStatus.steepSites > 0 && <p className="mt-2 text-amber-200/80">{settlementStatus.steepSites} building sites exceed the foundation height limit and are hidden.</p>}
+        {settlementStatus.errors.length > 0 && <>
+          <ul className="mt-2 break-words text-amber-200/80">{settlementStatus.errors.map((error) => <li key={error}>{error}</li>)}</ul>
+          <button className="mt-2 underline" onClick={() => { onSettlementEnabled(false); onSettlementEnabled(true); }}>Retry settlement</button>
+        </>}
+        <p className="mt-2 text-white/40">Level foundations and terrain-following paths. No historical reconstruction claimed.</p>
       </fieldset>
       {terrainWarning && (
         <p role="status" className="mt-2 text-amber-200/80">

@@ -327,3 +327,24 @@ cd scripts/biomes && ../../.biome-venv/bin/python build.py --global \
 .biome-venv/bin/python scripts/biomes/check.py .biome-data/tiles/pnv-v4-global
 pnpm dev   # also serves the tiles on 127.0.0.1:8766
 ```
+
+
+## Roman GLB integration (Phase 3)
+
+Use **Debug tools → Visit Roman test** to see the villa, temple and two-tier
+aqueduct together near Giza. This is an integration fixture, with no historical
+claim about the location. The Roman models checkbox releases the test assets.
+See [docs/roman-assets.md](docs/roman-assets.md) for registration, placement,
+source/licence records, resource ownership, terrain limits and validation.
+This supersedes the Phase 1 notes above about clearing depth and anchoring the
+beacon at sea level: the shared layer now preserves terrain depth, samples the
+displayed ground and hides the oversized beacon at zoom 12 and above.
+
+### Reusable Roman settlement
+
+**Debug tools → Visit settlement** assembles seven existing Roman models near
+Rome from an origin plus local metre offsets, with a terrain-following road,
+paths and level foundations. **Relocate nearby** reuses the same layout at a
+second origin; the settlement checkbox unloads it. The original Giza asset test
+remains available. See [docs/settlement-layout.md](docs/settlement-layout.md) for
+the definition/assembler API, DEM waiting/retention policy, validation and limits.

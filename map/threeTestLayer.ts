@@ -3,9 +3,8 @@
  *
  * A single MapLibre **custom layer** that draws Three.js geometry into
  * MapLibre's own WebGL2 context — no second canvas, no independent render loop.
- * It anchors one procedural 3D marker to a fixed longitude/latitude and keeps
- * it aligned with the map as the globe rotates, zooms, and (at high zoom)
- * transitions from globe to mercator projection.
+ * It anchors the original beacon and lazily loaded Roman GLBs at geographic
+ * locations, following displayed terrain through globe/mercator projection.
  *
  * ── How the projection is handled ──────────────────────────────────────────
  * MapLibre hands custom layers two matrices each frame:
@@ -32,20 +31,29 @@
  */
 
 import * as THREE from "three";
-import { MercatorCoordinate } from "maplibre-gl";
-import type {
-  CustomLayerInterface,
-  CustomRenderMethodInput,
-  Map as MapLibreMap,
-} from "maplibre-gl";
-import {
-  dot,
-  globeSurfaceFrame,
-  lerpMat4,
-  lngLatToUnitSphere,
-  metersToGlobeUnits,
-  type Vec3,
-} from "@/lib/geo";
+import type { CustomLayerInterface, CustomRenderMethodInput, Map as MapLibreMap, MapSourceDataEvent } from "maplibre-gl";
+import { dot, lerpMat4 } from "@/lib/geo";
+import { geographicAnchor } from "@/map/geographicAnchor";
+import { queryTerrainHeights } from "@/map/terrain";
+import { assetRegistry, assetUrl } from "@/lib/assets/registry";
+import { glbCache, type ModelLease } from "@/lib/assets/glbCache";
+import { prepareAsset, ROMAN_TEST_CENTER, ROMAN_TEST_PLACEMENTS, type AssetPlacement } from "@/map/romanTestScene";
+
+import { SettlementScene, type SettlementStatus } from "@/map/settlements/SettlementScene";
+import { ROMAN_SETTLEMENT, type Coordinate } from "@/map/settlements/romanSettlement";
+
+type AnchoredScene = {
+  scene: THREE.Scene;
+  lngLat: readonly [number, number];
+  altitude: number;
+  anchor: ReturnType<typeof geographicAnchor>;
+  lease?: ModelLease;
+};
+export interface RomanTestStatus {
+  state: "disabled" | "waiting" | "loading" | "ready" | "error";
+  loaded: number;
+  errors: string[];
+}
 
 /**
  * Marker dimensions, in metres. These are **deliberately exaggerated** (a
@@ -63,6 +71,8 @@ export interface ThreeTestLayerOptions {
   id?: string;
   /** [longitude, latitude] in degrees to anchor the marker. */
   lngLat: readonly [number, number];
+  onRomanStatus?: (status: RomanTestStatus) => void;
+  onSettlementStatus?: (status: SettlementStatus) => void;
 }
 
 export class ThreeTestLayer implements CustomLayerInterface {
@@ -80,11 +90,29 @@ export class ThreeTestLayer implements CustomLayerInterface {
   /** Disposables tracked for leak-free teardown. */
   private readonly disposables: Array<{ dispose(): void }> = [];
 
-  /** Constant model matrices (depend only on the anchor, not the camera). */
-  private readonly modelGlobe = new THREE.Matrix4();
-  private readonly modelMercator = new THREE.Matrix4();
-  /** Unit-sphere position of the anchor, for horizon culling. */
-  private anchorSphere: Vec3 = [0, 0, 0];
+  private settlement: SettlementScene | null = null;
+  private settlementAnchor: AnchoredScene | null = null;
+  private settlementEnabled = false;
+  private readonly onSettlementStatus?: (status: SettlementStatus) => void;
+  private readonly onSettlementMove = () => {
+    this.settlement?.invalidateTerrain();
+    this.map?.triggerRepaint();
+  };
+  private readonly onSettlementTerrain = () => {
+    // Exaggeration/source changes invalidate heights in the old displayed frame.
+    this.settlement?.invalidateTerrain(true);
+    this.map?.triggerRepaint();
+  };
+  private readonly onSettlementSource = (event: MapSourceDataEvent) => {
+    if (event.sourceId === this.map?.getTerrain()?.source) this.onSettlementMove();
+  };
+  private beacon: AnchoredScene | null = null;
+  private romans: AnchoredScene[] = [];
+  private romanEnabled = true;
+  private romanRequested = false;
+  private generation = 0;
+  private readonly onRomanStatus?: (status: RomanTestStatus) => void;
+  private romanStatus: RomanTestStatus = { state: "waiting", loaded: 0, errors: [] };
 
   /** Scratch objects reused every frame to avoid per-frame allocation. */
   private readonly scratchA = new THREE.Matrix4();
@@ -94,6 +122,8 @@ export class ThreeTestLayer implements CustomLayerInterface {
   constructor(options: ThreeTestLayerOptions) {
     this.id = options.id ?? "three-test-marker";
     this.lngLat = options.lngLat;
+    this.onRomanStatus = options.onRomanStatus;
+    this.onSettlementStatus = options.onSettlementStatus;
   }
 
   onAdd(map: MapLibreMap, gl: WebGL2RenderingContext): void {
@@ -114,10 +144,27 @@ export class ThreeTestLayer implements CustomLayerInterface {
     this.buildLights(this.scene);
     this.buildMarker(this.scene);
 
-    this.computeModelMatrices();
+    this.beacon = { scene: this.scene, lngLat: this.lngLat, altitude: NaN, anchor: geographicAnchor(this.lngLat, 0) };
+    this.onRomanStatus?.(this.romanStatus);
+    this.settlement = new SettlementScene(ROMAN_SETTLEMENT,
+      (status) => this.onSettlementStatus?.(status), () => this.map?.triggerRepaint());
+    this.buildLights(this.settlement.scene);
+    this.updateSettlementAnchor();
+    map.on("moveend", this.onSettlementMove);
+    map.on("terrain", this.onSettlementTerrain);
+    map.on("sourcedata", this.onSettlementSource);
   }
 
   onRemove(): void {
+    this.map?.off("moveend", this.onSettlementMove);
+    this.map?.off("terrain", this.onSettlementTerrain);
+    this.map?.off("sourcedata", this.onSettlementSource);
+    this.settlement?.unload();
+    this.settlement = null;
+    this.settlementAnchor = null;
+    this.settlementEnabled = false;
+    this.clearRomans();
+    this.beacon = null;
     // Dispose every geometry/material/texture we created, then the renderer.
     for (const d of this.disposables) d.dispose();
     this.disposables.length = 0;
@@ -134,41 +181,119 @@ export class ThreeTestLayer implements CustomLayerInterface {
     const { renderer, scene, camera, map } = this;
     if (!renderer || !scene || !camera || !map) return;
 
-    const isGlobe = map.getProjection().type === "globe";
+    // Start requests only when settlement-scale detail is useful and Giza is nearby.
+    const center = map.getCenter();
+    if (this.romanEnabled && !this.romanRequested && map.getZoom() >= 12 &&
+        Math.abs(center.lng - ROMAN_TEST_CENTER[0]) < 0.15 && Math.abs(center.lat - ROMAN_TEST_CENTER[1]) < 0.15) {
+      this.loadRomans();
+    }
+    renderer.resetState();
+    // Keep MapLibre's terrain depth. Clearing it here makes hills unable to occlude models.
+    if (this.beacon && map.getZoom() < 12) this.drawAnchored(this.beacon, args);
+    if (this.romanEnabled && map.getZoom() >= 12) {
+      for (const entry of this.romans) this.drawAnchored(entry, args);
+    }
+    if (this.settlementEnabled && this.settlement && this.settlementAnchor && map.getZoom() >= 12) {
+      this.settlement.updateTerrain((coordinate) =>
+        queryTerrainHeights(map, { lng: coordinate[0], lat: coordinate[1] })?.displayMeters ?? null);
+      this.drawAnchored(this.settlementAnchor, args, false);
+    }
+    // Static scene: only map movement, terrain updates and completed loads cause frames.
+  }
+
+  setRomanTestEnabled(enabled: boolean): void {
+    this.romanEnabled = enabled;
+    if (!enabled) this.clearRomans();
+    this.romanStatus = { state: enabled ? "waiting" : "disabled", loaded: 0, errors: [] };
+    this.onRomanStatus?.(this.romanStatus);
+    this.map?.triggerRepaint();
+  }
+
+  setSettlementEnabled(enabled: boolean): void {
+    this.settlementEnabled = enabled;
+    if (enabled) void this.settlement?.load();
+    else this.settlement?.unload();
+  }
+
+  visitSettlement(origin?: Coordinate): void {
+    if (!this.settlement || !this.map) return;
+    if (origin) {
+      this.settlement.relocate(origin);
+      this.updateSettlementAnchor();
+    }
+    this.setSettlementEnabled(true);
+    this.map.flyTo({ center: [...this.settlement.origin], zoom: 18.7, pitch: 55, bearing: -25 });
+  }
+
+  private updateSettlementAnchor(): void {
+    if (!this.settlement) return;
+    const lngLat = this.settlement.origin;
+    // Surface vertices already contain displayed altitude in local metres.
+    this.settlementAnchor = { scene: this.settlement.scene, lngLat, altitude: 0,
+      anchor: geographicAnchor(lngLat, 0) };
+  }
+
+  private clearRomans(): void {
+    this.generation++;
+    for (const entry of this.romans) entry.lease?.release();
+    this.romans = [];
+    this.romanRequested = false;
+  }
+
+  private loadRomans(): void {
+    this.romanRequested = true;
+    const generation = this.generation;
+    this.romanStatus = { state: "loading", loaded: 0, errors: [] };
+    this.onRomanStatus?.(this.romanStatus);
+    for (const placement of ROMAN_TEST_PLACEMENTS) void this.loadPlacement(placement, generation);
+  }
+
+  private async loadPlacement(placement: AssetPlacement, generation: number): Promise<void> {
+    let lease: ModelLease | undefined;
+    try {
+      const asset = assetRegistry[placement.assetId];
+      lease = await glbCache.acquire(assetUrl(asset.path));
+      if (generation !== this.generation || !this.map) { lease.release(); return; }
+      const scene = new THREE.Scene();
+      this.buildLights(scene);
+      scene.add(prepareAsset(lease.scene, asset, placement.rotationRadians));
+      this.romans.push({ scene, lngLat: placement.lngLat, altitude: NaN,
+        anchor: geographicAnchor(placement.lngLat, 0), lease });
+      this.romanStatus.loaded++;
+    } catch (error) {
+      lease?.release();
+      if (generation !== this.generation || !this.map) return;
+      this.romanStatus.errors.push(`${placement.assetId}: ${error instanceof Error ? error.message : String(error)}`);
+    }
+    const { loaded, errors } = this.romanStatus;
+    this.romanStatus.state = loaded + errors.length < ROMAN_TEST_PLACEMENTS.length ? "loading" : errors.length ? "error" : "ready";
+    this.onRomanStatus?.({ ...this.romanStatus, errors: [...errors] });
+    this.map?.triggerRepaint();
+  }
+
+  private drawAnchored(entry: AnchoredScene, args: CustomRenderMethodInput, followTerrain = true): void {
+    const { map, renderer, camera } = this;
+    if (!map || !renderer || !camera) return;
+    // Query every map frame: DEM arrival, mesh resolution and exaggeration can all change.
+    // Zero may mean no DEM yet; there is no reliable loaded-at-location flag in the public API.
+    const altitude = followTerrain ? queryTerrainHeights(map, { lng: entry.lngLat[0], lat: entry.lngLat[1] })?.displayMeters ?? 0 : entry.altitude;
+    if (altitude !== entry.altitude) {
+      entry.altitude = altitude;
+      entry.anchor = geographicAnchor(entry.lngLat, altitude);
+    }
     const data = args.defaultProjectionData;
-
-    if (isGlobe) {
-      // Cull when the anchor is beyond the globe's horizon (on the far side).
-      // Derived from MapLibre's globe clipping: a surface point is hidden when
-      // dot(point, clippingPlane.xyz) + clippingPlane.w < 0.
+    if (map.getProjection().type === "globe") {
       const p = data.clippingPlane;
-      const side = dot(this.anchorSphere, [p[0], p[1], p[2]]) + p[3];
-      if (side < 0) return;
-
-      const a = this.scratchA.fromArray(data.mainMatrix).multiply(this.modelGlobe);
-      const b = this.scratchB
-        .fromArray(data.fallbackMatrix)
-        .multiply(this.modelMercator);
+      if (dot(entry.anchor.sphere, [p[0], p[1], p[2]]) + p[3] < 0) return;
+      const a = this.scratchA.fromArray(data.mainMatrix).multiply(entry.anchor.globe);
+      const b = this.scratchB.fromArray(data.fallbackMatrix).multiply(entry.anchor.mercator);
       lerpMat4(this.scratchArray, b.elements, a.elements, data.projectionTransition);
       camera.projectionMatrix.fromArray(this.scratchArray);
     } else {
-      // Pure mercator projection: mainMatrix maps mercator [0..1] → clip.
-      camera.projectionMatrix
-        .fromArray(this.scratchA.fromArray(data.mainMatrix).elements)
-        .multiply(this.modelMercator);
+      camera.projectionMatrix.fromArray(data.mainMatrix).multiply(entry.anchor.mercator);
     }
     camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
-
-    // Hand GL state back and forth cleanly: reset Three's cached state (MapLibre
-    // mutated it), clear only the depth buffer so the marker self-occludes
-    // correctly while still drawing over the map, then render once.
-    renderer.resetState();
-    renderer.clearDepth();
-    renderer.render(scene, camera);
-
-    // No triggerRepaint(): the marker is static, so we rely on MapLibre to
-    // re-invoke render() on map movement. This avoids a perpetual render loop.
-    // Ambient animation in a later phase would call map.triggerRepaint() here.
+    renderer.render(entry.scene, camera);
   }
 
   // ── construction helpers ───────────────────────────────────────────────
@@ -182,7 +307,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
 
   /**
    * A procedural beacon authored in metres with **+Y up** and its base at
-   * `y = 0`, matching the local frame produced by {@link computeModelMatrices}.
+   * `y = 0`, matching the local frame produced by {@link geographicAnchor}.
    */
   private buildMarker(scene: THREE.Scene): void {
     const group = new THREE.Group();
@@ -219,43 +344,4 @@ export class ThreeTestLayer implements CustomLayerInterface {
     this.disposables.push(towerGeo, towerMat, beaconGeo, beaconMat);
   }
 
-  /**
-   * Precompute the two model matrices that place the marker. Both map the
-   * marker's local metre-space (+Y up, base at origin) into a projection's
-   * world space; they change only if the anchor changes, not per frame.
-   */
-  private computeModelMatrices(): void {
-    const [lng, lat] = this.lngLat;
-
-    // Globe: anchor on the unit sphere, local +Y along the surface normal.
-    const frame = globeSurfaceFrame(lng, lat);
-    this.anchorSphere = lngLatToUnitSphere(lng, lat);
-    const sGlobe = metersToGlobeUnits(1); // metres → sphere units
-    this.modelGlobe
-      .makeTranslation(frame.position[0], frame.position[1], frame.position[2])
-      .multiply(
-        new THREE.Matrix4().makeBasis(
-          new THREE.Vector3(frame.xAxis[0], frame.xAxis[1], frame.xAxis[2]),
-          new THREE.Vector3(frame.up[0], frame.up[1], frame.up[2]),
-          new THREE.Vector3(frame.zAxis[0], frame.zAxis[1], frame.zAxis[2]),
-        ),
-      )
-      .multiply(new THREE.Matrix4().makeScale(sGlobe, sGlobe, sGlobe));
-
-    // Mercator: anchor at the mercator coordinate; local +Y (up) → mercator +Z
-    // (elevation), local +X (east) → mercator +X. Right-handed, so local +Z →
-    // mercator −Y (the marker is radially symmetric, so azimuth is irrelevant).
-    const mc = MercatorCoordinate.fromLngLat({ lng, lat }, 0);
-    const sMerc = mc.meterInMercatorCoordinateUnits();
-    this.modelMercator
-      .makeTranslation(mc.x, mc.y, mc.z)
-      .multiply(
-        new THREE.Matrix4().makeBasis(
-          new THREE.Vector3(1, 0, 0),
-          new THREE.Vector3(0, 0, 1),
-          new THREE.Vector3(0, -1, 0),
-        ),
-      )
-      .multiply(new THREE.Matrix4().makeScale(sMerc, sMerc, sMerc));
-  }
 }

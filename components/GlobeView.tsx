@@ -27,7 +27,9 @@ import {
   TERRAIN_SOURCE,
   TEST_MARKER_LNGLAT,
 } from "@/map/mapStyle";
-import { ThreeTestLayer } from "@/map/threeTestLayer";
+import { ThreeTestLayer, type RomanTestStatus } from "@/map/threeTestLayer";
+import type { SettlementStatus } from "@/map/settlements/SettlementScene";
+import { ROMAN_SETTLEMENT } from "@/map/settlements/romanSettlement";
 import { DebugPanel } from "@/components/DebugPanel";
 import { MapReadout } from "@/components/MapReadout";
 import { queryTerrainHeights } from "@/map/terrain";
@@ -45,6 +47,12 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [debugMap, setDebugMap] = useState<maplibregl.Map | null>(null);
   const [terrainWarning, setTerrainWarning] = useState(false);
+  const threeLayerRef = useRef<ThreeTestLayer | null>(null);
+  const [romanStatus, setRomanStatus] = useState<RomanTestStatus>({ state: "waiting", loaded: 0, errors: [] });
+  const [settlementStatus, setSettlementStatus] = useState<SettlementStatus>({
+    state: "unloaded", origin: ROMAN_SETTLEMENT.origin, loaded: 0,
+    total: ROMAN_SETTLEMENT.buildings.length, terrainPending: 0, terrainRetained: 0, steepSites: 0, errors: [],
+  });
   // Keep the latest callback without re-running the init effect.
   const onStatusRef = useRef(onStatus);
   useEffect(() => {
@@ -74,7 +82,9 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
 
     map.on("load", () => {
       if (disposed) return;
-      map.addLayer(new ThreeTestLayer({ lngLat: TEST_MARKER_LNGLAT }));
+      const layer = new ThreeTestLayer({ lngLat: TEST_MARKER_LNGLAT, onRomanStatus: setRomanStatus, onSettlementStatus: setSettlementStatus });
+      threeLayerRef.current = layer;
+      map.addLayer(layer);
       setDebugMap(map);
       ready = true;
       onStatusRef.current("ready");
@@ -128,6 +138,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
         delete (window as unknown as { __globe?: unknown }).__globe;
       }
       map.remove();
+      threeLayerRef.current = null;
     };
   }, []);
 
@@ -141,6 +152,11 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
       <DebugPanel
         map={debugMap}
         terrainWarning={terrainWarning}
+        settlementStatus={settlementStatus}
+        onSettlementEnabled={(enabled) => threeLayerRef.current?.setSettlementEnabled(enabled)}
+        onVisitSettlement={(origin) => threeLayerRef.current?.visitSettlement(origin)}
+        romanStatus={romanStatus}
+        onRomanTestEnabled={(enabled) => threeLayerRef.current?.setRomanTestEnabled(enabled)}
         onRetryTerrain={() => {
           setTerrainWarning(false);
           debugMap?.refreshTiles(TERRAIN_SOURCE);
