@@ -29,11 +29,8 @@ export async function attachBiomes(map: Map, signal: AbortSignal): Promise<() =>
   map.addLayer({ id: BIOME_LAYER, type: "raster", source: BIOME_SOURCE,
     paint: { "raster-opacity": 1, "raster-fade-duration": 250, "raster-resampling": "linear" },
   }, map.getLayer("terrain-diagnostic") ? "terrain-diagnostic" : "regional-ocean");
-  // Preserve coast detail above the new surface at all zoom levels.
-  map.moveLayer("coastline", "regional-coastline");
   return () => {
     if (map.getLayer(BIOME_LAYER)) map.removeLayer(BIOME_LAYER);
     if (map.getSource(BIOME_SOURCE)) map.removeSource(BIOME_SOURCE);
-    if (map.getLayer("coastline")) map.moveLayer("coastline", "regional-land");
   };
 }

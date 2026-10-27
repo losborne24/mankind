@@ -28,7 +28,7 @@ for(const [a,b] of [['regional-land',BIOME_LAYER],[BIOME_LAYER,'terrain-diagnost
 assert.deepEqual(style.sources[BIOME_SOURCE].bounds,metadata.bounds);
 assert.equal(style.sources[BIOME_SOURCE].tileSize,256);
 detach();assert.equal(map.getSource(BIOME_SOURCE),undefined);
-assert.ok(style.layers.findIndex(l=>l.id==='coastline')<style.layers.findIndex(l=>l.id==='regional-land'));
+assert.ok(style.layers.findIndex(l=>l.id==='coastline')>style.layers.findIndex(l=>l.id==='regional-ocean'));
 globalThis.fetch=async()=>{throw new Error('offline');};
 await assert.rejects(()=>attachBiomes(map,new AbortController().signal));
 assert.equal(map.getSource(BIOME_SOURCE),undefined);

@@ -8,7 +8,10 @@ import {
   TERRAIN_SOURCE,
 } from "@/map/mapStyle";
 
-import { attachDiagnosticHillshade } from "@/map/hillshade";
+import {
+  attachDiagnosticHillshade, DEFAULT_GLOBAL_HILLSHADE_STRENGTH,
+  GLOBAL_HILLSHADE_STRENGTH, LOCAL_HILLSHADE_STRENGTH,
+} from "@/map/hillshade";
 import { attachBiomes, BIOME_BASE_URL } from "@/map/biomes";
 
 interface DebugPanelProps {
@@ -22,6 +25,7 @@ export function DebugPanel({ map, terrainWarning, onRetryTerrain }: DebugPanelPr
   const [exaggeration, setExaggeration] = useState(DEFAULT_TERRAIN_EXAGGERATION);
   const [diagnosticShading, setDiagnosticShading] = useState(true);
   const [hillshadeIntensity, setHillshadeIntensity] = useState(0.25);
+  const [globalHillshadeStrength, setGlobalHillshadeStrength] = useState(DEFAULT_GLOBAL_HILLSHADE_STRENGTH);
   const [biomesEnabled, setBiomesEnabled] = useState(Boolean(BIOME_BASE_URL));
   const [biomeWarning, setBiomeWarning] = useState("");
 
@@ -40,8 +44,13 @@ export function DebugPanel({ map, terrainWarning, onRetryTerrain }: DebugPanelPr
 
   useEffect(() => {
     if (!map || !diagnosticShading) return;
-    return attachDiagnosticHillshade(map, hillshadeIntensity);
-  }, [map, diagnosticShading, hillshadeIntensity]);
+    return attachDiagnosticHillshade(map);
+  }, [map, diagnosticShading]);
+
+  useEffect(() => {
+    map?.setGlobalStateProperty(GLOBAL_HILLSHADE_STRENGTH, globalHillshadeStrength);
+    map?.setGlobalStateProperty(LOCAL_HILLSHADE_STRENGTH, hillshadeIntensity);
+  }, [map, globalHillshadeStrength, hillshadeIntensity]);
 
   return (
     <details open className="absolute top-16 left-4 z-20 w-56 rounded-lg border border-panel-border bg-panel p-3 text-xs text-white/70 backdrop-blur-md sm:left-6">
@@ -82,7 +91,12 @@ export function DebugPanel({ map, terrainWarning, onRetryTerrain }: DebugPanelPr
           <input className="mt-1 w-full" aria-label="Hillshade intensity" type="range" min="0" max="0.6" step="0.05" value={hillshadeIntensity}
             onChange={(event) => setHillshadeIntensity(Number(event.target.value))} />
         </label>
-        <p className="mt-1 text-white/40">Visible at regional zooms once coastlines load.</p>
+        <label className="mt-3 block">
+          Global hillshade strength · {globalHillshadeStrength.toFixed(2)}
+          <input className="mt-1 w-full" aria-label="Global hillshade strength" type="range" min="0" max="1" step="0.05" value={globalHillshadeStrength}
+            onChange={(event) => setGlobalHillshadeStrength(Number(event.target.value))} />
+        </label>
+        <p className="mt-1 text-white/40">Global relief blends into regional detail from zoom 4 to 6.</p>
       </fieldset>
       {terrainWarning && (
         <p role="status" className="mt-2 text-amber-200/80">

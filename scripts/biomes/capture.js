@@ -11,6 +11,8 @@ window.captureTerrain = async (name, camera) => {
     name, center: map.getCenter(), zoom: map.getZoom(), pitch: map.getPitch(),
     bearing: map.getBearing(), terrain: map.getTerrain(),
     hillshade: map.getStyle().layers.find(layer => layer.id === 'terrain-diagnostic'),
+    shadingState: map.getGlobalState(),
+    globalOceanMask: map.getStyle().layers.find(layer => layer.id === 'hillshade-ocean-mask'),
     tiles: map.getSource('natural-biomes')?.serialize().tiles,
     viewportPixels: [map.getCanvas().width, map.getCanvas().height],
   };

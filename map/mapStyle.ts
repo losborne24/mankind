@@ -157,18 +157,6 @@ export function createGlobeStyle(): StyleSpecification {
         paint: { "fill-color": palette.land, "fill-opacity": 1 },
       },
       {
-        id: "coastline",
-        type: "line",
-        source: "physical-land",
-        layout: { "line-join": "round", "line-cap": "round" },
-        paint: {
-          "line-color": palette.coastline,
-          "line-width": ["interpolate", ["linear"], ["zoom"], 0, 0.8, 2, 1.1, 6, 1.4],
-          "line-opacity": ["*", 0.8, ["-", 1, detail]],
-          "line-opacity-transition": { duration: 300 },
-        },
-      },
-      {
         id: "regional-land",
         type: "fill",
         source: REGIONAL_LAND_SOURCE,
@@ -192,6 +180,18 @@ export function createGlobeStyle(): StyleSpecification {
           "fill-antialias": false,
           "fill-opacity": detail,
           "fill-opacity-transition": { duration: 300 },
+        },
+      },
+      {
+        id: "coastline",
+        type: "line",
+        source: "physical-land",
+        layout: { "line-join": "round", "line-cap": "round" },
+        paint: {
+          "line-color": palette.coastline,
+          "line-width": ["interpolate", ["linear"], ["zoom"], 0, 0.8, 2, 1.1, 6, 1.4],
+          "line-opacity": ["*", 0.8, ["-", 1, detail]],
+          "line-opacity-transition": { duration: 300 },
         },
       },
       {
