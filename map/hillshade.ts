@@ -1,7 +1,7 @@
 import type { Map, MapSourceDataEvent } from "maplibre-gl";
 import { COAST_DETAIL_STATE, REGIONAL_LAND_SOURCE, TERRAIN_SOURCE, createGlobeStyle } from "./mapStyle";
 
-const HILLSHADE_SOURCE = "elevation-diagnostic";
+export const HILLSHADE_SOURCE = "elevation-diagnostic";
 const HILLSHADE_LAYER = "terrain-diagnostic";
 export const GLOBAL_HILLSHADE_STRENGTH = "global-hillshade-strength";
 export const LOCAL_HILLSHADE_STRENGTH = "local-hillshade-strength";
