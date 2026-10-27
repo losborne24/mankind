@@ -71,8 +71,12 @@ const palette = {
   ocean: "#0a1622",
   land: "#223240",
   coastline: "#587083",
-  inlandWater: "#0e1e2b",
-  river: "#122330",
+  // Inland water reads as water, not as holes punched through the land: a muted
+  // blue keyed to the navy ocean but lifted well clear of it and of the land.
+  inlandWater: "#35596f",
+  // Lighter than the lake body: a river thread has to stay legible as water
+  // where a solid fill would, at one pixel wide, just read as a dark seam.
+  river: "#5d879d",
   graticule: "#7e95a8",
   graticuleMajor: "#8da5b8",
   skyHigh: "#060b14",
@@ -214,10 +218,16 @@ export function createGlobeStyle(): StyleSpecification {
         source: "physical-rivers",
         // Natural Earth's visibility ranks keep minor features out of global views.
         filter: ["<=", ["get", "min_zoom"], ["zoom"]],
+        // Round joins and caps stop the simplified centrelines from reading as
+        // the hard, mitred segments of a boundary line.
+        layout: { "line-join": "round", "line-cap": "round" },
         paint: {
           "line-color": palette.river,
-          "line-width": ["interpolate", ["linear"], ["zoom"], 0, 0.3, 4, 0.7, 8, 1.2],
-          "line-opacity": ["interpolate", ["linear"], ["zoom"], 0, 0.3, 4, 0.8],
+          // Thinner than the coastline at every zoom: rivers describe the land,
+          // they never outline it. Sub-pixel widths are carried by opacity
+          // rather than by blur, which erases a line this thin outright.
+          "line-width": ["interpolate", ["linear"], ["zoom"], 0, 0.25, 4, 0.55, 8, 0.95],
+          "line-opacity": ["interpolate", ["linear"], ["zoom"], 0, 0.35, 4, 0.65, 8, 0.8],
         },
       },
       {
@@ -225,7 +235,12 @@ export function createGlobeStyle(): StyleSpecification {
         type: "fill",
         source: "physical-lakes",
         filter: ["<=", ["get", "min_zoom"], ["zoom"]],
-        paint: { "fill-color": palette.inlandWater },
+        paint: {
+          "fill-color": palette.inlandWater,
+          // 1:50m rings are coarse, so globally the fill stays quiet and only
+          // firms up once a lake is large enough on screen to be read as one.
+          "fill-opacity": ["interpolate", ["linear"], ["zoom"], 0, 0.55, 3, 0.75, 5, 0.9],
+        },
       },
       {
         id: "graticule",
