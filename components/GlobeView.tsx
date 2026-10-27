@@ -27,6 +27,7 @@ import {
   TERRAIN_SOURCE,
 } from "@/map/mapStyle";
 import { DebugPanel } from "@/components/DebugPanel";
+import { MapReadout } from "@/components/MapReadout";
 import { queryTerrainHeights } from "@/map/terrain";
 import { attachCoastlineDetail } from "@/map/coastlineDetail";
 import { useExplorationStore } from "@/state/explorationStore";
@@ -133,6 +134,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
   return (
     <>
       <div ref={containerRef} className="h-full w-full" aria-hidden />
+      <MapReadout map={debugMap} />
       <DebugPanel
         map={debugMap}
         terrainWarning={terrainWarning}
