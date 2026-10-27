@@ -3,7 +3,7 @@
 /**
  * MapLibre globe lifecycle.
  *
- * Owns the `maplibregl.Map` instance and the Three.js custom layer, entirely on
+ * Owns the `maplibregl.Map` instance, entirely on
  * the client. It creates the map once on mount, reports status (loading / ready
  * / error) upward, keeps the shared view state in sync, and tears everything
  * down on unmount. The MapLibre `Map` and the Three.js layer are runtime
@@ -23,14 +23,14 @@ maplibregl.setWorkerUrl(
 );
 
 import {
-  createGlobeStyle, TEST_MARKER_LNGLAT, viewToCamera,
+  createGlobeStyle, viewToCamera,
   TERRAIN_SOURCE,
 } from "@/map/mapStyle";
 import { DebugPanel } from "@/components/DebugPanel";
 import { queryTerrainHeights } from "@/map/terrain";
-import { ThreeTestLayer } from "@/map/threeTestLayer";
 import { attachCoastlineDetail } from "@/map/coastlineDetail";
 import { useExplorationStore } from "@/state/explorationStore";
+import { BIOME_SOURCE } from "@/map/biomes";
 
 export type GlobeStatus = "loading" | "ready" | "error";
 
@@ -71,15 +71,6 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
 
     map.on("load", () => {
       if (disposed) return;
-      try {
-        map.addLayer(new ThreeTestLayer({ lngLat: TEST_MARKER_LNGLAT }));
-      } catch (err) {
-        onStatusRef.current(
-          "error",
-          err instanceof Error ? err.message : "Failed to initialize 3D layer.",
-        );
-        return;
-      }
       setDebugMap(map);
       ready = true;
       onStatusRef.current("ready");
@@ -97,6 +88,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
     // being unavailable). Transient errors after the map is ready are ignored.
     map.on("error", (e: maplibregl.ErrorEvent) => {
       if (disposed) return;
+      if ("sourceId" in e && e.sourceId === BIOME_SOURCE) return;
       // DEM is optional for navigation. MapLibre keeps loaded parent DEMs or
       // falls back to zero elevation for missing tiles; geography stays usable.
       if ("sourceId" in e && e.sourceId === TERRAIN_SOURCE) {

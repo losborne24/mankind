@@ -8,7 +8,7 @@ const MIN_ZOOM = 6;
 const MASK_SETTLE_MS = 300;
 
 /** Regional diagnostic shading, covered by the existing opaque ocean mask. */
-export function attachDiagnosticHillshade(map: Map): () => void {
+export function attachDiagnosticHillshade(map: Map, intensity = 0.25): () => void {
   map.addSource(HILLSHADE_SOURCE, { ...createGlobeStyle().sources[TERRAIN_SOURCE] });
   map.addLayer({
     id: HILLSHADE_LAYER,
@@ -17,7 +17,7 @@ export function attachDiagnosticHillshade(map: Map): () => void {
     minzoom: MIN_ZOOM,
     layout: { visibility: "none" },
     paint: {
-      "hillshade-exaggeration": 0.25,
+      "hillshade-exaggeration": intensity,
       "hillshade-shadow-color": "#0a1622",
       "hillshade-highlight-color": "#587083",
       "hillshade-accent-color": "#122330",

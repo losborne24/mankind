@@ -42,3 +42,8 @@ next-env.d.ts
 
 # Generated: MapLibre worker copied from node_modules on predev/prebuild
 /public/maplibre/
+
+# Offline biome inputs, Python environment, generated tiles (never bundled)
+/.biome-data/
+/.biome-venv/
+__pycache__/

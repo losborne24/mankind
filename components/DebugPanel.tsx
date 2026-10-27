@@ -9,6 +9,7 @@ import {
 } from "@/map/mapStyle";
 
 import { attachDiagnosticHillshade } from "@/map/hillshade";
+import { attachBiomes, BIOME_BASE_URL } from "@/map/biomes";
 
 interface DebugPanelProps {
   map: Map | null;
@@ -20,11 +21,27 @@ interface DebugPanelProps {
 export function DebugPanel({ map, terrainWarning, onRetryTerrain }: DebugPanelProps) {
   const [exaggeration, setExaggeration] = useState(DEFAULT_TERRAIN_EXAGGERATION);
   const [diagnosticShading, setDiagnosticShading] = useState(true);
+  const [hillshadeIntensity, setHillshadeIntensity] = useState(0.25);
+  const [biomesEnabled, setBiomesEnabled] = useState(Boolean(BIOME_BASE_URL));
+  const [biomeWarning, setBiomeWarning] = useState("");
+
+  useEffect(() => {
+    if (!map || !biomesEnabled) return;
+    const controller = new AbortController();
+    let detach: (() => void) | undefined;
+    void attachBiomes(map, controller.signal).then((cleanup) => {
+      if (controller.signal.aborted) cleanup();
+      else { detach = cleanup; setBiomeWarning(""); }
+    }).catch(() => {
+      if (!controller.signal.aborted) setBiomeWarning("Biome tiles unavailable. Showing dark atlas. Toggle to retry.");
+    });
+    return () => { controller.abort(); detach?.(); };
+  }, [map, biomesEnabled]);
 
   useEffect(() => {
     if (!map || !diagnosticShading) return;
-    return attachDiagnosticHillshade(map);
-  }, [map, diagnosticShading]);
+    return attachDiagnosticHillshade(map, hillshadeIntensity);
+  }, [map, diagnosticShading, hillshadeIntensity]);
 
   return (
     <details open className="absolute top-16 left-4 z-20 w-56 rounded-lg border border-panel-border bg-panel p-3 text-xs text-white/70 backdrop-blur-md sm:left-6">
@@ -50,10 +67,20 @@ export function DebugPanel({ map, terrainWarning, onRetryTerrain }: DebugPanelPr
         </label>
         <p className="mt-2 text-white/40">Mapterhorn · physical elevation</p>
         <label className="mt-3 flex items-center gap-2">
+          <input type="checkbox" checked={biomesEnabled} onChange={(event) => setBiomesEnabled(event.target.checked)} />
+          Biome colours
+        </label>
+        {biomesEnabled && biomeWarning && <p role="status" className="mt-2 text-amber-200/80">{biomeWarning}</p>}
+        <label className="mt-3 flex items-center gap-2">
           <input type="checkbox" checked={diagnosticShading} onChange={(event) => {
             setDiagnosticShading(event.target.checked);
           }} />
           Hillshade
+        </label>
+        <label className="mt-3 block">
+          Hillshade intensity · {hillshadeIntensity.toFixed(2)}
+          <input className="mt-1 w-full" aria-label="Hillshade intensity" type="range" min="0" max="0.6" step="0.05" value={hillshadeIntensity}
+            onChange={(event) => setHillshadeIntensity(Number(event.target.value))} />
         </label>
         <p className="mt-1 text-white/40">Visible at regional zooms once coastlines load.</p>
       </fieldset>

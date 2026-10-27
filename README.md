@@ -302,3 +302,7 @@ An earlier `pnpm build` passed; a subsequent Turbopack rebuild failed on local
 CSS worker port binding permissions (including an escalated retry), so the
 final production build was verified with Webpack. No bundler configuration
 was changed.
+
+## Natural biomes regional prototype
+
+The real OpenLandMap PNV preprocessing pipeline, local tile server, source/licence verification, validation results and proposed R2 deployment are documented in [docs/biomes.md](docs/biomes.md). Generated rasters and tiles are ignored and remain outside the Next.js build.
