@@ -47,3 +47,13 @@ next-env.d.ts
 /.biome-data/
 /.biome-venv/
 __pycache__/
+
+# Defence in depth: generated biome pyramids and raw rasters are hosted
+# externally and must never be committed or served from the Next.js build,
+# whatever output directory a future run is pointed at. Scoped to the
+# pyramid/raster artefacts so ordinary UI assets stay trackable.
+/public/biomes/
+/tiles/
+/public/**/tilejson.json
+*.tif
+*.part

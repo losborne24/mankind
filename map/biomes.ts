@@ -5,7 +5,7 @@ export const BIOME_LAYER = "natural-biome-colours";
 // The URL is inlined by Next.js at build time; raster requests happen at runtime.
 // No default production service is assumed.
 export const BIOME_BASE_URL = process.env.NEXT_PUBLIC_BIOME_TILE_BASE_URL ??
-  (process.env.NODE_ENV === "development" ? "http://localhost:8766/pnv-v4" : "");
+  (process.env.NODE_ENV === "development" ? "http://localhost:8766/pnv-v4-global" : "");
 export const BIOME_ATTRIBUTION = 'Contains <a href="https://doi.org/10.7910/DVN/QQHCIK">OpenLandMap PNV · Hengl et al. (2018)</a>, <a href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a> · <a href="https://mapterhorn.com/attribution">© Mapterhorn</a>';
 
 /** Small metadata fetch first. Offline service leaves the complete dark atlas usable. */
@@ -19,8 +19,14 @@ export async function attachBiomes(map: Map, signal: AbortSignal): Promise<() =>
   if (!Array.isArray(metadata.bounds) || metadata.bounds.length !== 4 ||
       !metadata.bounds.every(Number.isFinite) || !Number.isInteger(metadata.maxzoom) ||
       metadata.maxzoom < 0 || metadata.maxzoom > 12) throw new Error("Invalid biome tile metadata.");
+  // Regional prototypes publish PNG; the global pyramid publishes lossless WebP.
+  // Only these two are accepted, so a malformed manifest cannot build a URL.
+  const format = metadata.format === undefined ? "png" : metadata.format;
+  if (format !== "png" && format !== "webp") throw new Error(`Unsupported biome tile format: ${String(format)}`);
   const source: RasterSourceSpecification = {
-    type: "raster", tiles: [`${base}/{z}/{x}/{y}.png`], tileSize: 256,
+    type: "raster", tiles: [`${base}/{z}/{x}/{y}.${format}`], tileSize: 256,
+    // Outside `bounds` and beyond `maxzoom` MapLibre reuses parents instead of
+    // requesting tiles, so a sparse ocean-skipping pyramid stays quiet.
     minzoom: 0, maxzoom: metadata.maxzoom, bounds: metadata.bounds,
     attribution: `${BIOME_ATTRIBUTION} · <a href="${base}/NOTICE.txt">Data notice</a>`,
   };

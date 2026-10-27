@@ -303,8 +303,27 @@ CSS worker port binding permissions (including an escalated retry), so the
 final production build was verified with Webpack. No bundler configuration
 was changed.
 
-## Natural biomes regional prototype
+## Natural biomes
 
-The real OpenLandMap PNV preprocessing pipeline, local tile server, source/licence verification, validation results and proposed R2 deployment are documented in [docs/biomes.md](docs/biomes.md). Generated rasters and tiles are ignored and remain outside the Next.js build.
+Biome colour comes from offline-generated OpenLandMap PNV raster tiles, loaded
+by MapLibre at runtime from a configurable external URL. Generated rasters and
+tiles are ignored by Git and stay outside the Next.js build; the production
+bundle contains no raster bytes and has no default tile service.
 
-The [Step 3B terrain refinement report](docs/terrain-refinement.md) documents the current `pnv-v4` palette/materials, matched before-and-after captures, validation and rollback.
+- **[docs/global-biomes.md](docs/global-biomes.md) — current.** Step 4: the
+  worldwide `pnv-v4-global` pyramid. Generation commands, dateline and polar
+  handling, the measured tile-format and maximum-zoom decisions, storage and
+  runtime measurements, the Cloudflare R2 workflow, attribution and limitations.
+- [docs/terrain-refinement.md](docs/terrain-refinement.md) — Step 3B: the
+  `pnv-v4` palette, materials and hillshading this run reuses unchanged, with
+  matched before-and-after captures and rollback.
+- [docs/biomes.md](docs/biomes.md) — Step 3: the original `pnv-v2` regional
+  baseline, source and licence verification, and hosting architecture.
+
+```sh
+.biome-venv/bin/python scripts/biomes/fetch.py --global --dem-zoom 6 --jobs 10
+cd scripts/biomes && ../../.biome-venv/bin/python build.py --global \
+    --format webp --maxzoom 7 --workers 8 --output ../../.biome-data/tiles/pnv-v4-global
+.biome-venv/bin/python scripts/biomes/check.py .biome-data/tiles/pnv-v4-global
+pnpm dev   # also serves the tiles on 127.0.0.1:8766
+```

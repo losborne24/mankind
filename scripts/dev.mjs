@@ -5,7 +5,10 @@ import { fileURLToPath } from "node:url";
 
 const require = createRequire(import.meta.url);
 const root = fileURLToPath(new URL("../", import.meta.url));
-const metadataUrl = "http://127.0.0.1:8766/pnv-v4/tilejson.json";
+// Matches the development default in map/biomes.ts; override both with
+// NEXT_PUBLIC_BIOME_TILE_BASE_URL to serve a different generated version.
+const tileBase = process.env.NEXT_PUBLIC_BIOME_TILE_BASE_URL ?? "http://localhost:8766/pnv-v4-global";
+const metadataUrl = `${tileBase.replace(/\/$/, "").replace("//localhost", "//127.0.0.1")}/tilejson.json`;
 const children = new Set();
 let stopping = false;
 
@@ -53,7 +56,7 @@ if (await tilesReady()) {
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
   if (!ready && !stopping) {
-    console.error("Biome tiles unavailable. Check .biome-data/tiles/pnv-v4/tilejson.json and port 8766.");
+    console.error(`Biome tiles unavailable. Check ${metadataUrl} and port 8766.`);
     stop(1);
   }
 }
