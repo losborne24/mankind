@@ -169,19 +169,6 @@ export function createGlobeStyle(): StyleSpecification {
         },
       },
       {
-        id: "regional-ocean",
-        type: "fill",
-        source: REGIONAL_LAND_SOURCE,
-        "source-layer": "ocean",
-        minzoom: 4,
-        paint: {
-          "fill-color": palette.ocean,
-          "fill-antialias": false,
-          "fill-opacity": detail,
-          "fill-opacity-transition": { duration: 300 },
-        },
-      },
-      {
         id: "regional-land",
         type: "fill",
         source: REGIONAL_LAND_SOURCE,
@@ -189,6 +176,19 @@ export function createGlobeStyle(): StyleSpecification {
         minzoom: 4,
         paint: {
           "fill-color": palette.land,
+          "fill-antialias": false,
+          "fill-opacity": detail,
+          "fill-opacity-transition": { duration: 300 },
+        },
+      },
+      {
+        id: "regional-ocean",
+        type: "fill",
+        source: REGIONAL_LAND_SOURCE,
+        "source-layer": "ocean",
+        minzoom: 4,
+        paint: {
+          "fill-color": palette.ocean,
           "fill-antialias": false,
           "fill-opacity": detail,
           "fill-opacity-transition": { duration: 300 },

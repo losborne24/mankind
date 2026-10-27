@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Map } from "maplibre-gl";
 import {
-  createGlobeStyle,
   DEFAULT_TERRAIN_EXAGGERATION,
   TERRAIN_EXAGGERATIONS,
   TERRAIN_SOURCE,
 } from "@/map/mapStyle";
+
+import { attachDiagnosticHillshade } from "@/map/hillshade";
 
 interface DebugPanelProps {
   map: Map | null;
@@ -18,7 +19,12 @@ interface DebugPanelProps {
 /** Shared debug panel; add future map controls as separate fieldsets here. */
 export function DebugPanel({ map, terrainWarning, onRetryTerrain }: DebugPanelProps) {
   const [exaggeration, setExaggeration] = useState(DEFAULT_TERRAIN_EXAGGERATION);
-  const [diagnosticShading, setDiagnosticShading] = useState(false);
+  const [diagnosticShading, setDiagnosticShading] = useState(true);
+
+  useEffect(() => {
+    if (!map || !diagnosticShading) return;
+    return attachDiagnosticHillshade(map);
+  }, [map, diagnosticShading]);
 
   return (
     <details open className="absolute top-16 left-4 z-20 w-56 rounded-lg border border-panel-border bg-panel p-3 text-xs text-white/70 backdrop-blur-md sm:left-6">
@@ -45,29 +51,11 @@ export function DebugPanel({ map, terrainWarning, onRetryTerrain }: DebugPanelPr
         <p className="mt-2 text-white/40">Mapterhorn · physical elevation</p>
         <label className="mt-3 flex items-center gap-2">
           <input type="checkbox" checked={diagnosticShading} onChange={(event) => {
-            if (!map?.getSource(TERRAIN_SOURCE)) return;
-            const enabled = event.target.checked;
-            // A separate, lazy DEM source preserves terrain sampling quality.
-            if (enabled && !map.getLayer("terrain-diagnostic")) {
-              map.addSource("elevation-diagnostic", {
-                ...createGlobeStyle().sources[TERRAIN_SOURCE],
-              });
-              map.addLayer({
-                id: "terrain-diagnostic", type: "hillshade", source: "elevation-diagnostic",
-                paint: {
-                  "hillshade-exaggeration": 0.25,
-                  "hillshade-shadow-color": "#0a1622",
-                  "hillshade-highlight-color": "#587083",
-                  "hillshade-accent-color": "#122330",
-                },
-              }, "rivers");
-            } else if (map.getLayer("terrain-diagnostic")) {
-              map.setLayoutProperty("terrain-diagnostic", "visibility", enabled ? "visible" : "none");
-            }
-            setDiagnosticShading(enabled);
+            setDiagnosticShading(event.target.checked);
           }} />
           Hillshade
         </label>
+        <p className="mt-1 text-white/40">Visible at regional zooms once coastlines load.</p>
       </fieldset>
       {terrainWarning && (
         <p role="status" className="mt-2 text-amber-200/80">

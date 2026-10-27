@@ -222,9 +222,35 @@ No additional dependencies, terrain meshes, or custom LOD were introduced.
 
 The default is **1.0×**. The **Debug tools** panel opens by default at top left; its **Terrain** section lets you choose 1.0×,
 1.5×, 2.0× or 2.5×. It changes one constant exaggeration through `setTerrain`;
-it never varies with zoom or timeline year. Optional **Hillshade**
-is off by default and lazily loads its own DEM source when enabled. It is only
+it never varies with zoom or timeline year. **Hillshade** is on by default and
+loads its own DEM source; the checkbox turns it off. It is only
 a relief inspection aid; the Step 3 landscape styling remains deferred.
+
+Hillshade is composited **after regional land and before the regional ocean
+mask**, with coastline outlines, rivers and lakes above it. The mask and land
+use the same Natural Earth 10m rings. Hillshade is restricted to z6+ where
+regional geography is fully active: it waits for loaded coastal tiles and the
+300 ms opacity transition, and hides while new coastal tiles load. Below z6,
+there is only an ocean background (no matching global polygon mask), so the
+inspection shading is suppressed. This gate affects shading only; Mapterhorn
+physical terrain and its single exaggeration value remain enabled at all zooms.
+Disabling Hillshade removes its layer, DEM source and event listeners.
+
+A polygon filter cannot clip a raster DEM hillshade layer to an unrelated
+vector source. Reusing the existing opaque ocean fill avoids custom stencil
+rendering, new mask datasets and new dependencies. Moving hillshade alone below
+the old translucent ocean fade would still leak through during loading/fades;
+the readiness gate prevents that. `node scripts/check-hillshade.mjs` checks the
+compositing order, loading/fade gate, zoom-out cancellation and cleanup.
+The check also decodes the actual coastal masks around Spain/Biscay, Corsica
+and Greece/Crete and verifies that sea samples are covered while land samples
+remain exposed. These automated checks pass, as do TypeScript, lint, geography
+validation and the Webpack production build. Live hillshade-on/off comparisons
+for this refinement remain pending: foreground Chrome interactions interrupted
+browser automation, and the browser was still in active use. The earlier
+terrain visual checks above predate this mask refinement.
+
+
 
 DEM errors show a nonfatal warning inside this panel. Navigation and Natural
 Earth remain usable with parent/zero-height fallback managed by MapLibre.
