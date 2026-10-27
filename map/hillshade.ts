@@ -54,54 +54,69 @@ export function attachDiagnosticHillshade(map: Map): () => void {
     map.setLayoutProperty(HILLSHADE_LAYER, "visibility", next ? "visible" : "none");
   };
   let detailedMaskReady = false;
-  const maskReady = () => map.getGlobalState()[COAST_DETAIL_STATE] === 1 &&
-    map.isSourceLoaded(REGIONAL_LAND_SOURCE);
+  // The regional masks are only opaque — and so only safe on their own — once
+  // the coast-detail blend has reached 1.
+  const detailBlended = () => map.getGlobalState()[COAST_DETAIL_STATE] === 1;
+  const maskReady = () => detailBlended() && map.isSourceLoaded(REGIONAL_LAND_SOURCE);
   let coarseMaskVisible = true;
+  // `isSourceLoaded` reports the whole source, so it flaps false on every tile
+  // the camera brings into view. Gating a whole layer on it strobes the relief
+  // during movement. Opaque coverage is therefore latched once: the coarse mask
+  // keeps its already-rendered tiles (and their parents) while new ones stream,
+  // so once any opaque mask has covered the ocean, shading stays exposed and
+  // only the mask handover below moves.
+  let maskCovered = false;
   const showSafeSurface = () => {
     if (coarseMaskVisible === detailedMaskReady) {
       coarseMaskVisible = !detailedMaskReady;
       map.setLayoutProperty(GLOBAL_OCEAN_LAYER, "visibility", coarseMaskVisible ? "visible" : "none");
     }
-    setVisible(detailedMaskReady || map.isSourceLoaded(GLOBAL_OCEAN_SOURCE));
+    maskCovered ||= detailedMaskReady || map.isSourceLoaded(GLOBAL_OCEAN_SOURCE);
+    setVisible(maskCovered);
+  };
+  /** Hand the mask over only once a changed condition has held for the fade.
+   * Debounced in both directions: a regional tile the camera brings into view
+   * clears `isSourceLoaded` for a few frames, and reacting to that immediately
+   * pops the coarse 50 m coastline back over the settled 10 m one. A genuinely
+   * slow regional fetch still outlasts the delay and gets covered.
+   */
+  const settleTo = (next: boolean) => {
+    if (detailedMaskReady === next) {
+      clearTimeout(timer);
+      timer = undefined;
+      return;
+    }
+    if (timer !== undefined) return;
+    timer = setTimeout(() => {
+      timer = undefined;
+      detailedMaskReady = maskReady();
+      showSafeSurface();
+    }, MASK_SETTLE_MS);
   };
   const update = () => {
-    if (!maskReady()) {
+    // Translucent regional masks are never the sole barrier: cover immediately.
+    if (!detailBlended()) {
       clearTimeout(timer);
       timer = undefined;
       detailedMaskReady = false;
-    } else if (!detailedMaskReady && timer === undefined) {
-      timer = setTimeout(() => {
-        timer = undefined;
-        detailedMaskReady = maskReady();
-        showSafeSurface();
-      }, MASK_SETTLE_MS);
-    }
+    } else settleTo(maskReady());
     showSafeSurface();
   };
   const onSource = (event: MapSourceDataEvent) => {
     if (event.sourceId === REGIONAL_LAND_SOURCE || event.sourceId === GLOBAL_OCEAN_SOURCE) update();
   };
-  const onLoading = (event: MapSourceDataEvent) => {
-    if (event.sourceId === GLOBAL_OCEAN_SOURCE) {
-      if (!detailedMaskReady) setVisible(false);
-      return;
-    }
-    if (event.sourceId !== REGIONAL_LAND_SOURCE) return;
-    clearTimeout(timer);
-    timer = undefined;
-    detailedMaskReady = false;
-    showSafeSurface();
-  };
   map.on("zoom", update);
   map.on("sourcedata", onSource);
-  map.on("sourcedataloading", onLoading);
+  // Streaming tiles never withdraw coverage, so `sourcedataloading` only feeds
+  // the same debounced handover; it must not gate a layer on its own.
+  map.on("sourcedataloading", onSource);
   update();
 
   return () => {
     clearTimeout(timer);
     map.off("zoom", update);
     map.off("sourcedata", onSource);
-    map.off("sourcedataloading", onLoading);
+    map.off("sourcedataloading", onSource);
     if (map.getLayer(HILLSHADE_LAYER)) map.removeLayer(HILLSHADE_LAYER);
     if (map.getSource(HILLSHADE_SOURCE)) map.removeSource(HILLSHADE_SOURCE);
     if (map.getLayer(GLOBAL_OCEAN_LAYER)) map.removeLayer(GLOBAL_OCEAN_LAYER);

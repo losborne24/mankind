@@ -28,6 +28,55 @@ of terrain elevation: https://maplibre.org/maplibre-style-spec/layers/#hillshade
 - Default physical terrain remains **1×**. PNV IDs, palette, processing and
   raster tiles are unchanged. No new JavaScript dependency or Three.js code.
 
+## Flickering during camera movement
+
+Shading visibly strobed while zooming, dragging and rotating. Instrumenting
+`setLayoutProperty` on the live map showed **23 layer visibility changes in
+1.3 s** during a single continental move — the hillshade layer switching off
+and on eleven times. It was not the DEM, the biome raster, terrain geometry or
+MapLibre: it was this module's own gating.
+
+`map.isSourceLoaded()` reports the state of a **whole source**, so it clears
+the moment the camera brings any new tile into view and is restored when that
+tile arrives — measured flapping false/true roughly every 50 ms while the
+coarse ocean mask streamed. `sourcedataloading` hid the hillshade layer and
+`sourcedata` restored it, so each flap became a full-frame relief pop. A layer
+`visibility` change is binary and has no transition, so there was nothing to
+soften it. Cached tiles shortened each gap but did not remove it, because the
+events fire regardless of cache.
+
+The underlying invariant is only that **an opaque mask must cover the ocean
+whenever shading is exposed** — and streaming tiles never withdraw coverage,
+since MapLibre keeps already-rendered tiles and their parents on screen while
+replacements load. Two changes follow from that:
+
+- Opaque coverage is **latched once** (`maskCovered`). After the first mask
+  covers the globe, relief is never hidden again; per-tile load events cannot
+  toggle a layer.
+- The coarse-to-detailed mask handover is **debounced in both directions** by
+  the existing 300 ms fade constant, so a regional tile that arrives promptly
+  no longer pops the coarse 50 m coastline back over the settled 10 m one. A
+  genuinely slow regional fetch still outlasts the delay and is covered. The
+  one case that stays immediate is the coast-detail blend dropping below 1,
+  where the regional masks begin fading to translucent at once.
+
+Measured after the change, with the same instrumentation: a cold first load
+flying from the globe to z6 and then a fourteen-step jerky drag produces
+**1 visibility change in total** — the intended LOD handover — and repeating
+that drag over warm tiles produces **none**. Panning, dragging, pitching and
+rotating at regional and continental zoom produce no changes at all.
+
+`sourcedataloading` is now just another trigger for the same debounced
+handover rather than a gate of its own. Lighting stays 315° map-anchored and
+physical elevation stays 1×. No renderer, dataset or classification changed.
+
+Remaining MapLibre limitations, not addressed here: layer `visibility` has no
+crossfade, so the single handover is a hard switch (invisible in practice,
+both masks being `#0a1622`); raster biome tiles keep their own 250 ms
+`raster-fade-duration` tile-by-tile fade-in; and MapLibre offers no per-tile
+coverage query, so "is the ocean masked here" can only be approximated by
+source-level state.
+
 ## Mask generation and an overzoom regression
 
 Run `node scripts/prepare-global-ocean.mjs` to regenerate the 85 z0–3 static
@@ -93,7 +142,9 @@ mask, global debug state and physical terrain alongside the render.
 
 - `node scripts/check-hillshade.mjs`: installed style validator; low-zoom
   availability; continuous intensity blend and independent global control;
-  mask loading/fade handover and cleanup; all 85 global tiles decode; mountain,
+  mask loading/fade handover and cleanup; streaming tiles toggle no layer and
+  brief regional loads do not re-show the coarse mask, while a sustained gap
+  still is covered; all 85 global tiles decode; mountain,
   island, ocean, dateline and polar samples; installed overzoom renderer test.
 - `node scripts/check-biomes.mjs` and `node scripts/check-geography.mjs`:
   existing geography, biome attachment/fallback, coastline and layer ordering.

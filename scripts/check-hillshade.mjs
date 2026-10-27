@@ -18,6 +18,7 @@ const { validateStyleMin, createPropertyExpression, latest, classifyRings } = re
 const style = createGlobeStyle();
 const handlers = new Map();
 let zoom = 2, detail = 0, loaded = false, coarseLoaded = false;
+const flips = [];
 const mock = {
   addSource: (id, source) => { style.sources[id] = source; },
   addLayer: (layer, before) => { style.layers.splice(style.layers.findIndex(({ id }) => id === before), 0, layer); },
@@ -28,14 +29,31 @@ const mock = {
   getZoom: () => zoom,
   getGlobalState: () => ({ "coast-detail": detail }),
   isSourceLoaded: (id) => id === "hillshade-ocean" ? coarseLoaded : loaded,
-  setLayoutProperty: (id, name, value) => { (mock.getLayer(id).layout ??= {})[name] = value; },
+  setLayoutProperty: (id, name, value) => {
+    if (name === "visibility") flips.push(`${id}=${value}`);
+    (mock.getLayer(id).layout ??= {})[name] = value;
+  },
   on: (name, handler) => handlers.set(name, handler),
   off: (name) => handlers.delete(name),
 };
 const maskVisibility = () => mock.getLayer("hillshade-ocean-mask").layout?.visibility ?? "visible";
 const visibility = () => mock.getLayer("terrain-diagnostic").layout.visibility;
 const sourceEvent = { sourceId: "physical-land-regional" };
+const coarseEvent = { sourceId: "hillshade-ocean" };
 const settle = () => new Promise((resolve) => setTimeout(resolve, 330));
+/** Visibility changes since the last call. Camera movement must produce none. */
+const churn = () => flips.splice(0);
+/** One streaming tile: pending, then delivered, as MapLibre reports it. */
+const streamTile = (event, stillLoading = false) => {
+  const key = event === coarseEvent ? "coarseLoaded" : "loaded";
+  const was = event === coarseEvent ? coarseLoaded : loaded;
+  if (event === coarseEvent) coarseLoaded = false; else loaded = false;
+  handlers.get("sourcedataloading")(event);
+  if (event === coarseEvent) coarseLoaded = stillLoading ? false : was;
+  else loaded = stillLoading ? false : was;
+  handlers.get("sourcedata")(event);
+  return key;
+};
 const detach = attachDiagnosticHillshade(mock);
 assert.deepEqual(validateStyleMin(style), []);
 const strength = { "global-hillshade-strength": 0.55, "local-hillshade-strength": 0.25 };
@@ -60,42 +78,63 @@ for (const [below, above] of [["regional-land", "terrain-diagnostic"], ["terrain
 }
 assert.equal(visibility(), "none", "Wait for an opaque ocean mask");
 coarseLoaded = true;
-handlers.get("sourcedata")({ sourceId: "hillshade-ocean" });
+handlers.get("sourcedata")(coarseEvent);
 assert.equal(visibility(), "visible", "Native relief visible on globe at z2");
 assert.equal(maskVisibility(), "visible");
 assert.equal(mock.getLayer("terrain-diagnostic").minzoom, undefined);
-coarseLoaded = false;
+
+// The flicker this guards against: `isSourceLoaded` reports the whole source,
+// so every tile the camera brings into view clears it for a few frames. Relief
+// must never be gated on that — the coarse mask keeps its rendered tiles.
+churn();
+for (let i = 0; i < 20; i++) {
+  streamTile(coarseEvent);
+  zoom = 2 + i * 0.1;
+  handlers.get("zoom")();
+}
+assert.deepEqual(churn(), [], "Streaming coarse tiles must not toggle any layer");
+assert.equal(visibility(), "visible", "Relief stays exposed while the mask streams");
+assert.equal(maskVisibility(), "visible");
+
+// Translucent regional masks are never the sole barrier over shading: the
+// opaque coarse mask has to stay up for the whole coast-detail blend.
 zoom = 11;
-handlers.get("zoom")();
-assert.equal(visibility(), "none", "Wait for geography loading and fade");
-loaded = true;
 detail = 0.5;
-handlers.get("sourcedata")(sourceEvent);
+loaded = true;
+handlers.get("zoom")();
 await settle();
-assert.equal(visibility(), "none", "Translucent ocean masks must never expose shading");
+assert.equal(maskVisibility(), "visible", "Translucent masks must not expose shading alone");
 detail = 1;
 handlers.get("sourcedata")(sourceEvent);
-assert.equal(visibility(), "none", "Do not show through the 300 ms ocean fade");
+assert.equal(maskVisibility(), "visible", "Do not hand over through the 300 ms ocean fade");
 await settle();
-assert.equal(visibility(), "visible");
 assert.equal(maskVisibility(), "none", "Detailed mask takes over only after its fade");
-handlers.get("sourcedataloading")(sourceEvent);
-assert.equal(visibility(), "none", "Hide immediately when new coast tiles load");
-loaded = false;
-handlers.get("sourcedata")(sourceEvent);
+assert.equal(visibility(), "visible");
+
+// A regional tile that arrives promptly must not pop the coarse 50 m coastline
+// back over the settled 10 m one; a sustained outage still gets covered.
+churn();
+for (let i = 0; i < 20; i++) streamTile(sourceEvent);
 await settle();
-assert.equal(visibility(), "none");
+assert.deepEqual(churn(), [], "Brief regional loads must not re-show the coarse mask");
+assert.equal(maskVisibility(), "none");
+streamTile(sourceEvent, true);
+assert.equal(maskVisibility(), "none", "Debounced in both directions");
+await settle();
+assert.equal(maskVisibility(), "visible", "A sustained regional gap is covered again");
+assert.equal(visibility(), "visible", "Coverage is restored by the mask, not by hiding relief");
 loaded = true;
 handlers.get("sourcedata")(sourceEvent);
+await settle();
+assert.equal(maskVisibility(), "none");
+
+// Zooming back out below the blend must cover shading immediately, with no
+// wait, because the regional masks start fading to translucent at once.
 zoom = 5;
 detail = 0.5;
 handlers.get("zoom")();
-await settle();
-assert.equal(visibility(), "none", "Loading masks must hide shading");
-coarseLoaded = true;
-handlers.get("sourcedata")({ sourceId: "hillshade-ocean" });
+assert.equal(maskVisibility(), "visible", "Leaving the blend covers shading immediately");
 assert.equal(visibility(), "visible", "Low zoom retains masked relief during coast blend");
-assert.equal(maskVisibility(), "visible");
 detach();
 assert.equal(handlers.size, 0);
 assert.equal(mock.getLayer("terrain-diagnostic"), undefined);
