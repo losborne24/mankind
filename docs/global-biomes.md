@@ -225,7 +225,7 @@ pnpm dev     # starts scripts/biomes/serve.py on 127.0.0.1:8766 too
 
 `pnpm dev` and `map/biomes.ts` both default to
 `http://localhost:8766/pnv-v4-global` in development. Override both with
-`NEXT_PUBLIC_BIOME_TILE_BASE_URL`. Production assumes no URL and falls back to
+`NEXT_PUBLIC_BIOME_TILE_URL`. Production assumes no URL and falls back to
 the dark atlas.
 
 Optional measurement pass, which writes into no pyramid:
@@ -541,7 +541,7 @@ server sends it for exactly this reason.
 ### 5. Point the app at it
 
 ```sh
-NEXT_PUBLIC_BIOME_TILE_BASE_URL=https://<TILE_DOMAIN>/biomes/pnv-v4 pnpm build
+NEXT_PUBLIC_BIOME_TILE_URL=https://<TILE_DOMAIN>/biomes/pnv-v4 pnpm build
 ```
 
 Verify before releasing, with an `Origin` header, that `tilejson.json` and a
@@ -657,7 +657,7 @@ Verified after a production `next build --webpack`:
 - The build output contains **no** reference to `.biome-data`, `pnv-1km`,
   `classes.tif`, `dem-z6` or `pnv-v4-global`.
 - No `.webp` or `.tif` tile is traced into the build.
-- `NEXT_PUBLIC_BIOME_TILE_BASE_URL` is unset in production, so no tile URL is
+- `NEXT_PUBLIC_BIOME_TILE_URL` is unset in production, so no tile URL is
   inlined and the application falls back to the dark atlas. Geographic payload
   added to the production bundle: **zero bytes**.
 - `.gitignore` covers `.biome-data/`, with additional scoped rules so a pyramid

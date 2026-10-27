@@ -64,10 +64,10 @@ The builder defaults to `.biome-data/tiles/pnv-v4` and refuses overwrites. On th
 
 ```sh
 .biome-venv/bin/python scripts/biomes/build.py --output .biome-data/tiles/pnv-v5
-NEXT_PUBLIC_BIOME_TILE_BASE_URL=http://localhost:8766/pnv-v5 pnpm dev
+NEXT_PUBLIC_BIOME_TILE_URL=http://localhost:8766/pnv-v5 pnpm dev
 ```
 
-Visual rollback: set `NEXT_PUBLIC_BIOME_TILE_BASE_URL=http://localhost:8766/pnv-v2` and restore the previous hillshade paint (shadow `#0a1622`, highlight `#587083`, accent `#122330`, direction 335°, viewport anchor). Old data is untouched. No infrastructure migration is required.
+Visual rollback: set `NEXT_PUBLIC_BIOME_TILE_URL=http://localhost:8766/pnv-v2` and restore the previous hillshade paint (shadow `#0a1622`, highlight `#587083`, accent `#122330`, direction 335°, viewport anchor). Old data is untouched. No infrastructure migration is required.
 
 ## Storage, build and runtime observations
 

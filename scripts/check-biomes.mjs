@@ -12,7 +12,7 @@ for(const name of candidates){
  try{ await readFile(new URL(`${name}/tilejson.json`,tiles)); version=name; break; }catch{}
 }
 assert.ok(version,`Generate tiles first: expected one of ${candidates.join(', ')} under .biome-data/tiles/`);
-process.env.NEXT_PUBLIC_BIOME_TILE_BASE_URL=`http://localhost:8766/${version}`;
+process.env.NEXT_PUBLIC_BIOME_TILE_URL=`http://localhost:8766/${version}`;
 const {attachBiomes,BIOME_SOURCE,BIOME_LAYER}=await import(moduleURL(await compile('../map/biomes.ts')));
 const {createGlobeStyle}=await import(moduleURL(await compile('../map/mapStyle.ts')));
 const require=createRequire(import.meta.resolve('maplibre-gl'));

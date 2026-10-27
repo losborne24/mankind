@@ -85,7 +85,7 @@ if [[ ${#DRY[@]} -eq 0 ]]; then
   echo "Upload complete. Verify before pointing the app at it:"
   echo "  curl -sI -H 'Origin: https://<APP_DOMAIN>' https://<TILE_DOMAIN>/${PREFIX}/tilejson.json"
   echo "  curl -sI -H 'Origin: https://<APP_DOMAIN>' https://<TILE_DOMAIN>/${PREFIX}/0/0/0.${FORMAT}"
-  echo "Then build with NEXT_PUBLIC_BIOME_TILE_BASE_URL=https://<TILE_DOMAIN>/${PREFIX}"
+  echo "Then build with NEXT_PUBLIC_BIOME_TILE_URL=https://<TILE_DOMAIN>/${PREFIX}"
 else
   echo "Dry run finished. Review the planned operations above, then add --confirm."
 fi

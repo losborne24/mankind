@@ -4,7 +4,7 @@ export const BIOME_SOURCE = "natural-biomes";
 export const BIOME_LAYER = "natural-biome-colours";
 // The URL is inlined by Next.js at build time; raster requests happen at runtime.
 // No default production service is assumed.
-export const BIOME_BASE_URL = process.env.NEXT_PUBLIC_BIOME_TILE_BASE_URL ??
+export const BIOME_BASE_URL = process.env.NEXT_PUBLIC_BIOME_TILE_URL ??
   (process.env.NODE_ENV === "development" ? "http://localhost:8766/pnv-v4-global" : "");
 export const BIOME_ATTRIBUTION = 'Contains <a href="https://doi.org/10.7910/DVN/QQHCIK">OpenLandMap PNV · Hengl et al. (2018)</a>, <a href="https://opendatacommons.org/licenses/odbl/1-0/">ODbL 1.0</a> · <a href="https://mapterhorn.com/attribution">© Mapterhorn</a>';
 

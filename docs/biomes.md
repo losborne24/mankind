@@ -75,7 +75,7 @@ Use a **fresh versioned directory** to change colours, variation or zoom:
 
 ```sh
 .biome-venv/bin/python scripts/biomes/build.py --maxzoom 8 --variation 0.025 --output .biome-data/tiles/pnv-v3
-NEXT_PUBLIC_BIOME_TILE_BASE_URL=http://localhost:8766/pnv-v3 pnpm dev
+NEXT_PUBLIC_BIOME_TILE_URL=http://localhost:8766/pnv-v3 pnpm dev
 ```
 
 The builder refuses to overwrite an existing output. Its manifest appears only after all tiles finish. Do not point the browser at a generation in progress.
@@ -109,7 +109,7 @@ Output: lossless **RGBA PNG, 256×256, XYZ z0–7**, overzoomed by MapLibre at c
 }
 ```
 
-The visible tile selection and parent reuse are MapLibre's responsibility. No GeoTIFF or large raster is downloaded to the browser. `NEXT_PUBLIC_BIOME_TILE_BASE_URL` is a **build-time browser configuration**; set it before `pnpm build`, then raster fetches occur at runtime. Production has no assumed URL and defaults to the dark atlas.
+The visible tile selection and parent reuse are MapLibre's responsibility. No GeoTIFF or large raster is downloaded to the browser. `NEXT_PUBLIC_BIOME_TILE_URL` is a **build-time browser configuration**; set it before `pnpm build`, then raster fetches occur at runtime. Production has no assumed URL and defaults to the dark atlas.
 
 Order: base land → regional land → biome raster → regional hillshade → opaque regional ocean → coastlines → rivers/lakes. The existing hillshade loading/fade gate and z6 minimum remain, preventing underwater relief. The old Phase-1 Three.js test-marker activation was removed; the unused test-layer file is retained. No Three.js terrain or objects are introduced.
 
@@ -143,7 +143,7 @@ Use a new prefix whenever data or palette changes; do not overwrite immutable ob
 ```
 
 4. Attach a custom tile domain through R2 Settings → Public access → Custom Domains. Use a CDN cache rule for the versioned tile prefix and honour object cache headers. `r2.dev` is for development; a custom domain supports Cloudflare caching. Purge any previously cached responses if correcting CORS. See [R2 public buckets](https://developers.cloudflare.com/r2/buckets/public-buckets/) and [R2 CORS](https://developers.cloudflare.com/r2/buckets/cors/).
-5. Build MANKIND with `NEXT_PUBLIC_BIOME_TILE_BASE_URL=https://<TILE_DOMAIN>/biomes/pnv-v2`. Verify a PNG and manifest with an `Origin` request header, content types, caching and notices. Rotate globe and zoom before releasing.
+5. Build MANKIND with `NEXT_PUBLIC_BIOME_TILE_URL=https://<TILE_DOMAIN>/biomes/pnv-v2`. Verify a PNG and manifest with an `Origin` request header, content types, caching and notices. Rotate globe and zoom before releasing.
 
 ## Validation and measured output
 
