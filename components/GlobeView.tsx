@@ -33,6 +33,7 @@ import { ROMAN_SETTLEMENT } from "@/map/settlements/romanSettlement";
 import { DebugPanel } from "@/components/DebugPanel";
 import { MapReadout } from "@/components/MapReadout";
 import { queryTerrainHeights } from "@/map/terrain";
+import { attachTerrainTexturePrecision } from "@/map/terrainTexturePrecision";
 import { attachCoastlineDetail } from "@/map/coastlineDetail";
 import { useExplorationStore } from "@/state/explorationStore";
 import { BIOME_SOURCE } from "@/map/biomes";
@@ -76,6 +77,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
       // MapLibre already observes container resize (trackResize default true).
     });
 
+    const detachTerrainTexturePrecision = attachTerrainTexturePrecision(map);
     map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "top-right");
     map.dragRotate.enable();
     const detachCoastlineDetail = attachCoastlineDetail(map);
@@ -133,6 +135,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
     return () => {
       disposed = true;
       detachCoastlineDetail();
+      detachTerrainTexturePrecision();
       map.off("moveend", syncView);
       if (process.env.NODE_ENV === "development") {
         delete (window as unknown as { __globe?: unknown }).__globe;
