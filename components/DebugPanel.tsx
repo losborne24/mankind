@@ -25,6 +25,7 @@ interface DebugPanelProps {
   terrainWarning: boolean;
   romanStatus: RomanTestStatus;
   settlementStatus: SettlementStatus;
+  onVillaEnhanced: (enabled: boolean) => void;
   onSettlementEnabled: (enabled: boolean) => void;
   onVisitSettlement: (origin?: Coordinate) => void;
   onRomanTestEnabled: (enabled: boolean) => void;
@@ -32,7 +33,8 @@ interface DebugPanelProps {
 }
 
 /** Shared debug panel; add future map controls as separate fieldsets here. */
-export function DebugPanel({ map, terrainWarning, onRetryTerrain, romanStatus, onRomanTestEnabled, settlementStatus, onSettlementEnabled, onVisitSettlement }: DebugPanelProps) {
+export function DebugPanel({ map, terrainWarning, onRetryTerrain, romanStatus, onRomanTestEnabled, settlementStatus, onSettlementEnabled, onVisitSettlement, onVillaEnhanced }: DebugPanelProps) {
+  const [villaEnhanced, setVillaEnhanced] = useState(true);
   const [exaggeration, setExaggeration] = useState(DEFAULT_TERRAIN_EXAGGERATION);
   const [diagnosticShading, setDiagnosticShading] = useState(true);
   const [hillshadeIntensity, setHillshadeIntensity] = useState(0.25);
@@ -136,6 +138,14 @@ export function DebugPanel({ map, terrainWarning, onRetryTerrain, romanStatus, o
             onChange={(event) => onSettlementEnabled(event.target.checked)} />
           Settlement scene
         </label>
+        <label className="mt-2 block">Comparison house
+          <select aria-label="Villa detail" value={villaEnhanced ? "enhanced" : "original"}
+            className="mt-1 w-full rounded border border-panel-border bg-background p-1 text-white"
+            onChange={(event) => { const enabled = event.target.value === "enhanced"; setVillaEnhanced(enabled); onVillaEnhanced(enabled); }}>
+            <option value="original">Original villa</option>
+            <option value="enhanced">Enhanced villa</option>
+          </select>
+        </label>
         <button className="mt-2 block underline" onClick={() => onVisitSettlement()}>Visit settlement</button>
         <button className="mt-2 block underline" onClick={() => onVisitSettlement(
           settlementStatus.origin[0] === ROMAN_SETTLEMENT.origin[0] ? ROMAN_SETTLEMENT_ALTERNATE : ROMAN_SETTLEMENT.origin,
@@ -145,6 +155,7 @@ export function DebugPanel({ map, terrainWarning, onRetryTerrain, romanStatus, o
         <p className="mt-1 text-white/40">{settlementStatus.origin.map((value) => value.toFixed(4)).join(", ")} · Generic prototype near Rome.</p>
         {settlementStatus.terrainPending > 0 && <p className="mt-2 text-amber-200/80">Waiting for terrain on {settlementStatus.terrainPending} surfaces. Unknown ground stays hidden.</p>}
         {settlementStatus.terrainRetained > 0 && <p className="mt-2 text-amber-200/80">Terrain updating; retaining known heights on {settlementStatus.terrainRetained} surfaces.</p>}
+        {settlementStatus.scenerySteep > 0 && <p className="mt-2 text-amber-200/80">{settlementStatus.scenerySteep} rigid props hidden on steep ground.</p>}
         {settlementStatus.steepSites > 0 && <p className="mt-2 text-amber-200/80">{settlementStatus.steepSites} building sites exceed the foundation height limit and are hidden.</p>}
         {settlementStatus.errors.length > 0 && <>
           <ul className="mt-2 break-words text-amber-200/80">{settlementStatus.errors.map((error) => <li key={error}>{error}</li>)}</ul>

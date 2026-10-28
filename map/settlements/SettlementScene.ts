@@ -5,8 +5,11 @@ import { prepareAsset } from "@/lib/assets/prepareAsset";
 import { offsetCoordinate, type Coordinate, type LocalPoint, type SettlementDefinition } from "@/map/settlements/romanSettlement";
 import { foundationSurface, roadNetworkSurface, groundSurface, writeSurfaceHeights, type TerrainSurface } from "@/map/settlements/terrainSurfaces";
 
+import { settlementSurfaceMaps, weatheredMaterial, GROUND_WIDTH, GROUND_DEPTH, type GroundFootprint } from "@/map/settlements/surfaceMaterials";
 import { configureTerrainShadowCaster } from "@/map/settlements/terrainShadows";
 import { InstancedScenery, type GroundResult } from "@/map/settlements/InstancedScenery";
+
+import { createEnhancedVilla, DETAIL_VILLA_ID } from "@/map/settlements/enhancedVilla";
 
 export interface SettlementStatus {
   state: "unloaded" | "loading" | "waiting-terrain" | "ready" | "partial" | "error";
@@ -19,6 +22,7 @@ export interface SettlementStatus {
   errors: string[];
   sceneryLoaded: number;
   sceneryTotal: number;
+  scenerySteep: number;
 }
 interface SurfaceEntry {
   surface: TerrainSurface;
@@ -41,8 +45,10 @@ export class SettlementScene {
   shadowsEnabled = true;
   private entries: SurfaceEntry[] = [];
   private resources: Array<{ dispose(): void }> = [];
-  private materialOverrides = new Map<THREE.Material, THREE.Material>();
+  private materialOverrides = new Map<THREE.Material, Map<number, THREE.Material>>();
   private readonly knownHeights = new Map<string, number>();
+  private enhancedVilla = true;
+  private villaComparison?: { original: THREE.Object3D; enhanced: THREE.Object3D };
   private active = false;
   private generation = 0;
   private dirty = true;
@@ -53,6 +59,7 @@ export class SettlementScene {
   private terrainPending = 0;
   private terrainRetained = 0;
   private steepSites = 0;
+  private scenerySteep = 0;
 
   constructor(
     readonly definition: SettlementDefinition,
@@ -68,25 +75,33 @@ export class SettlementScene {
     if (this.active) return this.loading ?? Promise.resolve();
     this.active = true;
     const generation = this.generation;
-    const sky = new THREE.HemisphereLight(0xc3d7e4, 0x8b775a, 1.4);
-    this.sun = new THREE.DirectionalLight(0xffe3b3, 2.5);
+    const sky = new THREE.HemisphereLight(0xd3dce0, 0x85765e, 1.65);
+    this.sun = new THREE.DirectionalLight(0xffeed4, 2.15);
     this.sun.castShadow = true;
     this.sun.shadow.mapSize.set(1024, 1024);
-    Object.assign(this.sun.shadow.camera, { left: -48, right: 48, top: 55, bottom: -55, near: 1, far: 180 });
+    Object.assign(this.sun.shadow.camera, { left: -68, right: 68, top: 78, bottom: -78, near: 1, far: 180 });
     this.sun.shadow.camera.updateProjectionMatrix();
+    this.sun.shadow.radius = 2;
     this.sun.shadow.bias = -0.00015;
     this.sun.shadow.normalBias = 0.035;
     this.root.add(sky, this.sun, this.sun.target);
     this.resources.push(this.sun.shadow);
     this.shadowDirty = true;
-    const roadMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, roughness: 1, side: THREE.DoubleSide });
-    const foundationMaterial = new THREE.MeshStandardMaterial({ color: 0x887a65, roughness: 1, flatShading: true, side: THREE.DoubleSide, shadowSide: THREE.BackSide });
+    const roadMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide, forceSinglePass: true });
+    const foundationMaterial = new THREE.MeshStandardMaterial({ color: 0x918570, roughness: 1, flatShading: true, side: THREE.DoubleSide, shadowSide: THREE.BackSide });
     this.resources.push(roadMaterial, foundationMaterial);
     this.addSurface(roadNetworkSurface(this.definition.roads), roadMaterial, "road-network");
+    const footprints: GroundFootprint[] = [];
+    const groundMaterial = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide, forceSinglePass: true });
+    this.resources.push(groundMaterial);
+    const treatment = this.addSurface(groundSurface(GROUND_WIDTH, GROUND_DEPTH, 2), groundMaterial, "settlement-ground");
+    treatment.mesh.renderOrder = 1;
     const catcher = new THREE.ShadowMaterial({ opacity: 0.27, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1 });
     this.resources.push(catcher);
-    const ground = this.addSurface(groundSurface(64, 88), catcher, "terrain-shadow-receiver");
+    const ground = this.addSurface(groundSurface(GROUND_WIDTH, GROUND_DEPTH, 2), catcher, "terrain-shadow-receiver");
     ground.shadowReceiver = true;
+    ground.mesh.renderOrder = 2;
+    this.entries[0].mesh.renderOrder = 3;
     const sceneryLoad = this.scenery.load(this.definition.scenery ?? [], this.cache, () => {
       this.dirty = this.shadowDirty = true; this.publish(); this.repaint();
     });
@@ -99,16 +114,20 @@ export class SettlementScene {
         const model = prepareAsset(lease.scene, asset);
         const size = new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3());
         const heading = building.headingRadians ?? 0;
+        footprints.push({ offset: building.offset, width: size.x, depth: size.z, heading });
+        const variant = [...building.id].reduce((sum, char) => sum + char.charCodeAt(0), 0) % 3;
         const entry = this.addSurface(foundationSurface(building.offset, size.x + 0.4, size.z + 0.4, heading), foundationMaterial, `${building.id}-foundation`);
         model.traverse((object) => {
           if (object instanceof THREE.Mesh) {
             // Closed prototype buildings are double-sided. Back-face shadow casting
             // avoids their front surfaces shadowing themselves; cache materials stay immutable.
             const shadowMaterial = (material: THREE.Material) => {
-              let copy = this.materialOverrides.get(material);
+              let variants = this.materialOverrides.get(material);
+              if (!variants) { variants = new Map(); this.materialOverrides.set(material, variants); }
+              let copy = variants.get(variant);
               if (!copy) {
-                copy = material.clone(); copy.shadowSide = THREE.BackSide;
-                this.materialOverrides.set(material, copy); this.resources.push(copy);
+                copy = weatheredMaterial(material, variant);
+                variants.set(variant, copy); this.resources.push(copy);
               }
               return copy;
             };
@@ -118,6 +137,17 @@ export class SettlementScene {
         });
         entry.mesh.castShadow = true;
         configureTerrainShadowCaster(entry.mesh);
+        if (building.id === DETAIL_VILLA_ID && building.assetId === "roman-villa-01") {
+          const detail = createEnhancedVilla();
+          const original = new THREE.Group();
+          original.name = "original-villa";
+          original.add(...model.children.slice());
+          model.add(original, detail.group);
+          this.resources.push(detail);
+          this.villaComparison = { original, enhanced: detail.group };
+          original.visible = !this.enhancedVilla;
+          detail.group.visible = this.enhancedVilla;
+        }
         model.name = building.id;
         model.rotation.y = heading;
         model.position.set(building.offset[0], 0, building.offset[1]);
@@ -135,11 +165,29 @@ export class SettlementScene {
       this.publish();
       this.repaint();
     })]).then(() => {
-      if (this.active && generation === this.generation) { this.publish(); this.repaint(); }
+      if (this.active && generation === this.generation) {
+        const maps = settlementSurfaceMaps(this.definition, footprints);
+        groundMaterial.opacity = 1; roadMaterial.opacity = 1;
+        groundMaterial.map = maps.ground; groundMaterial.needsUpdate = true;
+        roadMaterial.map = maps.road; roadMaterial.needsUpdate = true;
+        this.resources.push(maps.ground, maps.road);
+        this.publish(); this.repaint();
+      }
     });
     this.publish();
     this.repaint();
     return this.loading;
+  }
+
+  /** Swap only child visibility: the measured footprint, lease and terrain anchor stay identical. */
+  setVillaEnhanced(enabled: boolean): void {
+    this.enhancedVilla = enabled;
+    if (this.villaComparison) {
+      this.villaComparison.original.visible = !enabled;
+      this.villaComparison.enhanced.visible = enabled;
+    }
+    this.shadowDirty = true;
+    this.repaint();
   }
 
   /** Reuses loaded models and geometry; invalidates all old-location terrain samples. */
@@ -159,7 +207,7 @@ export class SettlementScene {
       this.scenery.invalidateTerrain();
       this.shadowDirty = true;
       this.terrainPending = this.entries.length;
-      this.terrainRetained = this.steepSites = 0;
+      this.terrainRetained = this.steepSites = this.scenerySteep = 0;
       for (const entry of this.entries) {
         entry.heights = undefined;
         entry.mesh.visible = false;
@@ -172,7 +220,7 @@ export class SettlementScene {
   updateTerrain(sample: TerrainSampler): void {
     if (!this.active || !this.dirty) return;
     this.dirty = false;
-    this.terrainPending = this.terrainRetained = this.steepSites = 0;
+    this.terrainPending = this.terrainRetained = this.steepSites = this.scenerySteep = 0;
     this.shadowDirty = true;
     const frameSamples = new Map<string, GroundResult>();
     const resolve = (point: LocalPoint): GroundResult => {
@@ -219,9 +267,9 @@ export class SettlementScene {
       }
       if (!entry.heights || heights.some((height, i) => height !== entry.heights![i])) {
         writeSurfaceHeights(entry.surface, heights, top);
-        if (entry.shadowReceiver) {
+        if (entry.shadowReceiver || entry.mesh.name === "settlement-ground") {
           const positions = entry.surface.geometry.getAttribute("position") as THREE.BufferAttribute;
-          for (let i = 0; i < heights.length; i++) positions.setY(i, heights[i] + 0.025);
+          for (let i = 0; i < heights.length; i++) positions.setY(i, heights[i] + (entry.shadowReceiver ? 0.065 : 0.05));
           entry.surface.geometry.computeBoundingSphere();
         }
         entry.heights = heights;
@@ -232,10 +280,11 @@ export class SettlementScene {
     const sceneryGround = this.scenery.updateTerrain(resolve);
     this.terrainPending += sceneryGround.pending;
     this.terrainRetained += sceneryGround.retained;
+    this.scenerySteep = sceneryGround.steep;
     const stableFloors = this.entries.filter((entry) => entry.model?.visible).map((entry) => entry.model!.position.y);
     const center = stableFloors.length ? { height: stableFloors.reduce((sum, value) => sum + value, 0) / stableFloors.length } : resolve([0, 0]);
     if (this.sun && center.height !== undefined) {
-      this.sun.position.set(-35, center.height + 65, -25);
+      this.sun.position.set(-40, center.height + 65, -40);
       this.sun.target.position.set(0, center.height, 0);
     }
     this.updateAccessPaths();
@@ -250,11 +299,12 @@ export class SettlementScene {
     for (const entry of this.entries) entry.lease?.release();
     for (const resource of this.resources) resource.dispose();
     this.root.clear();
+    this.villaComparison = undefined;
     this.entries = [];
     this.resources = [];
     this.materialOverrides.clear();
     this.knownHeights.clear();
-    this.loaded = this.terrainPending = this.terrainRetained = this.steepSites = 0;
+    this.loaded = this.terrainPending = this.terrainRetained = this.steepSites = this.scenerySteep = 0;
     this.errors = [];
     this.loading = undefined;
     this.dirty = true;
@@ -278,7 +328,7 @@ export class SettlementScene {
         if (!approach.accessTo) continue;
         const building = this.root.getObjectByName(approach.accessTo);
         if (!building?.visible) continue;
-        const [ax, az] = approach.points[0], [bx, bz] = approach.points[approach.points.length - 1];
+        const [ax, az] = approach.points[approach.points.length - 2], [bx, bz] = approach.points[approach.points.length - 1];
         const dx = bx - ax, dz = bz - az, lengthSquared = dx * dx + dz * dz;
         const t = ((x - ax) * dx + (z - az) * dz) / lengthSquared;
         const across = Math.abs((x - ax) * dz - (z - az) * dx) / Math.sqrt(lengthSquared);
@@ -315,10 +365,10 @@ export class SettlementScene {
     const state: SettlementStatus["state"] = !this.active ? "unloaded" : loading ? "loading" :
       this.loaded === 0 && this.errors.length ? "error" :
       this.terrainPending >= this.entries.length && this.entries.every((entry) => !entry.mesh.visible) ? "waiting-terrain" :
-      errors.length || this.terrainPending || this.terrainRetained || this.steepSites ? "partial" : "ready";
+      errors.length || this.terrainPending || this.terrainRetained || this.steepSites || this.scenerySteep ? "partial" : "ready";
     const status: SettlementStatus = { state, origin: [...this.origin], loaded: this.loaded,
       total: this.definition.buildings.length, terrainPending: this.terrainPending,
-      terrainRetained: this.terrainRetained, steepSites: this.steepSites, errors, sceneryLoaded: this.scenery.loaded, sceneryTotal };
+      terrainRetained: this.terrainRetained, steepSites: this.steepSites, errors, sceneryLoaded: this.scenery.loaded, sceneryTotal, scenerySteep: this.scenerySteep };
     const serialized = JSON.stringify(status);
     if (serialized !== this.lastStatus) { this.lastStatus = serialized; this.changed(status); }
   }

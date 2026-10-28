@@ -85,9 +85,45 @@ function grass() {
   }
   mesh(group,geometries,true);return group;
 }
+// Small modular world-building props, not architectural or botanical reconstructions.
+function boundary() {
+  const group = new THREE.Group(), stones = [];
+  for (let row=0;row<2;row++) for(let i=0;i<5;i++) {
+    const g=new THREE.IcosahedronGeometry(1,1);
+    g.scale(between(0.17,0.21),between(0.13,0.16),between(0.18,0.23));
+    g.rotateY(between(-0.2,0.2));g.translate((i-2)*0.34+(row?0.05:0),0.14+row*0.23,between(-0.025,0.025));
+    stones.push(colorize(g,0x9e9784,0.1));
+  }
+  mesh(group,stones);return group;
+}
+function crate() {
+  const group=new THREE.Group(), wood=[];
+  const box=(x,y,z,w,h,d)=>{const g=new THREE.BoxGeometry(w,h,d);g.translate(x,y,z);wood.push(colorize(g,0x79654c,0.07));};
+  for(let i=0;i<5;i++) { const x=-0.36+i*0.18;box(x,0.66,0,0.17,0.08,0.72); }
+  for(let i=0;i<4;i++) { const y=0.1+i*0.16;box(0,y,-0.34,0.9,0.145,0.06);box(0,y,0.34,0.9,0.145,0.06);box(-0.42,y,0,0.06,0.145,0.62);box(0.42,y,0,0.06,0.145,0.62); }
+  for(const x of [-0.34,0.34]) {box(x,0.35,-0.38,0.065,0.7,0.045);box(x,0.35,0.38,0.065,0.7,0.045);}
+  mesh(group,wood);return group;
+}
+function gardenPlant() {
+  const group=new THREE.Group(), leaves=[];
+  for(let i=0;i<34;i++) {
+    const a=i*2.4, r=between(0.04,0.18);
+    leaf([Math.cos(a)*r,between(0.08,0.22),Math.sin(a)*r],between(0.17,0.3),i%3?0x647648:0x88925e,leaves);
+  }
+  mesh(group,leaves,true);return group;
+}
+function grain() {
+  const group=new THREE.Group(), parts=[];
+  for(let i=0;i<23;i++) {
+    const a=i*2.4,r=between(0.05,0.42),h=between(0.6,0.95),x=Math.cos(a)*r,z=Math.sin(a)*r;
+    const stalk=new THREE.CylinderGeometry(0.008,0.012,h,5);stalk.translate(x,h/2,z);parts.push(colorize(stalk,0xb8a36a,0.06));
+    const ear=new THREE.SphereGeometry(1,5,4);ear.scale(0.032,0.12,0.035);ear.translate(x,h,z);parts.push(colorize(ear,0xc4ad70,0.08));
+  }
+  mesh(group,parts);return group;
+}
 const output=new URL("../public/assets/environment/",import.meta.url);await mkdir(output,{recursive:true});
 const manifest={};
-for(const [name,create] of Object.entries({"olive-tree":olive,"italian-cypress":cypress,"mediterranean-shrub":shrub,"limestone-rock":rock,"dry-grass-tuft":grass})) {
+for(const [name,create] of Object.entries({"olive-tree":olive,"italian-cypress":cypress,"mediterranean-shrub":shrub,"limestone-rock":rock,"dry-grass-tuft":grass,"low-stone-boundary":boundary,"wooden-crate":crate,"garden-plant":gardenPlant,"grain-clump":grain})) {
   const group=create();group.name=name;
   const bounds=new THREE.Box3().setFromObject(group);group.position.y=-bounds.min.y;
   const buffer=await new GLTFExporter().parseAsync(group,{binary:true});

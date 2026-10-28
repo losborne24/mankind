@@ -4,8 +4,8 @@ Choose **Debug tools → Roman settlement layout → Visit settlement**. The lay
 is a generic prototype near Rome at [12.55, 41.85], not an archaeological
 reconstruction. It contains five villas, one temple and one aqueduct, using only
 the three previously imported GLBs. The main road is 4 m wide and smaller paths
-are 1.6 m wide. The environment milestone adds 126 instanced scenery objects
-and sunlight shadows; see [settlement-environment.md](settlement-environment.md). The layout covers roughly 30 × 65 metres.
+range from 1.1 to 1.8 m wide. The environmental world-building milestone adds
+508 instanced scenery placements, courtyards, gardens, field margins and shadows; see [settlement-environment.md](settlement-environment.md). The local ground/shadow coverage is 96 × 128 metres; all surface heights follow native DEM samples.
 
 **Relocate nearby** alternates between the original location and
 [12.5515, 41.851]. The **Settlement scene** checkbox unloads/reloads it. Errors

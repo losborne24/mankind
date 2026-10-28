@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { GROUND_WIDTH, GROUND_DEPTH } from "@/map/settlements/surfaceMaterials";
 import type { LocalPoint } from "@/map/settlements/romanSettlement";
 
 /** Indexed surface vertices keep geographic sample points separate from mesh heights. */
@@ -10,6 +11,7 @@ export interface TerrainSurface {
 function surface(points: LocalPoint[], indices: number[]): TerrainSurface {
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute("position", new THREE.Float32BufferAttribute(points.flatMap(([x, z]) => [x, 0, z]), 3));
+  geometry.setAttribute("uv", new THREE.Float32BufferAttribute(points.flatMap(([x, z]) => [x / GROUND_WIDTH + 0.5, z / GROUND_DEPTH + 0.5]), 2));
   geometry.setIndex(indices);
   return { points, geometry };
 }
@@ -117,9 +119,6 @@ export function roadNetworkSurface(roads: readonly { widthMeters: number; points
     indices.push(a, c, b, b, c, d);
   }
   const result = surface(points, indices);
-  const base = new THREE.Color(0x98886a);
-  const colors = points.flatMap(([x, z]) => base.clone().multiplyScalar(0.94 + 0.09 * (Math.sin(x * 13.1 + z * 7.7) * 0.5 + 0.5)).toArray());
-  result.geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
   return result;
 }
 

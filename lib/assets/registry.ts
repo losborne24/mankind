@@ -58,6 +58,30 @@ export const assetRegistry = {
     id: "environment-dry-grass-tuft-01", path: "environment/dry-grass-tuft.glb", category: "vegetation",
     scale: 1, dimensionsMeters: [0.429601, 0.475204, 0.433412], groundOffsetMeters: 0, source: environmentSource,
   },
+  "environment-low-stone-boundary-01": {
+    id: "environment-low-stone-boundary-01", path: "environment/low-stone-boundary.glb", category: "prop",
+    scale: 1, dimensionsMeters: [1.799475, 0.53842, 0.470937], groundOffsetMeters: 0, source: environmentSource,
+  },
+  "environment-wooden-crate-01": {
+    id: "environment-wooden-crate-01", path: "environment/wooden-crate.glb", category: "prop",
+    scale: 1, dimensionsMeters: [0.9, 0.7, 0.805], groundOffsetMeters: 0, source: environmentSource,
+  },
+  "environment-garden-plant-01": {
+    id: "environment-garden-plant-01", path: "environment/garden-plant.glb", category: "vegetation",
+    scale: 1, dimensionsMeters: [0.752882, 0.532974, 0.558861], groundOffsetMeters: 0, source: environmentSource,
+  },
+  "environment-grain-clump-01": {
+    id: "environment-grain-clump-01", path: "environment/grain-clump.glb", category: "vegetation",
+    scale: 1, dimensionsMeters: [0.626516, 1.0661, 0.527335], groundOffsetMeters: 0, source: environmentSource,
+  },
+  "roman-wine-barrel-01": {
+    id: "roman-wine-barrel-01", path: "roman/props/wine_barrel.glb", category: "prop",
+    scale: 1, dimensionsMeters: [0.9, 0.8, 0.88], groundOffsetMeters: 0, source,
+  },
+  "roman-market-awning-01": {
+    id: "roman-market-awning-01", path: "roman/props/market_awning.glb", category: "prop",
+    scale: 1, dimensionsMeters: [2.6, 2.174045, 1.791743], groundOffsetMeters: 0, source,
+  },
   "roman-amphora-01": {
     id: "roman-amphora-01", path: "roman/props/amphora.glb", category: "prop",
     scale: 1, dimensionsMeters: [1.0, 1.3, 0.66574], groundOffsetMeters: 0, source,

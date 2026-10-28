@@ -8,7 +8,48 @@ const { ROMAN_SETTLEMENT, ROMAN_SETTLEMENT_ALTERNATE, offsetCoordinate } = await
 const { SettlementScene } = await import(await loadModule("map/settlements/SettlementScene"));
 const { queryTerrainSample } = await import(await loadModule("map/terrain"));
 const { GlbCache } = await import(await loadModule("lib/assets/glbCache"));
+const { assetRegistry } = await import(await loadModule("lib/assets/registry"));
+const { settlementSurfaceMaps } = await import(await loadModule("map/settlements/surfaceMaterials"));
+const { roadNetworkSurface } = await import(await loadModule("map/settlements/terrainSurfaces"));
 assert.equal(ROMAN_SETTLEMENT.buildings.length, 7);
+assert.deepEqual(new Set(ROMAN_SETTLEMENT.groundAreas.map((area) => area.kind)), new Set(["courtyard", "garden", "field"]));
+// Retain the previous union regression fixture as well as the new network below.
+const legacyRoads = [{widthMeters:4,points:[[0,-32],[0,21]]},
+  ...[-20,-6,10].map((z)=>({widthMeters:1.6,points:[[-2,z],[-6.5,z]]})),
+  ...[-20,-6].map((z)=>({widthMeters:1.6,points:[[2,z],[6.5,z]]})),
+  {widthMeters:1.6,points:[[2,12],[5.8,12]]}, {widthMeters:1.6,points:[[0,21],[0,27]]}];
+const legacy = roadNetworkSurface(legacyRoads), lp = legacy.geometry.getAttribute("position"), li = legacy.geometry.index;
+let legacyArea = 0;
+for (let i=0;i<li.count;i+=3) {
+  const a=li.getX(i),b=li.getX(i+1),c=li.getX(i+2);
+  legacyArea += Math.abs((lp.getX(b)-lp.getX(a))*(lp.getZ(c)-lp.getZ(a))-(lp.getZ(b)-lp.getZ(a))*(lp.getX(c)-lp.getX(a)))/2;
+}
+assert.ok(Math.abs(legacyArea-263.68)<0.001);
+legacy.geometry.dispose();
+// The authored natural clumps must not obstruct the existing roads or footprints.
+for (const item of ROMAN_SETTLEMENT.scenery.filter((s) => ["vegetation", "rock"].includes(assetRegistry[s.assetId].category))) {
+  const radius = Math.max(assetRegistry[item.assetId].dimensionsMeters[0], assetRegistry[item.assetId].dimensionsMeters[2]) * (item.scale ?? 1) / 2;
+  for (const road of ROMAN_SETTLEMENT.roads) for (let i = 1; i < road.points.length; i++) {
+    const [ax, az] = road.points[i - 1], [bx, bz] = road.points[i], [x, z] = item.offset;
+    const dx = bx - ax, dz = bz - az;
+    const t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / (dx * dx + dz * dz)));
+    assert.ok(Math.hypot(x - ax - t * dx, z - az - t * dz) > radius + road.widthMeters / 2, "Scenery keeps roads and entrances clear");
+  }
+  for (const building of ROMAN_SETTLEMENT.buildings) {
+    const [width,,depth] = assetRegistry[building.assetId].dimensionsMeters;
+    const dx = item.offset[0] - building.offset[0], dz = item.offset[1] - building.offset[1], angle = building.headingRadians ?? 0;
+    const x = Math.cos(angle) * dx - Math.sin(angle) * dz, z = Math.sin(angle) * dx + Math.cos(angle) * dz;
+    assert.ok(Math.hypot(Math.max(0, Math.abs(x) - width / 2), Math.max(0, Math.abs(z) - depth / 2)) > radius, "Scenery clears building footprints");
+  }
+}
+// A vegetation stamp changes its own patch, without changing unrelated ground.
+const emptyPatch = { ...ROMAN_SETTLEMENT, roads: [], scenery: [] };
+const bare = settlementSurfaceMaps(emptyPatch, []);
+const planted = settlementSurfaceMaps({ ...emptyPatch, scenery: [{assetId: "environment-mediterranean-shrub-01", offset: [0,0]}] }, []);
+const centerPixel = (352 * 512 + 256) * 4;
+assert.notDeepEqual(planted.ground.image.data.slice(centerPixel, centerPixel + 4), bare.ground.image.data.slice(centerPixel, centerPixel + 4));
+assert.deepEqual(planted.ground.image.data.slice(0, 256 * 4), bare.ground.image.data.slice(0, 256 * 4));
+for (const map of [bare.ground, bare.road, planted.ground, planted.road]) map.dispose();
 assert.ok(offsetCoordinate([12, 42], [10, 0])[0] > 12);
 assert.ok(offsetCoordinate([12, 42], [0, 10])[1] < 42);
 assert.ok(offsetCoordinate([179.99999, 0], [10, 0])[0] < -179);
@@ -99,21 +140,63 @@ try {
     roadArea += Math.abs((roadPositions.getX(b) - roadPositions.getX(a)) * (roadPositions.getZ(c) - roadPositions.getZ(a)) -
       (roadPositions.getZ(b) - roadPositions.getZ(a)) * (roadPositions.getX(c) - roadPositions.getX(a))) / 2;
   }
-  assert.ok(Math.abs(roadArea - 263.68) < 0.001, "Road triangles cover the street union once, without overlapping junctions");
+  assert.ok(Math.abs(roadArea - 394.0675) < 0.001, "Road triangles cover the street union once, without overlapping junctions");
+  for (let i=0;i<roadIndices.count;i+=3) {
+    const vertices=[0,1,2].map((j)=>roadIndices.getX(i+j));
+    const x=vertices.reduce((sum,v)=>sum+roadPositions.getX(v),0)/3;
+    const z=vertices.reduce((sum,v)=>sum+roadPositions.getZ(v),0)/3;
+    for (const building of ROMAN_SETTLEMENT.buildings) {
+      const [width,,depth]=assetRegistry[building.assetId].dimensionsMeters, angle=building.headingRadians??0;
+      const dx=x-building.offset[0],dz=z-building.offset[1];
+      const lx=Math.cos(angle)*dx-Math.sin(angle)*dz,lz=Math.sin(angle)*dx+Math.cos(angle)*dz;
+      assert.ok(Math.abs(lx)>=width/2-0.01 || Math.abs(lz)>=depth/2-0.01, "Road interiors stay outside building footprints");
+    }
+  }
   for (const path of ROMAN_SETTLEMENT.roads.filter((road) => road.accessTo)) {
     const [x,z] = path.points.at(-1);
+    const [ax,az] = path.points.at(-2), dx = x - ax, dz = z - az;
     const building = assembler.scene.getObjectByName(path.accessTo);
     let matched = 0;
     for (let i = 0; i < roadPositions.count; i++) {
       const distance = Math.hypot(roadPositions.getX(i) - x, roadPositions.getZ(i) - z);
-      if (distance <= path.widthMeters / 2 + 0.00001) {
+      const along = ((roadPositions.getX(i) - x) * dx + (roadPositions.getZ(i) - z) * dz) / Math.hypot(dx,dz);
+      if (distance <= path.widthMeters / 2 + 0.00001 && Math.abs(along) < 0.00001) {
         assert.ok(Math.abs(roadPositions.getY(i) - building.position.y) < 0.0001, "Entrance landings meet the foundation height");
         matched++;
       }
     }
     assert.ok(matched > 0);
   }
+  const treatment = assembler.scene.getObjectByName("settlement-ground");
+  const groundMap = treatment.material.map;
+  const roadMap = network.material.map;
+  assert.ok(groundMap.isDataTexture && roadMap.isDataTexture);
+  assert.equal(treatment.material.depthWrite, false, "Ground blending preserves MapLibre depth");
+  assert.equal(network.material.forceSinglePass, true, "Transparent roads need only one face pass");
+  const pixels = groundMap.image.data, w = groundMap.image.width, h = groundMap.image.height;
+  for (let i = 0; i < w; i++) {
+    assert.equal(pixels[i * 4 + 3], 0);
+    assert.equal(pixels[((h - 1) * w + i) * 4 + 3], 0);
+  }
+  for (let j = 0; j < h; j++) {
+    assert.equal(pixels[(j * w) * 4 + 3], 0);
+    assert.equal(pixels[(j * w + w - 1) * 4 + 3], 0);
+  }
+  assert.ok(pixels.some((v, i) => i % 4 === 3 && v > 120), "Wear is visible inside the transparent perimeter");
+  const groundPositions = treatment.geometry.getAttribute("position");
+  for (let i = 0; i < groundPositions.count; i++) {
+    const y = plane(offsetCoordinate(assembler.origin, [groundPositions.getX(i), groundPositions.getZ(i)]));
+    assert.ok(Math.abs(groundPositions.getY(i) - y - 0.05) < 0.0001, "Ground treatment follows the sampled terrain");
+  }
+  let textureDisposals = 0;
+  groundMap.addEventListener("dispose", () => textureDisposals++);
+  roadMap.addEventListener("dispose", () => textureDisposals++);
   const instanceMeshes = meshes().filter((mesh) => mesh.isInstancedMesh);
+  const cloth = instanceMeshes.find((mesh) => mesh.name.startsWith("roman-market-awning") && mesh.material.name === "roman_red").material;
+  assert.equal(cloth.color.getHex(), 0xb8a37e);
+  let clothDisposed = 0;
+  cloth.addEventListener("dispose", () => clothDisposed++);
+  const instanceColours = instanceMeshes.map((mesh) => mesh.instanceColor?.array.slice());
   assert.ok(instanceMeshes.length < ROMAN_SETTLEMENT.scenery.length / 4, "Repeated scenery must be instanced");
   for (const mesh of instanceMeshes) {
     assert.ok(mesh.visible);
@@ -133,8 +216,44 @@ try {
   assert.notEqual(settlementVillaMaterial, originalVillaMaterial, "Settlement shadow overrides must not mutate the cached/Giza material");
   assert.equal(settlementVillaMaterial.shadowSide, THREE.BackSide);
   assert.notEqual(originalVillaMaterial.shadowSide, THREE.BackSide);
+  const villaColors = new Set();
+  for (const building of ROMAN_SETTLEMENT.buildings.filter((b) => b.assetId === "roman-villa-01")) {
+    assembler.scene.getObjectByName(building.id).traverse((o) => {
+      if (o.isMesh && o.material.name === "terra") villaColors.add(o.material.color.getHex());
+    });
+  }
+  assert.ok(villaColors.size > 1, "Repeated villas have deterministic material variation");
   let overrideDisposed = 0;
   settlementVillaMaterial.addEventListener("dispose", () => overrideDisposed++);
+  // The architectural experiment shares the original placement, foundation and lease.
+  const house = assembler.scene.getObjectByName("villa-west-2");
+  const baseline = house.getObjectByName("original-villa");
+  const detail = house.getObjectByName("enhanced-villa");
+  assert.ok(baseline && detail);
+  assert.equal(detail.children.length, 6, "Architecture stays in six material batches");
+  assert.equal(assembler.scene.getObjectsByProperty("name", "enhanced-villa").length, 1);
+  const anchorBefore = house.position.clone(), headingBefore = house.rotation.y;
+  const requestsBeforeSwitch = requests.length;
+  assembler.setVillaEnhanced(false);
+  assert.ok(baseline.visible && !detail.visible);
+  assembler.setVillaEnhanced(true);
+  assert.ok(!baseline.visible && detail.visible);
+  assert.ok(house.position.equals(anchorBefore));
+  assert.equal(house.rotation.y, headingBefore);
+  assert.equal(requests.length, requestsBeforeSwitch);
+  const localBounds = new THREE.Box3();
+  for (const mesh of detail.children) { mesh.geometry.computeBoundingBox(); localBounds.union(mesh.geometry.boundingBox); }
+  assert.ok(localBounds.min.y >= -1e-6 && localBounds.max.y < 4.5);
+  assert.ok(localBounds.max.x - localBounds.min.x < 6.2 && localBounds.max.z - localBounds.min.z < 6.6);
+  let detailDisposals = 0, detailMaterialDisposals = 0, detailTextureDisposals = 0;
+  const detailMaps = new Set();
+  for (const mesh of detail.children) {
+    mesh.geometry.addEventListener("dispose", () => detailDisposals++);
+    mesh.material.addEventListener("dispose", () => detailMaterialDisposals++);
+    if (mesh.material.map) detailMaps.add(mesh.material.map);
+  }
+  for (const map of detailMaps) map.addEventListener("dispose", () => detailTextureDisposals++);
+  console.log(`Villa detail: ${detail.children.reduce((n,m) => n + m.geometry.getAttribute("position").count/3, 0)} triangles, 6 batches, two 128² textures.`);
   const foundation = foundations()[0];
   const heightsBefore = foundation.geometry.getAttribute("position").array.slice();
   const roadHeightsBefore = network.geometry.getAttribute("position").array.slice();
@@ -155,8 +274,12 @@ try {
   assert.equal(status.state, "ready");
   assert.equal(requests.length, uniqueAssets, "Relocation reuses all models");
   assert.equal(foundations()[0], foundation, "Relocation reuses procedural geometry");
+  assert.equal(treatment.material.map, groundMap, "Relocation reuses local ground textures");
+  assert.equal(network.material.map, roadMap, "Relocation reuses local road textures");
+  instanceMeshes.forEach((mesh, i) => assert.deepEqual(mesh.instanceColor?.array, instanceColours[i], "Relocation preserves scenery colour variation"));
   assembler.invalidateTerrain(true); assembler.updateTerrain(([lng]) => 200 + (lng - assembler.origin[0]) * 200000);
   assert.equal(status.steepSites, 7);
+  assert.ok(status.scenerySteep > 0, "Rigid props are rejected on unsuitable footprint slopes");
   assert.ok(foundations().every((o) => !o.visible), "Unsuitable slopes must not create towering foundations");
   let disposed = 0;
   foundation.geometry.addEventListener("dispose", () => disposed++);
@@ -164,7 +287,13 @@ try {
   assert.equal(status.state, "unloaded");
   assert.equal(meshes().length, 0);
   assert.equal(disposed, 1, "Procedural resources are disposed once");
+  assert.equal(detailDisposals, 6);
+  assert.equal(detailMaterialDisposals, 6);
+  assert.equal(detailTextureDisposals, 2, "Shared detail maps disposed once each");
+  assert.equal(textureDisposals, 2, "Owned ground and road textures are disposed once");
+  assert.equal(clothDisposed, 1, "Owned awning cloth materials are disposed once");
   assert.equal(overrideDisposed, 1, "Owned shadow material copies are disposed once");
+  assembler.setVillaEnhanced(false);
   pause = true;
   const pending = assembler.load();
   assembler.unload();
@@ -181,6 +310,8 @@ try {
   assembler.unload(); failTemple = false;
   await assembler.load(); assembler.updateTerrain(() => 100);
   assert.equal(status.state, "ready", "Unloading and loading retries failed assets");
+  assert.equal(assembler.scene.getObjectByName("enhanced-villa").visible, false, "Comparison choice survives reload");
+  assembler.setVillaEnhanced(true);
   assembler.invalidateTerrain(true); assembler.updateTerrain(() => -20);
   assert.equal(status.state, "ready", "Valid negative elevations are supported");
 } finally {

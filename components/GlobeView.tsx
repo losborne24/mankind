@@ -51,7 +51,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
   const [romanStatus, setRomanStatus] = useState<RomanTestStatus>({ state: "waiting", loaded: 0, errors: [] });
   const [settlementStatus, setSettlementStatus] = useState<SettlementStatus>({
     state: "unloaded", origin: ROMAN_SETTLEMENT.origin, loaded: 0,
-    total: ROMAN_SETTLEMENT.buildings.length, terrainPending: 0, terrainRetained: 0, steepSites: 0, errors: [], sceneryLoaded: 0, sceneryTotal: ROMAN_SETTLEMENT.scenery?.length ?? 0,
+    total: ROMAN_SETTLEMENT.buildings.length, terrainPending: 0, terrainRetained: 0, steepSites: 0, errors: [], sceneryLoaded: 0, scenerySteep: 0, sceneryTotal: ROMAN_SETTLEMENT.scenery?.length ?? 0,
   });
   // Keep the latest callback without re-running the init effect.
   const onStatusRef = useRef(onStatus);
@@ -153,6 +153,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
         map={debugMap}
         terrainWarning={terrainWarning}
         settlementStatus={settlementStatus}
+        onVillaEnhanced={(enabled) => threeLayerRef.current?.setVillaEnhanced(enabled)}
         onSettlementEnabled={(enabled) => threeLayerRef.current?.setSettlementEnabled(enabled)}
         onVisitSettlement={(origin) => threeLayerRef.current?.visitSettlement(origin)}
         romanStatus={romanStatus}
