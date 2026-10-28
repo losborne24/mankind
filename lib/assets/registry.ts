@@ -1,7 +1,11 @@
+import { romanVariants } from "@/lib/assets/romanVariants";
+
 /** Asset descriptions have no knowledge of dates, settlements or placements. */
 export interface AssetDefinition {
   id: string;
   path: string;
+  /** Prebuilt node in a shared GLB library. */
+  nodeName?: string;
   category: "building" | "infrastructure" | "prop" | "vegetation" | "rock";
   /** Authored units → metres. Optional dimensions are [X width, Y height, Z depth]. */
   scale: number;
@@ -25,7 +29,14 @@ const environmentSource = {
   licenceFile: "environment/PROVENANCE.md",
 };
 
+const variantAssets = Object.fromEntries(Object.entries(romanVariants).map(([name, variant]) => [
+  `roman-${name}`, { id: `roman-${name}`, path: "roman-kit/residential-variants.glb", nodeName: name,
+    category: "building" as const, scale: 1, dimensionsMeters: variant.dimensionsMeters,
+    groundOffsetMeters: 0, source },
+])) as { [K in keyof typeof romanVariants as `roman-${K}`]: AssetDefinition & { dimensionsMeters: readonly [number, number, number] } };
+
 export const assetRegistry = {
+  ...variantAssets,
   "roman-taberna-01": {
     id: "roman-taberna-01", path: "roman-kit/taberna.glb", category: "building",
     scale: 1, dimensionsMeters: [6.039, 4.16, 6.425], groundOffsetMeters: 0, source,

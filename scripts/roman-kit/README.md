@@ -42,3 +42,50 @@ Aqueduct sections repeat every 8m in X. End half-piers combine into full piers;
 small projecting plinth/coping overlaps are intentional. Channel is dry, with
 a real trough. Studio cameras use fixed front/rear direction, an orthographic
 scale derived from the largest bound, fixed neutral ground and fixed lights.
+
+## Phase 1: seeded residential library
+
+```sh
+# Preserve the nine original GLBs; generate ONLY the twelve-variant library:
+/Applications/Blender.app/Contents/MacOS/Blender --background --factory-startup --python-exit-code 1 --python scripts/roman-kit/generate.py -- --variants --render --save-blend
+# Fast deterministic re-export (no renders):
+/Applications/Blender.app/Contents/MacOS/Blender --background --factory-startup --python-exit-code 1 --python scripts/roman-kit/generate.py -- --variants
+python3 scripts/roman-kit/check_variations.py
+node scripts/check-roman-variations.mjs
+```
+
+`variations.json` owns named profiles, reusable ranges, explicit architectural choices,
+per-design seeds, weights and roof cover resolution. `variations.py` resolves and
+validates definitions independently of Blender. `--seed INTEGER` overrides all
+per-design seeds for an intentional library revision. The global seed, design name,
+per-design seed and parameter name feed SHA-256 samples; parameter additions do not
+reshuffle existing samples. Material pigments use seeded vertex colours, with lower-wall
+staining, and the same atlas. No runtime random materials or meshes are generated.
+
+Output: `residential-variants.glb` (12 named meshes, one material, two embedded PNGs),
+`variants.json` (resolved parameters/metrics/hash) and generated
+`lib/assets/romanVariants.ts` (registry metadata, no runtime inventory request).
+The same pinned Blender version and default seeds reproduce the same GLB bytes.
+`--variants` exports the full library; it cannot be combined with `--only`/`--modules`.
+Do not run two generators concurrently.
+
+Profiles cover compact cottages, supported porches, modest two-storey dwellings,
+lean-to workshops with linen/tiled/no shelter, and the existing validated L-plan
+farmhouse with veranda or walled workyard. Farm wing junction coordinates remain
+constrained to the supported plan. Aperture surrounds, eave clearance, storeys,
+proportions and porch alignment are validated before export. Wall infill supports
+stacked apertures without overlapping vertical bands. Roof covers use two curved
+segments instead of four in this library; the original assets stay unchanged.
+
+Gameplay uses `createRomanSettlement(seed)` and weighted selection without replacement
+within each archetype cycle. The same cache URL serves all variants; the registry's
+`nodeName` selects complete prebuilt geometry. Repeated library meshes are instanced,
+while the existing plot roots, foundations, terrain sampling and landmarks retain
+their lifecycle. All library instances share one settlement shadow override material.
+
+For browser review, paste `scripts/capture-roman-variants.js` into DevTools:
+`romanReview.fixture(true)` shows all twelve plus three repeats;
+`romanReview.fixture(false)` restores the seven-plot settlement;
+`romanReview.fixture('baseline')` restores original assets in those same plots.
+Capture/benchmark methods wait five seconds so DevTools can be closed for the full
+3456×1786 canvas. See `docs/roman-variations.md` for inventory, evidence and measurements.

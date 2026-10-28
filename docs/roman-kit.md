@@ -1,5 +1,10 @@
 # Project-owned Roman architecture kit — 28 October 2026
 
+**Phase 1 update:** twelve seeded residential/commercial variants are now integrated.
+See [Roman building variations](roman-variations.md) for current inventory,
+shared-library loading, instancing, validation, previews and performance comparisons.
+The original migration report and nine-asset baseline below are retained for reference.
+
 The Roman Town Pack dependency has been replaced by nine project-authored Blender
 GLBs: three different dwelling/shop archetypes, a temple, an extendable aqueduct
 section and four props. Twelve separate module GLBs supply reusable authoring

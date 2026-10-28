@@ -1,0 +1,343 @@
+{
+  "schemaVersion": 1,
+  "bytes": 8012236,
+  "sha256": "68e515c627f7f02e6d852da40561fb73e376b7737b5191ab8f4ba62d34211e2e",
+  "variants": {
+    "cottage-lime": {
+      "dimensionsMeters": [
+        5.31,
+        4.04,
+        5.52
+      ],
+      "triangles": 7416,
+      "parameters": {
+        "kind": "house",
+        "width": 4.54,
+        "depth": 4.5,
+        "wallHeight": 2.71,
+        "roofRise": 1.13,
+        "eave": 0.26,
+        "frontDoor": 1.05,
+        "porch": false,
+        "frontWindows": [
+          -1.35,
+          1.35
+        ],
+        "wallMaterial": "plaster",
+        "doorX": 0.12,
+        "seed": 101,
+        "variantName": "cottage-lime",
+        "weight": 2
+      }
+    },
+    "cottage-ochre": {
+      "dimensionsMeters": [
+        5.42,
+        4.01,
+        5.42
+      ],
+      "triangles": 7334,
+      "parameters": {
+        "kind": "house",
+        "width": 4.65,
+        "depth": 4.4,
+        "wallHeight": 2.8,
+        "roofRise": 1.01,
+        "eave": 0.24,
+        "frontDoor": 1.05,
+        "porch": false,
+        "frontWindows": [
+          1.35
+        ],
+        "wallMaterial": "ochre-plaster",
+        "doorX": -0.12,
+        "seed": 217,
+        "variantName": "cottage-ochre",
+        "weight": 2
+      }
+    },
+    "porch-merchant": {
+      "dimensionsMeters": [
+        5.9,
+        4.36,
+        6.062367
+      ],
+      "triangles": 8438,
+      "parameters": {
+        "kind": "house",
+        "width": 5.13,
+        "depth": 4.91,
+        "wallHeight": 2.87,
+        "roofRise": 1.29,
+        "eave": 0.32,
+        "frontDoor": 1.05,
+        "porch": true,
+        "frontWindows": [
+          -1.55,
+          1.55
+        ],
+        "wallMaterial": "ochre-plaster",
+        "seed": 309,
+        "variantName": "porch-merchant",
+        "weight": 1
+      }
+    },
+    "porch-lime": {
+      "dimensionsMeters": [
+        5.89,
+        4.43,
+        6.132367
+      ],
+      "triangles": 8172,
+      "parameters": {
+        "kind": "house",
+        "width": 5.12,
+        "depth": 4.98,
+        "wallHeight": 3.02,
+        "roofRise": 1.21,
+        "eave": 0.32,
+        "frontDoor": 1.05,
+        "porch": true,
+        "frontWindows": [
+          -1.55
+        ],
+        "doorX": 0.1,
+        "seed": 411,
+        "variantName": "porch-lime",
+        "weight": 2
+      }
+    },
+    "upper-weavers": {
+      "dimensionsMeters": [
+        5.91,
+        6.48,
+        5.54
+      ],
+      "triangles": 10272,
+      "parameters": {
+        "kind": "house",
+        "width": 5.14,
+        "depth": 4.52,
+        "wallHeight": 5.12,
+        "roofRise": 1.16,
+        "eave": 0.33,
+        "frontDoor": 1.05,
+        "porch": false,
+        "storeys": 2,
+        "frontWindows": [
+          -1.55,
+          1.55
+        ],
+        "wallMaterial": "plaster",
+        "seed": 503,
+        "variantName": "upper-weavers",
+        "weight": 1
+      }
+    },
+    "upper-ochre": {
+      "dimensionsMeters": [
+        5.92,
+        6.35,
+        5.55
+      ],
+      "triangles": 10260,
+      "parameters": {
+        "kind": "house",
+        "width": 5.15,
+        "depth": 4.53,
+        "wallHeight": 5.07,
+        "roofRise": 1.08,
+        "eave": 0.25,
+        "frontDoor": 1.05,
+        "porch": false,
+        "storeys": 2,
+        "frontWindows": [
+          -1.55,
+          1.55
+        ],
+        "wallMaterial": "ochre-plaster",
+        "doorX": -0.1,
+        "seed": 617,
+        "variantName": "upper-ochre",
+        "weight": 1
+      }
+    },
+    "taberna-linen": {
+      "dimensionsMeters": [
+        5.498,
+        3.82,
+        5.865
+      ],
+      "triangles": 3706,
+      "parameters": {
+        "kind": "workshop",
+        "width": 4.88,
+        "depth": 4.74,
+        "wallHeight": 2.81,
+        "roofRise": 0.8,
+        "eave": 0.25,
+        "frontDoor": 2.52,
+        "shelter": "linen",
+        "wallMaterial": "ochre-plaster",
+        "seed": 719,
+        "variantName": "taberna-linen",
+        "weight": 2
+      }
+    },
+    "taberna-tiled": {
+      "dimensionsMeters": [
+        5.638,
+        4.04,
+        6.010939
+      ],
+      "triangles": 3692,
+      "parameters": {
+        "kind": "workshop",
+        "width": 5.02,
+        "depth": 4.83,
+        "wallHeight": 3.09,
+        "roofRise": 0.74,
+        "eave": 0.26,
+        "frontDoor": 2.12,
+        "shelter": "tile",
+        "wallMaterial": "plaster",
+        "seed": 823,
+        "variantName": "taberna-tiled",
+        "weight": 1
+      }
+    },
+    "workshop-open": {
+      "dimensionsMeters": [
+        5.038,
+        3.92,
+        5.83
+      ],
+      "triangles": 3446,
+      "parameters": {
+        "kind": "workshop",
+        "width": 4.42,
+        "depth": 4.97,
+        "wallHeight": 2.78,
+        "roofRise": 0.93,
+        "eave": 0.22,
+        "frontDoor": 2.26,
+        "shelter": "none",
+        "wallMaterial": "ochre-plaster",
+        "seed": 929,
+        "variantName": "workshop-open",
+        "weight": 1
+      }
+    },
+    "workshop-portico": {
+      "dimensionsMeters": [
+        5.858,
+        3.88,
+        5.960939
+      ],
+      "triangles": 3732,
+      "parameters": {
+        "kind": "workshop",
+        "width": 5.24,
+        "depth": 4.78,
+        "wallHeight": 3.0,
+        "roofRise": 0.67,
+        "eave": 0.24,
+        "frontDoor": 2.9,
+        "shelter": "tile",
+        "wallMaterial": "plaster",
+        "seed": 1031,
+        "variantName": "workshop-portico",
+        "weight": 1
+      }
+    },
+    "farm-veranda": {
+      "dimensionsMeters": [
+        8.191854,
+        4.89,
+        7.395
+      ],
+      "triangles": 10904,
+      "parameters": {
+        "kind": "farmhouse",
+        "width": 7.4,
+        "depth": 6.5,
+        "wallHeight": 3.23,
+        "roofRise": 1.46,
+        "eave": 0.35,
+        "frontDoor": 1.2,
+        "main": {
+          "width": 5.2,
+          "depth": 5.2,
+          "offset": [
+            -1.1,
+            -0.65
+          ]
+        },
+        "serviceWing": {
+          "centerX": 2.6,
+          "width": 2.2,
+          "backZ": -1.4,
+          "frontZ": 3.25,
+          "wallHeight": 2.5
+        },
+        "veranda": {
+          "postsX": [
+            -3.2,
+            -1.1,
+            0.95
+          ],
+          "frontZ": 3.13
+        },
+        "verandaRoof": true,
+        "seed": 1139,
+        "variantName": "farm-veranda",
+        "weight": 1
+      }
+    },
+    "farm-yard": {
+      "dimensionsMeters": [
+        8.190176,
+        4.85,
+        7.35
+      ],
+      "triangles": 11016,
+      "parameters": {
+        "kind": "farmhouse",
+        "width": 7.4,
+        "depth": 6.5,
+        "wallHeight": 3.28,
+        "roofRise": 1.37,
+        "eave": 0.35,
+        "frontDoor": 1.2,
+        "main": {
+          "width": 5.2,
+          "depth": 5.2,
+          "offset": [
+            -1.1,
+            -0.65
+          ]
+        },
+        "serviceWing": {
+          "centerX": 2.6,
+          "width": 2.2,
+          "backZ": -1.4,
+          "frontZ": 3.25,
+          "wallHeight": 2.5
+        },
+        "veranda": {
+          "postsX": [
+            -3.2,
+            -1.1,
+            0.95
+          ],
+          "frontZ": 3.13
+        },
+        "verandaRoof": false,
+        "boundary": true,
+        "seed": 1249,
+        "variantName": "farm-yard",
+        "weight": 1
+      }
+    }
+  }
+}

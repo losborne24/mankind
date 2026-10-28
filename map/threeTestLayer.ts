@@ -40,7 +40,7 @@ import { glbCache, type ModelLease } from "@/lib/assets/glbCache";
 import { prepareAsset, ROMAN_TEST_CENTER, ROMAN_TEST_PLACEMENTS, type AssetPlacement } from "@/map/romanTestScene";
 
 import { SettlementScene, type SettlementStatus } from "@/map/settlements/SettlementScene";
-import { ROMAN_SETTLEMENT, type Coordinate } from "@/map/settlements/romanSettlement";
+import { ROMAN_SETTLEMENT, ROMAN_VARIATION_PREVIEW, ROMAN_SETTLEMENT_BASELINE, type Coordinate } from "@/map/settlements/romanSettlement";
 
 type AnchoredScene = {
   scene: THREE.Scene;
@@ -216,6 +216,15 @@ export class ThreeTestLayer implements CustomLayerInterface {
     this.settlementEnabled = enabled;
     if (enabled) void this.settlement?.load();
     else this.settlement?.unload();
+  }
+
+  /** Developer review fixture uses the same loader, foundations and anchor lifecycle. */
+  previewRomanVariants(enabled: boolean | "baseline" = true): void {
+    this.settlement?.unload();
+    this.settlement = new SettlementScene(enabled === "baseline" ? ROMAN_SETTLEMENT_BASELINE : enabled ? ROMAN_VARIATION_PREVIEW : ROMAN_SETTLEMENT,
+      (status) => this.onSettlementStatus?.(status), () => this.map?.triggerRepaint());
+    this.updateSettlementAnchor();
+    this.visitSettlement();
   }
 
   visitSettlement(origin?: Coordinate): void {

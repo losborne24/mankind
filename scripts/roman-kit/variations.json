@@ -1,0 +1,341 @@
+{
+  "schemaVersion": 1,
+  "seed": 271828,
+  "profiles": {
+    "cottage": {
+      "base": "provincial-house",
+      "ranges": {
+        "width": [
+          4.4,
+          4.7
+        ],
+        "depth": [
+          4.2,
+          4.6
+        ],
+        "wallHeight": [
+          2.65,
+          2.8
+        ],
+        "roofRise": [
+          1.0,
+          1.15
+        ],
+        "eave": [
+          0.23,
+          0.3
+        ]
+      },
+      "options": {
+        "porch": false,
+        "frontWindows": [
+          -1.35,
+          1.35
+        ],
+        "wallMaterial": "plaster"
+      }
+    },
+    "porch-house": {
+      "base": "provincial-house",
+      "ranges": {
+        "width": [
+          4.9,
+          5.2
+        ],
+        "depth": [
+          4.8,
+          5.15
+        ],
+        "wallHeight": [
+          2.8,
+          3.05
+        ],
+        "roofRise": [
+          1.15,
+          1.45
+        ],
+        "eave": [
+          0.28,
+          0.35
+        ]
+      },
+      "options": {
+        "porch": true,
+        "frontWindows": [
+          -1.55,
+          1.55
+        ]
+      }
+    },
+    "upper-house": {
+      "base": "provincial-house",
+      "ranges": {
+        "width": [
+          4.9,
+          5.2
+        ],
+        "depth": [
+          4.3,
+          4.65
+        ],
+        "wallHeight": [
+          5.05,
+          5.25
+        ],
+        "roofRise": [
+          1.05,
+          1.25
+        ],
+        "eave": [
+          0.25,
+          0.33
+        ]
+      },
+      "options": {
+        "porch": false,
+        "storeys": 2,
+        "frontWindows": [
+          -1.55,
+          1.55
+        ]
+      }
+    },
+    "shop": {
+      "base": "taberna",
+      "ranges": {
+        "width": [
+          4.4,
+          5.3
+        ],
+        "depth": [
+          4.3,
+          5.2
+        ],
+        "wallHeight": [
+          2.75,
+          3.15
+        ],
+        "roofRise": [
+          0.65,
+          1.05
+        ],
+        "eave": [
+          0.22,
+          0.3
+        ],
+        "frontDoor": [
+          2.1,
+          2.8
+        ]
+      },
+      "options": {
+        "shelter": "linen"
+      }
+    },
+    "farm": {
+      "base": "farmhouse",
+      "ranges": {
+        "wallHeight": [
+          3.2,
+          3.3
+        ],
+        "roofRise": [
+          1.15,
+          1.5
+        ]
+      },
+      "options": {}
+    }
+  },
+  "variants": {
+    "cottage-lime": {
+      "profile": "cottage",
+      "seed": 101,
+      "weight": 2,
+      "options": {
+        "doorX": 0.12,
+        "wallMaterial": "plaster"
+      }
+    },
+    "cottage-ochre": {
+      "profile": "cottage",
+      "seed": 217,
+      "weight": 2,
+      "options": {
+        "doorX": -0.12,
+        "wallMaterial": "ochre-plaster",
+        "frontWindows": [
+          1.35
+        ]
+      }
+    },
+    "porch-merchant": {
+      "profile": "porch-house",
+      "seed": 309,
+      "weight": 1,
+      "options": {
+        "wallMaterial": "ochre-plaster"
+      }
+    },
+    "porch-lime": {
+      "profile": "porch-house",
+      "seed": 411,
+      "weight": 2,
+      "options": {
+        "doorX": 0.1,
+        "frontWindows": [
+          -1.55
+        ]
+      }
+    },
+    "upper-weavers": {
+      "profile": "upper-house",
+      "seed": 503,
+      "weight": 1,
+      "options": {
+        "wallMaterial": "plaster"
+      }
+    },
+    "upper-ochre": {
+      "profile": "upper-house",
+      "seed": 617,
+      "weight": 1,
+      "options": {
+        "wallMaterial": "ochre-plaster",
+        "doorX": -0.1
+      }
+    },
+    "taberna-linen": {
+      "profile": "shop",
+      "seed": 719,
+      "weight": 2,
+      "options": {
+        "wallMaterial": "ochre-plaster"
+      }
+    },
+    "taberna-tiled": {
+      "profile": "shop",
+      "seed": 823,
+      "weight": 1,
+      "options": {
+        "shelter": "tile",
+        "wallMaterial": "plaster"
+      }
+    },
+    "workshop-open": {
+      "profile": "shop",
+      "seed": 929,
+      "weight": 1,
+      "options": {
+        "shelter": "none",
+        "wallMaterial": "ochre-plaster"
+      }
+    },
+    "workshop-portico": {
+      "profile": "shop",
+      "seed": 1031,
+      "weight": 1,
+      "options": {
+        "shelter": "tile",
+        "wallMaterial": "plaster",
+        "frontDoor": 2.9
+      }
+    },
+    "farm-veranda": {
+      "profile": "farm",
+      "seed": 1139,
+      "weight": 1,
+      "options": {
+        "verandaRoof": true
+      }
+    },
+    "farm-yard": {
+      "profile": "farm",
+      "seed": 1249,
+      "weight": 1,
+      "options": {
+        "verandaRoof": false,
+        "boundary": true
+      }
+    }
+  },
+  "quality": {
+    "tileCoverSegments": 2
+  },
+  "pigments": {
+    "plaster": [
+      [
+        0.94,
+        0.06
+      ],
+      [
+        0.94,
+        0.04
+      ],
+      [
+        0.91,
+        0.06
+      ]
+    ],
+    "ochre-plaster": [
+      [
+        0.91,
+        0.09
+      ],
+      [
+        0.92,
+        0.06
+      ],
+      [
+        0.92,
+        0.05
+      ]
+    ],
+    "terracotta": [
+      [
+        0.86,
+        0.14
+      ],
+      [
+        0.86,
+        0.12
+      ],
+      [
+        0.85,
+        0.12
+      ]
+    ],
+    "timber": [
+      [
+        0.78,
+        0.22
+      ],
+      [
+        0.81,
+        0.19
+      ],
+      [
+        0.8,
+        0.18
+      ]
+    ],
+    "stone": [
+      [
+        0.88,
+        0.12
+      ],
+      [
+        0.88,
+        0.12
+      ],
+      [
+        0.88,
+        0.12
+      ]
+    ]
+  },
+  "foundationStain": {
+    "height": 0.8,
+    "strength": 0.09
+  }
+}

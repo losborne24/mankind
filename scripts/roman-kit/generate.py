@@ -11,6 +11,9 @@ import struct
 import sys
 import zlib
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from variations import CONFIG, resolve, apertures
+
 import bpy
 from mathutils import Vector
 import numpy as np
@@ -92,6 +95,7 @@ def atlas():
     return mat
 
 class Mesh:
+    roof_segments=4
     def __init__(self):
         self.vertices=[]; self.faces=[]; self.uv=[]; self.smooth=[]
     def poly(self, points, material, outward=None, smooth=False, uv=None):
@@ -152,7 +156,7 @@ class Mesh:
         if close:
             for r,y,sign in [(profile[0][0],profile[0][1],-1),(profile[-1][0],profile[-1][1],1)]:
                 self.poly([c+Vector((r*math.cos(i*2*PI/segments),y,r*math.sin(i*2*PI/segments))) for i in range(segments)],mat,(0,sign,0))
-    def finish(self,name,mat):
+    def finish(self,name,mat,spec=None):
         data=bpy.data.meshes.new(name)
         data.from_pydata([(x,-z,y) for x,y,z in self.vertices],[],self.faces);data.update()
         obj=bpy.data.objects.new(name,data);bpy.context.collection.objects.link(obj)
@@ -161,6 +165,20 @@ class Mesh:
         for polygon,uv,smooth in zip(data.polygons,self.uv,self.smooth):
             polygon.use_smooth=smooth
             for loop,coord in zip(polygon.loop_indices,uv): layer.data[loop].uv=coord
+        if spec:
+            colors=data.color_attributes.new(name='RomanWear',type='FLOAT_COLOR',domain='CORNER')
+            # Offline vertex pigment/weathering; one atlas/material for the whole library.
+            for face_index, polygon in enumerate(data.polygons):
+                u,v=self.uv[face_index][0];cell=int(u*4)+int((1-v)*2)*4
+                key=f"{spec['seed']}:{cell}".encode()
+                sample=int.from_bytes(hashlib.sha256(key).digest()[:4],'big')/0xffffffff
+                ranges=CONFIG['pigments'].get(PALETTE[cell],[[1,0]]*3)
+                tint=tuple(low+spread*sample for low,spread in ranges)
+                for loop in polygon.loop_indices:
+                    y=data.vertices[data.loops[loop].vertex_index].co.z
+                    wear=CONFIG['foundationStain']
+                    stain=1-wear['strength']*max(0,1-y/wear['height']) if cell in (0,1,7) else 1
+                    colors.data[loop].color=(*[c*stain for c in tint],1)
         return obj
 
 def masonry(m,center,size,course=.24,block=.48):
@@ -210,11 +228,18 @@ def facade(m,width,height,z,openings,front=True,wallmat='plaster',base=.12):
         for i in range(count):
             w=(x1-x0)/count
             m.box((x0+(i+.5)*w,(y0+y1)/2,z),(w,y1-y0,.3),wallmat)
-    for x,w,bottom,top,kind in sorted(openings):
-        fill(left,x-w/2,base,height);fill(x-w/2,x+w/2,base,bottom);fill(x-w/2,x+w/2,top,height)
+    # Partition the facade in X first, then fill the complement of all vertical gaps.
+    # This also supports stacked apertures without overlapping wall bands.
+    cuts=sorted(set([-width/2,width/2]+[x+sign*w/2 for x,w,_,_,_ in openings for sign in [-1,1]]))
+    for x0,x1 in zip(cuts,cuts[1:]):
+        middle=(x0+x1)/2
+        gaps=sorted((bottom,top) for x,w,bottom,top,_ in openings if abs(middle-x)<w/2+1e-8)
+        bottom=base
+        for low,high in gaps:
+            fill(x0,x1,bottom,low);bottom=max(bottom,high)
+        fill(x0,x1,bottom,height)
+    for x,w,bottom,top,kind in openings:
         opening(m,x,z,w,bottom,top,front,kind in ('door','workshop'),kind=='workshop')
-        left=x+w/2
-    fill(left,width/2,base,height)
 
 def gable(m,width,z,eave,rise,mat='plaster'):
     for face,normal in [(z-.15,(0,0,-1)),(z+.15,(0,0,1))]:
@@ -241,8 +266,8 @@ def roof_plane(m,origin,u,v,nx,nz,detailed=True):
             m.poly([a,b,b+v*(.96/nz),a+v*(.96/nz)],'terracotta',normal)
             p=a+v*(.98/nz)+normal*.012
             length=u.length/nx*1.035
-            for seg in range(4):
-                t0,t1=seg*PI/4,(seg+1)*PI/4
+            for seg in range(m.roof_segments):
+                t0,t1=seg*PI/m.roof_segments,(seg+1)*PI/m.roof_segments
                 aa=normal*math.sin(t0)*.045+across*math.cos(t0)*.045
                 bb=normal*math.sin(t1)*.045+across*math.cos(t1)*.045
                 m.poly([p+aa,p+along*length+aa,p+along*length+bb,p+bb],'terracotta',normal*math.sin((t0+t1)/2)+across*math.cos((t0+t1)/2),True)
@@ -265,10 +290,10 @@ def pitched_roof(m,w,d,eave,rise,overhang=.35,cx=0,cz=0,detailed=True):
         for z in np.arange(-d/2,d/2+.1,.52): m.box((cx+side*(w/2+.12),eave-.1,cz+z),(.44,.12,.11),'timber',.008)
     ridge(m,cx,eave+rise+.025,cz,depth)
 
-def side_wall(m,width,depth,height,material='plaster'):
+def side_wall(m,width,depth,height,material='plaster',storeys=1):
     # Side elevations include a recessed window each; generate a facade then rotate 90°.
     for side in [-1,1]:
-        sub=Mesh();facade(sub,depth,height,0,[(0,.65,1.4,2.15,'window')],True,material)
+        sub=Mesh();facade(sub,depth,height,0,[(0,.65,1.4+2.25*i,2.15+2.25*i,'window') for i in range(storeys)],True,material)
         for pts,uv,smooth in zip(sub.faces,sub.uv,sub.smooth):
             points=[]
             for index in pts:
@@ -278,9 +303,12 @@ def side_wall(m,width,depth,height,material='plaster'):
 
 def house(m,s):
     w,d,h=s['width'],s['depth'],s['wallHeight']
-    facade(m,w,h,d/2,[(-1.6,.65,1.35,2.15,'window'),(0,s['frontDoor'],.16,2.23,'door'),(1.6,.65,1.35,2.15,'window')])
-    facade(m,w,h,-d/2,[(-1.25,.65,1.45,2.15,'window'),(1.25,.65,1.45,2.15,'window')],False)
-    side_wall(m,w,d-.3,h)
+    facade(m,w,h,d/2,apertures(s),wallmat=s.get('wallMaterial','plaster'))
+    facade(m,w,h,-d/2,apertures(s,True),False,wallmat=s.get('wallMaterial','plaster'))
+    side_wall(m,w,d-.3,h,s.get('wallMaterial','plaster'),s.get('storeys',1))
+    if s.get('storeys',1)==2:
+        for side in [-1,1]:
+            m.box((side*w/2,2.7,0),(.34,.16,d),'timber')
     for z in [-d/2,d/2]:gable(m,w,z,h,s['roofRise']*.93)
     for side in [-1,1]:
         masonry(m,(side*(w/2+.015),.30,0),(.22,.48,d+.22),block=.5)
@@ -307,23 +335,31 @@ def copy_module(target,source,offset=(0,0,0)):
 
 def workshop(m,s):
     w,d,h=s['width'],s['depth'],s['wallHeight'];rise=s['roofRise']
-    facade(m,w,h,d/2,[(0,s['frontDoor'],.16,2.42,'workshop')],wallmat='ochre-plaster')
-    facade(m,w,h+rise,-d/2,[(0,.75,1.65,2.4,'window')],False)
+    facade(m,w,h,d/2,[(0,s['frontDoor'],.16,2.42,'workshop')],wallmat=s.get('wallMaterial','ochre-plaster'))
+    facade(m,w,h+rise,-d/2,[(0,.75,1.65,2.4,'window')],False,wallmat=s.get('wallMaterial','plaster'))
     # Lean-to roof, taller rear wall and sloped side walls. Different structure from a house.
     for side in [-1,1]:
         x=side*w/2
-        m.box((x,h/2,0),(.3,h,d-.3),'ochre-plaster')
-        m.poly([(x-side*.15,h,-d/2),(x-side*.15,h,d/2),(x-side*.15,h+rise,-d/2)],'plaster',(-side,0,0))
-        m.poly([(x+side*.15,h,-d/2),(x+side*.15,h,d/2),(x+side*.15,h+rise,-d/2)],'plaster',(side,0,0))
+        m.box((x,h/2,0),(.3,h,d-.3),s.get('wallMaterial','ochre-plaster'))
+        m.poly([(x-side*.15,h,-d/2),(x-side*.15,h,d/2),(x-side*.15,h+rise,-d/2)],s.get('wallMaterial','plaster'),(-side,0,0))
+        m.poly([(x+side*.15,h,-d/2),(x+side*.15,h,d/2),(x+side*.15,h+rise,-d/2)],s.get('wallMaterial','plaster'),(side,0,0))
         for z in [-d/2,0,d/2]:m.box((x,.5*h,z),(.18,h,.16),'timber',.012)
         m.box((x,.45,0),(.33,.45,d),'stone',.015)
     for z in [-d/2,d/2]:
         m.box((0,.12,z),(w+.18,.24,.45),'stone',.025)
         m.box((0,2.56,z),(w+.14,.18,.19),'timber',.012)
     m.box((0,.07,0),(w+.18,.14,d+.18),'stone',.025)
-    roof_plane(m,(-w/2-.30,h+rise+.09,-d/2-.30),(0,-rise-.12,d+.60),(w+.60,0,0),14,20)
+    e=s['eave']
+    roof_plane(m,(-w/2-e,h+rise+.09,-d/2-e),(0,-rise-.12,d+2*e),(w+2*e,0,0),14,20)
     ridge(m,0,h+rise+.115,-d/2-.30,w+.6,'x')
-    # Shallow street shelter with fabric drape and two supported posts.
+    # Supported street shelter, with clearance below the eaves.
+    shelter=s.get('shelter','linen')
+    if shelter=='none':return
+    if shelter=='tile':
+        for x in [-1.6,1.6]:m.lathe([(.075,.15),(.075,2.32)],'timber',(x,0,d/2+.57),8)
+        roof_plane(m,(-1.78,2.67,d/2-.12),(0,-.25,.87),(3.56,0,0),2,12)
+        m.box((0,2.34,d/2+.60),(3.4,.12,.12),'timber')
+        return
     for x in [-1.6,1.6]:m.lathe([(.065,.15),(.065,2.32)],'timber',(x,0,d/2+.57),8)
     for i in range(16):
         x=-1.78+i*3.56/16
@@ -345,6 +381,12 @@ def farmhouse(m,s):
         m.poly([(1.5,h,z),(3.7,h,z),(3.7,2.55,z),(1.5,3.18,z)],'stone',normal)
     roof_plane(m,(1.48,3.30,back-.3),(2.58,-.75,0),(0,0,front-back+.63),7,18)
     m.box((cx,.07,(front+back)/2),(2.6,.14,front-back+.3),'stone',.02)
+    if not s.get('verandaRoof',True):
+        m.box((-1.1,.09,2.67),(5.4,.18,1.58),'stone',.02)
+        if s.get('boundary'):
+            masonry(m,(-3.6,.47,2.75),(.24,.94,1.5))
+            masonry(m,(-2.6,.47,3.4),(2.2,.94,.24))
+        return
     for x in s['veranda']['postsX']:
         m.lathe([(.13,.16),(.13,.35),(.085,.39),(.075,2.31)],'timber',(x,0,s['veranda']['frontZ']),10)
         m.box((x,.19,3.13),(.30,.29,.30),'stone',.02)
@@ -526,13 +568,54 @@ def preview(obj,name):
         bpy.ops.render.render(write_still=True)
     for ob in [plane,key,fill,sun,camera]:bpy.data.objects.remove(ob,do_unlink=True)
 
+def generate_variants(args,mat):
+    assert not args.modules and args.only is None, '--variants exports the complete shared library'
+    Mesh.roof_segments=CONFIG['quality']['tileCoverSegments']
+    assert Mesh.roof_segments in (2,3,4), 'Unsupported roof cover resolution'
+    nodes=mat.node_tree.nodes;links=mat.node_tree.links
+    pigment=nodes.new('ShaderNodeVertexColor');pigment.layer_name='RomanWear'
+    multiply=nodes.new('ShaderNodeMixRGB');multiply.blend_type='MULTIPLY';multiply.inputs[0].default_value=1
+    image=next(node for node in nodes if node.type=='TEX_IMAGE' and node.image.colorspace_settings.name!='Non-Color')
+    links.new(image.outputs['Color'],multiply.inputs[1]);links.new(pigment.outputs['Color'],multiply.inputs[2])
+    links.new(multiply.outputs[0],nodes.get('Principled BSDF').inputs['Base Color'])
+    objects=[];inventory={}
+    for name in CONFIG['variants']:
+        spec=resolve(name,SPEC['assets'],args.seed)
+        mesh=Mesh();BUILDERS[spec['kind']](mesh,spec)
+        assert min(v[1] for v in mesh.vertices)>=-1e-8, 'Floating/negative foundation'
+        obj=mesh.finish(name,mat,spec);objects.append(obj)
+        import bmesh
+        bm=bmesh.new();bm.from_mesh(obj.data);bmesh.ops.remove_doubles(bm,verts=list(bm.verts),dist=.000001);bm.to_mesh(obj.data);bm.free();obj.data.update()
+        obj.data.calc_loop_triangles()
+        points=[Vector((p[0],p[2],-p[1])) for p in obj.bound_box]
+        inventory[name]={'dimensionsMeters':[round(max(p[i] for p in points)-min(p[i] for p in points),6) for i in range(3)],'triangles':len(obj.data.loop_triangles),'parameters':spec}
+        if args.render and (not args.render_only or name in args.render_only):
+            for other in objects[:-1]:other.hide_render=True
+            preview(obj,name)
+            for other in objects[:-1]:other.hide_render=False
+    bpy.ops.object.select_all(action='DESELECT')
+    for obj in objects:obj.select_set(True)
+    path=OUT/'residential-variants.glb'
+    bpy.ops.export_scene.gltf(filepath=str(path),export_format='GLB',use_selection=True,export_yup=True,export_apply=True,export_animations=False,export_cameras=False,export_lights=False,export_image_format='AUTO',export_tangents=False,export_vertex_color='NAME',export_vertex_color_name='RomanWear',export_all_vertex_colors=False)
+    payload={'schemaVersion':1,'bytes':path.stat().st_size,'sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'variants':inventory}
+    (OUT/'variants.json').write_text(json.dumps(payload,indent=2)+'\n')
+    # Generated TS metadata is consumed by the ordinary registry: no JSON runtime fetch.
+    registry=ROOT/'lib/assets/romanVariants.ts'
+    registry.write_text('/** Generated by scripts/roman-kit/generate.py -- --variants. */\nexport const romanVariants = '+json.dumps({name:{'dimensionsMeters':v['dimensionsMeters'],'archetype':v['parameters']['kind'],'weight':v['parameters']['weight']} for name,v in inventory.items()},indent=2)+' as const;\n')
+    if args.save_blend:bpy.ops.wm.save_as_mainfile(filepath=str(REVIEW/'residential-variants.blend'))
+    print('KIT_VARIANTS',json.dumps({k:v for k,v in payload.items() if k!='variants'}),flush=True)
+
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--only',nargs='*');parser.add_argument('--render',action='store_true');parser.add_argument('--save-blend',action='store_true');parser.add_argument('--modules',action='store_true')
+    parser=argparse.ArgumentParser();parser.add_argument('--only',nargs='*');parser.add_argument('--render',action='store_true');parser.add_argument('--save-blend',action='store_true');parser.add_argument('--modules',action='store_true');parser.add_argument('--variants',action='store_true');parser.add_argument('--seed',type=int);parser.add_argument('--render-only',nargs='+')
     args=parser.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
+    if args.seed is not None and not args.variants:parser.error('--seed requires --variants')
     OUT.mkdir(parents=True,exist_ok=True);REVIEW.mkdir(parents=True,exist_ok=True)
     bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
     bpy.context.scene.unit_settings.system='METRIC';bpy.context.scene.unit_settings.scale_length=1
     mat=atlas();manifest_path=OUT/'manifest.json';manifest=json.loads(manifest_path.read_text()) if manifest_path.exists() else {}
+    if args.variants:
+        generate_variants(args,mat)
+        return
     definitions=SPEC['assets']
     if args.modules:
         definitions=json.loads(Path(__file__).with_name('modules.json').read_text())['modules']

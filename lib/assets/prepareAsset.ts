@@ -4,7 +4,11 @@ import type { AssetDefinition } from "@/lib/assets/registry";
 /** Correct orientation/scale first, then centre X/Z and put the bounding base on Y=0. */
 export function prepareAsset(model: THREE.Object3D, asset: AssetDefinition, heading = 0): THREE.Group {
   const corrected = new THREE.Group();
-  corrected.add(model);
+  if (asset.nodeName) {
+    const node = model.getObjectByName(asset.nodeName);
+    if (!node) throw new Error(`Missing library node: ${asset.nodeName}`);
+    corrected.add(node); // Detach only the selected prebuilt mesh; source GPU resources stay cache-owned.
+  } else corrected.add(model);
   corrected.scale.setScalar(asset.scale);
   if (asset.orientationRadians) corrected.rotation.set(...asset.orientationRadians);
   corrected.updateMatrixWorld(true);

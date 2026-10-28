@@ -1,3 +1,4 @@
+import { selectRomanVariants, romanVariantIds } from "@/map/settlements/romanVariation";
 import type { AssetId } from "@/lib/assets/registry";
 import { GLOBE_RADIUS_METERS } from "@/lib/geo";
 
@@ -66,7 +67,7 @@ const grassPatches = [
 ] as const;
 
 // Generic prototype near Rome; no claim to reconstruct a real site or period.
-export const ROMAN_SETTLEMENT: SettlementDefinition = {
+const baseSettlement: SettlementDefinition = {
   id: "roman-layout-prototype",
   origin: [12.55, 41.85],
   maxFoundationRiseMeters: 3,
@@ -150,3 +151,21 @@ export const ROMAN_SETTLEMENT: SettlementDefinition = {
   ],
 };
 export const ROMAN_SETTLEMENT_ALTERNATE: Coordinate = [12.5515, 41.851];
+
+/** Existing plots/roads/headings and landmarks are retained; only ordinary assets change. */
+export function createRomanSettlement(seed = 20261028): SettlementDefinition {
+  const selected = selectRomanVariants(seed, ["house", "house", "farmhouse", "house", "workshop"]);
+  return { ...baseSettlement, buildings: baseSettlement.buildings.map((building, i) =>
+    i < selected.length ? { ...building, assetId: selected[i] } : building) };
+}
+export const ROMAN_SETTLEMENT = createRomanSettlement();
+export const ROMAN_SETTLEMENT_BASELINE = baseSettlement;
+
+/** Review fixture: twelve distinct buildings plus repeated houses, using ordinary terrain placement. */
+export const ROMAN_VARIATION_PREVIEW: SettlementDefinition = {
+  id: "roman-variation-review", origin: baseSettlement.origin, maxFoundationRiseMeters: 3,
+  buildings: [...romanVariantIds, ...romanVariantIds.slice(0, 3)].map((assetId, i) => ({
+    id: `variant-${i}`, assetId, offset: [(i % 5 - 2) * 12, (Math.floor(i / 5) - 1) * 14] as LocalPoint,
+  })),
+  roads: [-7, 7, 21].map((z, i) => ({ id: `review-street-${i}`, widthMeters: 2, points: [[-30,z],[30,z]] as LocalPoint[] })),
+};

@@ -87,7 +87,7 @@ GLTFLoader.prototype.loadAsync = async function (url) {
   if (failTemple && url.includes("temple")) throw new Error("simulated missing temple");
   const bytes = await readFile(new URL(`../public${url}`, import.meta.url));
   const gltf = await new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength), "");
-  if (url.endsWith("provincial-house.glb")) gltf.scene.traverse((object) => { if (object.isMesh && !originalVillaMaterial) originalVillaMaterial = object.material; });
+  if (url.endsWith("residential-variants.glb")) gltf.scene.traverse((object) => { if (object.isMesh && !originalVillaMaterial) originalVillaMaterial = object.material; });
   return gltf;
 };
 let status;
@@ -102,7 +102,7 @@ const plane = ([lng, lat]) => 100 + (lng - assembler.origin[0]) * 4000 + (lat - 
 try {
   await assembler.load();
   assert.equal(status.loaded, 7);
-  const uniqueAssets = new Set([...ROMAN_SETTLEMENT.buildings, ...ROMAN_SETTLEMENT.scenery].map((item) => item.assetId)).size;
+  const uniqueAssets = new Set([...ROMAN_SETTLEMENT.buildings, ...ROMAN_SETTLEMENT.scenery].map((item) => assetRegistry[item.assetId].path)).size;
   assert.equal(requests.length, uniqueAssets, "Repeated buildings/scenery share one request per asset");
   assert.equal(status.sceneryLoaded, ROMAN_SETTLEMENT.scenery.length);
   assembler.updateTerrain(() => null);
@@ -214,17 +214,17 @@ try {
   assert.notEqual(settlementVillaMaterial, originalVillaMaterial, "Settlement shadow overrides must not mutate the cached/Giza material");
   assert.equal(settlementVillaMaterial.shadowSide, THREE.BackSide);
   assert.notEqual(originalVillaMaterial.shadowSide, THREE.BackSide);
-  const villaColors = new Set();
-  for (const building of ROMAN_SETTLEMENT.buildings.filter((b) => b.assetId === "roman-villa-01")) {
+  const libraryMaterials = new Set();
+  for (const building of ROMAN_SETTLEMENT.buildings.slice(0,5)) {
     assembler.scene.getObjectByName(building.id).traverse((o) => {
-      if (o.isMesh && o.material.map) villaColors.add(o.material.color.getHex());
+      if (o.isMesh) libraryMaterials.add(o.material);
     });
   }
-  assert.ok(villaColors.size > 1, "Repeated villas have deterministic material variation");
+  assert.equal(libraryMaterials.size, 1, "Library instances share a shadow material; pigment is baked");
   let overrideDisposed = 0;
   settlementVillaMaterial.addEventListener("dispose", () => overrideDisposed++);
   const archetypes = new Set(ROMAN_SETTLEMENT.buildings.filter((b) => !["temple","aqueduct"].includes(b.id)).map((b) => b.assetId));
-  assert.equal(archetypes.size, 3, "The settlement uses three distinct residential/commercial archetypes");
+  assert.equal(archetypes.size, 5, "The settlement uses three distinct residential/commercial archetypes");
   for (const building of ROMAN_SETTLEMENT.buildings) {
     let parts = 0;
     assembler.scene.getObjectByName(building.id).traverse((o) => { if (o.isMesh) { parts++; assert.ok(o.material.map && o.material.normalMap); } });

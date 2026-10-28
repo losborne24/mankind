@@ -23,3 +23,10 @@ General visual references: Pompeii Archaeological Park's official excavation gui
 and the Vitruvian/Tuscan vocabulary of simple podium, columns and pediment.
 No copyrighted reference imagery is incorporated in the textures or geometry.
 See `docs/roman-kit.md` for migration history, validation and remaining limits.
+
+Phase 1 residential library: `residential-variants.glb` contains twelve named,
+prebuilt house/shop/farm meshes sharing one atlas pair and one material.
+`variants.json` records resolved seeds, parameters, bounds, triangles and the
+library hash; `scripts/roman-kit/variations.json` owns profiles/ranges/weights.
+Seeded vertex pigments and foundation stains are authored offline. Original nine
+GLBs are retained; `original-baseline.json` verifies their unchanged hashes.

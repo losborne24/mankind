@@ -30,6 +30,7 @@ interface SurfaceEntry {
   lease?: ModelLease;
   heights?: number[];
   shadowReceiver?: boolean;
+  libraryBuilding?: boolean;
 }
 export type TerrainSampler = (coordinate: Coordinate) => number | null | import("@/map/terrain").TerrainSample;
 
@@ -45,6 +46,7 @@ export class SettlementScene {
   private entries: SurfaceEntry[] = [];
   private resources: Array<{ dispose(): void }> = [];
   private materialOverrides = new Map<THREE.Material, Map<number, THREE.Material>>();
+  private buildingBatches: Array<{ mesh: THREE.InstancedMesh; sources: Array<{ mesh: THREE.Mesh; model: THREE.Object3D }> }> = [];
   private readonly knownHeights = new Map<string, number>();
   private active = false;
   private generation = 0;
@@ -112,8 +114,9 @@ export class SettlementScene {
         const size = new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3());
         const heading = building.headingRadians ?? 0;
         footprints.push({ offset: building.offset, width: size.x, depth: size.z, heading });
-        const variant = [...building.id].reduce((sum, char) => sum + char.charCodeAt(0), 0) % 3;
+        const variant = "nodeName" in asset ? 0 : [...building.id].reduce((sum, char) => sum + char.charCodeAt(0), 0) % 3;
         const entry = this.addSurface(foundationSurface(building.offset, size.x + 0.4, size.z + 0.4, heading), foundationMaterial, `${building.id}-foundation`);
+        entry.libraryBuilding = "nodeName" in asset;
         model.traverse((object) => {
           if (object instanceof THREE.Mesh) {
             // Closed prototype buildings are double-sided. Back-face shadow casting
@@ -157,6 +160,7 @@ export class SettlementScene {
         groundMaterial.map = maps.ground; groundMaterial.needsUpdate = true;
         roadMaterial.map = maps.road; roadMaterial.needsUpdate = true;
         this.resources.push(maps.ground, maps.road);
+        this.batchLibraryBuildings();
         this.publish(); this.repaint();
       }
     });
@@ -179,6 +183,7 @@ export class SettlementScene {
     this.dirty = true;
     if (reset) {
       this.knownHeights.clear();
+      for (const batch of this.buildingBatches) batch.mesh.visible = false;
       this.scenery.invalidateTerrain();
       this.shadowDirty = true;
       this.terrainPending = this.entries.length;
@@ -263,6 +268,7 @@ export class SettlementScene {
       this.sun.target.position.set(0, center.height, 0);
     }
     this.updateAccessPaths();
+    this.syncBuildingBatches();
     this.publish();
   }
 
@@ -277,6 +283,7 @@ export class SettlementScene {
     this.entries = [];
     this.resources = [];
     this.materialOverrides.clear();
+    this.buildingBatches = [];
     this.knownHeights.clear();
     this.loaded = this.terrainPending = this.terrainRetained = this.steepSites = this.scenerySteep = 0;
     this.errors = [];
@@ -290,6 +297,43 @@ export class SettlementScene {
     const dirty = this.shadowDirty;
     this.shadowDirty = false;
     return dirty;
+  }
+
+  /** Only repeated prebuilt library meshes are instanced. Logical plot roots retain terrain state. */
+  private batchLibraryBuildings(): void {
+    const groups = new Map<THREE.BufferGeometry, Array<{ mesh: THREE.Mesh; model: THREE.Object3D }>>();
+    for (const entry of this.entries) {
+      if (!entry.model || !entry.libraryBuilding) continue;
+      entry.model.traverse((object) => {
+        if (!(object instanceof THREE.Mesh) || !object.geometry.getAttribute("color")) return;
+        const sources = groups.get(object.geometry) ?? [];
+        sources.push({ mesh: object, model: entry.model! }); groups.set(object.geometry, sources);
+      });
+    }
+    for (const sources of groups.values()) {
+      if (sources.length < 2) continue;
+      const first = sources[0].mesh;
+      const mesh = new THREE.InstancedMesh(first.geometry, first.material, sources.length);
+      mesh.name = `building-batch-${first.geometry.name}`;
+      mesh.castShadow = mesh.receiveShadow = true;
+      mesh.visible = false; mesh.count = 0;
+      configureTerrainShadowCaster(mesh);
+      for (const source of sources) source.mesh.visible = false;
+      this.root.add(mesh); this.resources.push(mesh); this.buildingBatches.push({ mesh, sources });
+    }
+  }
+
+  private syncBuildingBatches(): void {
+    this.root.updateMatrixWorld(true);
+    for (const { mesh, sources } of this.buildingBatches) {
+      mesh.count = 0;
+      for (const source of sources) {
+        if (source.model.visible) mesh.setMatrixAt(mesh.count++, source.mesh.matrixWorld);
+      }
+      mesh.visible = mesh.count > 0;
+      mesh.instanceMatrix.needsUpdate = true;
+      if (mesh.count) { mesh.computeBoundingBox(); mesh.computeBoundingSphere(); }
+    }
   }
 
   private updateAccessPaths(): void {

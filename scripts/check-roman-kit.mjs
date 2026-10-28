@@ -66,12 +66,12 @@ for (const [name, expected] of Object.entries(manifest)) {
 const {assetRegistry} = await import(await loadModule('lib/assets/registry'));
 const {ROMAN_SETTLEMENT}=await import(await loadModule('map/settlements/romanSettlement'));
 const owned = Object.values(assetRegistry).filter((a) => a.path.startsWith('roman-kit/'));
-assert.equal(owned.length,9);
+assert.equal(owned.length,21);
 for (const asset of owned) {
   assert.equal(asset.scale,1);assert.equal(asset.groundOffsetMeters,0);
   assert.equal(asset.source.licenceFile,'roman-kit/PROVENANCE.md');
 }
-assert.equal(new Set(ROMAN_SETTLEMENT.buildings.slice(0,5).map((b) => b.assetId)).size,3);
+assert.equal(new Set(ROMAN_SETTLEMENT.buildings.slice(0,5).map((b) => b.assetId)).size,5);
 // Regression guard: migration must not quietly regenerate the nine environment meshes.
 const environment = JSON.parse(await read('scripts/roman-kit/environment-baseline.json'));
 assert.equal(Object.keys(environment).length,9);

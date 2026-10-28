@@ -30,7 +30,7 @@ const sources = new Map();
 let totalBytes = 0;
 for (const asset of Object.values(assetRegistry)) {
   const bytes = await readFile(new URL(`../public/assets/${asset.path}`, import.meta.url));
-  totalBytes += bytes.length;
+  if (!sources.has(asset.path)) totalBytes += bytes.length;
   const gltf = await new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength), "");
   sources.set(asset.path, gltf);
   const bounds = new THREE.Box3().setFromObject(prepareAsset(gltf.scene.clone(true), asset));
