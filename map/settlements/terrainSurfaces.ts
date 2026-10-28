@@ -81,3 +81,57 @@ export function writeSurfaceHeights(surface: TerrainSurface, heights: readonly n
   surface.geometry.computeVertexNormals();
   surface.geometry.computeBoundingSphere();
 }
+
+/** A union grid for this small orthogonal street network: no coplanar overlaps. */
+export function roadNetworkSurface(roads: readonly { widthMeters: number; points: readonly LocalPoint[] }[]): TerrainSurface {
+  const rectangles: { minX: number; maxX: number; minZ: number; maxZ: number }[] = [];
+  for (const road of roads) for (let i = 1; i < road.points.length; i++) {
+    const [ax, az] = road.points[i - 1], [bx, bz] = road.points[i];
+    if (ax !== bx && az !== bz) throw new Error("Prototype street junctions require orthogonal segments.");
+    if (ax === bx && az === bz) continue;
+    const half = road.widthMeters / 2;
+    rectangles.push({ minX: Math.min(ax, bx) - (ax === bx ? half : 0), maxX: Math.max(ax, bx) + (ax === bx ? half : 0),
+      minZ: Math.min(az, bz) - (az === bz ? half : 0), maxZ: Math.max(az, bz) + (az === bz ? half : 0) });
+  }
+  const subdivisions = (values: number[]) => {
+    const unique = [...new Set(values)].sort((a, b) => a - b);
+    return unique.flatMap((value, i) => {
+      if (i === unique.length - 1) return [value];
+      const steps = Math.ceil((unique[i + 1] - value) / 2);
+      return Array.from({ length: steps }, (_, j) => value + (unique[i + 1] - value) * j / steps);
+    });
+  };
+  const xs = subdivisions(rectangles.flatMap((r) => [r.minX, r.maxX]));
+  const zs = subdivisions(rectangles.flatMap((r) => [r.minZ, r.maxZ]));
+  const points: LocalPoint[] = [], indices: number[] = [], vertices = new Map<string, number>();
+  const vertex = (x: number, z: number) => {
+    const key = `${x},${z}`;
+    if (!vertices.has(key)) { vertices.set(key, points.length); points.push([x, z]); }
+    return vertices.get(key)!;
+  };
+  for (let z = 0; z < zs.length - 1; z++) for (let x = 0; x < xs.length - 1; x++) {
+    const cx = (xs[x] + xs[x + 1]) / 2, cz = (zs[z] + zs[z + 1]) / 2;
+    if (!rectangles.some((r) => cx > r.minX && cx < r.maxX && cz > r.minZ && cz < r.maxZ)) continue;
+    const a = vertex(xs[x], zs[z]), b = vertex(xs[x + 1], zs[z]);
+    const c = vertex(xs[x], zs[z + 1]), d = vertex(xs[x + 1], zs[z + 1]);
+    indices.push(a, c, b, b, c, d);
+  }
+  const result = surface(points, indices);
+  const base = new THREE.Color(0x98886a);
+  const colors = points.flatMap(([x, z]) => base.clone().multiplyScalar(0.94 + 0.09 * (Math.sin(x * 13.1 + z * 7.7) * 0.5 + 0.5)).toArray());
+  result.geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
+  return result;
+}
+
+export function groundSurface(width: number, depth: number, spacing = 4): TerrainSurface {
+  const points: LocalPoint[] = [], indices: number[] = [];
+  const nx = Math.ceil(width / spacing), nz = Math.ceil(depth / spacing);
+  for (let z = 0; z <= nz; z++) for (let x = 0; x <= nx; x++) {
+    points.push([width * (x / nx - 0.5), depth * (z / nz - 0.5)]);
+    if (x < nx && z < nz) {
+      const a = z * (nx + 1) + x, c = a + nx + 1;
+      indices.push(a, c, a + 1, a + 1, c, c + 1);
+    }
+  }
+  return surface(points, indices);
+}

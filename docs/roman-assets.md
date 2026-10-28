@@ -144,3 +144,8 @@ then replace one asset with higher-quality PBR art through the same registry.
 The reusable layout, paths and slope-aware foundations are now implemented in
 [settlement-layout.md](settlement-layout.md). The original Giza integration
 fixture remains independent and retains its original centre-point placement.
+
+The environment milestone also extracts `GLB/amphora.glb` (19,088 bytes) and
+`GLB/stone_bench.glb` (3,704 bytes) from that same archived pack, unchanged,
+under `public/assets/roman/props/`, with the same preserved licence. See
+[settlement-environment.md](settlement-environment.md) for the instanced scenery.

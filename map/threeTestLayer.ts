@@ -34,7 +34,7 @@ import * as THREE from "three";
 import type { CustomLayerInterface, CustomRenderMethodInput, Map as MapLibreMap, MapSourceDataEvent } from "maplibre-gl";
 import { dot, lerpMat4 } from "@/lib/geo";
 import { geographicAnchor } from "@/map/geographicAnchor";
-import { queryTerrainHeights } from "@/map/terrain";
+import { queryTerrainHeights, queryTerrainSample } from "@/map/terrain";
 import { assetRegistry, assetUrl } from "@/lib/assets/registry";
 import { glbCache, type ModelLease } from "@/lib/assets/glbCache";
 import { prepareAsset, ROMAN_TEST_CENTER, ROMAN_TEST_PLACEMENTS, type AssetPlacement } from "@/map/romanTestScene";
@@ -137,6 +137,8 @@ export class ThreeTestLayer implements CustomLayerInterface {
       antialias: true,
     });
     this.renderer.autoClear = false;
+    this.renderer.shadowMap.type = THREE.PCFShadowMap;
+    this.renderer.shadowMap.autoUpdate = false;
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.Camera();
@@ -148,7 +150,6 @@ export class ThreeTestLayer implements CustomLayerInterface {
     this.onRomanStatus?.(this.romanStatus);
     this.settlement = new SettlementScene(ROMAN_SETTLEMENT,
       (status) => this.onSettlementStatus?.(status), () => this.map?.triggerRepaint());
-    this.buildLights(this.settlement.scene);
     this.updateSettlementAnchor();
     map.on("moveend", this.onSettlementMove);
     map.on("terrain", this.onSettlementTerrain);
@@ -177,7 +178,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
     this.map = null;
   }
 
-  render(_gl: WebGL2RenderingContext, args: CustomRenderMethodInput): void {
+  render(gl: WebGL2RenderingContext, args: CustomRenderMethodInput): void {
     const { renderer, scene, camera, map } = this;
     if (!renderer || !scene || !camera || !map) return;
 
@@ -188,6 +189,8 @@ export class ThreeTestLayer implements CustomLayerInterface {
       this.loadRomans();
     }
     renderer.resetState();
+    // Shadow passes restore Three's viewport; keep it aligned after map resize.
+    renderer.setViewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
     // Keep MapLibre's terrain depth. Clearing it here makes hills unable to occlude models.
     if (this.beacon && map.getZoom() < 12) this.drawAnchored(this.beacon, args);
     if (this.romanEnabled && map.getZoom() >= 12) {
@@ -195,7 +198,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
     }
     if (this.settlementEnabled && this.settlement && this.settlementAnchor && map.getZoom() >= 12) {
       this.settlement.updateTerrain((coordinate) =>
-        queryTerrainHeights(map, { lng: coordinate[0], lat: coordinate[1] })?.displayMeters ?? null);
+        queryTerrainSample(map, { lng: coordinate[0], lat: coordinate[1] }));
       this.drawAnchored(this.settlementAnchor, args, false);
     }
     // Static scene: only map movement, terrain updates and completed loads cause frames.
@@ -222,7 +225,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
       this.updateSettlementAnchor();
     }
     this.setSettlementEnabled(true);
-    this.map.flyTo({ center: [...this.settlement.origin], zoom: 18.7, pitch: 55, bearing: -25 });
+    this.map.flyTo({ center: [...this.settlement.origin], zoom: 18.4, pitch: 55, bearing: -25 });
   }
 
   private updateSettlementAnchor(): void {
@@ -293,6 +296,9 @@ export class ThreeTestLayer implements CustomLayerInterface {
       camera.projectionMatrix.fromArray(data.mainMatrix).multiply(entry.anchor.mercator);
     }
     camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
+    const settlement = entry.scene === this.settlement?.scene ? this.settlement : null;
+    renderer.shadowMap.enabled = settlement?.shadowsEnabled ?? false;
+    if (settlement) renderer.shadowMap.needsUpdate = settlement.consumeShadowUpdate();
     renderer.render(entry.scene, camera);
   }
 

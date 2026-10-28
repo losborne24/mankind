@@ -4,7 +4,8 @@ Choose **Debug tools → Roman settlement layout → Visit settlement**. The lay
 is a generic prototype near Rome at [12.55, 41.85], not an archaeological
 reconstruction. It contains five villas, one temple and one aqueduct, using only
 the three previously imported GLBs. The main road is 4 m wide and smaller paths
-are 1.6 m wide. The layout covers roughly 30 × 65 metres.
+are 1.6 m wide. The environment milestone adds 126 instanced scenery objects
+and sunlight shadows; see [settlement-environment.md](settlement-environment.md). The layout covers roughly 30 × 65 metres.
 
 **Relocate nearby** alternates between the original location and
 [12.5515, 41.851]. The **Settlement scene** checkbox unloads/reloads it. Errors
@@ -34,9 +35,10 @@ const layout: SettlementDefinition = {
 
 `SettlementScene` assembles any such definition. It owns a Three.js scene and
 provides `load()`, `unload()`, `relocate(origin)`, `invalidateTerrain(reset?)`
-and `updateTerrain(sample)`. The sampler returns displayed metres or null.
-The host supplies lighting and renders the scene with the existing shared
-renderer; the assembler creates no renderer, canvas, timers or animation loop.
+and `updateTerrain(sample)`. The sampler returns confirmed displayed metres, null, or a `TerrainSample`
+with confirmed/uncertain/unavailable readiness. The assembler supplies local
+hemisphere/sun lighting; the host renders with the existing shared renderer.
+The assembler creates no renderer, canvas, timers or animation loop.
 Status and repaint callbacks connect it to the host/UI. `load()` is idempotent.
 
 The MapLibre layer anchors the assembled scene at its origin and zero altitude.
@@ -63,8 +65,9 @@ Model normalization was moved to `lib/assets/prepareAsset.ts` for reuse;
 
 `terrainSurfaces.ts` builds indexed road grids and foundation slabs, with
 samples no more than 2 m apart along/across surfaces. Road vertices follow
-sampled terrain with an 8 cm clearance to reduce depth fighting. Junctions are
-simple overlapping strips; there is no junction triangulator or road carving.
+sampled terrain with an 8 cm clearance to reduce depth fighting. One indexed
+union grid covers the orthogonal road/path rectangles without duplicate
+intersection faces. There is no general junction triangulator or road carving.
 
 Foundations use the normalized GLB's measured X/Z dimensions plus 20 cm on each
 edge, rotated with the building. The complete footprint grid is sampled,
@@ -72,32 +75,38 @@ including its interior. Each slab has a level top 10 cm above its highest
 sample; its lower edge extends 15 cm into the sampled terrain. The model stays
 upright on the slab. A required rise above 3 m hides that building/foundation
 and reports an unsuitable site. The definition can change this limit.
-Buildings are not tilted and global terrain is not modified. Access paths end
-at the foundation edges; steps/ramps are not generated.
+Buildings are not tilted and global terrain is not modified. Paths with `accessTo` blend from street height to the named foundation
+landing. Their end vertices meet the slab top; the rest of the street stays
+terrain-following. There is no accessibility or retaining-wall solver.
 
-Sampling uses the existing public `queryTerrainHeights()` and its
-`displayMeters`, so heights follow terrain exaggeration. MapLibre returns zero
-for missing DEM as well as real sea level. To avoid starting buildings below
-the ground, this assembler treats null, zero and nonfinite samples as unknown.
-Valid negative elevations are supported. A surface with no known height at any
-required vertex stays hidden and contributes to the waiting count. If it had
-known heights already, temporary missing samples retain those heights and are
-reported as retained/stale. Relocation and terrain/exaggeration changes clear
-that cache. DEM arrival triggers resampling; there is no polling loop.
+Sampling uses `queryTerrainSample()` and displayed elevation, including terrain
+exaggeration. The adapter uses the installed MapLibre terrain object's optional
+`getDrawnElevationForLngLat()` capability to confirm DEM coverage. Its finite
+zero is valid sea level. Where the capability/coverage is absent, a fallback
+zero is explicitly **uncertain**; null/nonfinite values are unavailable. A
+nonzero fallback comes from loaded DEM and is usable. Direct numeric samplers
+are trusted, including zero. The adapter isolates the version-specific call.
 
-This conservative policy cannot display a genuinely zero-elevation site until
-a future API supplies per-location DEM readiness. Parent DEM samples can be
-usable but coarse. The configured Mapterhorn z12 data is overzoomed at building
-scale; these samples are not survey data. Grids approximate the terrain between
-samples, so small gaps/intersections remain possible. Surface heights can
-adjust as better DEM data arrives, or after a camera move ends. Extreme
-slopes hide buildings rather than solving grading/retaining-wall engineering.
+A surface with no known height at any required vertex stays hidden. If some
+samples temporarily become unavailable, its complete previous surface is kept
+coherent, rather than combining newly sampled heights with stale neighbours.
+Scenery anchors retain their last known heights. Relocation and terrain/source
+changes clear cached heights. DEM arrival triggers resampling; there is no
+polling loop. Confirmed higher-resolution DEM may still move the surface.
+
+Loaded parent DEM is usable but coarse. The configured Mapterhorn z12 data is
+overzoomed at building scale, not survey data. Sampled grids approximate terrain
+between vertices, so small gaps/intersections remain possible. If the optional
+coverage capability is unavailable, an unconfirmed zero site waits explicitly
+rather than being classified as invalid land. Extreme slopes still hide
+buildings instead of producing implausibly tall foundations.
 
 Local coordinate conversion uses a small-site spherical tangent approximation.
 It wraps longitude and rejects near-polar origins. One scene-wide tangent plane
 is suitable for this ~65 m layout, not a town spanning kilometres or polar
-sites. There is no automatic site selection, settlement streaming, instancing,
-collision checking, historical data, AI, new asset download or dependency.
+sites. There is no automatic site selection, settlement streaming, collision checking,
+historical data, runtime AI or new dependency. Repeated scenery is instanced;
+prototype botanical GLBs are built offline and two props reuse the licensed pack.
 
 ## Validation
 
@@ -113,7 +122,7 @@ Passed on 27 October 2026:
 
 The settlement check uses the real GLBs/GLTFLoader with controlled terrain to
 verify seven placements share three requests, metre offsets, road heights,
-level slab tops and terrain-shaped bottoms, unavailable/zero DEM, retention,
+level slab tops and terrain-shaped bottoms, confirmed/uncertain zero DEM, coherent retention,
 relocation without reloading, steep-site rejection, resource disposal, unload
 while requests are pending, valid negative heights and asset-failure retry.
 
@@ -124,3 +133,7 @@ terrain exaggeration changes from 1× to 2.5× and back. Unloading reported 0/7
 and removed the scene; visiting again restored 7/7. The separate Giza fixture
 was revisited and visibly rendered its three models at 3/3 ready. No FPS or
 large-settlement performance benchmark was performed.
+
+The environment milestone supersedes the original overlapping-junction and
+zero-elevation limitations. Detailed asset/shadow validation and current limits
+are in [settlement-environment.md](settlement-environment.md).

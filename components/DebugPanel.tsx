@@ -141,6 +141,7 @@ export function DebugPanel({ map, terrainWarning, onRetryTerrain, romanStatus, o
           settlementStatus.origin[0] === ROMAN_SETTLEMENT.origin[0] ? ROMAN_SETTLEMENT_ALTERNATE : ROMAN_SETTLEMENT.origin,
         )}>Relocate nearby</button>
         <p role="status" className="mt-2">{settlementStatus.loaded}/{settlementStatus.total} buildings · {settlementStatus.state}</p>
+        <p className="mt-1 text-white/40">{settlementStatus.sceneryLoaded}/{settlementStatus.sceneryTotal} scenery instances · sun shadows</p>
         <p className="mt-1 text-white/40">{settlementStatus.origin.map((value) => value.toFixed(4)).join(", ")} · Generic prototype near Rome.</p>
         {settlementStatus.terrainPending > 0 && <p className="mt-2 text-amber-200/80">Waiting for terrain on {settlementStatus.terrainPending} surfaces. Unknown ground stays hidden.</p>}
         {settlementStatus.terrainRetained > 0 && <p className="mt-2 text-amber-200/80">Terrain updating; retaining known heights on {settlementStatus.terrainRetained} surfaces.</p>}
@@ -149,7 +150,7 @@ export function DebugPanel({ map, terrainWarning, onRetryTerrain, romanStatus, o
           <ul className="mt-2 break-words text-amber-200/80">{settlementStatus.errors.map((error) => <li key={error}>{error}</li>)}</ul>
           <button className="mt-2 underline" onClick={() => { onSettlementEnabled(false); onSettlementEnabled(true); }}>Retry settlement</button>
         </>}
-        <p className="mt-2 text-white/40">Level foundations and terrain-following paths. No historical reconstruction claimed.</p>
+        <p className="mt-2 text-white/40">Level foundations, joined paths and Mediterranean scenery. No historical reconstruction claimed.</p>
       </fieldset>
       {terrainWarning && (
         <p role="status" className="mt-2 text-amber-200/80">

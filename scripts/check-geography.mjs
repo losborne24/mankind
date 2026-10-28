@@ -27,7 +27,7 @@ assert.deepEqual(style.sources[style.terrain.source].tiles, ["https://tiles.mapt
 const terrainModule = ts.transpileModule(await readFile(new URL("../map/terrain.ts", import.meta.url), "utf8"), {
   compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020 },
 });
-const { queryTerrainHeights } = await import(`data:text/javascript;base64,${Buffer.from(terrainModule.outputText).toString("base64")}`);
+const { queryTerrainHeights } = await import(`data:text/javascript;base64,${Buffer.from(terrainModule.outputText.replace('from "maplibre-gl"', `from "${import.meta.resolve("maplibre-gl")}"`)).toString("base64")}`);
 for (const exaggeration of [1, 1.5, 2, 2.5]) {
   const sampleMap = {
     getTerrain: () => ({ exaggeration }),
