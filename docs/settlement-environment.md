@@ -1,5 +1,11 @@
 # Roman settlement environment and polish
 
+> Historical milestone record. The original Roman Town Pack and its public licence
+> have since been removed. Current assets, paths and validation are documented in
+> [roman-kit.md](roman-kit.md); the original licence text is preserved only in
+> [the historical archive](archive/roman-town-pack-LICENSE.txt).
+
+
 ## Environmental world-building — 28 October 2026
 
 The latest fictional prototype has three connected environmental zones:

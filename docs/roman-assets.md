@@ -1,5 +1,11 @@
 # Phase 3: Roman GLB prototype
 
+> Historical milestone record. The original Roman Town Pack and its public licence
+> have since been removed. Current assets, paths and validation are documented in
+> [roman-kit.md](roman-kit.md); the original licence text is preserved only in
+> [the historical archive](archive/roman-town-pack-LICENSE.txt).
+
+
 Open the globe and choose **Debug tools → Visit Roman test**. The camera moves
 to [31.138, 29.9795], zoom 19, pitch 55°, bearing −25°. All three models appear
 together at their authored metre scale. These are temporary integration

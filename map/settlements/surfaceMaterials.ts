@@ -142,6 +142,10 @@ export function weatheredMaterial(source: THREE.Material, variant: number): THRE
   if (!(copy instanceof THREE.MeshStandardMaterial)) return copy;
   copy.roughness = Math.max(copy.roughness, 0.94);
   copy.metalness = 0;
+  if (copy.map) {
+    copy.color.multiplyScalar([0.97, 1, 1.025][variant]);
+    return copy;
+  }
   const roof = copy.name === "terra";
   if (roof) copy.color.lerp(new THREE.Color(0x85644e), 0.28);
   else copy.color.lerp(new THREE.Color(0xb7aa8d), 0.08);

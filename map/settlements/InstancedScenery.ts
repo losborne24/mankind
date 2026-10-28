@@ -12,7 +12,6 @@ interface Batch {
   lease: ModelLease;
   parts: { mesh: THREE.InstancedMesh; local: THREE.Matrix4 }[];
   heights: (number | undefined)[];
-  materials: THREE.Material[];
 }
 
 /** One cached source lease per asset, one instanced draw per source mesh/material. */
@@ -38,15 +37,10 @@ export class InstancedScenery {
         if (generation !== this.generation) { lease.release(); return; }
         const source = prepareAsset(lease.scene, asset);
         source.updateMatrixWorld(true);
-        const batch: Batch = { lease, placements: instances, parts: [], heights: [], materials: [] };
+        const batch: Batch = { lease, placements: instances, parts: [], heights: [] };
         source.traverse((object) => {
           if (!(object instanceof THREE.Mesh)) return;
           const mesh = new THREE.InstancedMesh(object.geometry, object.material, instances.length);
-          if (asset.id === "roman-market-awning-01" && object.material instanceof THREE.MeshStandardMaterial && ["red", "roman_red"].includes(object.material.name)) {
-            const cloth = object.material.clone();
-            cloth.color.set(0xb8a37e); cloth.roughness = 1;
-            mesh.material = cloth; batch.materials.push(cloth);
-          }
           mesh.name = `${asset.id}-instances`;
           mesh.castShadow = !asset.id.includes("grass");
           configureTerrainShadowCaster(mesh);
@@ -136,7 +130,6 @@ export class InstancedScenery {
     this.generation++;
     for (const batch of this.batches) {
       for (const part of batch.parts) part.mesh.dispose(); // instance buffers only; cache owns geometry/materials
-      for (const material of batch.materials) material.dispose();
       batch.lease.release();
     }
     this.batches = [];

@@ -1,0 +1,527 @@
+{
+  "provincial-house": {
+    "bytes": 1025268,
+    "sha256": "0235819367b02d75102b96e838c76629ea3d7a9eb840421b9575eb558939764a",
+    "dimensionsMeters": [
+      5.989207,
+      4.33,
+      6.352367
+    ],
+    "triangles": 9882,
+    "materials": 1,
+    "textures": [
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "baseColor"
+      },
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "normal"
+      }
+    ],
+    "entrance": "+Z",
+    "groundY": 0.0
+  },
+  "taberna": {
+    "bytes": 647948,
+    "sha256": "8863b3a87dbd46ad07ca165305e3cf4fc90a933040e1e178929508172b69bba6",
+    "dimensionsMeters": [
+      6.039,
+      4.16,
+      6.425
+    ],
+    "triangles": 4858,
+    "materials": 1,
+    "textures": [
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "baseColor"
+      },
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "normal"
+      }
+    ],
+    "entrance": "+Z",
+    "groundY": 0.0
+  },
+  "farmhouse": {
+    "bytes": 1237172,
+    "sha256": "b033c0590cb097dbb3c5a2194d8d0bd972eb12dca583879a92b5a9dd120f60f2",
+    "dimensionsMeters": [
+      8.190742,
+      4.75,
+      7.395
+    ],
+    "triangles": 12868,
+    "materials": 1,
+    "textures": [
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "baseColor"
+      },
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "normal"
+      }
+    ],
+    "entrance": "+Z",
+    "groundY": 0.0
+  },
+  "small-temple": {
+    "bytes": 956516,
+    "sha256": "eca49e76743897b52889a74875073567ab636402dd3f88d6cca9ea2a10954df6",
+    "dimensionsMeters": [
+      7.48,
+      5.61,
+      7.6
+    ],
+    "triangles": 9220,
+    "materials": 1,
+    "textures": [
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "baseColor"
+      },
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "normal"
+      }
+    ],
+    "entrance": "+Z",
+    "groundY": 0.0
+  },
+  "aqueduct-section": {
+    "bytes": 713948,
+    "sha256": "9915fe5dd1599abe45ab4d53c4c0c73f66965b9ddca109ad5c737c61ef5fdba5",
+    "dimensionsMeters": [
+      8.13,
+      8.7935,
+      1.72
+    ],
+    "triangles": 5484,
+    "materials": 1,
+    "textures": [
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "baseColor"
+      },
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "normal"
+      }
+    ],
+    "entrance": "+Z",
+    "groundY": 0.0
+  },
+  "wine-barrel": {
+    "bytes": 348172,
+    "sha256": "fd305842e57a3422d86fd32d6319365d24a831cba04ec1bb29fca3dc6a85cb3e",
+    "dimensionsMeters": [
+      0.899964,
+      0.8,
+      0.897
+    ],
+    "triangles": 780,
+    "materials": 1,
+    "textures": [
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "baseColor"
+      },
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "normal"
+      }
+    ],
+    "entrance": "+Z",
+    "groundY": 0.0
+  },
+  "market-awning": {
+    "bytes": 351220,
+    "sha256": "e909cd1a28f683985999507e9bcc471d39093cd6d43e0934476df1917fb248c7",
+    "dimensionsMeters": [
+      2.6,
+      2.18,
+      1.818
+    ],
+    "triangles": 712,
+    "materials": 1,
+    "textures": [
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "baseColor"
+      },
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "normal"
+      }
+    ],
+    "entrance": "+Z",
+    "groundY": 0.0
+  },
+  "amphora": {
+    "bytes": 358004,
+    "sha256": "61dd50b57ae21af100930d75cf53677c8f6a7843306883bd991a15b44d93044c",
+    "dimensionsMeters": [
+      0.6625,
+      1.0,
+      0.55
+    ],
+    "triangles": 844,
+    "materials": 1,
+    "textures": [
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "baseColor"
+      },
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "normal"
+      }
+    ],
+    "entrance": "+Z",
+    "groundY": 0.0
+  },
+  "stone-bench": {
+    "bytes": 318280,
+    "sha256": "3d3e34873333190718c2703a18b2ed6e17e4b94a3f88e79cc7533ca1aa968bf7",
+    "dimensionsMeters": [
+      1.8,
+      0.58,
+      0.5
+    ],
+    "triangles": 220,
+    "materials": 1,
+    "textures": [
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "baseColor"
+      },
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "normal"
+      }
+    ],
+    "entrance": "+Z",
+    "groundY": 0.0
+  },
+  "module-wall-limewash": {
+    "bytes": 302440,
+    "sha256": "86ce13fff2d60603f91981a1756dd31c8c839303a60de1fbf8d84adfa7fe4b75",
+    "dimensionsMeters": [
+      1.0,
+      2.8,
+      0.3
+    ],
+    "triangles": 12,
+    "materials": 1,
+    "textures": [
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "baseColor"
+      },
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "normal"
+      }
+    ],
+    "entrance": "+Z",
+    "groundY": 0.0
+  },
+  "module-wall-masonry": {
+    "bytes": 302436,
+    "sha256": "41c46441c03d4a5e3e4beffecf82666661feb711f5b06ae37a944bef959b3131",
+    "dimensionsMeters": [
+      1.0,
+      2.8,
+      0.3
+    ],
+    "triangles": 12,
+    "materials": 1,
+    "textures": [
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "baseColor"
+      },
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "normal"
+      }
+    ],
+    "entrance": "+Z",
+    "groundY": 0.0
+  },
+  "module-wall-timber-plaster": {
+    "bytes": 315808,
+    "sha256": "e283866bcdb9e9b8b780dbff6eb1cabc299c6eb8310a6d6cf1d0c19cbf6de557",
+    "dimensionsMeters": [
+      1.0,
+      2.8,
+      0.37
+    ],
+    "triangles": 188,
+    "materials": 1,
+    "textures": [
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "baseColor"
+      },
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "normal"
+      }
+    ],
+    "entrance": "+Z",
+    "groundY": 0.0
+  },
+  "module-corner-masonry": {
+    "bytes": 335012,
+    "sha256": "7e5798847d83b15a1be0feb0bd9b8586fbc9b61014a1672e1e6c5f17bdb0f2c7",
+    "dimensionsMeters": [
+      0.51,
+      2.78,
+      0.51
+    ],
+    "triangles": 440,
+    "materials": 1,
+    "textures": [
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "baseColor"
+      },
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "normal"
+      }
+    ],
+    "entrance": "+Z",
+    "groundY": 0.0
+  },
+  "module-door-bay": {
+    "bytes": 347552,
+    "sha256": "a91c47e98339c6618e39fd3d21968451449f6b37e9d113cfd4ddd2c8c8fb7d92",
+    "dimensionsMeters": [
+      1.6,
+      2.8,
+      0.535
+    ],
+    "triangles": 612,
+    "materials": 1,
+    "textures": [
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "baseColor"
+      },
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "normal"
+      }
+    ],
+    "entrance": "+Z",
+    "groundY": 0.0
+  },
+  "module-window-bay": {
+    "bytes": 330056,
+    "sha256": "3927ec2764b68de47eec0b9996468754da65bc6b315608653eda411f1eca1d08",
+    "dimensionsMeters": [
+      1.4,
+      2.8,
+      0.535
+    ],
+    "triangles": 384,
+    "materials": 1,
+    "textures": [
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "baseColor"
+      },
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "normal"
+      }
+    ],
+    "entrance": "+Z",
+    "groundY": 0.0
+  },
+  "module-workshop-bay": {
+    "bytes": 347024,
+    "sha256": "9584d99d42fae97f4fdd650d231e0770032ec9c0071eb1bf969e0a6c2100fcf6",
+    "dimensionsMeters": [
+      3.2,
+      2.8,
+      0.735
+    ],
+    "triangles": 608,
+    "materials": 1,
+    "textures": [
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "baseColor"
+      },
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "normal"
+      }
+    ],
+    "entrance": "+Z",
+    "groundY": 0.0
+  },
+  "module-roof-tiled-bay": {
+    "bytes": 348712,
+    "sha256": "a8b371557320df51fe41034c034ff8ef3f6ac8d0b20870fc5299cc2e0958ee07",
+    "dimensionsMeters": [
+      2.68,
+      1.05,
+      1.4394
+    ],
+    "triangles": 654,
+    "materials": 1,
+    "textures": [
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "baseColor"
+      },
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "normal"
+      }
+    ],
+    "entrance": "+Z",
+    "groundY": 0.0
+  },
+  "module-roof-simple-bay": {
+    "bytes": 327708,
+    "sha256": "26ba5388649faec7cfae616ee06de0b2eeffcc42cd08fd8acad46042237465b4",
+    "dimensionsMeters": [
+      2.68,
+      1.05,
+      1.418
+    ],
+    "triangles": 354,
+    "materials": 1,
+    "textures": [
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "baseColor"
+      },
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "normal"
+      }
+    ],
+    "entrance": "+Z",
+    "groundY": 0.0
+  },
+  "module-column-tuscan": {
+    "bytes": 324836,
+    "sha256": "4cb515bbd8ff69c9bb6d2883f3859fa2ae0782b954a3b117e8f3d2a6a9202029",
+    "dimensionsMeters": [
+      0.588,
+      2.95,
+      0.588
+    ],
+    "triangles": 340,
+    "materials": 1,
+    "textures": [
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "baseColor"
+      },
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "normal"
+      }
+    ],
+    "entrance": "+Z",
+    "groundY": 0.0
+  },
+  "module-foundation-step": {
+    "bytes": 304976,
+    "sha256": "34c449d4cd37156d97605b34a6639a71a12784f0e1cdd891e0cf3dc8ddddd930",
+    "dimensionsMeters": [
+      1.6,
+      0.16,
+      0.6
+    ],
+    "triangles": 44,
+    "materials": 1,
+    "textures": [
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "baseColor"
+      },
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "normal"
+      }
+    ],
+    "entrance": "+Z",
+    "groundY": 0.0
+  },
+  "module-stone-trim": {
+    "bytes": 304940,
+    "sha256": "dcd6bebd1c9ac610c90c69d1b901b34c455571339ef770be086b5014ae783409",
+    "dimensionsMeters": [
+      1.0,
+      0.16,
+      0.22
+    ],
+    "triangles": 44,
+    "materials": 1,
+    "textures": [
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "baseColor"
+      },
+      {
+        "width": 512,
+        "height": 256,
+        "kind": "normal"
+      }
+    ],
+    "entrance": "+Z",
+    "groundY": 0.0
+  }
+}

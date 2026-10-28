@@ -1,0 +1,44 @@
+{
+  "temple_small.glb": {
+    "bytes": 47856,
+    "sha256": "dd4526ec5100a3e974a4c873db0d77ffd5bbe2b6a71d3fa42abc33ce7b0e1df4",
+    "triangles": 728,
+    "primitives": 3
+  },
+  "aqueduct_double.glb": {
+    "bytes": 11352,
+    "sha256": "8a9b7d27755dd59ab8efd9d1b99e100303e4fccc64cf89a26f78ad8c98cbb959",
+    "triangles": 132,
+    "primitives": 2
+  },
+  "villa.glb": {
+    "bytes": 9928,
+    "sha256": "fdd6f08d7b0d31a600d0e2461dc429cdcbee9472c9db1df765d219f258353c3b",
+    "triangles": 80,
+    "primitives": 5
+  },
+  "stone_bench.glb": {
+    "bytes": 3704,
+    "sha256": "6072349117f9bc6e7692d15871fb6b494efda8656948b6deb8620b8361905c95",
+    "triangles": 36,
+    "primitives": 1
+  },
+  "amphora.glb": {
+    "bytes": 19088,
+    "sha256": "8f6cd962238def302ea38bb40e98bc38c4ab7db62080c61fc40bf4a6695696c4",
+    "triangles": 284,
+    "primitives": 1
+  },
+  "wine_barrel.glb": {
+    "bytes": 11160,
+    "sha256": "de4d71149129b6773dd5751efc7910380518b7f611ee1dd9a3b9c657ac5b1046",
+    "triangles": 168,
+    "primitives": 2
+  },
+  "market_awning.glb": {
+    "bytes": 14284,
+    "sha256": "59fc54e54aa6c8b1d786961619671d2ded665c7316101bc679ba58775336c805",
+    "triangles": 124,
+    "primitives": 4
+  }
+}

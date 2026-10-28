@@ -212,10 +212,6 @@ export class ThreeTestLayer implements CustomLayerInterface {
     this.map?.triggerRepaint();
   }
 
-  setVillaEnhanced(enabled: boolean): void {
-    this.settlement?.setVillaEnhanced(enabled);
-  }
-
   setSettlementEnabled(enabled: boolean): void {
     this.settlementEnabled = enabled;
     if (enabled) void this.settlement?.load();

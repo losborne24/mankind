@@ -1,5 +1,11 @@
 # One-house architectural experiment — 28 October 2026
 
+> Historical milestone record. The original Roman Town Pack and its public licence
+> have since been removed. Current assets, paths and validation are documented in
+> [roman-kit.md](roman-kit.md); the original licence text is preserved only in
+> [the historical archive](archive/roman-town-pack-LICENSE.txt).
+
+
 Use **Debug tools → Roman settlement layout → Comparison house** to switch
 Original villa / Enhanced villa. Only `villa-west-2` (offset [-9, -7], heading
 π/2, door facing east) changes. Enhanced is the initial choice. Selection survives

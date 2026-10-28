@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "units": "metres",
+  "entrance": "+Z",
+  "bayMeters": 1,
+  "palette": [
+    "plaster",
+    "stone",
+    "terracotta",
+    "timber",
+    "recess",
+    "iron",
+    "linen",
+    "ochre-plaster"
+  ],
+  "assets": {
+    "provincial-house": {
+      "kind": "house",
+      "width": 5.2,
+      "depth": 5.2,
+      "wallHeight": 2.85,
+      "roofRise": 1.28,
+      "eave": 0.35,
+      "frontDoor": 1.05,
+      "porch": true
+    },
+    "taberna": {
+      "kind": "workshop",
+      "width": 5.4,
+      "depth": 5.3,
+      "wallHeight": 2.85,
+      "roofRise": 1.1,
+      "eave": 0.3,
+      "frontDoor": 2.6
+    },
+    "farmhouse": {
+      "kind": "farmhouse",
+      "width": 7.4,
+      "depth": 6.5,
+      "wallHeight": 3.15,
+      "roofRise": 1.4,
+      "eave": 0.35,
+      "frontDoor": 1.2,
+      "main": {
+        "width": 5.2,
+        "depth": 5.2,
+        "offset": [
+          -1.1,
+          -0.65
+        ]
+      },
+      "serviceWing": {
+        "centerX": 2.6,
+        "width": 2.2,
+        "backZ": -1.4,
+        "frontZ": 3.25,
+        "wallHeight": 2.5
+      },
+      "veranda": {
+        "postsX": [
+          -3.2,
+          -1.1,
+          0.95
+        ],
+        "frontZ": 3.13
+      }
+    },
+    "small-temple": {
+      "kind": "temple",
+      "width": 6.8,
+      "depth": 7.4,
+      "podium": 0.85,
+      "columnHeight": 2.95,
+      "roofRise": 1.2
+    },
+    "aqueduct-section": {
+      "kind": "aqueduct",
+      "width": 8,
+      "depth": 1.6,
+      "height": 8.8,
+      "arches": 2,
+      "springHeight": 4.75,
+      "archRadius": 1.5
+    },
+    "wine-barrel": {
+      "kind": "barrel",
+      "diameter": 0.9,
+      "height": 0.8
+    },
+    "market-awning": {
+      "kind": "awning",
+      "width": 2.6,
+      "depth": 1.8,
+      "height": 2.18
+    },
+    "amphora": {
+      "kind": "amphora",
+      "height": 1,
+      "diameter": 0.55
+    },
+    "stone-bench": {
+      "kind": "bench",
+      "width": 1.8,
+      "depth": 0.5,
+      "height": 0.58
+    }
+  }
+}

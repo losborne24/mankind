@@ -1,5 +1,11 @@
 # Reusable Roman settlement layout
 
+> Historical milestone record. The original Roman Town Pack and its public licence
+> have since been removed. Current assets, paths and validation are documented in
+> [roman-kit.md](roman-kit.md); the original licence text is preserved only in
+> [the historical archive](archive/roman-town-pack-LICENSE.txt).
+
+
 Choose **Debug tools → Roman settlement layout → Visit settlement**. The layout
 is a generic prototype near Rome at [12.55, 41.85], not an archaeological
 reconstruction. It contains five villas, one temple and one aqueduct, using only

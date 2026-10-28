@@ -1,5 +1,5 @@
 // QA only: paste in local DevTools after Visit settlement at the original origin.
-// Select Original villa / Enhanced villa in Debug tools before each invocation.
+// Captures the current project-owned house; historical baseline PNGs are retained.
 // Close DevTools after invoking; the width guard waits for the undocked viewport.
 window.captureVilla = (name = "mankind-villa", elevated = false) => {
   const map = window.__globe.map;
@@ -18,7 +18,7 @@ window.captureVilla = (name = "mankind-villa", elevated = false) => {
       link.href = map.getCanvas().toDataURL("image/png");
       link.click();
       console.log("Villa capture", JSON.stringify({
-        variant: document.querySelector('[aria-label="Villa detail"]').value,
+        asset: "roman-kit/provincial-house.glb",
         center: map.getCenter(), zoom: map.getZoom(), pitch: map.getPitch(),
         bearing: map.getBearing(), terrain: map.getTerrain(),
         viewport: [map.getCanvas().width, map.getCanvas().height],

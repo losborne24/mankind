@@ -1,0 +1,20 @@
+{
+  "units": "metres",
+  "gridMeters": 1,
+  "wallThicknessMeters": 0.3,
+  "entrance": "+Z",
+  "modules": {
+    "wall-limewash": {"kind":"wall", "material":"plaster", "width":1, "height":2.8},
+    "wall-masonry": {"kind":"wall", "material":"stone", "width":1, "height":2.8},
+    "wall-timber-plaster": {"kind":"timber-wall", "width":1, "height":2.8},
+    "corner-masonry": {"kind":"corner", "height":2.8},
+    "door-bay": {"kind":"door", "width":1.6, "height":2.8, "openingWidth":1.05},
+    "window-bay": {"kind":"window", "width":1.4, "height":2.8, "openingWidth":0.65},
+    "workshop-bay": {"kind":"workshop", "width":3.2, "height":2.8, "openingWidth":2.6},
+    "roof-tiled-bay": {"kind":"roof", "width":2, "depth":1, "height":1, "detailed":true},
+    "roof-simple-bay": {"kind":"roof", "width":2, "depth":1, "height":1, "detailed":false},
+    "column-tuscan": {"kind":"column", "height":2.95, "radius":0.21},
+    "foundation-step": {"kind":"step", "width":1.6, "depth":0.6, "height":0.16},
+    "stone-trim": {"kind":"trim", "width":1, "depth":0.22, "height":0.16}
+  }
+}

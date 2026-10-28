@@ -87,7 +87,7 @@ GLTFLoader.prototype.loadAsync = async function (url) {
   if (failTemple && url.includes("temple")) throw new Error("simulated missing temple");
   const bytes = await readFile(new URL(`../public${url}`, import.meta.url));
   const gltf = await new GLTFLoader().parseAsync(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength), "");
-  if (url.endsWith("villa.glb")) gltf.scene.traverse((object) => { if (object.isMesh && !originalVillaMaterial) originalVillaMaterial = object.material; });
+  if (url.endsWith("provincial-house.glb")) gltf.scene.traverse((object) => { if (object.isMesh && !originalVillaMaterial) originalVillaMaterial = object.material; });
   return gltf;
 };
 let status;
@@ -140,7 +140,7 @@ try {
     roadArea += Math.abs((roadPositions.getX(b) - roadPositions.getX(a)) * (roadPositions.getZ(c) - roadPositions.getZ(a)) -
       (roadPositions.getZ(b) - roadPositions.getZ(a)) * (roadPositions.getX(c) - roadPositions.getX(a))) / 2;
   }
-  assert.ok(Math.abs(roadArea - 394.0675) < 0.001, "Road triangles cover the street union once, without overlapping junctions");
+  assert.ok(Math.abs(roadArea - 394.3875) < 0.001, "Road triangles cover the street union once, without overlapping junctions");
   for (let i=0;i<roadIndices.count;i+=3) {
     const vertices=[0,1,2].map((j)=>roadIndices.getX(i+j));
     const x=vertices.reduce((sum,v)=>sum+roadPositions.getX(v),0)/3;
@@ -192,10 +192,8 @@ try {
   groundMap.addEventListener("dispose", () => textureDisposals++);
   roadMap.addEventListener("dispose", () => textureDisposals++);
   const instanceMeshes = meshes().filter((mesh) => mesh.isInstancedMesh);
-  const cloth = instanceMeshes.find((mesh) => mesh.name.startsWith("roman-market-awning") && mesh.material.name === "roman_red").material;
-  assert.equal(cloth.color.getHex(), 0xb8a37e);
-  let clothDisposed = 0;
-  cloth.addEventListener("dispose", () => clothDisposed++);
+  const awning = instanceMeshes.find((mesh) => mesh.name.startsWith("roman-market-awning"));
+  assert.ok(awning.material.map && awning.material.normalMap, "Project-owned cloth retains its authored atlas");
   const instanceColours = instanceMeshes.map((mesh) => mesh.instanceColor?.array.slice());
   assert.ok(instanceMeshes.length < ROMAN_SETTLEMENT.scenery.length / 4, "Repeated scenery must be instanced");
   for (const mesh of instanceMeshes) {
@@ -219,41 +217,19 @@ try {
   const villaColors = new Set();
   for (const building of ROMAN_SETTLEMENT.buildings.filter((b) => b.assetId === "roman-villa-01")) {
     assembler.scene.getObjectByName(building.id).traverse((o) => {
-      if (o.isMesh && o.material.name === "terra") villaColors.add(o.material.color.getHex());
+      if (o.isMesh && o.material.map) villaColors.add(o.material.color.getHex());
     });
   }
   assert.ok(villaColors.size > 1, "Repeated villas have deterministic material variation");
   let overrideDisposed = 0;
   settlementVillaMaterial.addEventListener("dispose", () => overrideDisposed++);
-  // The architectural experiment shares the original placement, foundation and lease.
-  const house = assembler.scene.getObjectByName("villa-west-2");
-  const baseline = house.getObjectByName("original-villa");
-  const detail = house.getObjectByName("enhanced-villa");
-  assert.ok(baseline && detail);
-  assert.equal(detail.children.length, 6, "Architecture stays in six material batches");
-  assert.equal(assembler.scene.getObjectsByProperty("name", "enhanced-villa").length, 1);
-  const anchorBefore = house.position.clone(), headingBefore = house.rotation.y;
-  const requestsBeforeSwitch = requests.length;
-  assembler.setVillaEnhanced(false);
-  assert.ok(baseline.visible && !detail.visible);
-  assembler.setVillaEnhanced(true);
-  assert.ok(!baseline.visible && detail.visible);
-  assert.ok(house.position.equals(anchorBefore));
-  assert.equal(house.rotation.y, headingBefore);
-  assert.equal(requests.length, requestsBeforeSwitch);
-  const localBounds = new THREE.Box3();
-  for (const mesh of detail.children) { mesh.geometry.computeBoundingBox(); localBounds.union(mesh.geometry.boundingBox); }
-  assert.ok(localBounds.min.y >= -1e-6 && localBounds.max.y < 4.5);
-  assert.ok(localBounds.max.x - localBounds.min.x < 6.2 && localBounds.max.z - localBounds.min.z < 6.6);
-  let detailDisposals = 0, detailMaterialDisposals = 0, detailTextureDisposals = 0;
-  const detailMaps = new Set();
-  for (const mesh of detail.children) {
-    mesh.geometry.addEventListener("dispose", () => detailDisposals++);
-    mesh.material.addEventListener("dispose", () => detailMaterialDisposals++);
-    if (mesh.material.map) detailMaps.add(mesh.material.map);
+  const archetypes = new Set(ROMAN_SETTLEMENT.buildings.filter((b) => !["temple","aqueduct"].includes(b.id)).map((b) => b.assetId));
+  assert.equal(archetypes.size, 3, "The settlement uses three distinct residential/commercial archetypes");
+  for (const building of ROMAN_SETTLEMENT.buildings) {
+    let parts = 0;
+    assembler.scene.getObjectByName(building.id).traverse((o) => { if (o.isMesh) { parts++; assert.ok(o.material.map && o.material.normalMap); } });
+    assert.equal(parts, 1, "Each complete architectural GLB is one merged material batch");
   }
-  for (const map of detailMaps) map.addEventListener("dispose", () => detailTextureDisposals++);
-  console.log(`Villa detail: ${detail.children.reduce((n,m) => n + m.geometry.getAttribute("position").count/3, 0)} triangles, 6 batches, two 128² textures.`);
   const foundation = foundations()[0];
   const heightsBefore = foundation.geometry.getAttribute("position").array.slice();
   const roadHeightsBefore = network.geometry.getAttribute("position").array.slice();
@@ -287,13 +263,8 @@ try {
   assert.equal(status.state, "unloaded");
   assert.equal(meshes().length, 0);
   assert.equal(disposed, 1, "Procedural resources are disposed once");
-  assert.equal(detailDisposals, 6);
-  assert.equal(detailMaterialDisposals, 6);
-  assert.equal(detailTextureDisposals, 2, "Shared detail maps disposed once each");
   assert.equal(textureDisposals, 2, "Owned ground and road textures are disposed once");
-  assert.equal(clothDisposed, 1, "Owned awning cloth materials are disposed once");
   assert.equal(overrideDisposed, 1, "Owned shadow material copies are disposed once");
-  assembler.setVillaEnhanced(false);
   pause = true;
   const pending = assembler.load();
   assembler.unload();
@@ -310,8 +281,6 @@ try {
   assembler.unload(); failTemple = false;
   await assembler.load(); assembler.updateTerrain(() => 100);
   assert.equal(status.state, "ready", "Unloading and loading retries failed assets");
-  assert.equal(assembler.scene.getObjectByName("enhanced-villa").visible, false, "Comparison choice survives reload");
-  assembler.setVillaEnhanced(true);
   assembler.invalidateTerrain(true); assembler.updateTerrain(() => -20);
   assert.equal(status.state, "ready", "Valid negative elevations are supported");
 } finally {

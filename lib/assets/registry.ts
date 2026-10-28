@@ -12,10 +12,10 @@ export interface AssetDefinition {
 }
 
 const source = {
-  author: "reodesuxz",
-  url: "https://reodesuxz.itch.io/low-poly-roman-town-pack",
-  licence: "Personal/commercial project use; no standalone redistribution, sublicensing or AI training. Attribution optional.",
-  licenceFile: "roman/LICENSE.txt",
+  author: "Mankind project",
+  url: "scripts/roman-kit/generate.py",
+  licence: "Project-authored geometry and textures; repository terms apply.",
+  licenceFile: "roman-kit/PROVENANCE.md",
 };
 
 const environmentSource = {
@@ -26,17 +26,25 @@ const environmentSource = {
 };
 
 export const assetRegistry = {
+  "roman-taberna-01": {
+    id: "roman-taberna-01", path: "roman-kit/taberna.glb", category: "building",
+    scale: 1, dimensionsMeters: [6.039, 4.16, 6.425], groundOffsetMeters: 0, source,
+  },
+  "roman-farmhouse-01": {
+    id: "roman-farmhouse-01", path: "roman-kit/farmhouse.glb", category: "building",
+    scale: 1, dimensionsMeters: [8.190742, 4.75, 7.395], groundOffsetMeters: 0, source,
+  },
   "roman-villa-01": {
-    id: "roman-villa-01", path: "roman/buildings/villa.glb", category: "building",
-    scale: 1, dimensionsMeters: [6, 4.4, 6.6], groundOffsetMeters: 0, source,
+    id: "roman-villa-01", path: "roman-kit/provincial-house.glb", category: "building",
+    scale: 1, dimensionsMeters: [5.989207, 4.33, 6.352367], groundOffsetMeters: 0, source,
   },
   "roman-temple-01": {
-    id: "roman-temple-01", path: "roman/buildings/temple_small.glb", category: "building",
-    scale: 1, dimensionsMeters: [7.6, 5.6, 8], groundOffsetMeters: 0, source,
+    id: "roman-temple-01", path: "roman-kit/small-temple.glb", category: "building",
+    scale: 1, dimensionsMeters: [7.48, 5.61, 7.6], groundOffsetMeters: 0, source,
   },
   "roman-aqueduct-01": {
-    id: "roman-aqueduct-01", path: "roman/buildings/aqueduct_double.glb", category: "infrastructure",
-    scale: 1, dimensionsMeters: [8, 9.075, 1.6], groundOffsetMeters: 0, source,
+    id: "roman-aqueduct-01", path: "roman-kit/aqueduct-section.glb", category: "infrastructure",
+    scale: 1, dimensionsMeters: [8.13, 8.7935, 1.72], groundOffsetMeters: 0, source,
   },
   "environment-olive-tree-01": {
     id: "environment-olive-tree-01", path: "environment/olive-tree.glb", category: "vegetation",
@@ -75,19 +83,19 @@ export const assetRegistry = {
     scale: 1, dimensionsMeters: [0.626516, 1.0661, 0.527335], groundOffsetMeters: 0, source: environmentSource,
   },
   "roman-wine-barrel-01": {
-    id: "roman-wine-barrel-01", path: "roman/props/wine_barrel.glb", category: "prop",
-    scale: 1, dimensionsMeters: [0.9, 0.8, 0.88], groundOffsetMeters: 0, source,
+    id: "roman-wine-barrel-01", path: "roman-kit/wine-barrel.glb", category: "prop",
+    scale: 1, dimensionsMeters: [0.899964, 0.8, 0.897], groundOffsetMeters: 0, source,
   },
   "roman-market-awning-01": {
-    id: "roman-market-awning-01", path: "roman/props/market_awning.glb", category: "prop",
-    scale: 1, dimensionsMeters: [2.6, 2.174045, 1.791743], groundOffsetMeters: 0, source,
+    id: "roman-market-awning-01", path: "roman-kit/market-awning.glb", category: "prop",
+    scale: 1, dimensionsMeters: [2.6, 2.18, 1.818], groundOffsetMeters: 0, source,
   },
   "roman-amphora-01": {
-    id: "roman-amphora-01", path: "roman/props/amphora.glb", category: "prop",
-    scale: 1, dimensionsMeters: [1.0, 1.3, 0.66574], groundOffsetMeters: 0, source,
+    id: "roman-amphora-01", path: "roman-kit/amphora.glb", category: "prop",
+    scale: 1, dimensionsMeters: [0.6625, 1.0, 0.55], groundOffsetMeters: 0, source,
   },
   "roman-stone-bench-01": {
-    id: "roman-stone-bench-01", path: "roman/props/stone_bench.glb", category: "prop",
+    id: "roman-stone-bench-01", path: "roman-kit/stone-bench.glb", category: "prop",
     scale: 1, dimensionsMeters: [1.8, 0.58, 0.5], groundOffsetMeters: 0, source,
   },
 } as const satisfies Record<string, AssetDefinition>;

@@ -1,3 +1,4 @@
+import "./glb-node-images.mjs";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import ts from "typescript";
@@ -24,7 +25,7 @@ const { assetRegistry, assetUrl } = await import(await loadModule("lib/assets/re
 const { prepareAsset } = await import(await loadModule("map/romanTestScene"));
 const { geographicAnchor } = await import(await loadModule("map/geographicAnchor"));
 const { GlbCache } = await import(await loadModule("lib/assets/glbCache"));
-assert.equal(assetUrl("roman/buildings/villa.glb", "https://cdn.example/assets/"), "https://cdn.example/assets/roman/buildings/villa.glb");
+assert.equal(assetUrl("roman-kit/provincial-house.glb", "https://cdn.example/assets/"), "https://cdn.example/assets/roman-kit/provincial-house.glb");
 const sources = new Map();
 let totalBytes = 0;
 for (const asset of Object.values(assetRegistry)) {
@@ -69,12 +70,18 @@ try {
   a.scene.traverse((o) => { if (o.isMesh) geometryA = o.geometry; });
   b.scene.traverse((o) => { if (o.isMesh) geometryB = o.geometry; });
   assert.equal(geometryA, geometryB);
+  let textureDisposed = 0;
+  const maps = new Set();
+  a.scene.traverse((o) => { if (o.isMesh) { if (o.material.map) maps.add(o.material.map); if (o.material.normalMap) maps.add(o.material.normalMap); } });
+  for (const map of maps) map.addEventListener("dispose", () => textureDisposed++);
   let disposed = 0;
   geometryA.addEventListener("dispose", () => disposed++);
   a.release(); a.release();
   assert.equal(disposed, 0);
+  assert.equal(textureDisposed, 0, "Maps stay alive while another scene uses the asset");
   b.release();
   assert.equal(disposed, 1);
+  assert.equal(textureDisposed, maps.size, "Last-user release disposes each atlas once");
   fail = true;
   await assert.rejects(cache.acquire("missing"), /simulated 404/);
   fail = false;

@@ -9,7 +9,6 @@ import { settlementSurfaceMaps, weatheredMaterial, GROUND_WIDTH, GROUND_DEPTH, t
 import { configureTerrainShadowCaster } from "@/map/settlements/terrainShadows";
 import { InstancedScenery, type GroundResult } from "@/map/settlements/InstancedScenery";
 
-import { createEnhancedVilla, DETAIL_VILLA_ID } from "@/map/settlements/enhancedVilla";
 
 export interface SettlementStatus {
   state: "unloaded" | "loading" | "waiting-terrain" | "ready" | "partial" | "error";
@@ -47,8 +46,6 @@ export class SettlementScene {
   private resources: Array<{ dispose(): void }> = [];
   private materialOverrides = new Map<THREE.Material, Map<number, THREE.Material>>();
   private readonly knownHeights = new Map<string, number>();
-  private enhancedVilla = true;
-  private villaComparison?: { original: THREE.Object3D; enhanced: THREE.Object3D };
   private active = false;
   private generation = 0;
   private dirty = true;
@@ -137,17 +134,6 @@ export class SettlementScene {
         });
         entry.mesh.castShadow = true;
         configureTerrainShadowCaster(entry.mesh);
-        if (building.id === DETAIL_VILLA_ID && building.assetId === "roman-villa-01") {
-          const detail = createEnhancedVilla();
-          const original = new THREE.Group();
-          original.name = "original-villa";
-          original.add(...model.children.slice());
-          model.add(original, detail.group);
-          this.resources.push(detail);
-          this.villaComparison = { original, enhanced: detail.group };
-          original.visible = !this.enhancedVilla;
-          detail.group.visible = this.enhancedVilla;
-        }
         model.name = building.id;
         model.rotation.y = heading;
         model.position.set(building.offset[0], 0, building.offset[1]);
@@ -177,17 +163,6 @@ export class SettlementScene {
     this.publish();
     this.repaint();
     return this.loading;
-  }
-
-  /** Swap only child visibility: the measured footprint, lease and terrain anchor stay identical. */
-  setVillaEnhanced(enabled: boolean): void {
-    this.enhancedVilla = enabled;
-    if (this.villaComparison) {
-      this.villaComparison.original.visible = !enabled;
-      this.villaComparison.enhanced.visible = enabled;
-    }
-    this.shadowDirty = true;
-    this.repaint();
   }
 
   /** Reuses loaded models and geometry; invalidates all old-location terrain samples. */
@@ -299,7 +274,6 @@ export class SettlementScene {
     for (const entry of this.entries) entry.lease?.release();
     for (const resource of this.resources) resource.dispose();
     this.root.clear();
-    this.villaComparison = undefined;
     this.entries = [];
     this.resources = [];
     this.materialOverrides.clear();

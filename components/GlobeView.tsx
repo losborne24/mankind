@@ -153,7 +153,6 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
         map={debugMap}
         terrainWarning={terrainWarning}
         settlementStatus={settlementStatus}
-        onVillaEnhanced={(enabled) => threeLayerRef.current?.setVillaEnhanced(enabled)}
         onSettlementEnabled={(enabled) => threeLayerRef.current?.setSettlementEnabled(enabled)}
         onVisitSettlement={(origin) => threeLayerRef.current?.visitSettlement(origin)}
         romanStatus={romanStatus}
