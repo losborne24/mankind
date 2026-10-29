@@ -16,6 +16,17 @@ phases. The timeline changes application state only.
 
 ![The globe with a geo-anchored 3D marker at Giza](docs/screenshot.png)
 
+## Vision
+
+The goal: ask Mankind to take you somewhere in history ("Take me to London
+during the 2012 Olympics") and be flown there in a guided, cinematic scenario
+with historical context — pausing whenever you take control, and letting you
+move through time to see how the same place changed. See
+**[docs/vision.md](docs/vision.md)** for the full storyboard, principles, and
+gap analysis.
+
+![Target experience storyboard](docs/vision/target-experience.png)
+
 ---
 
 ## Getting started
