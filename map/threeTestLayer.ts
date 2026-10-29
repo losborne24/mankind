@@ -31,6 +31,7 @@
  */
 
 import * as THREE from "three";
+import { DEFAULT_AMBIENT_LIFE, type AmbientLifeOptions } from "@/map/settlements/AmbientLifeView";
 import type { CustomLayerInterface, CustomRenderMethodInput, Map as MapLibreMap, MapSourceDataEvent } from "maplibre-gl";
 import { dot, lerpMat4 } from "@/lib/geo";
 import { geographicAnchor } from "@/map/geographicAnchor";
@@ -100,7 +101,9 @@ export class ThreeTestLayer implements CustomLayerInterface {
   private settlement: SettlementScene | null = null;
   private settlementAnchor: AnchoredScene | null = null;
   private settlementEnabled = false;
+  private ambientLifeOptions = { ...DEFAULT_AMBIENT_LIFE };
   private readonly onSettlementStatus?: (status: SettlementStatus) => void;
+  private readonly onVisibility = () => { this.settlement?.ambientLife.pause(); this.map?.triggerRepaint(); };
   private readonly onSettlementMove = () => {
     this.procedural?.invalidate();
     this.settlement?.invalidateTerrain();
@@ -110,7 +113,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
     // Exaggeration/source changes invalidate heights in the old displayed frame.
     if (this.procedural) {
       this.procedural.invalidate(true);
-      this.settlement?.unload();
+      this.settlement?.dispose();
       this.settlement = null; this.settlementAnchor = null;
       this.committedProcedural = undefined;
     }
@@ -166,18 +169,20 @@ export class ThreeTestLayer implements CustomLayerInterface {
     this.settlement = new SettlementScene(ROMAN_SETTLEMENT,
       (status) => this.onSettlementStatus?.(status), () => this.map?.triggerRepaint());
     this.updateSettlementAnchor();
+    document.addEventListener("visibilitychange", this.onVisibility);
     map.on("moveend", this.onSettlementMove);
     map.on("terrain", this.onSettlementTerrain);
     map.on("sourcedata", this.onSettlementSource);
   }
 
   onRemove(): void {
+    document.removeEventListener("visibilitychange", this.onVisibility);
     this.map?.off("moveend", this.onSettlementMove);
     this.map?.off("terrain", this.onSettlementTerrain);
     this.map?.off("sourcedata", this.onSettlementSource);
     this.procedural?.cancel();
     this.procedural = null;
-    this.settlement?.unload();
+    this.settlement?.dispose();
     this.settlement = null;
     this.settlementAnchor = null;
     this.settlementEnabled = false;
@@ -217,9 +222,28 @@ export class ThreeTestLayer implements CustomLayerInterface {
     if (this.settlementEnabled && this.settlement && this.settlementAnchor && map.getZoom() >= 12) {
       this.settlement.updateTerrain((coordinate) =>
         queryTerrainSample(map, { lng: coordinate[0], lat: coordinate[1] }));
+      this.updateAmbientFrame(center.lng, center.lat);
       this.drawAnchored(this.settlementAnchor, args, false);
+    } else this.settlement?.updateAmbientLife(performance.now(),false);
+
+  }
+
+  private updateAmbientFrame(lng: number, lat: number): void {
+    if (this.settlement && this.map) {
+      const map = this.map;
+      const origin = this.settlement.origin;
+      const east = (lng-origin[0])*Math.cos(origin[1]*Math.PI/180)*111320;
+      const south = (lat-origin[1])*111320;
+      const visible = this.settlementEnabled && map.getZoom() >= 17 && Math.hypot(east,south) < 350 &&
+        !document.hidden && map.getBounds().contains([origin[0],origin[1]]);
+      if (this.settlement.updateAmbientLife(performance.now(),visible)) map.triggerRepaint();
     }
-    // Static scene: only map movement, terrain updates and completed loads cause frames.
+  }
+
+  configureAmbientLife(options: AmbientLifeOptions): void {
+    this.ambientLifeOptions = { ...options };
+    this.settlement?.configureAmbientLife(options);
+    this.map?.triggerRepaint();
   }
 
   setRomanTestEnabled(enabled: boolean): void {
@@ -240,12 +264,12 @@ export class ThreeTestLayer implements CustomLayerInterface {
       this.procedural?.cancel(); this.procedural = null;
       this.committedProcedural = undefined;
       this.onProceduralStatus?.(null);
-      this.settlement?.unload();
       if (wasProcedural) {
+        this.settlement?.dispose();
         this.settlement = new SettlementScene(ROMAN_SETTLEMENT,
           (status) => this.onSettlementStatus?.(status), () => this.map?.triggerRepaint());
         this.updateSettlementAnchor();
-      }
+      } else this.settlement?.unload();
     }
     this.map?.triggerRepaint();
   }
@@ -254,7 +278,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
   previewRomanVariants(enabled: boolean | "baseline" = true): void {
     this.procedural?.cancel(); this.procedural = null;
     this.committedProcedural = undefined; this.onProceduralStatus?.(null);
-    this.settlement?.unload();
+    this.settlement?.dispose();
     this.settlement = new SettlementScene(enabled === "baseline" ? ROMAN_SETTLEMENT_BASELINE : enabled ? ROMAN_VARIATION_PREVIEW : ROMAN_SETTLEMENT,
       (status) => this.onSettlementStatus?.(status), () => this.map?.triggerRepaint());
     this.updateSettlementAnchor();
@@ -277,7 +301,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
   /** Fictional/debug only; swaps the one existing settlement slot. */
   visitProceduralSettlement(seed = 7, origin: Coordinate = DEFAULT_PROCEDURAL_CONFIG.origin, overrides?: Partial<ProceduralSettlementConfig>): void {
     this.procedural?.cancel();
-    this.settlement?.unload(); this.settlement = null; this.settlementAnchor = null;
+    this.settlement?.dispose(); this.settlement = null; this.settlementAnchor = null;
     this.committedProcedural = undefined;
     const config = {...DEFAULT_PROCEDURAL_CONFIG,...overrides,seed,origin};
     this.procedural = new ProceduralSettlementSession(config);
@@ -293,7 +317,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
       const result = this.procedural.update((coordinate) => queryTerrainSample(this.map!,{lng:coordinate[0],lat:coordinate[1]}));
       if (!result || result === this.committedProcedural) return;
       // Invalidated plots must never remain visible while their replacement waits for DEM.
-      this.settlement?.unload(); this.settlement = null; this.settlementAnchor = null;
+      this.settlement?.dispose(); this.settlement = null; this.settlementAnchor = null;
       this.committedProcedural = result;
       this.onProceduralStatus?.(result);
       if (result.definition) {
@@ -311,6 +335,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
 
   private updateSettlementAnchor(): void {
     if (!this.settlement) return;
+    this.settlement.configureAmbientLife(this.ambientLifeOptions);
     const lngLat = this.settlement.origin;
     // Surface vertices already contain displayed altitude in local metres.
     this.settlementAnchor = { scene: this.settlement.scene, lngLat, altitude: 0,

@@ -104,7 +104,7 @@ const plane = ([lng, lat]) => 100 + (lng - assembler.origin[0]) * 4000 + (lat - 
 try {
   await assembler.load();
   assert.equal(status.loaded, 7);
-  const uniqueAssets = new Set([...ROMAN_SETTLEMENT.buildings, ...ROMAN_SETTLEMENT.scenery].map((item) => assetRegistry[item.assetId].path)).size;
+  const uniqueAssets = new Set([...ROMAN_SETTLEMENT.buildings, ...ROMAN_SETTLEMENT.scenery, {assetId:"roman-villager-01"}].map((item) => assetRegistry[item.assetId].path)).size;
   assert.equal(requests.length, uniqueAssets, "Repeated buildings/scenery share one request per asset");
   assert.equal(status.sceneryLoaded, environment.scenery.length);
   assembler.updateTerrain(() => null);

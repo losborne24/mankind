@@ -22,7 +22,10 @@ import { ROMAN_SETTLEMENT, ROMAN_SETTLEMENT_ALTERNATE, type Coordinate } from "@
 
 import type { GenerationResult } from "@/map/settlements/proceduralSettlement";
 
+import { DEFAULT_AMBIENT_LIFE, type AmbientLifeOptions } from "@/map/settlements/AmbientLifeView";
+
 interface DebugPanelProps {
+  onAmbientLife: (options: AmbientLifeOptions) => void;
   proceduralStatus: GenerationResult | null;
   onVisitProcedural: (seed: number, origin?: Coordinate) => void;
   map: Map | null;
@@ -36,7 +39,9 @@ interface DebugPanelProps {
 }
 
 /** Shared debug panel; add future map controls as separate fieldsets here. */
-export function DebugPanel({ map, terrainWarning, onRetryTerrain, romanStatus, onRomanTestEnabled, settlementStatus, onSettlementEnabled, onVisitSettlement, proceduralStatus, onVisitProcedural }: DebugPanelProps) {
+export function DebugPanel({ onAmbientLife, map, terrainWarning, onRetryTerrain, romanStatus, onRomanTestEnabled, settlementStatus, onSettlementEnabled, onVisitSettlement, proceduralStatus, onVisitProcedural }: DebugPanelProps) {
+  const [life, setLife] = useState({ ...DEFAULT_AMBIENT_LIFE });
+  const changeLife = (patch: Partial<AmbientLifeOptions>) => { const next = {...life,...patch}; setLife(next); onAmbientLife(next); };
   const [proceduralSeed, setProceduralSeed] = useState("7");
   const [proceduralNearby, setProceduralNearby] = useState(false);
   const seedValid = proceduralSeed.trim() !== "" && Number.isSafeInteger(Number(proceduralSeed));
@@ -182,6 +187,10 @@ export function DebugPanel({ map, terrainWarning, onRetryTerrain, romanStatus, o
           <p className="mt-1">Navigation: {proceduralStatus.navigation.nodes.length} nodes · {proceduralStatus.navigation.edges.length} edges</p>
           <p className="mt-1 text-white/40">{proceduralStatus.message}</p>
         </>}
+        <label className="mt-3 block"><input type="checkbox" checked={life.enabled} onChange={e => changeLife({enabled:e.target.checked})} /> Ambient life</label>
+        <label className="mt-2 block">Villagers: {life.count}<input aria-label="Villager count" type="range" min="0" max="5" value={life.count} onChange={e => changeLife({count:Number(e.target.value)})} /></label>
+        <label className="mt-2 block"><input type="checkbox" checked={life.paths} onChange={e => changeLife({paths:e.target.checked})} /> Show walking graph</label>
+        <p role="status" className="mt-2">{settlementStatus.ambientLife?.active ?? 0} active · {settlementStatus.ambientLife?.walking ?? 0} walking · {settlementStatus.ambientLife?.idle ?? 0} idle{settlementStatus.ambientLife?.paused ? " · paused" : ""}</p>
         <p className="mt-2 text-white/40">Fictional debug scenes; independent of historical timeline filtering.</p>
       </fieldset>
       {terrainWarning && (

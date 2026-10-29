@@ -158,6 +158,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
         map={debugMap}
         terrainWarning={terrainWarning}
         settlementStatus={settlementStatus}
+        onAmbientLife={(options) => threeLayerRef.current?.configureAmbientLife(options)}
         proceduralStatus={proceduralStatus}
         onVisitProcedural={(seed, origin) => threeLayerRef.current?.visitProceduralSettlement(seed, origin)}
         onSettlementEnabled={(enabled) => threeLayerRef.current?.setSettlementEnabled(enabled)}

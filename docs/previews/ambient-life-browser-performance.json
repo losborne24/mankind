@@ -1,0 +1,154 @@
+{
+  "date": "2026-10-29",
+  "browser": "Chrome, local development build",
+  "results": [
+    {
+      "seed": 7,
+      "viewport": [
+        3456,
+        1674
+      ],
+      "active": {
+        "frames": 479,
+        "medianMs": 8.300000071525574,
+        "p95Ms": 9.300000071525574,
+        "lifeMedianCpuMs": 0.10000002384185791,
+        "lifeP95CpuMs": 0.20000004768371582,
+        "calls": 41,
+        "triangles": 207290,
+        "memory": {
+          "geometries": 33,
+          "textures": 7
+        },
+        "sceneReplaced": false,
+        "walking": true,
+        "idle": false,
+        "moved": [
+          4.101870265637401,
+          5.000112988717158,
+          4.9246609885245585
+        ]
+      },
+      "disabled": {
+        "frames": 0,
+        "calls": 26,
+        "memory": {
+          "geometries": 33,
+          "textures": 7
+        }
+      }
+    },
+    {
+      "seed": 42,
+      "viewport": [
+        3456,
+        1674
+      ],
+      "active": {
+        "frames": 479,
+        "medianMs": 8.300000071525574,
+        "p95Ms": 9.299999952316284,
+        "lifeMedianCpuMs": 0.10000002384185791,
+        "lifeP95CpuMs": 0.20000004768371582,
+        "calls": 39,
+        "triangles": 180772,
+        "memory": {
+          "geometries": 31,
+          "textures": 7
+        },
+        "sceneReplaced": false,
+        "walking": true,
+        "idle": false,
+        "moved": [
+          4.287998118653864,
+          4.843495750334143,
+          3.765531748393549
+        ]
+      },
+      "disabled": {
+        "frames": 0,
+        "calls": 24,
+        "memory": {
+          "geometries": 31,
+          "textures": 7
+        }
+      }
+    },
+    {
+      "seed": 2026,
+      "viewport": [
+        3456,
+        1674
+      ],
+      "active": {
+        "frames": 478,
+        "medianMs": 8.300000071525574,
+        "p95Ms": 9.199999928474426,
+        "lifeMedianCpuMs": 0.10000002384185791,
+        "lifeP95CpuMs": 0.20000004768371582,
+        "calls": 40,
+        "triangles": 184224,
+        "memory": {
+          "geometries": 32,
+          "textures": 7
+        },
+        "sceneReplaced": false,
+        "walking": true,
+        "idle": true,
+        "moved": [
+          5.123407794806986,
+          3.6861860071859853,
+          4.240540584782174
+        ]
+      },
+      "disabled": {
+        "frames": 0,
+        "calls": 25,
+        "memory": {
+          "geometries": 32,
+          "textures": 7
+        }
+      }
+    },
+    {
+      "seed": 7,
+      "viewport": [
+        3456,
+        1674
+      ],
+      "active": {
+        "frames": 479,
+        "medianMs": 8.300000071525574,
+        "p95Ms": 9.200000047683716,
+        "lifeMedianCpuMs": 0.10000002384185791,
+        "lifeP95CpuMs": 0.20000004768371582,
+        "calls": 41,
+        "triangles": 207290,
+        "memory": {
+          "geometries": 33,
+          "textures": 7
+        },
+        "sceneReplaced": false,
+        "walking": true,
+        "idle": false,
+        "moved": [
+          4.101870265637401,
+          5.000112988717158,
+          4.9246609885245585
+        ]
+      },
+      "disabled": {
+        "frames": 0,
+        "calls": 26,
+        "memory": {
+          "geometries": 33,
+          "textures": 7
+        }
+      }
+    }
+  ],
+  "unloaded": {
+    "geometries": 2,
+    "textures": 1
+  }
+}

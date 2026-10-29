@@ -7,7 +7,7 @@ export interface AssetDefinition {
   path: string;
   /** Prebuilt node in a shared GLB library. */
   nodeName?: string;
-  category: "building" | "infrastructure" | "prop" | "vegetation" | "rock";
+  category: "building" | "infrastructure" | "prop" | "vegetation" | "rock" | "character";
   /** Authored units → metres. Optional dimensions are [X width, Y height, Z depth]. */
   scale: number;
   dimensionsMeters?: readonly [number, number, number];
@@ -42,6 +42,11 @@ const variantAssets = Object.fromEntries(Object.entries(romanVariants).map(([nam
 ])) as unknown as { [K in keyof typeof romanVariants as `roman-${K}`]: AssetDefinition & { dimensionsMeters: readonly [number, number, number] } };
 
 export const assetRegistry = {
+  "roman-villager-01": {
+    id: "roman-villager-01", path: "characters/roman-villager.glb", category: "character",
+    scale: 1, dimensionsMeters: [0.67, 1.783, 0.35], groundOffsetMeters: 0,
+    source: { author: "Mankind project", url: "scripts/ambient-life/generate.py", licence: "Project-authored; repository terms apply.", licenceFile: "characters/PROVENANCE.md" },
+  },
   ...variantAssets,
   "roman-taberna-01": {
     id: "roman-taberna-01", path: "roman-kit/taberna.glb", category: "building",

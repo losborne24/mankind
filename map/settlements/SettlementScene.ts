@@ -1,3 +1,5 @@
+import { AmbientLifeView, type AmbientLifeOptions, type AmbientLifeStatus } from "@/map/settlements/AmbientLifeView";
+import { ambientNavigation } from "@/map/settlements/ambientNavigation";
 import * as THREE from "three";
 import { assetRegistry, assetUrl } from "@/lib/assets/registry";
 import { glbCache, type ModelLease } from "@/lib/assets/glbCache";
@@ -24,6 +26,7 @@ export interface SettlementStatus {
   sceneryLoaded: number;
   sceneryTotal: number;
   scenerySteep: number;
+  ambientLife?: AmbientLifeStatus;
 }
 interface SurfaceEntry {
   surface: TerrainSurface;
@@ -40,6 +43,7 @@ export type TerrainSampler = (coordinate: Coordinate) => number | null | import(
 export class SettlementScene {
   readonly scene = new THREE.Scene();
   origin: Coordinate;
+  readonly ambientLife: AmbientLifeView;
   private readonly root = new THREE.Group();
   private readonly scenery = new InstancedScenery();
   private environment: ReturnType<typeof createSettlementEnvironment> | undefined;
@@ -58,6 +62,7 @@ export class SettlementScene {
   private loaded = 0;
   private errors: string[] = [];
   private lastStatus = "";
+  private readonly lastLifeStatus: AmbientLifeStatus = {active:-1,walking:-1,idle:-1,paused:true};
   private terrainPending = 0;
   private terrainRetained = 0;
   private steepSites = 0;
@@ -70,7 +75,8 @@ export class SettlementScene {
     private readonly cache: Pick<typeof glbCache, "acquire"> = glbCache,
   ) {
     this.origin = [...definition.origin];
-    this.scene.add(this.root, this.scenery.group);
+    this.ambientLife = new AmbientLifeView(ambientNavigation(definition), definition.seed ?? 0);
+    this.scene.add(this.root, this.scenery.group, this.ambientLife.group);
   }
 
   load(): Promise<void> {
@@ -113,7 +119,7 @@ export class SettlementScene {
     const sceneryLoad = this.scenery.load(this.environment.scenery, this.cache, () => {
       this.dirty = this.shadowDirty = true; this.publish(); this.repaint();
     });
-    this.loading = Promise.all([sceneryLoad, ...this.definition.buildings.map(async (building) => {
+    this.loading = Promise.all([this.ambientLife.load(this.cache), sceneryLoad, ...this.definition.buildings.map(async (building) => {
       let lease: ModelLease | undefined;
       try {
         const asset = assetRegistry[building.assetId];
@@ -191,6 +197,7 @@ export class SettlementScene {
   invalidateTerrain(reset = false): void {
     this.dirty = true;
     if (reset) {
+      this.ambientLife.invalidateTerrain();
       this.knownHeights.clear();
       for (const batch of this.buildingBatches) batch.mesh.visible = false;
       this.scenery.invalidateTerrain();
@@ -285,6 +292,7 @@ export class SettlementScene {
     this.active = false;
     this.generation++;
     this.scenery.unload();
+    this.ambientLife.unload();
     this.environment = undefined;
     this.sun = null;
     for (const entry of this.entries) entry.lease?.release();
@@ -302,6 +310,24 @@ export class SettlementScene {
     this.publish();
     this.repaint();
   }
+
+  configureAmbientLife(options: AmbientLifeOptions): void {
+    this.ambientLife.configure(options); this.publish(); this.repaint();
+  }
+
+  updateAmbientLife(now: number, visible: boolean): boolean {
+    const road = this.entries[0];
+    const animate = this.active && this.ambientLife.update(now, visible, road?.mesh);
+    // Counts only publish when they change, not on every animation frame.
+    const s = this.ambientLife.status;
+    const old = this.lastLifeStatus;
+    if (s.active !== old.active || s.walking !== old.walking || s.idle !== old.idle || s.paused !== old.paused || s.error !== old.error) {
+      Object.assign(old,s); this.publish();
+    }
+    return animate;
+  }
+
+  dispose(): void { this.unload(); this.ambientLife.dispose(); }
 
   consumeShadowUpdate(): boolean {
     const dirty = this.shadowDirty;
@@ -386,7 +412,7 @@ export class SettlementScene {
   }
 
   private publish(): void {
-    const errors = [...this.errors, ...this.scenery.errors];
+    const errors = [...this.errors, ...this.scenery.errors, ...(this.ambientLife.status.error ? [this.ambientLife.status.error] : [])];
     const sceneryTotal = this.environment?.scenery.length ?? this.definition.scenery?.length ?? 0;
     const loading = this.loaded + this.errors.length < this.definition.buildings.length ||
       this.scenery.loaded < sceneryTotal && this.scenery.errors.length === 0;
@@ -396,7 +422,7 @@ export class SettlementScene {
       errors.length || this.terrainPending || this.terrainRetained || this.steepSites || this.scenerySteep ? "partial" : "ready";
     const status: SettlementStatus = { state, origin: [...this.origin], loaded: this.loaded,
       total: this.definition.buildings.length, terrainPending: this.terrainPending,
-      terrainRetained: this.terrainRetained, steepSites: this.steepSites, errors, sceneryLoaded: this.scenery.loaded, sceneryTotal, scenerySteep: this.scenerySteep };
+      terrainRetained: this.terrainRetained, steepSites: this.steepSites, errors, sceneryLoaded: this.scenery.loaded, sceneryTotal, scenerySteep: this.scenerySteep, ambientLife: { ...this.ambientLife.status } };
     const serialized = JSON.stringify(status);
     if (serialized !== this.lastStatus) { this.lastStatus = serialized; this.changed(status); }
   }

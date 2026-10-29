@@ -64,12 +64,19 @@ for(let seed=0;seed<100;seed++) {
 // Real shared library through scene/cache lifecycle, including repeated instanced plots.
 const original=GLTFLoader.prototype.loadAsync;
 let requests=0;
-GLTFLoader.prototype.loadAsync=async()=>{requests++;return gltf};
+GLTFLoader.prototype.loadAsync=async(url)=>{
+ requests++;
+ if(url.includes('/characters/')) {
+  const b=await read(`public${url}`);
+  return new GLTFLoader().parseAsync(b.buffer.slice(b.byteOffset,b.byteOffset+b.byteLength),'');
+ }
+ return gltf;
+};
 try {
  const {GlbCache}=await import(await loadModule('lib/assets/glbCache'));
  let status;
  const scene=new SettlementScene(ROMAN_VARIATION_PREVIEW,s=>{status=s},()=>{},new GlbCache());
- await scene.load();assert.equal(status.loaded,15);assert.equal(requests,1);
+ await scene.load();assert.equal(status.loaded,15);assert.equal(requests,2,"One building-library request plus one shared villager asset");
  scene.updateTerrain(()=>100);assert.equal(status.state,'ready');
  const batches=[];scene.scene.traverse(o=>{if(o.isInstancedMesh)batches.push(o)});
  assert.equal(batches.length,3);assert.ok(batches.every(b=>b.count===2));
