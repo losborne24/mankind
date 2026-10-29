@@ -1,6 +1,6 @@
 # Terrain-to-settlement integration
 
-28 October 2026. The Roman fixture now uses authored contact feet instead of a
+28–29 October 2026. The Roman fixture now uses authored contact feet instead of a
 platform fitted to its roof bounds. Narrow wall wear, door aprons, broken cart
 tracks and vegetation clearance share deterministic local settlement data.
 MapLibre remains the only terrain engine; the existing custom Three.js layer,
@@ -28,7 +28,9 @@ road union, building variants, timeline and lighting remain in place.
    the asset's registered bounds.
 
    The environment is generated once per load, reused by surface-map generation
-   and discarded on unload. The same seed and local data reproduce identical
+   and discarded on unload. The contact metadata also reproduced byte-for-byte on a second Blender export
+   (SHA-256 `5ee96ddb54ce5e59371341db79c21cf873fd07356892a931c89164b2b8e3421b`).
+   The same seed and local data reproduce identical
    wear maps and vegetation. World origin, camera, frame time and historical date
    do not enter generation. Road colour, gravel, irregular alpha edges and
    occasional paired tracks use the existing two mipmapped 512×704 maps.
@@ -146,7 +148,9 @@ contact, not a steep-hillside construction system.
    The network remains orthogonal; alpha blending softens its edges but does not
    curve the street layout. Ground palettes retain the fixture's existing earth
    tones; future biome-specific palettes and irregular contact polygons need art
-   review. Desktop Chrome was tested; mobile/GPU profiling remains future work.
+   review. Texture baking is synchronous once per load; larger settlements should move
+   this work to a worker before expansion. Desktop Chrome was tested; mobile/GPU
+   profiling remains future work.
 
 10. **Next milestone.** Add deterministic terrain-aware plot suitability and
     entrance orientation to a small procedural settlement-layout prototype,
