@@ -54,6 +54,15 @@ try {
  assert.equal(layer.settlement,null);assert.equal(priorTerrainScene.loaded,0);
  layer.updateProcedural();await layer.settlement.load();layer.settlement.updateTerrain(flat);
  assert.equal(layer.settlement.loaded,40);assert.equal(layer.getStreamingStatus().activeId,fixtures[2].id);
+ // Historical ownership replaces fixtures atomically, including an empty dated result.
+ let markerData;layer.map.getSource=()=>undefined;layer.map.addSource=(_id,source)=>{markerData=source.data;};layer.map.addLayer=()=>{};
+ const historical={id:'historical-test-layout',origin:fixtures[2].origin,radiusMeters:190,definition:{...layer.settlement.definition,ambientLife:false}};
+ const previous=layer.settlement;layer.lodController.override='local';layer.setHistoricalSettlements([historical]);
+ assert.equal(previous.loaded,0);assert.equal(glbCache.snapshot().users,0);assert.equal(layer.lodController.override,'auto');
+ assert.equal(markerData.features[0].properties.fictional,false);
+ const markerIdentity=markerData;layer.setHistoricalSettlements([historical]);assert.equal(markerData,markerIdentity,'Unchanged dated layouts do not churn scenes/sources');
+ layer.setHistoricalSettlements([]);assert.equal(layer.descriptors.length,0);assert.equal(layer.settlement,null);
+ layer.useDevelopmentSettlements();assert.equal(layer.historicalSignature,undefined);assert.equal(layer.descriptors.length,3);assert.equal(markerData.features[0].properties.fictional,true);
  // Start loads behind a gate; leave immediately and switch. Stale completions cannot replace the slot.
  layer.clearStreamingScene();glbCache.clearIdle();clearSurfaceMapCache();
  let resume;gate=new Promise(r=>resume=r);approach(a);await new Promise(r=>setTimeout(r,230));layer.updateStreaming();layer.updateProcedural();const stale=layer.settlement,staleLoad=stale.load();

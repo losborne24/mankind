@@ -1,0 +1,56 @@
+{
+  "historical": {
+    "status": "ready",
+    "dataset": "london2012",
+    "time": {
+      "start": {
+        "year": 2012,
+        "month": 7,
+        "day": 27
+      }
+    },
+    "places": [
+      {
+        "id": "place:london",
+        "presence": "within",
+        "basis": "dated-context",
+        "layout": "none",
+        "candidates": [],
+        "warnings": [
+          "Geographic context only; no dated layout supplied."
+        ]
+      },
+      {
+        "id": "place:olympic-stadium",
+        "presence": "within",
+        "basis": "dated-context",
+        "layout": "none",
+        "candidates": [],
+        "warnings": [
+          "Geographic context only; no dated layout supplied."
+        ]
+      }
+    ],
+    "events": [
+      {
+        "id": "event:london-2012-opening",
+        "match": "within"
+      }
+    ],
+    "detailedLayouts": 0
+  },
+  "console": [
+    {
+      "level": "warn",
+      "message": "calculateFogMatrix is not supported on globe projection.",
+      "timestamp": "2026-10-29T19:36:33.437Z",
+      "url": "chrome-extension://fmkadmapgofadopljbjfkapdkoienihi/build/installHook.js"
+    },
+    {
+      "level": "warn",
+      "message": "calculateFogMatrix is not supported on globe projection.",
+      "timestamp": "2026-10-29T19:36:39.405Z",
+      "url": "chrome-extension://fmkadmapgofadopljbjfkapdkoienihi/build/installHook.js"
+    }
+  ]
+}

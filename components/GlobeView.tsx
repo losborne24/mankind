@@ -160,6 +160,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
       <MapReadout map={debugMap} />
       {debugMap && <ScenarioPanel map={debugMap} layer={scenarioLayer} />}
       <DebugPanel
+        historicalLayer={scenarioLayer}
         streamingStatus={streamingStatus}
         onStreamingFixtures={() => threeLayerRef.current?.useDevelopmentSettlements()}
         onStreamingVisit={id => threeLayerRef.current?.visitStreamingSettlement(id)}

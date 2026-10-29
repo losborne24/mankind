@@ -125,6 +125,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
   private lastStreamStatus = 0;
   private streamSignature = "";
   private markerFilter = "";
+  private historicalSignature?: string;
   private measuredFrames = 0;
   private lastMeasuredFrame = 0;
   private readonly frameIntervals: number[] = [];
@@ -256,7 +257,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
 
     // Start requests only when settlement-scale detail is useful and Giza is nearby.
     const center = map.getCenter();
-    if (this.romanEnabled && !this.romanRequested && map.getZoom() >= 12 &&
+    if (this.historicalSignature === undefined && this.romanEnabled && !this.romanRequested && map.getZoom() >= 12 &&
         Math.abs(center.lng - ROMAN_TEST_CENTER[0]) < 0.15 && Math.abs(center.lat - ROMAN_TEST_CENTER[1]) < 0.15) {
       this.loadRomans();
     }
@@ -349,12 +350,14 @@ export class ThreeTestLayer implements CustomLayerInterface {
     this.map?.flyTo({center:[...origin],zoom:18.4,pitch:55,bearing:-25});
   }
   private setDebugDescriptor(descriptor: SettlementDescriptor): void {
+    this.historicalSignature = undefined;
     this.clearStreamingScene();this.regional?.dispose();this.regional=undefined;this.regionalAnchor=undefined;
     this.layouts.clear();this.descriptors=[descriptor];this.streamingEnabled=true;
     this.lodController.current={lod:"global",distance:Infinity};
     this.installSettlementMarkers();this.map?.triggerRepaint();
   }
   useDevelopmentSettlements(): void {
+    this.historicalSignature = undefined;
     this.clearStreamingScene();this.regional?.dispose();this.regional=undefined;this.regionalAnchor=undefined;
     this.descriptors=DEVELOPMENT_SETTLEMENTS;this.streamingEnabled=true;
     this.lodController.current={lod:"global",distance:Infinity};
@@ -363,6 +366,20 @@ export class ThreeTestLayer implements CustomLayerInterface {
   visitStreamingSettlement(id: string): void {
     this.useDevelopmentSettlements();const d=this.descriptors.find(d=>d.id===id);
     if(d)this.map?.flyTo({center:[...d.origin],zoom:18.4,pitch:55,bearing:-25});
+  }
+  /** Dataset selection supplies explicit definitions; an empty set never falls back to fixtures. */
+  setHistoricalSettlements(descriptors: readonly SettlementDescriptor[]): void {
+    if (descriptors.some(d => !d.definition)) throw Error('Historical streaming requires explicit layouts');
+    const signature = JSON.stringify(descriptors);
+    if (signature === this.historicalSignature) return;
+    this.historicalSignature = signature;
+    this.clearRomans();
+    this.romanStatus = { state: this.romanEnabled ? 'waiting' : 'disabled', loaded: 0, errors: [] };
+    this.onRomanStatus?.(this.romanStatus);
+    this.clearStreamingScene(); this.regional?.dispose(); this.regional = undefined; this.regionalAnchor = undefined;
+    this.layouts.clear(); this.descriptors = descriptors; this.streamingEnabled = true;
+    this.lodController.override = 'auto'; this.lodController.current = { lod: 'global', distance: Infinity };
+    this.installSettlementMarkers(); this.map?.triggerRepaint();
   }
   setSettlementLOD(override: SettlementLOD | "auto"): void {this.lodController.override=override;this.map?.triggerRepaint();}
   getStreamingStatus(): StreamingStatus {
@@ -443,7 +460,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
   private installSettlementMarkers(): void {
     const map=this.map;if(!map)return;
     this.removeSettlementMarkers();this.markerFilter="";
-    map.addSource("settlement-descriptors",{type:"geojson",data:{type:"FeatureCollection",features:this.descriptors.map(d=>({type:"Feature",properties:{id:d.id,profile:d.profile,fictional:true},geometry:{type:"Point",coordinates:[...d.origin]}}))}});
+    map.addSource("settlement-descriptors",{type:"geojson",data:{type:"FeatureCollection",features:this.descriptors.map(d=>({type:"Feature",properties:{id:d.id,profile:d.profile,fictional:this.historicalSignature===undefined},geometry:{type:"Point",coordinates:[...d.origin]}}))}});
     map.addLayer({id:"settlement-descriptors",type:"circle",source:"settlement-descriptors",paint:{"circle-radius":3,"circle-color":"#d1ad7a","circle-stroke-color":"#40382a","circle-stroke-width":1}});
   }
   private removeSettlementMarkers(): void {

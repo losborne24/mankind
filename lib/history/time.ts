@@ -27,7 +27,10 @@ export function periodBounds(period: HistoricalPeriod): [number, number] {
   return [lower, upper];
 }
 export function matchHistoricalPeriod(period: HistoricalPeriod, date: HistoricalDate): 'within' | 'possible' | 'outside' {
-  const [lower, upper] = periodBounds(period), [from, to] = dateBounds(date);
+  return matchHistoricalTime(period, { start: date });
+}
+export function matchHistoricalTime(period: HistoricalPeriod, selection: HistoricalTime): 'within' | 'possible' | 'outside' {
+  const [lower, upper] = periodBounds(period), [from, to] = periodBounds(selection);
   const uncertainty = (period.uncertaintyYears ?? 0) * 372;
   if (to < lower - uncertainty || from > upper + uncertainty) return 'outside';
   return uncertainty || from < lower || to > upper ? 'possible' : 'within';

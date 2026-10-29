@@ -1,5 +1,7 @@
 # Historical World Data Schema v1 — Phase 4 Step 1
 
+Step 2 now implements [explicit dataset loading and date-aware selection](historical-dataset-loading.md). The Step 1 limits below describe the original schema milestone; see Step 2 for the current live opt-in integration.
+
 The first historical-data boundary is implemented as plain JSON records, TypeScript types and a strict runtime validator. It describes places, evidence, dated layouts and events independently of camera direction. No database, AI service, new model kit, automatic world ingestion or historical reconstruction was added.
 
 ## Entry points

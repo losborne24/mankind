@@ -386,3 +386,11 @@ dated layouts, roads, events, routes and scene requirements. The JSON London exa
 keeps event evidence, approximate geography and unavailable architecture explicit.
 Run `node scripts/check-historical-world.mjs` for the new contract checks, or
 `node scripts/check-phase3.mjs docs/previews/historical-world` for the full gate.
+
+
+### Historical dataset loading (Phase 4 Step 2)
+
+Use **Debug tools → Historical dataset** to load the reviewed London example and
+inspect exact/coarse dates, map-only context and scenario date updates. No period
+architecture is fabricated. [Loading, selection and lifecycle contract](docs/historical-dataset-loading.md).
+Run `node scripts/check-phase3.mjs docs/previews/historical-loading` for the full gate.

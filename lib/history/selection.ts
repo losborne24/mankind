@@ -1,0 +1,59 @@
+import type { HistoricalWorldData, HistoricalPlace, HistoricalEvent, HistoricalRoute, HistoricalPeriod } from '@/lib/history/schema';
+import type { HistoricalTime } from '@/lib/scenarios/schema';
+import type { SettlementDescriptor } from '@/map/settlements/settlementStreaming';
+import { matchHistoricalTime, periodBounds } from '@/lib/history/time';
+import { resolveValidatedSettlement } from '@/lib/history/adapters';
+
+type Match = 'within' | 'possible' | 'outside';
+export interface HistoricalPlaceSelection {
+  place: HistoricalPlace;
+  presence: Match | 'undated';
+  basis: 'place-period' | 'dated-context' | 'unknown';
+  layoutIds: string[];
+  layoutStatus: 'ready' | 'none' | 'ambiguous' | 'unavailable' | 'outside';
+  warnings: string[];
+}
+export interface HistoricalSelection {
+  time: HistoricalTime;
+  places: HistoricalPlaceSelection[];
+  events: { event: HistoricalEvent; match: Exclude<Match, 'outside'> }[];
+  routes: { route: HistoricalRoute; match: Exclude<Match, 'outside'> }[];
+  descriptors: SettlementDescriptor[];
+}
+/** Input must be a validated dataset. No camera/date mutations or asset requests. */
+export function selectHistoricalWorld(world: HistoricalWorldData, time: HistoricalTime): HistoricalSelection {
+  periodBounds(time);
+  const match = (period: HistoricalPeriod) => matchHistoricalTime(period, time);
+  const events: HistoricalSelection['events'] = [], routes: HistoricalSelection['routes'] = [];
+  for (const event of world.events) { const m = match(event.period); if (m !== 'outside') events.push({ event, match: m }); }
+  for (const route of world.routes) { const m = match(route.period); if (m !== 'outside') routes.push({ route, match: m }); }
+  const descriptors: SettlementDescriptor[] = [];
+  const places = world.places.map(place => {
+    const contexts = [
+      ...world.events.filter(e => e.locations.some(l => l.placeId === place.id)),
+      ...world.routes.filter(r => r.placeIds.includes(place.id)),
+      ...world.layouts.filter(l => l.placeId === place.id),
+      ...world.scenes.filter(s => s.placeId === place.id),
+    ].map(entity => match(entity.period));
+    const presence = place.period ? match(place.period) : contexts.includes('within') ? 'within' : contexts.includes('possible') ? 'possible' : contexts.length ? 'outside' : 'undated';
+    const row: HistoricalPlaceSelection = { place, presence, basis: place.period ? 'place-period' : contexts.length ? 'dated-context' : 'unknown', layoutIds: [], layoutStatus: 'none', warnings: [] };
+    if (presence === 'outside' || presence === 'undated') { row.layoutStatus = presence === 'outside' ? 'outside' : 'none'; return row; }
+    const candidates = world.layouts.filter(layout => layout.placeId === place.id && match(layout.period) !== 'outside');
+    row.layoutIds = candidates.map(l => l.id);
+    if (!candidates.length) { row.warnings.push('Geographic context only; no dated layout supplied.'); return row; }
+    const candidate = candidates[0];
+    const network = world.roadNetworks.find(n => n.id === candidate.roadNetworkId);
+    if (network && match(network.period) === 'outside') {
+      row.layoutStatus = 'unavailable'; row.warnings.push('The layout road network is outside the selected date.'); return row;
+    }
+    if (presence !== 'within' || candidates.length !== 1 || match(candidate.period) !== 'within' || (network && match(network.period) !== 'within')) {
+      row.layoutStatus = 'ambiguous'; row.warnings.push('Date precision or overlapping layouts prevent automatic selection.'); return row;
+    }
+    const result = resolveValidatedSettlement(world, candidate.id, time.start);
+    row.warnings = result.warnings;
+    row.layoutStatus = result.status === 'ready' ? 'ready' : result.status === 'uncertain-period' ? 'ambiguous' : 'unavailable';
+    if (result.descriptor) descriptors.push(result.descriptor);
+    return row;
+  });
+  return { time: structuredClone(time), places, events, routes, descriptors };
+}

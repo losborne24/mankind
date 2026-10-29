@@ -63,7 +63,11 @@ export interface SettlementResolution {
 }
 /** All-or-nothing geometry resolution: never substitute Roman buildings for absent historical assets. */
 export function resolveHistoricalSettlement(value: unknown, layoutId: string, at: HistoricalDate): SettlementResolution {
-  const world = validateHistoricalWorld(value), layout = world.layouts.find(l => l.id === layoutId);
+  return resolveValidatedSettlement(validateHistoricalWorld(value), layoutId, at);
+}
+/** Internal projection for an already validated session snapshot; avoids revalidating per place/date. */
+export function resolveValidatedSettlement(world: import('@/lib/history/schema').HistoricalWorldData, layoutId: string, at: HistoricalDate): SettlementResolution {
+  const layout = world.layouts.find(l => l.id === layoutId);
   if (!layout) throw Error(`Unknown historical layout ${layoutId}`);
   const place = world.places.find(p => p.id === layout.placeId)!;
   const network = world.roadNetworks.find(n => n.id === layout.roadNetworkId);

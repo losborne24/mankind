@@ -1,4 +1,6 @@
 "use client";
+import { HistoricalDatasetControls } from "@/components/HistoricalDatasetControls";
+import type { ThreeTestLayer } from "@/map/threeTestLayer";
 import { ScenarioDiagnostics } from "@/components/ScenarioDiagnostics";
 import type { StreamingStatus } from "@/map/threeTestLayer";
 import { DEVELOPMENT_SETTLEMENTS, type SettlementLOD } from "@/map/settlements/settlementStreaming";
@@ -28,6 +30,7 @@ import { SETTLEMENT_PROFILES, type SettlementProfile, type GenerationResult } fr
 import { DEFAULT_AMBIENT_LIFE, type AmbientLifeOptions } from "@/map/settlements/AmbientLifeView";
 
 interface DebugPanelProps {
+  historicalLayer?: ThreeTestLayer | null;
   streamingStatus?: StreamingStatus;
   onStreamingFixtures: () => void;
   onStreamingVisit: (id: string) => void;
@@ -46,7 +49,7 @@ interface DebugPanelProps {
 }
 
 /** Shared debug panel; add future map controls as separate fieldsets here. */
-export function DebugPanel({ streamingStatus, onStreamingFixtures, onStreamingVisit, onLODOverride, onAmbientLife, map, terrainWarning, onRetryTerrain, romanStatus, onRomanTestEnabled, settlementStatus, onSettlementEnabled, onVisitSettlement, proceduralStatus, onVisitProcedural }: DebugPanelProps) {
+export function DebugPanel({ historicalLayer, streamingStatus, onStreamingFixtures, onStreamingVisit, onLODOverride, onAmbientLife, map, terrainWarning, onRetryTerrain, romanStatus, onRomanTestEnabled, settlementStatus, onSettlementEnabled, onVisitSettlement, proceduralStatus, onVisitProcedural }: DebugPanelProps) {
   const [life, setLife] = useState({ ...DEFAULT_AMBIENT_LIFE });
   const changeLife = (patch: Partial<AmbientLifeOptions>) => { const next = {...life,...patch}; setLife(next); onAmbientLife(next); };
   const [proceduralProfile, setProceduralProfile] = useState<SettlementProfile>("village");
@@ -90,6 +93,7 @@ export function DebugPanel({ streamingStatus, onStreamingFixtures, onStreamingVi
     <details open className="absolute top-16 left-4 z-20 max-h-[calc(100%-12rem)] w-56 overflow-y-auto rounded-lg border border-panel-border bg-panel p-3 text-xs text-white/70 backdrop-blur-md sm:left-6">
       <summary className="cursor-pointer tracking-wide">Debug tools</summary>
       <ScenarioDiagnostics />
+      {map && historicalLayer && <HistoricalDatasetControls map={map} layer={historicalLayer} />}
       <fieldset data-scenario-exit className="mt-4 border-t border-panel-border pt-3">
         <legend className="text-white/40">Settlement streaming · fictional fixtures</legend>
         <button className="mt-2 block underline" onClick={onStreamingFixtures}>Enable three streaming fixtures</button>
