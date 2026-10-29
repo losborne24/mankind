@@ -8,7 +8,8 @@ const checks = readdirSync('scripts').filter(name => /^check-.*\.mjs$/.test(name
 const commands = checks.map(name => [process.execPath, [`scripts/${name}`]]);
 commands.push(['pnpm', ['typecheck']], ['pnpm', ['lint']], ['pnpm', ['exec', 'next', 'build', '--webpack']]);
 const results = [];
-mkdirSync('docs/previews/phase3-final', { recursive: true });
+const reportDirectory = process.argv[2] ?? 'docs/previews/phase3-final';
+mkdirSync(reportDirectory, { recursive: true });
 try {
   for (const [command, args] of commands) {
     const started = performance.now();
@@ -17,7 +18,7 @@ try {
       ms: performance.now() - started, stdout: result.stdout, stderr: result.stderr, error: result.error?.message };
     results.push(row);
     console.log(`${row.exit === 0 ? 'PASS' : 'FAIL'} ${row.command}`);
-    writeFileSync('docs/previews/phase3-final/regression.json', JSON.stringify({ recordedAt: new Date().toISOString(), results }, null, 2) + '\n');
+    writeFileSync(`${reportDirectory}/regression.json`, JSON.stringify({ recordedAt: new Date().toISOString(), results }, null, 2) + '\n');
   }
 } finally {
   for (const [path, bytes] of originals) writeFileSync(path, bytes);

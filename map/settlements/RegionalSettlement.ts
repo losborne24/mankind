@@ -15,7 +15,7 @@ export class RegionalSettlement {
   private readonly roofs: THREE.InstancedMesh;
   private readonly plots: {offset: readonly [number,number];width:number;depth:number;heading:number;height:number;roofRise:number}[];
   private dirty = true;
-  constructor(readonly descriptor: SettlementDescriptor, definition?: SettlementDefinition) {
+  constructor(readonly descriptor: SettlementDescriptor, definition: SettlementDefinition | undefined = descriptor.definition) {
     if (definition) {
       this.plots = definition.buildings.flatMap(building => {
         const asset = assetRegistry[building.assetId];
@@ -28,6 +28,7 @@ export class RegionalSettlement {
         return parts.map(part => ({...part,offset:localToSettlement(part.offset,building.offset,heading),heading}));
       });
     } else {
+      if (!descriptor.profile) throw Error('Authored settlement requires its explicit definition');
       const count={hamlet:6,village:22,"small-town":40}[descriptor.profile];
       this.plots=Array.from({length:count},(_,i)=>({offset:[(i%2 ? -1:1)*(10+Math.floor(i/12)*17),(Math.floor(i/2)%6-2.5)*14] as const,width:7,depth:8,heading:0,height:3.5,roofRise:1}));
     }

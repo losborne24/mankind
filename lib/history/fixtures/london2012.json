@@ -1,0 +1,174 @@
+{
+  "version": 1,
+  "id": "world:london-2012-example",
+  "title": "London 2012 opening ceremony \u2014 data boundary example",
+  "coordinateSystem": "WGS84",
+  "calendar": "proleptic-gregorian",
+  "sources": [
+    {
+      "id": "source:world-athletics-opening",
+      "title": "London Olympics open in spectacular fashion",
+      "url": "https://worldathletics.org/news/news/london-olympics-open-in-spectacular-fashion",
+      "publisher": "World Athletics",
+      "accessed": "2026-10-29",
+      "citation": "News, 28 July 2012. Search-index excerpt reviewed; direct page fetch returned HTTP 403."
+    }
+  ],
+  "places": [
+    {
+      "id": "place:london",
+      "title": "London",
+      "kind": "region",
+      "position": {
+        "coordinate": [
+          -0.1276,
+          51.5074
+        ],
+        "evidence": {
+          "certainty": "illustrative",
+          "sources": [],
+          "note": "Approximate overview anchor from the existing developer demo; no surveyed accuracy claimed."
+        }
+      },
+      "radiusMeters": 15000,
+      "evidence": {
+        "certainty": "documented",
+        "sources": [
+          "source:world-athletics-opening"
+        ],
+        "note": "The report identifies London as the host city."
+      }
+    },
+    {
+      "id": "place:olympic-stadium",
+      "title": "Olympic Stadium \u00b7 Stratford",
+      "kind": "landmark",
+      "parentId": "place:london",
+      "position": {
+        "coordinate": [
+          -0.0166,
+          51.5387
+        ],
+        "evidence": {
+          "certainty": "illustrative",
+          "sources": [],
+          "note": "Approximate marker from the existing developer demo. Discovery radius is a display envelope, not a surveyed footprint."
+        }
+      },
+      "radiusMeters": 300,
+      "evidence": {
+        "certainty": "documented",
+        "sources": [
+          "source:world-athletics-opening"
+        ],
+        "note": "The report names the Olympic Stadium as the ceremony venue; it does not substantiate these coordinates or a building model."
+      }
+    }
+  ],
+  "assets": [
+    {
+      "id": "asset:stadium-2012",
+      "category": "building",
+      "evidence": {
+        "certainty": "unknown",
+        "sources": [],
+        "note": "No project-owned London 2012 stadium model is available. No Roman substitute is specified."
+      }
+    }
+  ],
+  "roadNetworks": [],
+  "layouts": [],
+  "events": [
+    {
+      "id": "event:london-2012-opening",
+      "title": "London 2012 opening ceremony",
+      "description": "The London Games opened at the Olympic Stadium on 27 July 2012. Danny Boyle directed the ceremony.",
+      "period": {
+        "start": {
+          "year": 2012,
+          "month": 7,
+          "day": 27
+        }
+      },
+      "locations": [
+        {
+          "placeId": "place:olympic-stadium",
+          "role": "ceremony venue"
+        },
+        {
+          "placeId": "place:london",
+          "role": "host city"
+        }
+      ],
+      "evidence": {
+        "certainty": "documented",
+        "sources": [
+          "source:world-athletics-opening"
+        ],
+        "note": "The report supports the date, venue and director. It provides no evidence for route geometry or architectural reconstruction."
+      }
+    }
+  ],
+  "routes": [
+    {
+      "id": "route:london-approach",
+      "title": "Illustrative approach to Stratford",
+      "period": {
+        "start": {
+          "year": 2012,
+          "month": 7,
+          "day": 27
+        }
+      },
+      "coordinates": [
+        [
+          -0.1276,
+          51.5074
+        ],
+        [
+          -0.0754,
+          51.5081
+        ],
+        [
+          -0.0166,
+          51.5387
+        ]
+      ],
+      "placeIds": [
+        "place:london",
+        "place:olympic-stadium"
+      ],
+      "evidence": {
+        "certainty": "illustrative",
+        "sources": [],
+        "note": "A camera-testing line between approximate anchors; not a historical torch relay or documented road alignment."
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "scene:ceremony-context",
+      "title": "Ceremony geographic context",
+      "description": "Show geographic markers and ceremony context. A period-specific stadium reconstruction is unavailable.",
+      "placeId": "place:olympic-stadium",
+      "period": {
+        "start": {
+          "year": 2012,
+          "month": 7,
+          "day": 27
+        }
+      },
+      "layoutIds": [],
+      "assetIds": [
+        "asset:stadium-2012"
+      ],
+      "required": false,
+      "fallback": "map-only",
+      "evidence": {
+        "certainty": "illustrative",
+        "sources": [],
+        "note": "This describes a presentation requirement, not evidence for a reconstructed scene."
+      }
+    }
+  ]
+}

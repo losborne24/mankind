@@ -79,7 +79,8 @@ export class SettlementScene {
     private readonly cache: Pick<typeof glbCache, "acquire"> = glbCache,
   ) {
     this.origin = [...definition.origin];
-    this.ambientLife = new AmbientLifeView(ambientNavigation(definition), definition.seed ?? 0);
+    this.ambientLife = new AmbientLifeView(definition.ambientLife === false ? { nodes: [], edges: [] } : ambientNavigation(definition), definition.seed ?? 0);
+    if (definition.ambientLife === false) this.ambientLife.configure({ enabled: false, count: 0, paths: false });
     this.scene.add(this.root, this.scenery.group, this.ambientLife.group);
   }
 
@@ -130,7 +131,7 @@ export class SettlementScene {
     this.timing.add("surfaceAndShadowSetup", preparationStarted);
     const assetsStarted = performance.now();
     this.timing.stage = "assets";
-    this.loading = Promise.all([this.ambientLife.load(this.cache), sceneryLoad, ...this.definition.buildings.map(async (building) => {
+    this.loading = Promise.all([this.definition.ambientLife === false ? Promise.resolve() : this.ambientLife.load(this.cache), sceneryLoad, ...this.definition.buildings.map(async (building) => {
       let lease: ModelLease | undefined;
       try {
         const asset = assetRegistry[building.assetId];
@@ -341,7 +342,7 @@ export class SettlementScene {
   }
 
   configureAmbientLife(options: AmbientLifeOptions): void {
-    this.ambientLife.configure(options); this.publish(); this.repaint();
+    this.ambientLife.configure(this.definition.ambientLife === false ? { enabled: false, count: 0, paths: false } : options); this.publish(); this.repaint();
   }
 
   updateAmbientLife(now: number, visible: boolean): boolean {

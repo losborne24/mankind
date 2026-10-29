@@ -374,6 +374,15 @@ provenance, shadow integration, validation and limitations.
 
 See [Phase 3 completion and Phase 4 contract](docs/phase3-completion.md) for the
 implementation inventory, ownership fixes, browser captures, resource measurements
-and known limits. Run `node scripts/check-phase3.mjs` for the 18-command integration
-gate. Phase 4 Step 1 remains a schema proposal; no historical database or AI director
-was implemented in this milestone.
+and known limits. Run `node scripts/check-phase3.mjs` for the integration gate,
+which now includes the Phase 4 data-contract checks. No historical database or AI
+director was implemented in the integration milestone.
+
+
+### Historical World Data Schema v1 (Phase 4 Step 1)
+
+[Data contract and adapters](docs/historical-world-schema.md) define sourced places,
+dated layouts, roads, events, routes and scene requirements. The JSON London example
+keeps event evidence, approximate geography and unavailable architecture explicit.
+Run `node scripts/check-historical-world.mjs` for the new contract checks, or
+`node scripts/check-phase3.mjs docs/previews/historical-world` for the full gate.

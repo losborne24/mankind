@@ -24,6 +24,8 @@ export interface GroundArea {
   headingRadians?: number;
 }
 export interface SettlementDefinition {
+  /** Existing fixture villagers are opt-out; imported historical layouts disable them. */
+  ambientLife?: false;
   profile?: "hamlet" | "village" | "small-town";
   /** Explicit square treatment/receiver size for expanded procedural sites. */
   groundSizeMeters?: number;

@@ -3,18 +3,18 @@ import type { ProceduralSettlementConfig, SettlementProfile } from "@/map/settle
 
 export type SettlementLOD = "global" | "regional" | "local";
 /** Discovery data only. No generation, asset request or scene construction. */
-export interface SettlementDescriptor {
+interface SettlementDescriptorBase {
   id: string;
   origin: Coordinate;
   radiusMeters: number;
-  profile: SettlementProfile;
-  seed: number;
-  definition?: SettlementDefinition;
-  config?: Partial<ProceduralSettlementConfig>;
   visual?: { roofColour?: number; label?: string };
   /** Reserved for later historical filtering; fixtures make no historical claim. */
   validYears?: { from: number; to: number };
 }
+export type SettlementDescriptor = SettlementDescriptorBase & (
+  | { definition: SettlementDefinition; profile?: SettlementProfile; seed?: number; config?: never }
+  | { definition?: undefined; profile: SettlementProfile; seed: number; config?: Partial<ProceduralSettlementConfig> }
+);
 export const DEVELOPMENT_SETTLEMENTS: readonly SettlementDescriptor[] = [
   {id:"fictional-hamlet",origin:[12.55,41.85],radiusMeters:90,profile:"hamlet",seed:7},
   {id:"fictional-village",origin:[12.57,41.85],radiusMeters:130,profile:"village",seed:42},

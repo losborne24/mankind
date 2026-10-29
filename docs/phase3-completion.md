@@ -143,4 +143,4 @@ No rendering architecture rewrite is required to begin defining historical data.
 4. Write small adapters to existing descriptors/definitions, the sole date store and ScenarioDefinition. Resolve scene requirements through data/services outside the player; preserve its camera and lifecycle ports.
 5. Validate one small evidence-grounded fixture end to end, with invalid-reference/units/date/uncertainty tests and a documented provenance record. Do not begin global content ingestion or AI research in that schema step.
 
-This is a handoff outline only. Phase 4 Step 1 has not been implemented here.
+The outline above records the Phase 3 handoff. Phase 4 Step 1 has since been implemented in the [Historical World Data Schema v1](historical-world-schema.md); its explicit limits and current validation are documented there.
