@@ -42,6 +42,9 @@ import { prepareAsset, ROMAN_TEST_CENTER, ROMAN_TEST_PLACEMENTS, type AssetPlace
 import { SettlementScene, type SettlementStatus } from "@/map/settlements/SettlementScene";
 import { ROMAN_SETTLEMENT, ROMAN_VARIATION_PREVIEW, ROMAN_SETTLEMENT_BASELINE, type Coordinate } from "@/map/settlements/romanSettlement";
 
+import { DEFAULT_PROCEDURAL_CONFIG, type GenerationResult, type ProceduralSettlementConfig } from "@/map/settlements/proceduralSettlement";
+import { ProceduralSettlementSession } from "@/map/settlements/ProceduralSettlementSession";
+
 type AnchoredScene = {
   scene: THREE.Scene;
   lngLat: readonly [number, number];
@@ -73,6 +76,7 @@ export interface ThreeTestLayerOptions {
   lngLat: readonly [number, number];
   onRomanStatus?: (status: RomanTestStatus) => void;
   onSettlementStatus?: (status: SettlementStatus) => void;
+  onProceduralStatus?: (status: GenerationResult | null) => void;
 }
 
 export class ThreeTestLayer implements CustomLayerInterface {
@@ -90,16 +94,26 @@ export class ThreeTestLayer implements CustomLayerInterface {
   /** Disposables tracked for leak-free teardown. */
   private readonly disposables: Array<{ dispose(): void }> = [];
 
+  private procedural: ProceduralSettlementSession | null = null;
+  private committedProcedural?: GenerationResult;
+  private readonly onProceduralStatus?: (status: GenerationResult | null) => void;
   private settlement: SettlementScene | null = null;
   private settlementAnchor: AnchoredScene | null = null;
   private settlementEnabled = false;
   private readonly onSettlementStatus?: (status: SettlementStatus) => void;
   private readonly onSettlementMove = () => {
+    this.procedural?.invalidate();
     this.settlement?.invalidateTerrain();
     this.map?.triggerRepaint();
   };
   private readonly onSettlementTerrain = () => {
     // Exaggeration/source changes invalidate heights in the old displayed frame.
+    if (this.procedural) {
+      this.procedural.invalidate(true);
+      this.settlement?.unload();
+      this.settlement = null; this.settlementAnchor = null;
+      this.committedProcedural = undefined;
+    }
     this.settlement?.invalidateTerrain(true);
     this.map?.triggerRepaint();
   };
@@ -124,6 +138,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
     this.lngLat = options.lngLat;
     this.onRomanStatus = options.onRomanStatus;
     this.onSettlementStatus = options.onSettlementStatus;
+    this.onProceduralStatus = options.onProceduralStatus;
   }
 
   onAdd(map: MapLibreMap, gl: WebGL2RenderingContext): void {
@@ -160,6 +175,8 @@ export class ThreeTestLayer implements CustomLayerInterface {
     this.map?.off("moveend", this.onSettlementMove);
     this.map?.off("terrain", this.onSettlementTerrain);
     this.map?.off("sourcedata", this.onSettlementSource);
+    this.procedural?.cancel();
+    this.procedural = null;
     this.settlement?.unload();
     this.settlement = null;
     this.settlementAnchor = null;
@@ -196,6 +213,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
     if (this.romanEnabled && map.getZoom() >= 12) {
       for (const entry of this.romans) this.drawAnchored(entry, args);
     }
+    if (this.settlementEnabled && this.procedural && map.getZoom() >= 12) this.updateProcedural();
     if (this.settlementEnabled && this.settlement && this.settlementAnchor && map.getZoom() >= 12) {
       this.settlement.updateTerrain((coordinate) =>
         queryTerrainSample(map, { lng: coordinate[0], lat: coordinate[1] }));
@@ -214,12 +232,28 @@ export class ThreeTestLayer implements CustomLayerInterface {
 
   setSettlementEnabled(enabled: boolean): void {
     this.settlementEnabled = enabled;
-    if (enabled) void this.settlement?.load();
-    else this.settlement?.unload();
+    if (enabled) {
+      if (this.procedural) this.procedural.start();
+      else void this.settlement?.load();
+    } else {
+      const wasProcedural = Boolean(this.procedural);
+      this.procedural?.cancel(); this.procedural = null;
+      this.committedProcedural = undefined;
+      this.onProceduralStatus?.(null);
+      this.settlement?.unload();
+      if (wasProcedural) {
+        this.settlement = new SettlementScene(ROMAN_SETTLEMENT,
+          (status) => this.onSettlementStatus?.(status), () => this.map?.triggerRepaint());
+        this.updateSettlementAnchor();
+      }
+    }
+    this.map?.triggerRepaint();
   }
 
   /** Developer review fixture uses the same loader, foundations and anchor lifecycle. */
   previewRomanVariants(enabled: boolean | "baseline" = true): void {
+    this.procedural?.cancel(); this.procedural = null;
+    this.committedProcedural = undefined; this.onProceduralStatus?.(null);
     this.settlement?.unload();
     this.settlement = new SettlementScene(enabled === "baseline" ? ROMAN_SETTLEMENT_BASELINE : enabled ? ROMAN_VARIATION_PREVIEW : ROMAN_SETTLEMENT,
       (status) => this.onSettlementStatus?.(status), () => this.map?.triggerRepaint());
@@ -228,6 +262,9 @@ export class ThreeTestLayer implements CustomLayerInterface {
   }
 
   visitSettlement(origin?: Coordinate): void {
+    if (this.procedural || this.settlement?.definition.id === "fictional-procedural-roman-village") {
+      this.previewRomanVariants(false);
+    }
     if (!this.settlement || !this.map) return;
     if (origin) {
       this.settlement.relocate(origin);
@@ -235,6 +272,41 @@ export class ThreeTestLayer implements CustomLayerInterface {
     }
     this.setSettlementEnabled(true);
     this.map.flyTo({ center: [...this.settlement.origin], zoom: 18.4, pitch: 55, bearing: -25 });
+  }
+
+  /** Fictional/debug only; swaps the one existing settlement slot. */
+  visitProceduralSettlement(seed = 7, origin: Coordinate = DEFAULT_PROCEDURAL_CONFIG.origin, overrides?: Partial<ProceduralSettlementConfig>): void {
+    this.procedural?.cancel();
+    this.settlement?.unload(); this.settlement = null; this.settlementAnchor = null;
+    this.committedProcedural = undefined;
+    const config = {...DEFAULT_PROCEDURAL_CONFIG,...overrides,seed,origin};
+    this.procedural = new ProceduralSettlementSession(config);
+    this.procedural.start(); this.settlementEnabled = true;
+    this.onProceduralStatus?.({state:"waiting-terrain",seed,requested:config.targetBuildingCount,accepted:0,rejected:0,terrainReady:false,message:"Waiting for confirmed DEM coverage.",navigation:{nodes:[],edges:[]}});
+    this.map?.flyTo({center:[...origin],zoom:18.4,pitch:55,bearing:-25});
+    this.map?.triggerRepaint();
+  }
+
+  private updateProcedural(): void {
+    if (!this.procedural || !this.map) return;
+    try {
+      const result = this.procedural.update((coordinate) => queryTerrainSample(this.map!,{lng:coordinate[0],lat:coordinate[1]}));
+      if (!result || result === this.committedProcedural) return;
+      // Invalidated plots must never remain visible while their replacement waits for DEM.
+      this.settlement?.unload(); this.settlement = null; this.settlementAnchor = null;
+      this.committedProcedural = result;
+      this.onProceduralStatus?.(result);
+      if (result.definition) {
+        this.settlement = new SettlementScene(result.definition,
+          (status) => this.onSettlementStatus?.(status), () => this.map?.triggerRepaint());
+        this.updateSettlementAnchor();
+        void this.settlement.load();
+      }
+    } catch (error) {
+      const config = this.procedural.config;
+      this.procedural.cancel();
+      this.onProceduralStatus?.({state:"unsuitable",seed:config.seed,requested:config.targetBuildingCount,accepted:0,rejected:0,terrainReady:false,message:`Generation error: ${error instanceof Error ? error.message : String(error)}`,navigation:{nodes:[],edges:[]}});
+    }
   }
 
   private updateSettlementAnchor(): void {

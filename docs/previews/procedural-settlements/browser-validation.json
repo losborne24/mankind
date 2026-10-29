@@ -1,0 +1,73 @@
+{
+  "browser": "Local development Chrome",
+  "screenshots": {
+    "seeds": [
+      7,
+      42,
+      2026
+    ],
+    "origin": [
+      12.55,
+      41.85
+    ],
+    "zoom": 18.4,
+    "pitch": 55,
+    "bearing": -25,
+    "exaggeration": 1,
+    "cssViewport": [
+      1728,
+      837
+    ]
+  },
+  "checks": [
+    {
+      "name": "three seed layouts",
+      "result": "pass",
+      "acceptedBuildingsEach": 8,
+      "navigationNodesEach": 18,
+      "navigationEdgesEach": 17
+    },
+    {
+      "name": "nearby relocation",
+      "origin": [
+        12.5515,
+        41.851
+      ],
+      "seed": 2026,
+      "result": "ready",
+      "acceptedBuildings": 8
+    },
+    {
+      "name": "terrain exaggeration invalidation",
+      "exaggeration": 2,
+      "result": "ready after regeneration",
+      "acceptedBuildings": 8
+    },
+    {
+      "name": "restore 1x and unload",
+      "result": "procedural unloaded"
+    },
+    {
+      "name": "return to authored reference",
+      "result": "ready",
+      "buildings": 7,
+      "scenery": 522
+    },
+    {
+      "name": "invalid seed input",
+      "value": "not-a-seed",
+      "visitEnabled": false
+    },
+    {
+      "name": "reload procedural",
+      "seed": 2026,
+      "result": "ready",
+      "acceptedBuildings": 8
+    }
+  ],
+  "limits": [
+    "Live sites limited to two Rome-area origins. Steep terrain and obstacle adaptation are covered by synthetic confirmed-terrain automated tests.",
+    "Coarse Mapterhorn 404s occurred during travel; confirmed local terrain and settlement assets loaded."
+  ],
+  "performance": "performance.json"
+}

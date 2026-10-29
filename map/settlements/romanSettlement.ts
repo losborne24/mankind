@@ -36,6 +36,8 @@ export interface SettlementDefinition {
   roads: readonly { id: string; widthMeters: number; points: readonly LocalPoint[]; accessTo?: string }[];
   scenery?: readonly SceneryPlacement[];
   groundAreas?: readonly GroundArea[];
+  /** Shared orthogonal road union frame; roads remain in settlement metre coordinates. */
+  roadFrameHeadingRadians?: number;
   maxFoundationRiseMeters: number;
 }
 

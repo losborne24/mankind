@@ -98,7 +98,7 @@ export class SettlementScene {
     roadMaterial.customProgramCacheKey = () => 'settlement-road-roughness-v1';
     const foundationMaterial = new THREE.MeshStandardMaterial({ color: 0x918570, roughness: 1, flatShading: true, side: THREE.DoubleSide, shadowSide: THREE.BackSide });
     this.resources.push(roadMaterial, foundationMaterial);
-    this.addSurface(roadNetworkSurface(this.definition.roads), roadMaterial, "road-network");
+    this.addSurface(roadNetworkSurface(this.definition.roads, this.definition.roadFrameHeadingRadians), roadMaterial, "road-network");
     const footprints: GroundFootprint[] = [];
     const groundMaterial = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide, forceSinglePass: true });
     this.resources.push(groundMaterial);

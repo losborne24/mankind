@@ -29,6 +29,7 @@ import {
 } from "@/map/mapStyle";
 import { ThreeTestLayer, type RomanTestStatus } from "@/map/threeTestLayer";
 import type { SettlementStatus } from "@/map/settlements/SettlementScene";
+import type { GenerationResult } from "@/map/settlements/proceduralSettlement";
 import { ROMAN_SETTLEMENT } from "@/map/settlements/romanSettlement";
 import { DebugPanel } from "@/components/DebugPanel";
 import { MapReadout } from "@/components/MapReadout";
@@ -50,6 +51,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
   const [terrainWarning, setTerrainWarning] = useState(false);
   const threeLayerRef = useRef<ThreeTestLayer | null>(null);
   const [romanStatus, setRomanStatus] = useState<RomanTestStatus>({ state: "waiting", loaded: 0, errors: [] });
+  const [proceduralStatus, setProceduralStatus] = useState<GenerationResult | null>(null);
   const [settlementStatus, setSettlementStatus] = useState<SettlementStatus>({
     state: "unloaded", origin: ROMAN_SETTLEMENT.origin, loaded: 0,
     total: ROMAN_SETTLEMENT.buildings.length, terrainPending: 0, terrainRetained: 0, steepSites: 0, errors: [], sceneryLoaded: 0, scenerySteep: 0, sceneryTotal: ROMAN_SETTLEMENT.scenery?.length ?? 0,
@@ -84,7 +86,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
 
     map.on("load", () => {
       if (disposed) return;
-      const layer = new ThreeTestLayer({ lngLat: TEST_MARKER_LNGLAT, onRomanStatus: setRomanStatus, onSettlementStatus: setSettlementStatus });
+      const layer = new ThreeTestLayer({ lngLat: TEST_MARKER_LNGLAT, onRomanStatus: setRomanStatus, onSettlementStatus: setSettlementStatus, onProceduralStatus: setProceduralStatus });
       threeLayerRef.current = layer;
       map.addLayer(layer);
       setDebugMap(map);
@@ -156,6 +158,8 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
         map={debugMap}
         terrainWarning={terrainWarning}
         settlementStatus={settlementStatus}
+        proceduralStatus={proceduralStatus}
+        onVisitProcedural={(seed, origin) => threeLayerRef.current?.visitProceduralSettlement(seed, origin)}
         onSettlementEnabled={(enabled) => threeLayerRef.current?.setSettlementEnabled(enabled)}
         onVisitSettlement={(origin) => threeLayerRef.current?.visitSettlement(origin)}
         romanStatus={romanStatus}

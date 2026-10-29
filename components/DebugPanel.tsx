@@ -20,7 +20,11 @@ import { ROMAN_TEST_CENTER } from "@/map/romanTestScene";
 import type { SettlementStatus } from "@/map/settlements/SettlementScene";
 import { ROMAN_SETTLEMENT, ROMAN_SETTLEMENT_ALTERNATE, type Coordinate } from "@/map/settlements/romanSettlement";
 
+import type { GenerationResult } from "@/map/settlements/proceduralSettlement";
+
 interface DebugPanelProps {
+  proceduralStatus: GenerationResult | null;
+  onVisitProcedural: (seed: number, origin?: Coordinate) => void;
   map: Map | null;
   terrainWarning: boolean;
   romanStatus: RomanTestStatus;
@@ -32,7 +36,10 @@ interface DebugPanelProps {
 }
 
 /** Shared debug panel; add future map controls as separate fieldsets here. */
-export function DebugPanel({ map, terrainWarning, onRetryTerrain, romanStatus, onRomanTestEnabled, settlementStatus, onSettlementEnabled, onVisitSettlement }: DebugPanelProps) {
+export function DebugPanel({ map, terrainWarning, onRetryTerrain, romanStatus, onRomanTestEnabled, settlementStatus, onSettlementEnabled, onVisitSettlement, proceduralStatus, onVisitProcedural }: DebugPanelProps) {
+  const [proceduralSeed, setProceduralSeed] = useState("7");
+  const [proceduralNearby, setProceduralNearby] = useState(false);
+  const seedValid = proceduralSeed.trim() !== "" && Number.isSafeInteger(Number(proceduralSeed));
   const [exaggeration, setExaggeration] = useState(DEFAULT_TERRAIN_EXAGGERATION);
   const [diagnosticShading, setDiagnosticShading] = useState(true);
   const [hillshadeIntensity, setHillshadeIntensity] = useState(0.25);
@@ -130,11 +137,11 @@ export function DebugPanel({ map, terrainWarning, onRetryTerrain, romanStatus, o
         </>}
       </fieldset>
       <fieldset disabled={!map} className="mt-3 border-t border-panel-border pt-2 disabled:opacity-50">
-        <legend className="text-white/40">Roman settlement layout</legend>
+        <legend className="text-white/40">Settlement rendering · fictional/debug</legend>
         <label className="mt-2 flex items-center gap-2">
-          <input type="checkbox" checked={settlementStatus.state !== "unloaded"}
-            onChange={(event) => onSettlementEnabled(event.target.checked)} />
-          Settlement scene
+          <input type="checkbox" checked={!proceduralStatus && settlementStatus.state !== "unloaded"}
+            onChange={(event) => event.target.checked ? onVisitSettlement() : onSettlementEnabled(false)} />
+          Hand-authored reference scene
         </label>
         <button className="mt-2 block underline" onClick={() => onVisitSettlement()}>Visit settlement</button>
         <button className="mt-2 block underline" onClick={() => onVisitSettlement(
@@ -152,6 +159,30 @@ export function DebugPanel({ map, terrainWarning, onRetryTerrain, romanStatus, o
           <button className="mt-2 underline" onClick={() => { onSettlementEnabled(false); onSettlementEnabled(true); }}>Retry settlement</button>
         </>}
         <p className="mt-2 text-white/40">Project-owned Roman architecture, level foundations and Mediterranean scenery. No historical reconstruction claimed.</p>
+      </fieldset>
+      <fieldset disabled={!map} className="mt-3 border-t border-panel-border pt-2 disabled:opacity-50">
+        <legend className="text-white/40">Procedural Roman village · fictional</legend>
+        <label className="mt-2 block">Seed
+          <input aria-label="Procedural settlement seed" className="mt-1 w-full rounded border border-panel-border bg-background p-1"
+            value={proceduralSeed} onChange={(event) => setProceduralSeed(event.target.value)} inputMode="numeric" />
+        </label>
+        {!seedValid && <p className="mt-1 text-amber-200/80">Enter a safe integer seed.</p>}
+        <button disabled={!seedValid} className="mt-2 block underline disabled:opacity-40" onClick={() => {
+          setProceduralNearby(false); onVisitProcedural(Number(proceduralSeed));
+        }}>Visit procedural settlement</button>
+        <button disabled={!seedValid} className="mt-2 block underline disabled:opacity-40" onClick={() => onVisitProcedural(Number(proceduralSeed), proceduralNearby ? ROMAN_SETTLEMENT_ALTERNATE : ROMAN_SETTLEMENT.origin)}>Regenerate settlement</button>
+        <button disabled={!seedValid} className="mt-2 block underline disabled:opacity-40" onClick={() => {
+          setProceduralNearby(!proceduralNearby); onVisitProcedural(Number(proceduralSeed), proceduralNearby ? ROMAN_SETTLEMENT.origin : ROMAN_SETTLEMENT_ALTERNATE);
+        }}>Relocate procedural nearby</button>
+        <button className="mt-2 block underline" onClick={() => onVisitSettlement()}>Return to hand-authored reference</button>
+        <button className="mt-2 block underline" disabled={!proceduralStatus} onClick={() => onSettlementEnabled(false)}>Unload procedural settlement</button>
+        <p role="status" className="mt-2">{proceduralStatus ? `Seed ${proceduralStatus.seed} · ${proceduralStatus.accepted}/${proceduralStatus.requested} buildings · ${proceduralStatus.state}` : "Procedural scene unloaded."}</p>
+        {proceduralStatus && <>
+          <p className="mt-1">Terrain {proceduralStatus.terrainReady ? "confirmed" : "pending"} · {proceduralStatus.rejected} rejected plots</p>
+          <p className="mt-1">Navigation: {proceduralStatus.navigation.nodes.length} nodes · {proceduralStatus.navigation.edges.length} edges</p>
+          <p className="mt-1 text-white/40">{proceduralStatus.message}</p>
+        </>}
+        <p className="mt-2 text-white/40">Fictional debug scenes; independent of historical timeline filtering.</p>
       </fieldset>
       {terrainWarning && (
         <p role="status" className="mt-2 text-amber-200/80">

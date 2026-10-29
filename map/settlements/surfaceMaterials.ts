@@ -30,8 +30,11 @@ function boxDistance(x: number, z: number, halfX: number, halfZ: number): number
 /** Two small, mipmapped CPU-authored maps: no downloads or per-frame noise work. */
 export function settlementSurfaceMaps(definition: SettlementDefinition, footprints: readonly GroundFootprint[], environment = createSettlementEnvironment(definition)) {
   const seedOffset = (environment.seed >>> 0) % 8192;
-  const segments = definition.roads.flatMap((road) => road.points.slice(1).map(([bx, bz], i) => {
-    const [ax, az] = road.points[i];
+  const heading = definition.roadFrameHeadingRadians ?? 0;
+  const c = Math.cos(heading), s = Math.sin(heading);
+  const frame = ([x,z]: LocalPoint): LocalPoint => heading ? [Math.round((c*x-s*z)*1e8)/1e8,Math.round((s*x+c*z)*1e8)/1e8] : [x,z];
+  const segments = definition.roads.flatMap((road) => road.points.slice(1).map((point, i) => {
+    const [ax, az] = frame(road.points[i]), [bx,bz] = frame(point);
     return { x: (ax + bx) / 2, z: (az + bz) / 2,
       hx: (Math.abs(bx - ax) + (ax === bx ? road.widthMeters : 0)) / 2,
       hz: (Math.abs(bz - az) + (az === bz ? road.widthMeters : 0)) / 2 };
@@ -51,8 +54,10 @@ export function settlementSurfaceMaps(definition: SettlementDefinition, footprin
     }
     return { x: cx, z: cz, hx, hz };
   });
-  const roadDistance = (x: number, z: number) => Math.min(...joined.map((s) =>
-    boxDistance(x - s.x, z - s.z, s.hx, s.hz)));
+  const roadDistance = (x: number, z: number) => {
+    const [rx,rz] = frame([x,z]);
+    return Math.min(...joined.map((s) => boxDistance(rx - s.x, rz - s.z, s.hx, s.hz)));
+  };
   const width = 512, height = 704; // About 18 cm texels over the compact village and field margins.
   const ground = new Uint8Array(width * height * 4), road = new Uint8Array(ground.length);
   // Bounded splats, authored scenery positions only. These temporary fields tie

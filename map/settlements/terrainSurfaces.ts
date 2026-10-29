@@ -103,7 +103,19 @@ export function writeSurfaceHeights(surface: TerrainSurface, heights: readonly n
 }
 
 /** A union grid for this small orthogonal street network: no coplanar overlaps. */
-export function roadNetworkSurface(roads: readonly { widthMeters: number; points: readonly LocalPoint[] }[]): TerrainSurface {
+export function roadNetworkSurface(roads: readonly { widthMeters: number; points: readonly LocalPoint[] }[], heading = 0): TerrainSurface {
+  if (heading) {
+    const c = Math.cos(heading), s = Math.sin(heading);
+    // Rotate into the existing union algorithm, then restore settlement coordinates.
+    // Quantisation removes rotation round-off at shared orthogonal junctions.
+    const snap = (v: number) => Math.round(v * 1e8) / 1e8;
+    const result = roadNetworkSurface(roads.map((r) => ({...r, points:r.points.map(([x,z]) => [snap(c*x-s*z),snap(s*x+c*z)] as LocalPoint)})));
+    result.points = result.points.map(([x,z]) => [c*x+s*z,-s*x+c*z]);
+    const positions = result.geometry.getAttribute("position") as THREE.BufferAttribute;
+    const uv = result.geometry.getAttribute("uv") as THREE.BufferAttribute;
+    result.points.forEach(([x,z], i) => { positions.setXYZ(i,x,0,z); uv.setXY(i,x/GROUND_WIDTH+0.5,z/GROUND_DEPTH+0.5); });
+    return result;
+  }
   const rectangles: { minX: number; maxX: number; minZ: number; maxZ: number }[] = [];
   for (const road of roads) for (let i = 1; i < road.points.length; i++) {
     const [ax, az] = road.points[i - 1], [bx, bz] = road.points[i];
