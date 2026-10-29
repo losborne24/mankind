@@ -368,3 +368,12 @@ The terrain adapter accepts confirmed zero elevations, junctions use one joined
 street mesh, and entrance paths meet their foundations. See
 [docs/settlement-environment.md](docs/settlement-environment.md) for assets,
 provenance, shadow integration, validation and limitations.
+
+
+### Phase 3 integration handoff
+
+See [Phase 3 completion and Phase 4 contract](docs/phase3-completion.md) for the
+implementation inventory, ownership fixes, browser captures, resource measurements
+and known limits. Run `node scripts/check-phase3.mjs` for the 18-command integration
+gate. Phase 4 Step 1 remains a schema proposal; no historical database or AI director
+was implemented in this milestone.

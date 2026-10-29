@@ -1,5 +1,7 @@
 # Scenario Player v1
 
+For the current bottom-bar interaction model and validation, see [Scenario Timeline v1.1](scenario-timeline.md). The original v1 implementation/review notes follow.
+
 Run `pnpm dev`, then choose **Start London journey** in the card at the top right. The manually authored tour lasts approximately 78 seconds of active playback. Drag, wheel, touch, keyboard map navigation, timeline input and existing debug navigation interrupt the guide. Resume returns to the saved viewpoint over 1.8 seconds, restores the intended historical time and continues the interrupted action. Repeated interruption of that return preserves the original saved pose. Exit releases control and removes scenario geography; completion keeps the final location and highlights. Replay starts from the current viewpoint, with a smooth flight back towards Britain.
 
 No AI, research service, paid map service, new model pack or extra runtime dependency is used.

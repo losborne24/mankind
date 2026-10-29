@@ -1,0 +1,1942 @@
+[
+  {
+    "label": "global",
+    "observedAt": "2026-10-29T18:33:14.278Z",
+    "rendering": {
+      "lod": "global",
+      "override": "auto",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": 22276030,
+      "stage": "global",
+      "cache": {
+        "entries": 0,
+        "users": 0,
+        "idle": 0,
+        "bytes": 0,
+        "requests": 0,
+        "hits": 0,
+        "decodeWallMs": 0,
+        "cloneMs": 0
+      },
+      "surfaceCache": {
+        "entries": 0,
+        "bytes": 0
+      },
+      "rendering": {
+        "frames": 1,
+        "samples": 0,
+        "medianMs": null,
+        "p95Ms": null,
+        "calls": 2,
+        "triangles": 104,
+        "geometries": 2,
+        "textures": 1,
+        "canvas": [
+          3456,
+          1786
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "explore",
+      "lifecycle": "idle",
+      "beat": "london",
+      "beatElapsed": 0,
+      "progress": 0,
+      "historicalDate": -2999,
+      "suspendedForExploration": false,
+      "owner": "user",
+      "returning": false
+    }
+  },
+  {
+    "label": "fly-drag-paused",
+    "observedAt": "2026-10-29T18:33:20.239Z",
+    "rendering": {
+      "lod": "global",
+      "override": "auto",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": 21808656,
+      "stage": "global",
+      "cache": {
+        "entries": 0,
+        "users": 0,
+        "idle": 0,
+        "bytes": 0,
+        "requests": 0,
+        "hits": 0,
+        "decodeWallMs": 0,
+        "cloneMs": 0
+      },
+      "surfaceCache": {
+        "entries": 0,
+        "bytes": 0
+      },
+      "rendering": {
+        "frames": 165,
+        "samples": 127,
+        "medianMs": 8.300000071525574,
+        "p95Ms": 13.299999952316284,
+        "calls": 2,
+        "triangles": 104,
+        "geometries": 2,
+        "textures": 1,
+        "canvas": [
+          3456,
+          1786
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "scenario",
+      "lifecycle": "paused",
+      "beat": "london",
+      "beatElapsed": 475.0340000000033,
+      "progress": 1,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7
+        }
+      },
+      "suspendedForExploration": false,
+      "owner": "user",
+      "returning": false,
+      "interruption": "Mouse navigation"
+    }
+  },
+  {
+    "label": "return-wheel-paused",
+    "observedAt": "2026-10-29T18:33:21.007Z",
+    "rendering": {
+      "lod": "global",
+      "override": "auto",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": 20299864,
+      "stage": "global",
+      "cache": {
+        "entries": 0,
+        "users": 0,
+        "idle": 0,
+        "bytes": 0,
+        "requests": 0,
+        "hits": 0,
+        "decodeWallMs": 0,
+        "cloneMs": 0
+      },
+      "surfaceCache": {
+        "entries": 0,
+        "bytes": 0
+      },
+      "rendering": {
+        "frames": 257,
+        "samples": 49,
+        "medianMs": 8.299999952316284,
+        "p95Ms": 10.299999952316284,
+        "calls": 2,
+        "triangles": 104,
+        "geometries": 2,
+        "textures": 1,
+        "canvas": [
+          3456,
+          1786
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "scenario",
+      "lifecycle": "paused",
+      "beat": "london",
+      "beatElapsed": 475.0340000000033,
+      "progress": 1,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7
+        }
+      },
+      "suspendedForExploration": false,
+      "owner": "user",
+      "returning": true,
+      "interruption": "Scroll zoom"
+    }
+  },
+  {
+    "label": "route-wheel-paused",
+    "observedAt": "2026-10-29T18:33:52.845Z",
+    "rendering": {
+      "lod": "global",
+      "override": "auto",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": null,
+      "stage": "global",
+      "cache": {
+        "entries": 0,
+        "users": 0,
+        "idle": 0,
+        "bytes": 0,
+        "requests": 0,
+        "hits": 0,
+        "decodeWallMs": 0,
+        "cloneMs": 0
+      },
+      "surfaceCache": {
+        "entries": 0,
+        "bytes": 0
+      },
+      "rendering": {
+        "frames": 2847,
+        "samples": 240,
+        "medianMs": 8.300000071525574,
+        "p95Ms": 9.100000023841858,
+        "calls": 0,
+        "triangles": 0,
+        "geometries": 2,
+        "textures": 1,
+        "canvas": [
+          3456,
+          1786
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "scenario",
+      "lifecycle": "paused",
+      "beat": "relay",
+      "beatElapsed": 358.3000000000029,
+      "progress": 16,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7
+        }
+      },
+      "suspendedForExploration": false,
+      "owner": "user",
+      "returning": false,
+      "interruption": "Scroll zoom"
+    }
+  },
+  {
+    "label": "explore-bce",
+    "observedAt": "2026-10-29T18:34:12.474Z",
+    "rendering": {
+      "lod": "global",
+      "override": "auto",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": null,
+      "stage": "global",
+      "cache": {
+        "entries": 0,
+        "users": 0,
+        "idle": 0,
+        "bytes": 0,
+        "requests": 0,
+        "hits": 0,
+        "decodeWallMs": 0,
+        "cloneMs": 0
+      },
+      "surfaceCache": {
+        "entries": 0,
+        "bytes": 0
+      },
+      "rendering": {
+        "frames": 2847,
+        "samples": 240,
+        "medianMs": 8.300000071525574,
+        "p95Ms": 9.100000023841858,
+        "calls": 0,
+        "triangles": 0,
+        "geometries": 2,
+        "textures": 1,
+        "canvas": [
+          3456,
+          1786
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "explore",
+      "lifecycle": "paused",
+      "beat": "relay",
+      "beatElapsed": 358.3000000000029,
+      "progress": 16,
+      "historicalDate": -2999,
+      "suspendedForExploration": true,
+      "owner": "user",
+      "returning": false,
+      "interruption": "Scroll zoom"
+    }
+  },
+  {
+    "label": "resume-restores-date",
+    "observedAt": "2026-10-29T18:34:16.039Z",
+    "rendering": {
+      "lod": "global",
+      "override": "auto",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": null,
+      "stage": "global",
+      "cache": {
+        "entries": 0,
+        "users": 0,
+        "idle": 0,
+        "bytes": 0,
+        "requests": 0,
+        "hits": 0,
+        "decodeWallMs": 0,
+        "cloneMs": 0
+      },
+      "surfaceCache": {
+        "entries": 0,
+        "bytes": 0
+      },
+      "rendering": {
+        "frames": 2874,
+        "samples": 0,
+        "medianMs": null,
+        "p95Ms": null,
+        "calls": 0,
+        "triangles": 0,
+        "geometries": 2,
+        "textures": 1,
+        "canvas": [
+          3456,
+          1786
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "scenario",
+      "lifecycle": "playing",
+      "beat": "relay",
+      "beatElapsed": 358.3000000000029,
+      "progress": 16,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7
+        }
+      },
+      "suspendedForExploration": false,
+      "owner": "scenario",
+      "returning": true
+    }
+  },
+  {
+    "label": "explicit-pause",
+    "observedAt": "2026-10-29T18:34:31.902Z",
+    "rendering": {
+      "lod": "global",
+      "override": "auto",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": null,
+      "stage": "global",
+      "cache": {
+        "entries": 0,
+        "users": 0,
+        "idle": 0,
+        "bytes": 0,
+        "requests": 0,
+        "hits": 0,
+        "decodeWallMs": 0,
+        "cloneMs": 0
+      },
+      "surfaceCache": {
+        "entries": 0,
+        "bytes": 0
+      },
+      "rendering": {
+        "frames": 4745,
+        "samples": 240,
+        "medianMs": 8.300000071525574,
+        "p95Ms": 9.100000023841858,
+        "calls": 0,
+        "triangles": 0,
+        "geometries": 2,
+        "textures": 1,
+        "canvas": [
+          3456,
+          1786
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "scenario",
+      "lifecycle": "paused",
+      "beat": "park",
+      "beatElapsed": 3391.5,
+      "progress": 59,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7
+        }
+      },
+      "suspendedForExploration": false,
+      "owner": "user",
+      "returning": false,
+      "interruption": "Playback paused"
+    }
+  },
+  {
+    "label": "orbit-keyboard-paused",
+    "observedAt": "2026-10-29T18:34:40.450Z",
+    "rendering": {
+      "lod": "global",
+      "override": "auto",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": null,
+      "stage": "global",
+      "cache": {
+        "entries": 0,
+        "users": 0,
+        "idle": 0,
+        "bytes": 0,
+        "requests": 0,
+        "hits": 0,
+        "decodeWallMs": 0,
+        "cloneMs": 0
+      },
+      "surfaceCache": {
+        "entries": 0,
+        "bytes": 0
+      },
+      "rendering": {
+        "frames": 4804,
+        "samples": 45,
+        "medianMs": 8.400000095367432,
+        "p95Ms": 13.700000047683716,
+        "calls": 0,
+        "triangles": 0,
+        "geometries": 2,
+        "textures": 1,
+        "canvas": [
+          3456,
+          1786
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "scenario",
+      "lifecycle": "paused",
+      "beat": "ceremony",
+      "beatElapsed": 349.3000000000029,
+      "progress": 68,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7,
+          "day": 27
+        }
+      },
+      "suspendedForExploration": false,
+      "owner": "user",
+      "returning": false,
+      "interruption": "Keyboard navigation"
+    }
+  },
+  {
+    "label": "fixture-takes-ownership",
+    "observedAt": "2026-10-29T18:34:49.422Z",
+    "rendering": {
+      "lod": "global",
+      "override": "auto",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": null,
+      "stage": "global",
+      "cache": {
+        "entries": 0,
+        "users": 0,
+        "idle": 0,
+        "bytes": 0,
+        "requests": 0,
+        "hits": 0,
+        "decodeWallMs": 0,
+        "cloneMs": 0
+      },
+      "surfaceCache": {
+        "entries": 0,
+        "bytes": 0
+      },
+      "rendering": {
+        "frames": 4919,
+        "samples": 49,
+        "medianMs": 8.299999952316284,
+        "p95Ms": 9.799999952316284,
+        "calls": 0,
+        "triangles": 0,
+        "geometries": 2,
+        "textures": 1,
+        "canvas": [
+          3456,
+          1786
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "explore",
+      "lifecycle": "idle",
+      "beat": "london",
+      "beatElapsed": 0,
+      "progress": 0,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7,
+          "day": 27
+        }
+      },
+      "suspendedForExploration": false,
+      "owner": "user",
+      "returning": false
+    }
+  },
+  {
+    "label": "hamlet-local",
+    "observedAt": "2026-10-29T18:34:58.995Z",
+    "rendering": {
+      "lod": "global",
+      "override": "auto",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": null,
+      "stage": "global",
+      "cache": {
+        "entries": 0,
+        "users": 0,
+        "idle": 0,
+        "bytes": 0,
+        "requests": 0,
+        "hits": 0,
+        "decodeWallMs": 0,
+        "cloneMs": 0
+      },
+      "surfaceCache": {
+        "entries": 0,
+        "bytes": 0
+      },
+      "rendering": {
+        "frames": 4919,
+        "samples": 49,
+        "medianMs": 8.299999952316284,
+        "p95Ms": 9.799999952316284,
+        "calls": 0,
+        "triangles": 0,
+        "geometries": 2,
+        "textures": 1,
+        "canvas": [
+          3456,
+          1786
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "explore",
+      "lifecycle": "idle",
+      "beat": "london",
+      "beatElapsed": 0,
+      "progress": 0,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7,
+          "day": 27
+        }
+      },
+      "suspendedForExploration": false,
+      "owner": "user",
+      "returning": false
+    }
+  },
+  {
+    "label": "hamlet-ready",
+    "observedAt": "2026-10-29T18:35:34.946Z",
+    "rendering": {
+      "lod": "local",
+      "override": "auto",
+      "activeId": "fictional-hamlet",
+      "detailedScenes": 1,
+      "descriptors": 3,
+      "distanceMeters": 136,
+      "stage": "ready",
+      "cache": {
+        "entries": 9,
+        "users": 14,
+        "idle": 0,
+        "bytes": 12346298.666666664,
+        "requests": 9,
+        "hits": 5,
+        "decodeWallMs": 460.700000166893,
+        "cloneMs": 0.49999988079071045
+      },
+      "surfaceCache": {
+        "entries": 1,
+        "bytes": 2883584
+      },
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 7.399999976158142,
+          "terrainPlacement": 25.40000009536743,
+          "ambientUpdate": 38,
+          "buildingAssembly": 1.5,
+          "assetWallIncludingAssembly": 82.79999995231628,
+          "cpuTextures": 269.9999998807907,
+          "textureWall": 476.39999997615814,
+          "batchAssembly": 0.30000007152557373,
+          "readyWall": 579.1000000238419,
+          "renderWithShadowCpu": 107.29999995231628,
+          "renderCpu": 146.89999973773956
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "terrainPlacement": 4,
+          "ambientUpdate": 405,
+          "buildingAssembly": 6,
+          "assetWallIncludingAssembly": 1,
+          "textureWall": 1,
+          "batchAssembly": 1,
+          "renderWithShadowCpu": 1,
+          "renderCpu": 389
+        }
+      },
+      "layout": {
+        "stage": "ready",
+        "ms": {
+          "demQueries": 0.30000007152557373,
+          "layoutGeneration": 5.5,
+          "readyWall": 5.699999928474426,
+          "terrainWaitWall": 0.19999992847442627
+        },
+        "counts": {
+          "demQueries": 886,
+          "layoutGeneration": 1
+        }
+      },
+      "rendering": {
+        "frames": 6269,
+        "samples": 240,
+        "medianMs": 8.300000071525574,
+        "p95Ms": 9.200000047683716,
+        "calls": 32,
+        "triangles": 208930,
+        "geometries": 31,
+        "textures": 9,
+        "canvas": [
+          3456,
+          1786
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "explore",
+      "lifecycle": "idle",
+      "beat": "london",
+      "beatElapsed": 0,
+      "progress": 0,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7,
+          "day": 27
+        }
+      },
+      "suspendedForExploration": false,
+      "owner": "user",
+      "returning": false
+    }
+  },
+  {
+    "label": "regional-hamlet",
+    "observedAt": "2026-10-29T18:35:53.501Z",
+    "rendering": {
+      "lod": "regional",
+      "override": "regional",
+      "activeId": "fictional-hamlet",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": 136,
+      "stage": "regional",
+      "cache": {
+        "entries": 9,
+        "users": 0,
+        "idle": 9,
+        "bytes": 12346298.666666664,
+        "requests": 9,
+        "hits": 5,
+        "decodeWallMs": 460.700000166893,
+        "cloneMs": 0.49999988079071045
+      },
+      "surfaceCache": {
+        "entries": 1,
+        "bytes": 2883584
+      },
+      "rendering": {
+        "frames": 6326,
+        "samples": 240,
+        "medianMs": 8.300000071525574,
+        "p95Ms": 9.299999952316284,
+        "calls": 2,
+        "triangles": 108,
+        "geometries": 22,
+        "textures": 5,
+        "canvas": [
+          3456,
+          1786
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "explore",
+      "lifecycle": "idle",
+      "beat": "london",
+      "beatElapsed": 0,
+      "progress": 0,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7,
+          "day": 27
+        }
+      },
+      "suspendedForExploration": false,
+      "owner": "user",
+      "returning": false
+    }
+  },
+  {
+    "label": "village-ready",
+    "observedAt": "2026-10-29T18:36:06.505Z",
+    "rendering": {
+      "lod": "local",
+      "override": "auto",
+      "activeId": "fictional-village",
+      "detailedScenes": 1,
+      "descriptors": 3,
+      "distanceMeters": 96,
+      "stage": "ready",
+      "cache": {
+        "entries": 10,
+        "users": 31,
+        "idle": 0,
+        "bytes": 13761079.999999998,
+        "requests": 10,
+        "hits": 35,
+        "decodeWallMs": 526.4000002145767,
+        "cloneMs": 0.8999998569488525
+      },
+      "surfaceCache": {
+        "entries": 2,
+        "bytes": 5767168
+      },
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 7.600000023841858,
+          "terrainPlacement": 49.00000011920929,
+          "ambientUpdate": 749.5000011920929,
+          "buildingAssembly": 2.399999976158142,
+          "assetWallIncludingAssembly": 65.39999997615814,
+          "cpuTextures": 423.2000005245209,
+          "textureWall": 634.2000000476837,
+          "batchAssembly": 0.20000004768371582,
+          "readyWall": 725,
+          "renderWithShadowCpu": 40.90000009536743,
+          "renderCpu": 349.4999976158142
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "terrainPlacement": 4,
+          "ambientUpdate": 1084,
+          "buildingAssembly": 22,
+          "assetWallIncludingAssembly": 1,
+          "textureWall": 1,
+          "batchAssembly": 1,
+          "renderWithShadowCpu": 1,
+          "renderCpu": 1068
+        }
+      },
+      "layout": {
+        "stage": "ready",
+        "ms": {
+          "demQueries": 1.600000023841858,
+          "layoutGeneration": 12.800000071525574,
+          "readyWall": 12.900000095367432,
+          "terrainWaitWall": 0.10000002384185791
+        },
+        "counts": {
+          "demQueries": 3553,
+          "layoutGeneration": 1
+        }
+      },
+      "rendering": {
+        "frames": 7727,
+        "samples": 240,
+        "medianMs": 8.300000071525574,
+        "p95Ms": 9.100000023841858,
+        "calls": 65,
+        "triangles": 429792,
+        "geometries": 54,
+        "textures": 11,
+        "canvas": [
+          3456,
+          1786
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "explore",
+      "lifecycle": "idle",
+      "beat": "london",
+      "beatElapsed": 0,
+      "progress": 0,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7,
+          "day": 27
+        }
+      },
+      "suspendedForExploration": false,
+      "owner": "user",
+      "returning": false
+    }
+  },
+  {
+    "label": "village-2x",
+    "observedAt": "2026-10-29T18:36:29.784Z",
+    "rendering": {
+      "lod": "local",
+      "override": "auto",
+      "activeId": "fictional-village",
+      "detailedScenes": 1,
+      "descriptors": 3,
+      "distanceMeters": 96,
+      "stage": "ready",
+      "cache": {
+        "entries": 10,
+        "users": 31,
+        "idle": 0,
+        "bytes": 13761079.999999998,
+        "requests": 10,
+        "hits": 66,
+        "decodeWallMs": 526.4000002145767,
+        "cloneMs": 1.2999998331069946
+      },
+      "surfaceCache": {
+        "entries": 2,
+        "bytes": 5767168
+      },
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 6.899999976158142,
+          "terrainPlacement": 22.40000009536743,
+          "ambientUpdate": 1917.2000004053116,
+          "buildingAssembly": 2.299999952316284,
+          "assetWallIncludingAssembly": 19,
+          "cpuTextures": 0,
+          "textureWall": 0.10000002384185791,
+          "batchAssembly": 0.10000002384185791,
+          "readyWall": 48.60000002384186,
+          "renderWithShadowCpu": 38.200000047683716,
+          "renderCpu": 797.0999985933304
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "terrainPlacement": 2,
+          "ambientUpdate": 2717,
+          "buildingAssembly": 22,
+          "assetWallIncludingAssembly": 1,
+          "textureWall": 1,
+          "batchAssembly": 1,
+          "renderWithShadowCpu": 1,
+          "renderCpu": 2715
+        }
+      },
+      "layout": {
+        "stage": "ready",
+        "ms": {
+          "demQueries": 3.700000047683716,
+          "layoutGeneration": 25.800000071525574,
+          "readyWall": 12.900000095367432,
+          "terrainWaitWall": 0
+        },
+        "counts": {
+          "demQueries": 7106,
+          "layoutGeneration": 2
+        }
+      },
+      "rendering": {
+        "frames": 10493,
+        "samples": 240,
+        "medianMs": 8.300000071525574,
+        "p95Ms": 9.100000023841858,
+        "calls": 65,
+        "triangles": 429792,
+        "geometries": 54,
+        "textures": 11,
+        "canvas": [
+          3456,
+          1786
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "explore",
+      "lifecycle": "idle",
+      "beat": "london",
+      "beatElapsed": 0,
+      "progress": 0,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7,
+          "day": 27
+        }
+      },
+      "suspendedForExploration": false,
+      "owner": "user",
+      "returning": false
+    }
+  },
+  {
+    "label": "town-ready",
+    "observedAt": "2026-10-29T18:36:44.744Z",
+    "rendering": {
+      "lod": "local",
+      "override": "auto",
+      "activeId": "fictional-town",
+      "detailedScenes": 1,
+      "descriptors": 3,
+      "distanceMeters": 36,
+      "stage": "ready",
+      "cache": {
+        "entries": 11,
+        "users": 50,
+        "idle": 0,
+        "bytes": 13768423.999999998,
+        "requests": 11,
+        "hits": 146,
+        "decodeWallMs": 613.200000166893,
+        "cloneMs": 1.999999761581421
+      },
+      "surfaceCache": {
+        "entries": 3,
+        "bytes": 8650752
+      },
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 14.399999976158142,
+          "terrainPlacement": 101.29999995231628,
+          "ambientUpdate": 2473.9000002145767,
+          "buildingAssembly": 3.6999999284744263,
+          "assetWallIncludingAssembly": 86.80000007152557,
+          "cpuTextures": 522.6000001430511,
+          "textureWall": 746.7999999523163,
+          "batchAssembly": 0.10000002384185791,
+          "readyWall": 878,
+          "renderWithShadowCpu": 52.800000071525574,
+          "renderCpu": 617.800001502037
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "terrainPlacement": 4,
+          "ambientUpdate": 1276,
+          "buildingAssembly": 40,
+          "assetWallIncludingAssembly": 1,
+          "textureWall": 1,
+          "batchAssembly": 1,
+          "renderWithShadowCpu": 1,
+          "renderCpu": 1259
+        }
+      },
+      "layout": {
+        "stage": "ready",
+        "ms": {
+          "demQueries": 3.899999976158142,
+          "layoutGeneration": 42.200000047683716,
+          "readyWall": 42.200000047683716,
+          "terrainWaitWall": 0
+        },
+        "counts": {
+          "demQueries": 8693,
+          "layoutGeneration": 1
+        }
+      },
+      "rendering": {
+        "frames": 12151,
+        "samples": 240,
+        "medianMs": 8.300000071525574,
+        "p95Ms": 9.300000071525574,
+        "calls": 90,
+        "triangles": 620610,
+        "geometries": 75,
+        "textures": 11,
+        "canvas": [
+          3456,
+          1786
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "explore",
+      "lifecycle": "idle",
+      "beat": "london",
+      "beatElapsed": 0,
+      "progress": 0,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7,
+          "day": 27
+        }
+      },
+      "suspendedForExploration": false,
+      "owner": "user",
+      "returning": false
+    }
+  },
+  {
+    "label": "hamlet-return-ready",
+    "observedAt": "2026-10-29T18:37:19.142Z",
+    "rendering": {
+      "lod": "local",
+      "override": "auto",
+      "activeId": "fictional-hamlet",
+      "detailedScenes": 1,
+      "descriptors": 3,
+      "distanceMeters": 136,
+      "stage": "ready",
+      "cache": {
+        "entries": 11,
+        "users": 14,
+        "idle": 2,
+        "bytes": 13768423.999999998,
+        "requests": 11,
+        "hits": 160,
+        "decodeWallMs": 613.200000166893,
+        "cloneMs": 2.899999737739563
+      },
+      "surfaceCache": {
+        "entries": 3,
+        "bytes": 8650752
+      },
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 3,
+          "terrainPlacement": 11.099999904632568,
+          "ambientUpdate": 311.09999918937683,
+          "buildingAssembly": 0.6000000238418579,
+          "assetWallIncludingAssembly": 13.399999976158142,
+          "cpuTextures": 0,
+          "textureWall": 0.10000002384185791,
+          "batchAssembly": 0,
+          "readyWall": 30.699999928474426,
+          "renderWithShadowCpu": 44.200000047683716,
+          "renderCpu": 1230.8999981880188
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "terrainPlacement": 2,
+          "ambientUpdate": 3651,
+          "buildingAssembly": 6,
+          "assetWallIncludingAssembly": 1,
+          "textureWall": 1,
+          "batchAssembly": 1,
+          "renderWithShadowCpu": 1,
+          "renderCpu": 3649
+        }
+      },
+      "layout": {
+        "stage": "ready",
+        "ms": {
+          "demQueries": 0.30000007152557373,
+          "layoutGeneration": 3.299999952316284,
+          "readyWall": 3.299999952316284,
+          "terrainWaitWall": 0
+        },
+        "counts": {
+          "demQueries": 886,
+          "layoutGeneration": 1
+        }
+      },
+      "rendering": {
+        "frames": 16262,
+        "samples": 240,
+        "medianMs": 8.300000071525574,
+        "p95Ms": 9.100000023841858,
+        "calls": 32,
+        "triangles": 208930,
+        "geometries": 41,
+        "textures": 11,
+        "canvas": [
+          3456,
+          1786
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "explore",
+      "lifecycle": "idle",
+      "beat": "london",
+      "beatElapsed": 0,
+      "progress": 0,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7,
+          "day": 27
+        }
+      },
+      "suspendedForExploration": false,
+      "owner": "user",
+      "returning": false
+    }
+  },
+  {
+    "label": "authored-ready",
+    "observedAt": "2026-10-29T18:38:22.759Z",
+    "rendering": {
+      "lod": "local",
+      "override": "auto",
+      "activeId": "roman-layout-prototype",
+      "detailedScenes": 1,
+      "descriptors": 1,
+      "distanceMeters": 156,
+      "stage": "ready",
+      "cache": {
+        "entries": 17,
+        "users": 21,
+        "idle": 0,
+        "bytes": 21276653.33333333,
+        "requests": 17,
+        "hits": 175,
+        "decodeWallMs": 969.9000002145767,
+        "cloneMs": 3.3999996185302734
+      },
+      "surfaceCache": {
+        "entries": 3,
+        "bytes": 8650752
+      },
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 5.600000023841858,
+          "terrainPlacement": 29.99999988079071,
+          "ambientUpdate": 2158.1999921798706,
+          "buildingAssembly": 0.7999999523162842,
+          "assetWallIncludingAssembly": 69.10000002384186,
+          "cpuTextures": 409.4000005722046,
+          "textureWall": 604.5,
+          "batchAssembly": 0.09999990463256836,
+          "readyWall": 689.2999999523163,
+          "renderWithShadowCpu": 56.60000002384186,
+          "renderCpu": 2663.6000024080276
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "terrainPlacement": 6,
+          "ambientUpdate": 7446,
+          "buildingAssembly": 7,
+          "assetWallIncludingAssembly": 1,
+          "textureWall": 1,
+          "batchAssembly": 1,
+          "renderWithShadowCpu": 1,
+          "renderCpu": 7434
+        }
+      },
+      "rendering": {
+        "frames": 23775,
+        "samples": 240,
+        "medianMs": 8.299999952316284,
+        "p95Ms": 9.199999928474426,
+        "calls": 43,
+        "triangles": 565440,
+        "geometries": 49,
+        "textures": 19,
+        "canvas": [
+          3456,
+          1786
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "explore",
+      "lifecycle": "idle",
+      "beat": "london",
+      "beatElapsed": 0,
+      "progress": 0,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7,
+          "day": 27
+        }
+      },
+      "suspendedForExploration": false,
+      "owner": "user",
+      "returning": false
+    }
+  },
+  {
+    "label": "authored-relocated",
+    "observedAt": "2026-10-29T18:38:39.549Z",
+    "rendering": {
+      "lod": "local",
+      "override": "auto",
+      "activeId": "roman-layout-prototype",
+      "detailedScenes": 1,
+      "descriptors": 1,
+      "distanceMeters": 156,
+      "stage": "ready",
+      "cache": {
+        "entries": 17,
+        "users": 21,
+        "idle": 0,
+        "bytes": 21276653.333333332,
+        "requests": 22,
+        "hits": 191,
+        "decodeWallMs": 1180.2000000476837,
+        "cloneMs": 3.899999499320984
+      },
+      "surfaceCache": {
+        "entries": 3,
+        "bytes": 8650752
+      },
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 5.300000071525574,
+          "terrainPlacement": 23.49999988079071,
+          "ambientUpdate": 534.000002861023,
+          "buildingAssembly": 0.7999999523162842,
+          "assetWallIncludingAssembly": 63.299999952316284,
+          "cpuTextures": 0,
+          "textureWall": 0.2999999523162842,
+          "batchAssembly": 0.10000002384185791,
+          "readyWall": 82.10000002384186,
+          "renderWithShadowCpu": 50.89999997615814,
+          "renderCpu": 638.2000021934509
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "terrainPlacement": 4,
+          "ambientUpdate": 1908,
+          "buildingAssembly": 7,
+          "assetWallIncludingAssembly": 1,
+          "textureWall": 1,
+          "batchAssembly": 1,
+          "renderWithShadowCpu": 1,
+          "renderCpu": 1900
+        }
+      },
+      "rendering": {
+        "frames": 25812,
+        "samples": 240,
+        "medianMs": 8.300000071525574,
+        "p95Ms": 9,
+        "calls": 43,
+        "triangles": 565440,
+        "geometries": 49,
+        "textures": 19,
+        "canvas": [
+          3456,
+          1786
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "explore",
+      "lifecycle": "idle",
+      "beat": "london",
+      "beatElapsed": 0,
+      "progress": 0,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7,
+          "day": 27
+        }
+      },
+      "suspendedForExploration": false,
+      "owner": "user",
+      "returning": false
+    }
+  },
+  {
+    "label": "all-scenes-disabled",
+    "observedAt": "2026-10-29T18:38:39.962Z",
+    "rendering": {
+      "lod": "global",
+      "override": "auto",
+      "detailedScenes": 0,
+      "descriptors": 1,
+      "distanceMeters": null,
+      "stage": "disabled",
+      "cache": {
+        "entries": 12,
+        "users": 0,
+        "idle": 12,
+        "bytes": 18957407.999999996,
+        "requests": 22,
+        "hits": 191,
+        "decodeWallMs": 1180.2000000476837,
+        "cloneMs": 3.899999499320984
+      },
+      "surfaceCache": {
+        "entries": 3,
+        "bytes": 8650752
+      },
+      "rendering": {
+        "frames": 25827,
+        "samples": 240,
+        "medianMs": 8.300000071525574,
+        "p95Ms": 9,
+        "calls": 0,
+        "triangles": 0,
+        "geometries": 31,
+        "textures": 13,
+        "canvas": [
+          3456,
+          1786
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "explore",
+      "lifecycle": "idle",
+      "beat": "london",
+      "beatElapsed": 0,
+      "progress": 0,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7,
+          "day": 27
+        }
+      },
+      "suspendedForExploration": false,
+      "owner": "user",
+      "returning": false
+    }
+  },
+  {
+    "label": "continuous-route-playing",
+    "observedAt": "2026-10-29T18:39:27.140Z",
+    "rendering": {
+      "lod": "global",
+      "override": "auto",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": null,
+      "stage": "global",
+      "cache": {
+        "entries": 0,
+        "users": 0,
+        "idle": 0,
+        "bytes": 0,
+        "requests": 0,
+        "hits": 0,
+        "decodeWallMs": 0,
+        "cloneMs": 0
+      },
+      "surfaceCache": {
+        "entries": 0,
+        "bytes": 0
+      },
+      "rendering": {
+        "frames": 1368,
+        "samples": 240,
+        "medianMs": 8.300000071525574,
+        "p95Ms": 8.700000047683716,
+        "calls": 0,
+        "triangles": 0,
+        "geometries": 2,
+        "textures": 1,
+        "canvas": [
+          3456,
+          1786
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "scenario",
+      "lifecycle": "playing",
+      "beat": "relay",
+      "beatElapsed": 7500.700000000004,
+      "progress": 38,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7
+        }
+      },
+      "suspendedForExploration": false,
+      "owner": "scenario",
+      "returning": false
+    }
+  },
+  {
+    "label": "continuous-completed",
+    "observedAt": "2026-10-29T18:43:21.643Z",
+    "rendering": {
+      "lod": "global",
+      "override": "auto",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": null,
+      "stage": "global",
+      "cache": {
+        "entries": 0,
+        "users": 0,
+        "idle": 0,
+        "bytes": 0,
+        "requests": 0,
+        "hits": 0,
+        "decodeWallMs": 0,
+        "cloneMs": 0
+      },
+      "surfaceCache": {
+        "entries": 0,
+        "bytes": 0
+      },
+      "rendering": {
+        "frames": 3870,
+        "samples": 0,
+        "medianMs": null,
+        "p95Ms": null,
+        "calls": 0,
+        "triangles": 0,
+        "geometries": 2,
+        "textures": 1,
+        "canvas": [
+          3456,
+          1674
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "scenario",
+      "lifecycle": "completed",
+      "beat": "explore",
+      "beatElapsed": 2000,
+      "progress": 100,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7,
+          "day": 27
+        }
+      },
+      "suspendedForExploration": false,
+      "owner": "user",
+      "returning": false
+    }
+  },
+  {
+    "label": "completed-continue-exploring",
+    "observedAt": "2026-10-29T18:43:22.150Z",
+    "rendering": {
+      "lod": "global",
+      "override": "auto",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": null,
+      "stage": "global",
+      "cache": {
+        "entries": 0,
+        "users": 0,
+        "idle": 0,
+        "bytes": 0,
+        "requests": 0,
+        "hits": 0,
+        "decodeWallMs": 0,
+        "cloneMs": 0
+      },
+      "surfaceCache": {
+        "entries": 0,
+        "bytes": 0
+      },
+      "rendering": {
+        "frames": 3870,
+        "samples": 0,
+        "medianMs": null,
+        "p95Ms": null,
+        "calls": 0,
+        "triangles": 0,
+        "geometries": 2,
+        "textures": 1,
+        "canvas": [
+          3456,
+          1674
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "explore",
+      "lifecycle": "completed",
+      "beat": "explore",
+      "beatElapsed": 2000,
+      "progress": 100,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7,
+          "day": 27
+        }
+      },
+      "suspendedForExploration": true,
+      "owner": "user",
+      "returning": false
+    }
+  },
+  {
+    "label": "completion-replay",
+    "observedAt": "2026-10-29T18:43:36.853Z",
+    "rendering": {
+      "lod": "global",
+      "override": "auto",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": null,
+      "stage": "global",
+      "cache": {
+        "entries": 0,
+        "users": 0,
+        "idle": 0,
+        "bytes": 0,
+        "requests": 0,
+        "hits": 0,
+        "decodeWallMs": 0,
+        "cloneMs": 0
+      },
+      "surfaceCache": {
+        "entries": 0,
+        "bytes": 0
+      },
+      "rendering": {
+        "frames": 3871,
+        "samples": 0,
+        "medianMs": null,
+        "p95Ms": null,
+        "calls": 0,
+        "triangles": 0,
+        "geometries": 2,
+        "textures": 1,
+        "canvas": [
+          3456,
+          1674
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "scenario",
+      "lifecycle": "playing",
+      "beat": "london",
+      "beatElapsed": 232.5,
+      "progress": 1,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7
+        }
+      },
+      "suspendedForExploration": false,
+      "owner": "scenario",
+      "returning": false
+    }
+  },
+  {
+    "label": "stationary-paused-start",
+    "observedAt": "2026-10-29T18:43:37.356Z",
+    "rendering": {
+      "lod": "global",
+      "override": "auto",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": null,
+      "stage": "global",
+      "cache": {
+        "entries": 0,
+        "users": 0,
+        "idle": 0,
+        "bytes": 0,
+        "requests": 0,
+        "hits": 0,
+        "decodeWallMs": 0,
+        "cloneMs": 0
+      },
+      "surfaceCache": {
+        "entries": 0,
+        "bytes": 0
+      },
+      "rendering": {
+        "frames": 3898,
+        "samples": 27,
+        "medianMs": 8.699999928474426,
+        "p95Ms": 22.200000047683716,
+        "calls": 0,
+        "triangles": 0,
+        "geometries": 2,
+        "textures": 1,
+        "canvas": [
+          3456,
+          1674
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "scenario",
+      "lifecycle": "paused",
+      "beat": "london",
+      "beatElapsed": 607.9000000000233,
+      "progress": 2,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7
+        }
+      },
+      "suspendedForExploration": false,
+      "owner": "user",
+      "returning": false,
+      "interruption": "Playback paused"
+    }
+  },
+  {
+    "label": "stationary-paused-end",
+    "observedAt": "2026-10-29T18:44:10.119Z",
+    "rendering": {
+      "lod": "global",
+      "override": "auto",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": null,
+      "stage": "global",
+      "cache": {
+        "entries": 0,
+        "users": 0,
+        "idle": 0,
+        "bytes": 0,
+        "requests": 0,
+        "hits": 0,
+        "decodeWallMs": 0,
+        "cloneMs": 0
+      },
+      "surfaceCache": {
+        "entries": 0,
+        "bytes": 0
+      },
+      "rendering": {
+        "frames": 3938,
+        "samples": 67,
+        "medianMs": 8.699999928474426,
+        "p95Ms": 22.200000047683716,
+        "calls": 0,
+        "triangles": 0,
+        "geometries": 2,
+        "textures": 1,
+        "canvas": [
+          3456,
+          1674
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "scenario",
+      "lifecycle": "paused",
+      "beat": "london",
+      "beatElapsed": 607.9000000000233,
+      "progress": 2,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7
+        }
+      },
+      "suspendedForExploration": false,
+      "owner": "user",
+      "returning": false,
+      "interruption": "Playback paused"
+    }
+  },
+  {
+    "label": "fixture-activation-after-fix",
+    "observedAt": "2026-10-29T18:44:10.949Z",
+    "rendering": {
+      "lod": "global",
+      "override": "auto",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": null,
+      "stage": "global",
+      "cache": {
+        "entries": 0,
+        "users": 0,
+        "idle": 0,
+        "bytes": 0,
+        "requests": 0,
+        "hits": 0,
+        "decodeWallMs": 0,
+        "cloneMs": 0
+      },
+      "surfaceCache": {
+        "entries": 0,
+        "bytes": 0
+      },
+      "rendering": {
+        "frames": 3986,
+        "samples": 33,
+        "medianMs": 8.300000071525574,
+        "p95Ms": 13.200000047683716,
+        "calls": 0,
+        "triangles": 0,
+        "geometries": 2,
+        "textures": 1,
+        "canvas": [
+          3456,
+          1674
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "explore",
+      "lifecycle": "idle",
+      "beat": "london",
+      "beatElapsed": 0,
+      "progress": 0,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7
+        }
+      },
+      "suspendedForExploration": false,
+      "owner": "user",
+      "returning": false
+    }
+  },
+  {
+    "label": "rapid-destinations-settled",
+    "observedAt": "2026-10-29T18:45:12.308Z",
+    "rendering": {
+      "lod": "local",
+      "override": "auto",
+      "activeId": "fictional-village",
+      "detailedScenes": 1,
+      "descriptors": 3,
+      "distanceMeters": 81,
+      "stage": "ready",
+      "cache": {
+        "entries": 10,
+        "users": 31,
+        "idle": 0,
+        "bytes": 13761079.999999998,
+        "requests": 10,
+        "hits": 21,
+        "decodeWallMs": 616.8999998569489,
+        "cloneMs": 0.7000000476837158
+      },
+      "surfaceCache": {
+        "entries": 1,
+        "bytes": 2883584
+      },
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 10.900000095367432,
+          "terrainPlacement": 52.10000002384186,
+          "ambientUpdate": 4262.100005507469,
+          "buildingAssembly": 3,
+          "assetWallIncludingAssembly": 94.89999997615814,
+          "cpuTextures": 413.099999666214,
+          "textureWall": 622.7999999523163,
+          "batchAssembly": 0.3999999761581421,
+          "readyWall": 745.6000000238419,
+          "renderWithShadowCpu": 103.10000002384186,
+          "renderCpu": 2063.09998857975
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "terrainPlacement": 4,
+          "ambientUpdate": 6091,
+          "buildingAssembly": 22,
+          "assetWallIncludingAssembly": 1,
+          "textureWall": 1,
+          "batchAssembly": 1,
+          "renderWithShadowCpu": 1,
+          "renderCpu": 6076
+        }
+      },
+      "layout": {
+        "stage": "ready",
+        "ms": {
+          "demQueries": 1.6000001430511475,
+          "layoutGeneration": 17.299999952316284,
+          "readyWall": 17.399999976158142,
+          "terrainWaitWall": 0.10000002384185791
+        },
+        "counts": {
+          "demQueries": 3553,
+          "layoutGeneration": 1
+        }
+      },
+      "rendering": {
+        "frames": 11123,
+        "samples": 240,
+        "medianMs": 8.300000071525574,
+        "p95Ms": 9.200000047683716,
+        "calls": 65,
+        "triangles": 429792,
+        "geometries": 54,
+        "textures": 11,
+        "canvas": [
+          3456,
+          1674
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "explore",
+      "lifecycle": "idle",
+      "beat": "london",
+      "beatElapsed": 0,
+      "progress": 0,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7
+        }
+      },
+      "suspendedForExploration": false,
+      "owner": "user",
+      "returning": false
+    }
+  },
+  {
+    "label": "exited-at-stadium",
+    "observedAt": "2026-10-29T18:46:10.683Z",
+    "rendering": {
+      "lod": "global",
+      "override": "auto",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": null,
+      "stage": "global",
+      "cache": {
+        "entries": 10,
+        "users": 0,
+        "idle": 10,
+        "bytes": 13761079.999999998,
+        "requests": 10,
+        "hits": 21,
+        "decodeWallMs": 616.8999998569489,
+        "cloneMs": 0.7000000476837158
+      },
+      "surfaceCache": {
+        "entries": 1,
+        "bytes": 2883584
+      },
+      "rendering": {
+        "frames": 12393,
+        "samples": 0,
+        "medianMs": null,
+        "p95Ms": null,
+        "calls": 0,
+        "triangles": 0,
+        "geometries": 27,
+        "textures": 7,
+        "canvas": [
+          3456,
+          1674
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "explore",
+      "lifecycle": "idle",
+      "beat": "london",
+      "beatElapsed": 0,
+      "progress": 0,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7,
+          "day": 27
+        }
+      },
+      "suspendedForExploration": false,
+      "owner": "user",
+      "returning": false
+    }
+  },
+  {
+    "label": "exit-during-active-return",
+    "observedAt": "2026-10-29T18:46:28.906Z",
+    "rendering": {
+      "lod": "global",
+      "override": "auto",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": null,
+      "stage": "global",
+      "cache": {
+        "entries": 10,
+        "users": 0,
+        "idle": 10,
+        "bytes": 13761079.999999998,
+        "requests": 10,
+        "hits": 21,
+        "decodeWallMs": 616.8999998569489,
+        "cloneMs": 0.7000000476837158
+      },
+      "surfaceCache": {
+        "entries": 1,
+        "bytes": 2883584
+      },
+      "rendering": {
+        "frames": 12697,
+        "samples": 97,
+        "medianMs": 8.299999952316284,
+        "p95Ms": 10,
+        "calls": 0,
+        "triangles": 0,
+        "geometries": 27,
+        "textures": 7,
+        "canvas": [
+          3456,
+          1674
+        ]
+      }
+    },
+    "scenario": {
+      "presentation": "explore",
+      "lifecycle": "idle",
+      "beat": "london",
+      "beatElapsed": 0,
+      "progress": 0,
+      "historicalDate": {
+        "start": {
+          "year": 2012,
+          "month": 7
+        }
+      },
+      "suspendedForExploration": false,
+      "owner": "user",
+      "returning": false
+    }
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "level": "warn",
+    "message": "calculateFogMatrix is not supported on globe projection.",
+    "timestamp": "2026-10-29T18:29:48.912Z",
+    "url": "chrome-extension://fmkadmapgofadopljbjfkapdkoienihi/build/installHook.js"
+  },
+  {
+    "level": "warn",
+    "message": "calculateFogMatrix is not supported on globe projection.",
+    "timestamp": "2026-10-29T18:32:43.827Z",
+    "url": "chrome-extension://fmkadmapgofadopljbjfkapdkoienihi/build/installHook.js"
+  },
+  {
+    "level": "warn",
+    "message": "terrain is not fully supported on vertical perspective projection.",
+    "timestamp": "2026-10-29T18:33:14.916Z",
+    "url": "chrome-extension://fmkadmapgofadopljbjfkapdkoienihi/build/installHook.js"
+  },
+  {
+    "level": "warn",
+    "message": "calculateFogMatrix is not supported on globe projection.",
+    "timestamp": "2026-10-29T18:38:40.836Z",
+    "url": "chrome-extension://fmkadmapgofadopljbjfkapdkoienihi/build/installHook.js"
+  }
+]

@@ -158,8 +158,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
     <>
       <div ref={containerRef} className="h-full w-full" aria-hidden />
       <MapReadout map={debugMap} />
-      {debugMap && <ScenarioPanel map={debugMap} layer={scenarioLayer} streaming={streamingStatus} />}
-      <div data-manual-camera>
+      {debugMap && <ScenarioPanel map={debugMap} layer={scenarioLayer} />}
       <DebugPanel
         streamingStatus={streamingStatus}
         onStreamingFixtures={() => threeLayerRef.current?.useDevelopmentSettlements()}
@@ -180,7 +179,6 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
           debugMap?.refreshTiles(TERRAIN_SOURCE);
         }}
       />
-      </div>
     </>
   );
 }

@@ -15,3 +15,20 @@ export function attachScenarioInput(container: HTMLElement, interrupt: (reason: 
         container.removeEventListener('keydown', key, { capture: true });
     };
 }
+
+/** Only explicit navigation controls take ownership; inspecting debug UI is inert. */
+export function attachScenarioControls(root: EventTarget, player: { pause(reason: string): void; stop(): void }) {
+    const manual = (event: Event) => {
+        const target = event.target as Element | null;
+        // Resetting diagnostics at pointerdown can move the clicked fixture button
+        // before pointerup. Release on activation, still before its React handler.
+        if (target?.closest?.('[data-scenario-exit]')) {
+            if (event.type === 'click' || event.type === 'input') player.stop();
+        }
+        else if (target?.closest?.('[aria-label="Historical timeline"]')) player.pause('Timeline manipulation');
+        else if (target?.closest?.('[data-manual-camera]')) player.pause('Manual camera control');
+    };
+    const events = ['pointerdown', 'keydown', 'input', 'click'];
+    for (const type of events) root.addEventListener(type, manual, { capture: true });
+    return () => { for (const type of events) root.removeEventListener(type, manual, { capture: true }); };
+}

@@ -1,4 +1,5 @@
 "use client";
+import { ScenarioDiagnostics } from "@/components/ScenarioDiagnostics";
 import type { StreamingStatus } from "@/map/threeTestLayer";
 import { DEVELOPMENT_SETTLEMENTS, type SettlementLOD } from "@/map/settlements/settlementStreaming";
 
@@ -88,7 +89,8 @@ export function DebugPanel({ streamingStatus, onStreamingFixtures, onStreamingVi
   return (
     <details open className="absolute top-16 left-4 z-20 max-h-[calc(100%-12rem)] w-56 overflow-y-auto rounded-lg border border-panel-border bg-panel p-3 text-xs text-white/70 backdrop-blur-md sm:left-6">
       <summary className="cursor-pointer tracking-wide">Debug tools</summary>
-      <fieldset className="mt-4 border-t border-panel-border pt-3">
+      <ScenarioDiagnostics />
+      <fieldset data-scenario-exit className="mt-4 border-t border-panel-border pt-3">
         <legend className="text-white/40">Settlement streaming · fictional fixtures</legend>
         <button className="mt-2 block underline" onClick={onStreamingFixtures}>Enable three streaming fixtures</button>
         {DEVELOPMENT_SETTLEMENTS.map(d => <button key={d.id} className="mt-2 block underline" onClick={() => onStreamingVisit(d.id)}>Visit {d.id}</button>)}
@@ -98,10 +100,15 @@ export function DebugPanel({ streamingStatus, onStreamingFixtures, onStreamingVi
           </select>
         </label>
         <p role="status">LOD {streamingStatus?.lod??"global"} · {streamingStatus?.activeId??"none"} · {streamingStatus?.detailedScenes??0}/1 detailed · {streamingStatus?.descriptors??3} descriptors</p>
-        <p>{streamingStatus?.stage??"idle"} · {streamingStatus?.distanceMeters??"—"} m from extent</p>
-        <p>GLB cache: {streamingStatus?.cache.entries??0} entries · {streamingStatus?.cache.users??0} leases · {streamingStatus?.cache.hits??0} hits · {((streamingStatus?.cache.bytes??0)/1048576).toFixed(1)} MiB estimated</p>
+        <p>{streamingStatus?.stage??"idle"} · {streamingStatus?.distanceMeters == null ? "—" : Math.round(streamingStatus.distanceMeters)} m from extent</p>
+        <p>GLB cache: {streamingStatus?.cache.entries??0} entries · {streamingStatus?.cache.users??0} leases · {streamingStatus?.cache.hits??0} hits · {Math.round((streamingStatus?.cache.bytes??0)/1048576)} MiB estimated</p>
         {streamingStatus?.scene && <p>Textures {Math.round(streamingStatus.scene.ms.textureWall??0)} ms · placement {Math.round(streamingStatus.scene.ms.terrainPlacement??0)} ms · ready {Math.round(streamingStatus.scene.ms.readyWall??0)} ms</p>}
       </fieldset>
+      <details className="mt-3 border-t border-panel-border pt-2">
+        <summary className="cursor-pointer">Rendering diagnostics</summary>
+        <p className="my-2 text-white/45">Development CPU frame intervals, last 240 active frames; idle gaps ≥250 ms excluded. Three counts exclude MapLibre terrain.</p>
+        <pre aria-label="Rendering diagnostics" className="whitespace-pre-wrap text-[10px]">{JSON.stringify(streamingStatus, (_key, value) => typeof value === "number" ? Math.round(value) : value, 2)}</pre>
+      </details>
       <fieldset disabled={!map} className="disabled:opacity-50">
         <legend className="mt-3 text-white/40">Terrain</legend>
         <label className="mt-3 flex items-center justify-between gap-3">
@@ -117,7 +124,7 @@ export function DebugPanel({ streamingStatus, onStreamingFixtures, onStreamingVi
             }}
           >
             {TERRAIN_EXAGGERATIONS.map((value) => (
-              <option key={value} value={value}>{value.toFixed(1)}×</option>
+              <option key={value} value={value}>{Math.round(value * 100)}%</option>
             ))}
           </select>
         </label>
@@ -134,18 +141,18 @@ export function DebugPanel({ streamingStatus, onStreamingFixtures, onStreamingVi
           Hillshade
         </label>
         <label className="mt-3 block">
-          Hillshade intensity · {hillshadeIntensity.toFixed(2)}
+          Hillshade intensity · {Math.round(hillshadeIntensity * 100)}%
           <input className="mt-1 w-full" aria-label="Hillshade intensity" type="range" min="0" max="0.6" step="0.05" value={hillshadeIntensity}
             onChange={(event) => setHillshadeIntensity(Number(event.target.value))} />
         </label>
         <label className="mt-3 block">
-          Global hillshade strength · {globalHillshadeStrength.toFixed(2)}
+          Global hillshade strength · {Math.round(globalHillshadeStrength * 100)}%
           <input className="mt-1 w-full" aria-label="Global hillshade strength" type="range" min="0" max="1" step="0.05" value={globalHillshadeStrength}
             onChange={(event) => setGlobalHillshadeStrength(Number(event.target.value))} />
         </label>
         <p className="mt-1 text-white/40">Global relief blends into regional detail from zoom 4 to 6.</p>
       </fieldset>
-      <fieldset disabled={!map} className="mt-3 border-t border-panel-border pt-2 disabled:opacity-50">
+      <fieldset data-scenario-exit disabled={!map} className="mt-3 border-t border-panel-border pt-2 disabled:opacity-50">
         <legend className="text-white/40">Roman integration test</legend>
         <label className="mt-2 flex items-center gap-2">
           <input type="checkbox" checked={romanStatus.state !== "disabled"}
@@ -165,7 +172,7 @@ export function DebugPanel({ streamingStatus, onStreamingFixtures, onStreamingVi
           <button className="mt-2 underline" onClick={() => { onRomanTestEnabled(false); onRomanTestEnabled(true); }}>Retry models</button>
         </>}
       </fieldset>
-      <fieldset disabled={!map} className="mt-3 border-t border-panel-border pt-2 disabled:opacity-50">
+      <fieldset data-scenario-exit disabled={!map} className="mt-3 border-t border-panel-border pt-2 disabled:opacity-50">
         <legend className="text-white/40">Settlement rendering · fictional/debug</legend>
         <label className="mt-2 flex items-center gap-2">
           <input type="checkbox" checked={!proceduralStatus && settlementStatus.state !== "unloaded"}
@@ -178,7 +185,7 @@ export function DebugPanel({ streamingStatus, onStreamingFixtures, onStreamingVi
         )}>Relocate nearby</button>
         <p role="status" className="mt-2">{settlementStatus.loaded}/{settlementStatus.total} buildings · {settlementStatus.state}</p>
         <p className="mt-1 text-white/40">{settlementStatus.sceneryLoaded}/{settlementStatus.sceneryTotal} scenery instances · sun shadows</p>
-        <p className="mt-1 text-white/40">{settlementStatus.origin.map((value) => value.toFixed(4)).join(", ")} · Generic prototype near Rome.</p>
+        <p className="mt-1 text-white/40">{settlementStatus.origin.map((value) => Math.round(value)).join(", ")} · Generic prototype near Rome.</p>
         {settlementStatus.terrainPending > 0 && <p className="mt-2 text-amber-200/80">Waiting for terrain on {settlementStatus.terrainPending} surfaces. Unknown ground stays hidden.</p>}
         {settlementStatus.terrainRetained > 0 && <p className="mt-2 text-amber-200/80">Terrain updating; retaining known heights on {settlementStatus.terrainRetained} surfaces.</p>}
         {settlementStatus.scenerySteep > 0 && <p className="mt-2 text-amber-200/80">{settlementStatus.scenerySteep} rigid props hidden on steep ground.</p>}
@@ -189,7 +196,7 @@ export function DebugPanel({ streamingStatus, onStreamingFixtures, onStreamingVi
         </>}
         <p className="mt-2 text-white/40">Project-owned Roman architecture, level foundations and Mediterranean scenery. No historical reconstruction claimed.</p>
       </fieldset>
-      <fieldset disabled={!map} className="mt-3 border-t border-panel-border pt-2 disabled:opacity-50">
+      <fieldset data-scenario-exit disabled={!map} className="mt-3 border-t border-panel-border pt-2 disabled:opacity-50">
         <legend className="text-white/40">Procedural Roman settlement · fictional</legend>
         <label className="mt-2 block">Profile
           <select aria-label="Settlement profile" value={proceduralProfile} className="w-full rounded border border-panel-border bg-background p-1" onChange={event => {

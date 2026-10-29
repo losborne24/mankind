@@ -49,6 +49,11 @@ try {
  const before=requests;approach(a);await settle();assert.equal(requests,before,'Return reuses decoded GLBs');assert.equal(layer.settlement.timing.totals.cpuTextures,0,'Return reuses CPU maps');
  approach(b);await settle();assert.equal(layer.getStreamingStatus().activeId,b.id);assert.equal(layer.getStreamingStatus().detailedScenes,1);assert.equal(layer.settlement.loaded,22);
  approach(fixtures[2]);await settle();assert.equal(layer.settlement.loaded,40);assert.equal(layer.getStreamingStatus().activeId,fixtures[2].id);
+ // Source/exaggeration changes discard the old displayed-height frame and rebuild coherently.
+ const priorTerrainScene=layer.settlement;layer.onSettlementTerrain();
+ assert.equal(layer.settlement,null);assert.equal(priorTerrainScene.loaded,0);
+ layer.updateProcedural();await layer.settlement.load();layer.settlement.updateTerrain(flat);
+ assert.equal(layer.settlement.loaded,40);assert.equal(layer.getStreamingStatus().activeId,fixtures[2].id);
  // Start loads behind a gate; leave immediately and switch. Stale completions cannot replace the slot.
  layer.clearStreamingScene();glbCache.clearIdle();clearSurfaceMapCache();
  let resume;gate=new Promise(r=>resume=r);approach(a);await new Promise(r=>setTimeout(r,230));layer.updateStreaming();layer.updateProcedural();const stale=layer.settlement,staleLoad=stale.load();
@@ -74,6 +79,12 @@ try {
   const d=generateSettlement({...settlementProfileConfig(profile),seed},flat).definition,proxy=new RegionalSettlement({...a,profile,seed},d);
   proxy.updateTerrain(()=>12);assert.equal(proxy.walls.count,proxy.plots.length);assert.ok(proxy.plots.length>=d.buildings.length);assert.equal(proxy.scene.children.length,2);assert.ok(proxy.plots.length<=d.buildings.length*3,'At most three source masses per building');assert.ok(proxy.plots.every(p=>p.width>0&&p.depth>0&&p.height>0));proxy.dispose();
  }
+ // Full custom-layer removal cancels its timer, releases actors/leases and purges warm sources.
+ approach(a);await settle();const removedScene=layer.settlement;
+ globalThis.document=new EventTarget();layer.map.off=()=>{};layer.map.getSource=()=>undefined;
+ try {layer.onRemove();layer.onRemove();} finally {delete globalThis.document;}
+ assert.equal(removedScene.loaded,0);assert.equal(removedScene.ambientLife.actors.length,0);
+ assert.equal(layer.map,null);assert.equal(layer.streamTimer,undefined);assert.equal(glbCache.snapshot().entries,0);
 } finally {layer.clearStreamingScene();layer.regional?.dispose();glbCache.clearIdle();clearSurfaceMapCache();GLTFLoader.prototype.loadAsync=original;}
 assert.equal(glbCache.snapshot().entries,0);
 console.log('Streaming: LOD hysteresis, latitude/pitch/date line, nearest priority, rapid movement, no distant GLBs, travel debounce, bounded one-slot switching, warm visits, stale loads, texture cancellation, cache budgets, footprint silhouettes, pause/resume and disposal pass.');

@@ -21,7 +21,7 @@ export type CameraCommand = {
     bearing?: number;
     duration: number;
     easing?: 'linear' | 'smooth';
-    transition?: 'cinematic';
+    transition?: 'cinematic' | 'zoomPanZoom';
 } | {
     type: 'orbit';
     center: Coordinate;
@@ -172,17 +172,21 @@ const time = (v: unknown) => {
 };
 export function validateScenario(value: unknown): ScenarioDefinition {
     // Reject functions, undefined, cycles and non-JSON objects before cloning input.
-    const walk = (v: unknown): void => {
+    const ancestors = new Set<object>();
+    let nodes = 0;
+    const walk = (v: unknown, depth = 0): void => {
+        if (++nodes > 100000 || depth > 32)
+            throw Error('Scenario exceeds JSON complexity limit');
         if (v === null || typeof v === 'string' || typeof v === 'boolean')
             return;
         if (typeof v === 'number' && Number.isFinite(v))
             return;
-        if (Array.isArray(v)) {
-            v.forEach(walk);
-            return;
-        }
-        if (v && typeof v === 'object' && Object.getPrototypeOf(v) === Object.prototype) {
-            Object.values(v).forEach(walk);
+        if (v && typeof v === 'object' && (Array.isArray(v) || Object.getPrototypeOf(v) === Object.prototype)) {
+            if (ancestors.has(v)) throw Error('Scenario must be acyclic JSON');
+            ancestors.add(v);
+            const values = Array.isArray(v) ? list(v) : Object.values(v);
+            values.forEach(child => walk(child, depth + 1));
+            ancestors.delete(v);
             return;
         }
         throw Error('Scenario must be plain JSON');
@@ -272,6 +276,7 @@ export function validateScenario(value: unknown): ScenarioDefinition {
     ids(s.beats);
     if (!list(s.beats).length)
         throw Error('Scenario needs beats');
+    let actionCount = 0, totalDuration = 0;
     for (const b of list(s.beats)) {
         const beat = object(b);
         str(beat.title);
@@ -288,13 +293,16 @@ export function validateScenario(value: unknown): ScenarioDefinition {
                 time(action.time);
             const camera = object(action.camera);
             num(camera.duration, 100, 180000);
+            totalDuration += camera.duration as number;
+            if (++actionCount > 1000 || totalDuration > 3600000)
+                throw Error('Scenario exceeds 1000 actions or one hour');
             switch (camera.type) {
                 case 'flyTo':
                     coord(camera.center);
                     num(camera.zoom, 0, 20);
                     if (camera.easing !== undefined && !['linear', 'smooth'].includes(str(camera.easing)))
                         throw Error('Unknown easing');
-                    if (camera.transition !== undefined && camera.transition !== 'cinematic')
+                    if (camera.transition !== undefined && !['cinematic', 'zoomPanZoom'].includes(str(camera.transition)))
                         throw Error('Unknown transition');
                     break;
                 case 'orbit':

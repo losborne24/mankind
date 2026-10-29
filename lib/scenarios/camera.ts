@@ -62,6 +62,18 @@ export function directCamera(command: CameraCommand, start: CameraPose, scenario
         return () => start;
     if (command.type === 'flyTo') {
         const end = { ...start, ...command, center: command.center };
+        if (command.transition === 'zoomPanZoom') {
+            // Pull back at the origin, pan at a distance-aware scale, then descend.
+            const span = Math.max(1000, distance(start.center, command.center) * 4);
+            const zoom = Math.max(0, Math.min(start.zoom - 1, end.zoom - 1, Math.log2(40075000 / span)));
+            const departure = { ...start, zoom, pitch: 0 };
+            const arrival = { ...departure, center: command.center, bearing: end.bearing };
+            return t => t < .25
+                ? mixPose(start, departure, smooth(t / .25))
+                : t < .6
+                    ? mixPose(departure, arrival, smooth((t - .25) / .35))
+                    : mixPose(arrival, end, smooth((t - .6) / .4));
+        }
         return t => {
             const p = command.easing === 'linear' ? t : smooth(t), pose = mixPose(start, end, p);
             if (command.transition === 'cinematic')

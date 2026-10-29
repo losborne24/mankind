@@ -17,6 +17,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import { TopBar } from "@/components/TopBar";
+import { ScenarioProvider } from "@/components/ScenarioContext";
 import { Timeline } from "@/components/Timeline";
 import {
   ErrorOverlay,
@@ -49,7 +50,7 @@ export function Explorer() {
   };
 
   return (
-    <main className="relative h-full w-full overflow-hidden bg-background">
+    <ScenarioProvider><main className="relative h-full w-full overflow-hidden bg-background">
       {/* Globe layer */}
       {webglSupported === true && <GlobeView onStatus={handleStatus} />}
 
@@ -64,7 +65,7 @@ export function Explorer() {
       {webglSupported === true && globeStatus === "error" && (
         <ErrorOverlay message={errorMessage ?? "Unknown error."} />
       )}
-    </main>
+    </main></ScenarioProvider>
   );
 }
 

@@ -1,0 +1,16 @@
+{
+  "attempts": [
+    {
+      "command": "pnpm build",
+      "sandbox": "default",
+      "exit": 1
+    },
+    {
+      "command": "pnpm build",
+      "sandbox": "escalated retry",
+      "exit": 1
+    }
+  ],
+  "failure": "Turbopack MapLibre CSS worker: creating new process / binding to a port / Operation not permitted (os error 1)",
+  "fallback": "pnpm exec next build --webpack passed; full output is in regression.json"
+}

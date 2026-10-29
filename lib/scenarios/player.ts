@@ -30,6 +30,7 @@ export interface PlayerSnapshot {
     totalElapsed: number;
     progress: number;
     returning: boolean;
+    suspendedForExploration?: boolean;
     reason?: string;
     error?: string;
     warning?: string;
@@ -110,14 +111,14 @@ export class ScenarioPlayer {
         const next = scenario.beats[this.snapshot.beat + 1]?.actions[0].camera;
         this.intent = { focus: this.ports.camera.read().center, destination: 'center' in camera ? camera.center : next && 'center' in next ? next.center : undefined, route: camera.type === 'followRoute' ? scenario.content.routes.find(r => r.id === camera.route)?.coordinates : undefined, arrivalInMs: camera.duration, detail: 'map', importance: 'narrative', travelling: camera.type !== 'hold' };
         this.ports.streaming?.(this.intent);
-        this.publish({ state: 'playing', owner: 'scenario', command: camera.type });
+        this.publish({ owner: 'scenario', command: camera.type });
     }
     jump(beat: number) {
         if (this.destroyed || !this.scenario || !Number.isInteger(beat) || beat < 0 || beat >= this.scenario.beats.length)
             return;
         this.cancel();
         this.saved = undefined;
-        this.publish({ state: 'preparing', beat, action: 0, elapsed: 0, returning: false, reason: undefined, intendedTime: undefined, savedPose: undefined });
+        this.publish({ state: 'preparing', beat, action: 0, elapsed: 0, returning: false, suspendedForExploration: false, error: undefined, reason: undefined, intendedTime: undefined, savedPose: undefined });
         try {
             // Rebuild temporal context deterministically when jumping over actions.
             let intended: HistoricalTime = this.scenario.scope.time;
@@ -145,6 +146,11 @@ export class ScenarioPlayer {
         this.cancel();
         this.publish({ state: 'paused', owner: 'user', reason, savedPose: this.saved });
     }
+    exploreFreely() {
+        if (!['playing', 'preparing', 'paused', 'completed'].includes(this.snapshot.state)) return;
+        this.pause('Exploring freely');
+        this.publish({ suspendedForExploration: true });
+    }
     resume() {
         if (this.destroyed || this.snapshot.state !== 'paused' || !this.saved)
             return;
@@ -155,7 +161,7 @@ export class ScenarioPlayer {
             this.ports.streaming?.(this.intent ? { ...this.intent, travelling: true } : null);
             if (this.snapshot.intendedTime)
                 this.ports.timeline(this.snapshot.intendedTime);
-            this.publish({ state: 'playing', returning: true, owner: 'scenario', reason: undefined });
+            this.publish({ state: 'playing', suspendedForExploration: false, returning: true, owner: 'scenario', reason: undefined });
             this.schedule();
         }
         catch (e) {
@@ -181,7 +187,7 @@ export class ScenarioPlayer {
         this.sample = undefined;
         if (this.scenario)
             this.ports.overlays([], this.scenario);
-        this.publish({ state: 'idle', beat: 0, action: 0, elapsed: 0, totalElapsed: 0, progress: 0, returning: false, owner: 'user', savedPose: undefined, intendedTime: undefined, command: undefined, reason: undefined });
+        this.publish({ state: 'idle', beat: 0, action: 0, elapsed: 0, totalElapsed: 0, progress: 0, returning: false, suspendedForExploration: false, owner: 'user', savedPose: undefined, intendedTime: undefined, command: undefined, reason: undefined });
     }
     dispose() {
         if (this.destroyed)
@@ -205,9 +211,10 @@ export class ScenarioPlayer {
     }
     private tick = (now: number) => {
         this.raf = undefined;
-        if (this.destroyed || this.snapshot.state !== 'playing')
+        if (this.destroyed || !['preparing', 'playing'].includes(this.snapshot.state))
             return;
         try {
+            if (this.snapshot.state === 'preparing') this.publish({ state: 'playing' });
             const dt = this.last === undefined ? 0 : Math.max(0, Math.min(100, now - this.last));
             this.last = now;
             if (this.snapshot.returning) {

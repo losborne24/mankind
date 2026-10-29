@@ -81,6 +81,11 @@ export interface StreamingStatus {
   surfaceCache: ReturnType<typeof surfaceMapCacheInfo>;
   scene?: ReturnType<SettlementScene["timing"]["snapshot"]>;
   layout?: ReturnType<ProceduralSettlementSession["timing"]["snapshot"]>;
+  rendering?: {
+    frames: number; samples: number; medianMs: number | null; p95Ms: number | null;
+    calls: number; triangles: number; geometries: number; textures: number;
+    canvas: number[];
+  };
 }
 export interface ThreeTestLayerOptions {
   onStreamingStatus?: (status: StreamingStatus) => void;
@@ -120,6 +125,9 @@ export class ThreeTestLayer implements CustomLayerInterface {
   private lastStreamStatus = 0;
   private streamSignature = "";
   private markerFilter = "";
+  private measuredFrames = 0;
+  private lastMeasuredFrame = 0;
+  private readonly frameIntervals: number[] = [];
   private onStreamingStatus?: (status: StreamingStatus) => void;
   private procedural: ProceduralSettlementSession | null = null;
   private committedProcedural?: GenerationResult;
@@ -184,6 +192,8 @@ export class ThreeTestLayer implements CustomLayerInterface {
       antialias: true,
     });
     this.renderer.autoClear = false;
+    // Count all anchored scenes and shadow passes in this shared map frame.
+    this.renderer.info.autoReset = false;
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.renderer.shadowMap.autoUpdate = false;
 
@@ -232,6 +242,17 @@ export class ThreeTestLayer implements CustomLayerInterface {
   render(gl: WebGL2RenderingContext, args: CustomRenderMethodInput): void {
     const { renderer, scene, camera, map } = this;
     if (!renderer || !scene || !camera || !map) return;
+    renderer.info.reset();
+    if (process.env.NODE_ENV === "development") {
+      const now = performance.now(), interval = now - this.lastMeasuredFrame;
+      // Exclude idle gaps: these are active-frame observations, not refresh-rate promises.
+      if (this.lastMeasuredFrame && interval < 250) {
+        this.frameIntervals.push(interval);
+        if (this.frameIntervals.length > 240) this.frameIntervals.shift();
+      } else this.frameIntervals.length = 0;
+      this.lastMeasuredFrame = now;
+      this.measuredFrames++;
+    }
 
     // Start requests only when settlement-scale detail is useful and Giza is nearby.
     const center = map.getCenter();
@@ -346,8 +367,17 @@ export class ThreeTestLayer implements CustomLayerInterface {
   setSettlementLOD(override: SettlementLOD | "auto"): void {this.lodController.override=override;this.map?.triggerRepaint();}
   getStreamingStatus(): StreamingStatus {
     const c=this.lodController.current;
+    const intervals = [...this.frameIntervals].sort((a,b)=>a-b);
+    const rendering = process.env.NODE_ENV === "development" && this.renderer ? {
+      frames: this.measuredFrames, samples: intervals.length,
+      medianMs: intervals.length ? intervals[Math.floor(intervals.length*.5)] : null,
+      p95Ms: intervals.length ? intervals[Math.min(intervals.length-1,Math.floor(intervals.length*.95))] : null,
+      calls: this.renderer.info.render.calls, triangles: this.renderer.info.render.triangles,
+      geometries: this.renderer.info.memory.geometries, textures: this.renderer.info.memory.textures,
+      canvas: [this.map!.getCanvas().width,this.map!.getCanvas().height],
+    } : undefined;
     return {lod:c.lod,override:this.lodController.override,activeId:this.activeDescriptor?.id??(c.lod!=="global"?c.descriptor?.id:undefined),detailedScenes:this.settlement?1:0,descriptors:this.descriptors.length,distanceMeters:Number.isFinite(c.distance)?Math.round(c.distance):null,
-      stage:!this.streamingEnabled?"disabled":this.settlement?.timing.stage??this.procedural?.timing.stage??(this.localCandidate?"queued":c.lod),cache:glbCache.snapshot(),surfaceCache:surfaceMapCacheInfo(),scene:this.settlement?.timing.snapshot(),layout:this.procedural?.timing.snapshot()};
+      stage:!this.streamingEnabled?"disabled":this.settlement?.timing.stage??this.procedural?.timing.stage??(this.localCandidate?"queued":c.lod),cache:glbCache.snapshot(),surfaceCache:surfaceMapCacheInfo(),scene:this.settlement?.timing.snapshot(),layout:this.procedural?.timing.snapshot(),rendering};
   }
   private clearStreamingScene(): void {
     if(this.streamTimer)clearTimeout(this.streamTimer);this.streamTimer=undefined;this.localCandidate=undefined;
