@@ -76,7 +76,7 @@ try {
  scene.relocate([12.5515,41.851]);assert.ok(batches.every(b=>!b.visible));
  scene.updateTerrain(()=>null);assert.equal(status.state,'waiting-terrain');
  scene.invalidateTerrain();scene.updateTerrain(()=>200);assert.ok(batches.every(b=>b.visible&&b.count===2));
- for(const batch of batches) { const matrix=new THREE.Matrix4();batch.getMatrixAt(0,matrix);assert.ok(Math.abs(matrix.elements[13]-200.1)<.001,'Instanced geometry follows its plot foundation'); }
+ for(const batch of batches) { const matrix=new THREE.Matrix4();batch.getMatrixAt(0,matrix);assert.ok(Math.abs(matrix.elements[13]-200.015)<.001,'Instanced geometry follows its plot foundation'); }
  scene.invalidateTerrain();scene.updateTerrain(([lng])=>lng*100000000);assert.ok(batches.every(b=>!b.visible));
  scene.unload();assert.equal(status.loaded,0);
 } finally {GLTFLoader.prototype.loadAsync=original;}

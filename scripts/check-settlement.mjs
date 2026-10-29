@@ -9,6 +9,8 @@ const { SettlementScene } = await import(await loadModule("map/settlements/Settl
 const { queryTerrainSample } = await import(await loadModule("map/terrain"));
 const { GlbCache } = await import(await loadModule("lib/assets/glbCache"));
 const { assetRegistry } = await import(await loadModule("lib/assets/registry"));
+const { createSettlementEnvironment } = await import(await loadModule("map/settlements/settlementEnvironment"));
+const environment = createSettlementEnvironment(ROMAN_SETTLEMENT);
 const { settlementSurfaceMaps } = await import(await loadModule("map/settlements/surfaceMaterials"));
 const { roadNetworkSurface } = await import(await loadModule("map/settlements/terrainSurfaces"));
 assert.equal(ROMAN_SETTLEMENT.buildings.length, 7);
@@ -104,7 +106,7 @@ try {
   assert.equal(status.loaded, 7);
   const uniqueAssets = new Set([...ROMAN_SETTLEMENT.buildings, ...ROMAN_SETTLEMENT.scenery].map((item) => assetRegistry[item.assetId].path)).size;
   assert.equal(requests.length, uniqueAssets, "Repeated buildings/scenery share one request per asset");
-  assert.equal(status.sceneryLoaded, ROMAN_SETTLEMENT.scenery.length);
+  assert.equal(status.sceneryLoaded, environment.scenery.length);
   assembler.updateTerrain(() => null);
   assert.equal(status.state, "waiting-terrain");
   assert.ok(meshes().every((o) => { let visible = o.visible; o.traverseAncestors((parent) => { visible &&= parent.visible; }); return !visible; }), "Unknown DEM must not create sea-level geometry");
@@ -119,16 +121,17 @@ try {
     assert.ok(foundation.visible);
     const positions = foundation.geometry.getAttribute("position");
     const count = positions.count / 2;
+    const offsets = assembler.entries.find(e => e.mesh === foundation).surface.seatingOffsets;
     let highest = -Infinity;
     for (let i = 0; i < count; i++) {
       const h = plane(offsetCoordinate(assembler.origin, [positions.getX(i), positions.getZ(i)]));
       assert.ok(Math.abs(positions.getY(i) - (h - 0.15)) < 0.0001);
-      highest = Math.max(highest, h);
+      highest = Math.max(highest, h - (offsets?.[i] ?? 0));
     }
-    for (let i = count; i < positions.count; i++) assert.ok(Math.abs(positions.getY(i) - (highest + 0.1)) < 0.0001, "Foundation top stays level and above the sampled footprint");
+    for (let i = count; i < positions.count; i++) assert.ok(Math.abs(positions.getY(i) - (highest + 0.015 + (offsets?.[i-count] ?? 0))) < 0.0001, "Foundation top stays level and above the sampled footprint");
     const building = assembler.scene.getObjectByName(foundation.name.replace(/-foundation$/, ""));
     assert.equal(building.visible, true);
-    assert.ok(Math.abs(building.position.y - highest - 0.1) < 0.0001);
+    assert.ok(Math.abs(building.position.y - highest - 0.015) < 0.0001);
   }
   const network = assembler.scene.getObjectByName("road-network");
   assert.ok(network.visible);

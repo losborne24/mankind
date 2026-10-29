@@ -89,3 +89,19 @@ For browser review, paste `scripts/capture-roman-variants.js` into DevTools:
 `romanReview.fixture('baseline')` restores original assets in those same plots.
 Capture/benchmark methods wait five seconds so DevTools can be closed for the full
 3456×1786 canvas. See `docs/roman-variations.md` for inventory, evidence and measurements.
+
+Terrain contact metadata is exported from the same authored geometry on every
+normal generation. To refresh only `lib/assets/romanGrounding.ts`, without
+changing any GLB, texture or variant:
+
+```sh
+/Applications/Blender.app/Contents/MacOS/Blender --background --factory-startup --python-exit-code 1 --python scripts/roman-kit/generate.py -- --grounding-only
+```
+
+The exporter measures the lowest horizontal faces and structural step undersides within 8 cm,
+removes contained rectangles,
+and expresses feet (including their authored base heights) and entrance coordinates in the centred `prepareAsset` frame.
+This preserves the source stone base, doorway and stair geometry. The runtime
+can support separate piers and L-plan feet without filling their entire roof
+bounds with a raised platform. Future kits supply the same optional registry
+`grounding` contract in metres; no Roman-specific placement rule runs in Three.js.

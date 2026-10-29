@@ -25,6 +25,7 @@ export interface GroundArea {
 }
 export interface SettlementDefinition {
   id: string;
+  seed?: number;
   origin: Coordinate;
   buildings: readonly {
     id: string;
@@ -155,7 +156,7 @@ export const ROMAN_SETTLEMENT_ALTERNATE: Coordinate = [12.5515, 41.851];
 /** Existing plots/roads/headings and landmarks are retained; only ordinary assets change. */
 export function createRomanSettlement(seed = 20261028): SettlementDefinition {
   const selected = selectRomanVariants(seed, ["house", "house", "farmhouse", "house", "workshop"]);
-  return { ...baseSettlement, buildings: baseSettlement.buildings.map((building, i) =>
+  return { ...baseSettlement, seed, buildings: baseSettlement.buildings.map((building, i) =>
     i < selected.length ? { ...building, assetId: selected[i] } : building) };
 }
 export const ROMAN_SETTLEMENT = createRomanSettlement();

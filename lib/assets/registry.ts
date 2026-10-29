@@ -1,3 +1,4 @@
+import { romanGrounding } from "@/lib/assets/romanGrounding";
 import { romanVariants } from "@/lib/assets/romanVariants";
 
 /** Asset descriptions have no knowledge of dates, settlements or placements. */
@@ -11,6 +12,11 @@ export interface AssetDefinition {
   scale: number;
   dimensionsMeters?: readonly [number, number, number];
   groundOffsetMeters: number;
+  /** Authored ground contacts and entrance, in the prepared/centred metre frame. */
+  grounding?: {
+    contacts: readonly { offset: readonly [number, number]; width: number; depth: number; base?: number }[];
+    entrance: readonly [number, number] | null;
+  };
   orientationRadians?: readonly [number, number, number];
   source: { author: string; url: string; licence: string; licenceFile: string };
 }
@@ -32,30 +38,30 @@ const environmentSource = {
 const variantAssets = Object.fromEntries(Object.entries(romanVariants).map(([name, variant]) => [
   `roman-${name}`, { id: `roman-${name}`, path: "roman-kit/residential-variants.glb", nodeName: name,
     category: "building" as const, scale: 1, dimensionsMeters: variant.dimensionsMeters,
-    groundOffsetMeters: 0, source },
-])) as { [K in keyof typeof romanVariants as `roman-${K}`]: AssetDefinition & { dimensionsMeters: readonly [number, number, number] } };
+    groundOffsetMeters: 0, grounding: romanGrounding[name as keyof typeof romanGrounding], source },
+])) as unknown as { [K in keyof typeof romanVariants as `roman-${K}`]: AssetDefinition & { dimensionsMeters: readonly [number, number, number] } };
 
 export const assetRegistry = {
   ...variantAssets,
   "roman-taberna-01": {
     id: "roman-taberna-01", path: "roman-kit/taberna.glb", category: "building",
-    scale: 1, dimensionsMeters: [6.039, 4.16, 6.425], groundOffsetMeters: 0, source,
+    scale: 1, dimensionsMeters: [6.039, 4.16, 6.425], groundOffsetMeters: 0, grounding: romanGrounding["taberna"], source,
   },
   "roman-farmhouse-01": {
     id: "roman-farmhouse-01", path: "roman-kit/farmhouse.glb", category: "building",
-    scale: 1, dimensionsMeters: [8.190742, 4.75, 7.395], groundOffsetMeters: 0, source,
+    scale: 1, dimensionsMeters: [8.190742, 4.75, 7.395], groundOffsetMeters: 0, grounding: romanGrounding["farmhouse"], source,
   },
   "roman-villa-01": {
     id: "roman-villa-01", path: "roman-kit/provincial-house.glb", category: "building",
-    scale: 1, dimensionsMeters: [5.989207, 4.33, 6.352367], groundOffsetMeters: 0, source,
+    scale: 1, dimensionsMeters: [5.989207, 4.33, 6.352367], groundOffsetMeters: 0, grounding: romanGrounding["provincial-house"], source,
   },
   "roman-temple-01": {
     id: "roman-temple-01", path: "roman-kit/small-temple.glb", category: "building",
-    scale: 1, dimensionsMeters: [7.48, 5.61, 7.6], groundOffsetMeters: 0, source,
+    scale: 1, dimensionsMeters: [7.48, 5.61, 7.6], groundOffsetMeters: 0, grounding: romanGrounding["small-temple"], source,
   },
   "roman-aqueduct-01": {
     id: "roman-aqueduct-01", path: "roman-kit/aqueduct-section.glb", category: "infrastructure",
-    scale: 1, dimensionsMeters: [8.13, 8.7935, 1.72], groundOffsetMeters: 0, source,
+    scale: 1, dimensionsMeters: [8.13, 8.7935, 1.72], groundOffsetMeters: 0, grounding: romanGrounding["aqueduct-section"], source,
   },
   "environment-olive-tree-01": {
     id: "environment-olive-tree-01", path: "environment/olive-tree.glb", category: "vegetation",

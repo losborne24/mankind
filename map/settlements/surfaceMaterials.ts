@@ -1,5 +1,7 @@
 import * as THREE from "three";
 import { assetRegistry } from "@/lib/assets/registry";
+import { createSettlementEnvironment, footprintDistance, segmentDistance } from "@/map/settlements/settlementEnvironment";
+import { settlementEnvironmentConfig as config } from "@/map/settlements/environmentConfig";
 import type { LocalPoint, SettlementDefinition } from "@/map/settlements/romanSettlement";
 
 export interface GroundFootprint { offset: LocalPoint; width: number; depth: number; heading: number }
@@ -26,7 +28,8 @@ function boxDistance(x: number, z: number, halfX: number, halfZ: number): number
 }
 
 /** Two small, mipmapped CPU-authored maps: no downloads or per-frame noise work. */
-export function settlementSurfaceMaps(definition: SettlementDefinition, footprints: readonly GroundFootprint[]) {
+export function settlementSurfaceMaps(definition: SettlementDefinition, footprints: readonly GroundFootprint[], environment = createSettlementEnvironment(definition)) {
+  const seedOffset = (environment.seed >>> 0) % 8192;
   const segments = definition.roads.flatMap((road) => road.points.slice(1).map(([bx, bz], i) => {
     const [ax, az] = road.points[i];
     return { x: (ax + bx) / 2, z: (az + bz) / 2,
@@ -56,7 +59,7 @@ export function settlementSurfaceMaps(definition: SettlementDefinition, footprin
   // vegetation, leaf litter and pale mineral soil to the actual instanced meshes.
   // Avoid scanning every scenery instance for every texture pixel.
   const cover = new Float32Array(width * height), litter = new Float32Array(cover.length), mineral = new Float32Array(cover.length);
-  for (const placement of definition.scenery ?? []) {
+  for (const placement of environment.scenery) {
     const asset = assetRegistry[placement.assetId];
     if (asset.category !== "vegetation" && asset.category !== "rock") continue;
     const tree = placement.tags?.includes("tree");
@@ -75,20 +78,20 @@ export function settlementSurfaceMaps(definition: SettlementDefinition, footprin
   }
   for (let j = 0; j < height; j++) for (let i = 0; i < width; i++) {
     const x = GROUND_WIDTH * (i / (width - 1) - 0.5), z = GROUND_DEPTH * (j / (height - 1) - 0.5);
-    const broad = noise(x * 0.17, z * 0.17), grain = noise(x * 6, z * 6);
-    const flecks = hash(i, j);
+    const broad = noise(x * 0.17 + seedOffset, z * 0.17), grain = noise(x * 6, z * 6 + seedOffset);
+    const flecks = hash(i + seedOffset, j);
     const irregular = (noise(x * 1.4, z * 1.4) - 0.5) * 0.35 + (broad - 0.5) * 0.65;
     const distance = roadDistance(x, z);
     const verge = 1 - smooth(0.05, 0.8 + broad * 2.2, distance + irregular);
     let apron = 0;
-    for (const f of footprints) {
-      const dx = x - f.offset[0], dz = z - f.offset[1], c = Math.cos(f.heading), s = Math.sin(f.heading);
-      const d = boxDistance(c * dx - s * dz, s * dx + c * dz, f.width / 2, f.depth / 2);
-      apron = Math.max(apron, 1 - smooth(0, 1.2 + broad * 2.5, d + irregular * 2));
+    for (const f of environment.contacts.length ? environment.contacts : footprints) {
+      const d = footprintDistance([x, z], f);
+      apron = Math.max(apron, 1 - smooth(0, config.wallWearMeters + broad * 0.65, d + irregular * 0.6));
     }
+    const entrance = environment.entranceWear([x, z]);
     // Transparent perimeter and broken patches expose the actual biome/hillshade.
     const edge = 1 - smooth(0.65, 1, Math.hypot(x / (GROUND_WIDTH / 2), z / (GROUND_DEPTH / 2)));
-    const wear = Math.max(verge * 0.85, apron * 0.65);
+    const wear = Math.max(verge * 0.85, apron * 0.78, entrance * 0.95);
     const dry = smooth(0.35, 0.8, broad);
     const index = j * width + i;
     const vegetation = cover[index] * (0.65 + broad * 0.35) * (1 - wear);
@@ -103,7 +106,7 @@ export function settlementSurfaceMaps(definition: SettlementDefinition, footprin
       value = THREE.MathUtils.lerp(value, [105, 113, 69][k], vegetation * 0.65);
       value = THREE.MathUtils.lerp(value, [129, 116, 83][k], leaf * 0.6);
       value = THREE.MathUtils.lerp(value, [157, 148, 125][k], stone * 0.8);
-      ground[p + k] = value * shade;
+      ground[p + k] = THREE.MathUtils.lerp(value, [158, 146, 118][k], entrance * (0.15 + broad * 0.15)) * shade;
     }
     let areaAlpha = 0;
     for (const area of definition.groundAreas ?? []) {
@@ -119,7 +122,26 @@ export function settlementSurfaceMaps(definition: SettlementDefinition, footprin
     }
     ground[p + 3] = Math.max(alpha, areaAlpha * edge) * 255;
     const shoulder = smooth(-1, -0.05, distance + irregular);
-    const roadShade = 0.88 + broad * 0.13 + grain * 0.12 + (flecks > 0.93 ? 0.14 : 0) - shoulder * 0.09;
+    // Broken paired tracks only on cart-width streets, fading before junctions.
+    let track = 0;
+    for (const r of definition.roads) {
+      if (r.widthMeters < 2.8) continue;
+      for (let j = 1; j < r.points.length; j++) {
+        const a = r.points[j - 1], b = r.points[j];
+        const dx = b[0] - a[0], dz = b[1] - a[1], length = Math.hypot(dx, dz);
+        if (!length) continue;
+        const along = ((x - a[0]) * dx + (z - a[1]) * dz) / length;
+        if (along < 1 || along > length - 1) continue;
+        const across = Math.abs(((x - a[0]) * dz - (z - a[1]) * dx) / length);
+        const rut = 1 - smooth(0.03, config.trackWidthMeters + 0.1,
+          Math.abs(across - config.trackGaugeMeters / 2 + (noise(x * 0.4, z * 0.4) - 0.5) * 0.12));
+        if (rut <= 0) continue;
+        const junction = definition.roads.some((other) => other !== r && other.points.slice(1).some((p, k) =>
+          segmentDistance([x, z], other.points[k], p) < other.widthMeters / 2 + 0.55));
+        if (!junction) track = Math.max(track, rut * smooth(0.25, 0.65, noise(x * 0.3 + seedOffset, z * 0.3)));
+      }
+    }
+    const roadShade = 0.9 + broad * 0.12 + grain * 0.08 + (flecks > 0.96 ? 0.11 : 0) - shoulder * 0.06 - track * 0.13;
     for (let k = 0; k < 3; k++) road[p + k] = [151, 137, 109][k] * roadShade;
     road[p + 3] = (1 - smooth(-0.48, -0.04, distance + irregular)) * 255;
   }

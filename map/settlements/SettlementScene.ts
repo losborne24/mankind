@@ -3,9 +3,11 @@ import { assetRegistry, assetUrl } from "@/lib/assets/registry";
 import { glbCache, type ModelLease } from "@/lib/assets/glbCache";
 import { prepareAsset } from "@/lib/assets/prepareAsset";
 import { offsetCoordinate, type Coordinate, type LocalPoint, type SettlementDefinition } from "@/map/settlements/romanSettlement";
-import { foundationSurface, roadNetworkSurface, groundSurface, writeSurfaceHeights, type TerrainSurface } from "@/map/settlements/terrainSurfaces";
+import { contactFoundationSurface, roadNetworkSurface, groundSurface, writeSurfaceHeights, type TerrainSurface } from "@/map/settlements/terrainSurfaces";
 
 import { settlementSurfaceMaps, weatheredMaterial, GROUND_WIDTH, GROUND_DEPTH, type GroundFootprint } from "@/map/settlements/surfaceMaterials";
+import { buildingContacts, createSettlementEnvironment } from "@/map/settlements/settlementEnvironment";
+import { settlementEnvironmentConfig } from "@/map/settlements/environmentConfig";
 import { configureTerrainShadowCaster } from "@/map/settlements/terrainShadows";
 import { InstancedScenery, type GroundResult } from "@/map/settlements/InstancedScenery";
 
@@ -40,6 +42,7 @@ export class SettlementScene {
   origin: Coordinate;
   private readonly root = new THREE.Group();
   private readonly scenery = new InstancedScenery();
+  private environment: ReturnType<typeof createSettlementEnvironment> | undefined;
   private sun: THREE.DirectionalLight | null = null;
   private shadowDirty = true;
   shadowsEnabled = true;
@@ -74,6 +77,7 @@ export class SettlementScene {
     if (this.active) return this.loading ?? Promise.resolve();
     this.active = true;
     const generation = this.generation;
+    this.environment = createSettlementEnvironment(this.definition);
     const sky = new THREE.HemisphereLight(0xd3dce0, 0x85765e, 1.65);
     this.sun = new THREE.DirectionalLight(0xffeed4, 2.15);
     this.sun.castShadow = true;
@@ -87,6 +91,11 @@ export class SettlementScene {
     this.resources.push(this.sun.shadow);
     this.shadowDirty = true;
     const roadMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide, forceSinglePass: true });
+    roadMaterial.onBeforeCompile = (shader) => {
+      shader.fragmentShader = shader.fragmentShader.replace('#include <roughnessmap_fragment>',
+        '#include <roughnessmap_fragment>\n#ifdef USE_MAP\nroughnessFactor *= 0.94 + 0.06 * texture2D(map, vMapUv).g;\n#endif');
+    };
+    roadMaterial.customProgramCacheKey = () => 'settlement-road-roughness-v1';
     const foundationMaterial = new THREE.MeshStandardMaterial({ color: 0x918570, roughness: 1, flatShading: true, side: THREE.DoubleSide, shadowSide: THREE.BackSide });
     this.resources.push(roadMaterial, foundationMaterial);
     this.addSurface(roadNetworkSurface(this.definition.roads), roadMaterial, "road-network");
@@ -101,7 +110,7 @@ export class SettlementScene {
     ground.shadowReceiver = true;
     ground.mesh.renderOrder = 2;
     this.entries[0].mesh.renderOrder = 3;
-    const sceneryLoad = this.scenery.load(this.definition.scenery ?? [], this.cache, () => {
+    const sceneryLoad = this.scenery.load(this.environment.scenery, this.cache, () => {
       this.dirty = this.shadowDirty = true; this.publish(); this.repaint();
     });
     this.loading = Promise.all([sceneryLoad, ...this.definition.buildings.map(async (building) => {
@@ -115,7 +124,7 @@ export class SettlementScene {
         const heading = building.headingRadians ?? 0;
         footprints.push({ offset: building.offset, width: size.x, depth: size.z, heading });
         const variant = "nodeName" in asset ? 0 : [...building.id].reduce((sum, char) => sum + char.charCodeAt(0), 0) % 3;
-        const entry = this.addSurface(foundationSurface(building.offset, size.x + 0.4, size.z + 0.4, heading), foundationMaterial, `${building.id}-foundation`);
+        const entry = this.addSurface(contactFoundationSurface(buildingContacts(building)), foundationMaterial, `${building.id}-foundation`);
         entry.libraryBuilding = "nodeName" in asset;
         model.traverse((object) => {
           if (object instanceof THREE.Mesh) {
@@ -155,7 +164,7 @@ export class SettlementScene {
       this.repaint();
     })]).then(() => {
       if (this.active && generation === this.generation) {
-        const maps = settlementSurfaceMaps(this.definition, footprints);
+        const maps = settlementSurfaceMaps(this.definition, footprints, this.environment);
         groundMaterial.opacity = 1; roadMaterial.opacity = 1;
         groundMaterial.map = maps.ground; groundMaterial.needsUpdate = true;
         roadMaterial.map = maps.road; roadMaterial.needsUpdate = true;
@@ -238,7 +247,7 @@ export class SettlementScene {
         // Keep the entire previous surface coherent while any sample is stale.
         if (entry.heights) heights.splice(0, heights.length, ...entry.heights);
       }
-      const top = entry.model ? Math.max(...heights) + 0.1 : undefined;
+      const top = entry.model ? Math.max(...heights.map((h, i) => h - (entry.surface.seatingOffsets?.[i] ?? 0))) + settlementEnvironmentConfig.seatingClearance : undefined;
       if (top !== undefined && top - Math.min(...heights) > this.definition.maxFoundationRiseMeters) {
         this.steepSites++;
         entry.mesh.visible = false;
@@ -276,6 +285,7 @@ export class SettlementScene {
     this.active = false;
     this.generation++;
     this.scenery.unload();
+    this.environment = undefined;
     this.sun = null;
     for (const entry of this.entries) entry.lease?.release();
     for (const resource of this.resources) resource.dispose();
@@ -377,7 +387,7 @@ export class SettlementScene {
 
   private publish(): void {
     const errors = [...this.errors, ...this.scenery.errors];
-    const sceneryTotal = this.definition.scenery?.length ?? 0;
+    const sceneryTotal = this.environment?.scenery.length ?? this.definition.scenery?.length ?? 0;
     const loading = this.loaded + this.errors.length < this.definition.buildings.length ||
       this.scenery.loaded < sceneryTotal && this.scenery.errors.length === 0;
     const state: SettlementStatus["state"] = !this.active ? "unloaded" : loading ? "loading" :

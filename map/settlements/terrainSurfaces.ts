@@ -6,6 +6,8 @@ import type { LocalPoint } from "@/map/settlements/romanSettlement";
 export interface TerrainSurface {
   points: LocalPoint[];
   geometry: THREE.BufferGeometry;
+  /** Authored bottom height per support sample (steps can sit above the main base). */
+  seatingOffsets?: number[];
 }
 
 function surface(points: LocalPoint[], indices: number[]): TerrainSurface {
@@ -72,12 +74,28 @@ export function foundationSurface(offset: LocalPoint, width: number, depth: numb
   return surface(vertices, indices);
 }
 
+/** Disconnected authored feet share one draw; no platform beneath open arches or L-plan yards. */
+export function contactFoundationSurface(contacts: readonly { offset: LocalPoint; width: number; depth: number; heading: number; base?: number }[]): TerrainSurface {
+  const parts = contacts.map((f) => foundationSurface(f.offset, f.width, f.depth, f.heading));
+  const points = parts.flatMap((p) => p.points.slice(0, p.points.length / 2));
+  const count = points.length, indices: number[] = [];
+  let offset = 0;
+  for (const part of parts) {
+    const half = part.points.length / 2;
+    for (const index of part.geometry.index!.array) indices.push(index < half ? offset + index : count + offset + index - half);
+    offset += half;
+    part.geometry.dispose();
+  }
+  return { ...surface([...points, ...points], indices),
+    seatingOffsets: parts.flatMap((p, i) => Array(p.points.length / 2).fill(contacts[i].base ?? 0)) };
+}
+
 export function writeSurfaceHeights(surface: TerrainSurface, heights: readonly number[], top?: number): void {
   const positions = surface.geometry.getAttribute("position") as THREE.BufferAttribute;
   const count = top === undefined ? surface.points.length : surface.points.length / 2;
   for (let i = 0; i < count; i++) {
     positions.setY(i, heights[i] + (top === undefined ? 0.08 : -0.15));
-    if (top !== undefined) positions.setY(i + count, top);
+    if (top !== undefined) positions.setY(i + count, top + (surface.seatingOffsets?.[i] ?? 0));
   }
   positions.needsUpdate = true;
   surface.geometry.computeVertexNormals();
