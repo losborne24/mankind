@@ -27,7 +27,7 @@ import {
   TERRAIN_SOURCE,
   TEST_MARKER_LNGLAT,
 } from "@/map/mapStyle";
-import { ThreeTestLayer, type RomanTestStatus } from "@/map/threeTestLayer";
+import { ThreeTestLayer, type StreamingStatus, type RomanTestStatus } from "@/map/threeTestLayer";
 import type { SettlementStatus } from "@/map/settlements/SettlementScene";
 import type { GenerationResult } from "@/map/settlements/proceduralSettlement";
 import { ROMAN_SETTLEMENT } from "@/map/settlements/romanSettlement";
@@ -51,6 +51,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
   const [terrainWarning, setTerrainWarning] = useState(false);
   const threeLayerRef = useRef<ThreeTestLayer | null>(null);
   const [romanStatus, setRomanStatus] = useState<RomanTestStatus>({ state: "waiting", loaded: 0, errors: [] });
+  const [streamingStatus, setStreamingStatus] = useState<StreamingStatus>();
   const [proceduralStatus, setProceduralStatus] = useState<GenerationResult | null>(null);
   const [settlementStatus, setSettlementStatus] = useState<SettlementStatus>({
     state: "unloaded", origin: ROMAN_SETTLEMENT.origin, loaded: 0,
@@ -86,7 +87,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
 
     map.on("load", () => {
       if (disposed) return;
-      const layer = new ThreeTestLayer({ lngLat: TEST_MARKER_LNGLAT, onRomanStatus: setRomanStatus, onSettlementStatus: setSettlementStatus, onProceduralStatus: setProceduralStatus });
+      const layer = new ThreeTestLayer({ lngLat: TEST_MARKER_LNGLAT, onStreamingStatus: setStreamingStatus, onRomanStatus: setRomanStatus, onSettlementStatus: setSettlementStatus, onProceduralStatus: setProceduralStatus });
       threeLayerRef.current = layer;
       map.addLayer(layer);
       setDebugMap(map);
@@ -155,6 +156,10 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
       <div ref={containerRef} className="h-full w-full" aria-hidden />
       <MapReadout map={debugMap} />
       <DebugPanel
+        streamingStatus={streamingStatus}
+        onStreamingFixtures={() => threeLayerRef.current?.useDevelopmentSettlements()}
+        onStreamingVisit={id => threeLayerRef.current?.visitStreamingSettlement(id)}
+        onLODOverride={lod => threeLayerRef.current?.setSettlementLOD(lod)}
         map={debugMap}
         terrainWarning={terrainWarning}
         settlementStatus={settlementStatus}

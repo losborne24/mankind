@@ -1,3 +1,4 @@
+import { SettlementTiming } from "@/map/settlements/settlementTiming";
 import { AmbientLifeView, type AmbientLifeOptions, type AmbientLifeStatus } from "@/map/settlements/AmbientLifeView";
 import { ambientNavigation } from "@/map/settlements/ambientNavigation";
 import * as THREE from "three";
@@ -7,7 +8,7 @@ import { prepareAsset } from "@/lib/assets/prepareAsset";
 import { offsetCoordinate, type Coordinate, type LocalPoint, type SettlementDefinition } from "@/map/settlements/romanSettlement";
 import { contactFoundationSurface, roadNetworkSurface, groundSurface, writeSurfaceHeights, type TerrainSurface } from "@/map/settlements/terrainSurfaces";
 
-import { settlementSurfaceMaps, weatheredMaterial, GROUND_WIDTH, GROUND_DEPTH, type GroundFootprint } from "@/map/settlements/surfaceMaterials";
+import { settlementSurfaceMapsAsync, weatheredMaterial, GROUND_WIDTH, GROUND_DEPTH, type GroundFootprint } from "@/map/settlements/surfaceMaterials";
 import { buildingContacts, createSettlementEnvironment } from "@/map/settlements/settlementEnvironment";
 import { settlementEnvironmentConfig } from "@/map/settlements/environmentConfig";
 import { configureTerrainShadowCaster } from "@/map/settlements/terrainShadows";
@@ -41,6 +42,7 @@ export type TerrainSampler = (coordinate: Coordinate) => number | null | import(
 
 /** Owns layout instances and procedural surfaces, never a renderer or render loop. */
 export class SettlementScene {
+  readonly timing = new SettlementTiming();
   readonly scene = new THREE.Scene();
   origin: Coordinate;
   readonly ambientLife: AmbientLifeView;
@@ -56,6 +58,8 @@ export class SettlementScene {
   private buildingBatches: Array<{ mesh: THREE.InstancedMesh; sources: Array<{ mesh: THREE.Mesh; model: THREE.Object3D }> }> = [];
   private readonly knownHeights = new Map<string, number>();
   private active = false;
+  private texturesReady = false;
+  private fineDetail = true;
   private generation = 0;
   private dirty = true;
   private loading?: Promise<void>;
@@ -82,6 +86,9 @@ export class SettlementScene {
   load(): Promise<void> {
     if (this.active) return this.loading ?? Promise.resolve();
     this.active = true;
+    this.texturesReady = false;
+    this.timing.reset();
+    const preparationStarted = performance.now();
     const generation = this.generation;
     const width = this.definition.groundSizeMeters ?? GROUND_WIDTH, depth = this.definition.groundSizeMeters ?? GROUND_DEPTH;
     this.environment = createSettlementEnvironment(this.definition);
@@ -120,12 +127,16 @@ export class SettlementScene {
     const sceneryLoad = this.scenery.load(this.environment.scenery, this.cache, () => {
       this.dirty = this.shadowDirty = true; this.publish(); this.repaint();
     });
+    this.timing.add("surfaceAndShadowSetup", preparationStarted);
+    const assetsStarted = performance.now();
+    this.timing.stage = "assets";
     this.loading = Promise.all([this.ambientLife.load(this.cache), sceneryLoad, ...this.definition.buildings.map(async (building) => {
       let lease: ModelLease | undefined;
       try {
         const asset = assetRegistry[building.assetId];
-        lease = await this.cache.acquire(assetUrl(asset.path));
+        lease = await this.cache.acquire(assetUrl(asset.path), "nodeName" in asset ? asset.nodeName : undefined);
         if (!this.active || generation !== this.generation) { lease.release(); return; }
+        const assemblyStarted = performance.now();
         const model = prepareAsset(lease.scene, asset);
         const size = new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3());
         const heading = building.headingRadians ?? 0;
@@ -161,6 +172,7 @@ export class SettlementScene {
         entry.model = model;
         entry.lease = lease;
         this.loaded++;
+        this.timing.add("buildingAssembly", assemblyStarted);
       } catch (error) {
         lease?.release();
         if (!this.active || generation !== this.generation) return;
@@ -169,14 +181,25 @@ export class SettlementScene {
       this.dirty = this.shadowDirty = true;
       this.publish();
       this.repaint();
-    })]).then(() => {
+    })]).then(async () => {
       if (this.active && generation === this.generation) {
-        const maps = settlementSurfaceMaps(this.definition, footprints, this.environment);
+        this.timing.add("assetWallIncludingAssembly", assetsStarted);
+        this.timing.stage = "textures";
+        const textureStarted = performance.now();
+        const maps = await settlementSurfaceMapsAsync(this.definition, footprints, this.environment!, () => !this.active || generation !== this.generation, cpuMs=>{this.timing.totals.cpuTextures=cpuMs;});
+        if (!maps) return;
+        if (!this.active || generation !== this.generation) {maps.ground.dispose();maps.road.dispose();return;}
+        this.timing.add("textureWall", textureStarted);
+        this.texturesReady = true;
+        this.timing.stage = "placement";
+        this.dirty = true;
         groundMaterial.opacity = 1; roadMaterial.opacity = 1;
         groundMaterial.map = maps.ground; groundMaterial.needsUpdate = true;
         roadMaterial.map = maps.road; roadMaterial.needsUpdate = true;
         this.resources.push(maps.ground, maps.road);
+        const batchStarted = performance.now();
         this.batchLibraryBuildings();
+        this.timing.add("batchAssembly", batchStarted);
         this.publish(); this.repaint();
       }
     });
@@ -216,6 +239,7 @@ export class SettlementScene {
   /** Call from the existing map frame after terrain/source/camera changes. */
   updateTerrain(sample: TerrainSampler): void {
     if (!this.active || !this.dirty) return;
+    const terrainStarted = performance.now();
     this.dirty = false;
     this.terrainPending = this.terrainRetained = this.steepSites = this.scenerySteep = 0;
     this.shadowDirty = true;
@@ -287,11 +311,14 @@ export class SettlementScene {
     }
     this.updateAccessPaths();
     this.syncBuildingBatches();
+    this.timing.add("terrainPlacement", terrainStarted);
+    if (this.entries.some(e=>e.model?.visible) && this.timing.stage === "placement") this.timing.ready();
     this.publish();
   }
 
   unload(): void {
     this.active = false;
+    this.timing.stage = "unloaded";
     this.generation++;
     this.scenery.unload();
     this.ambientLife.unload();
@@ -318,6 +345,7 @@ export class SettlementScene {
   }
 
   updateAmbientLife(now: number, visible: boolean): boolean {
+    const animationStarted = performance.now();
     const road = this.entries[0];
     const animate = this.active && this.ambientLife.update(now, visible, road?.mesh);
     // Counts only publish when they change, not on every animation frame.
@@ -326,10 +354,16 @@ export class SettlementScene {
     if (s.active !== old.active || s.walking !== old.walking || s.idle !== old.idle || s.paused !== old.paused || s.error !== old.error) {
       Object.assign(old,s); this.publish();
     }
+    this.timing.add("ambientUpdate", animationStarted);
     return animate;
   }
 
   dispose(): void { this.unload(); this.ambientLife.dispose(); }
+
+  setFineDetail(enabled: boolean): void {
+    if (this.fineDetail === enabled) return;
+    this.fineDetail = enabled;this.scenery.setFineDetail(enabled);this.shadowDirty = true;
+  }
 
   consumeShadowUpdate(): boolean {
     const dirty = this.shadowDirty;
@@ -378,20 +412,25 @@ export class SettlementScene {
     const road = this.entries.find((entry) => entry.mesh.name === "road-network");
     if (!road?.heights || !road.mesh.visible) return;
     const positions = road.surface.geometry.getAttribute("position") as THREE.BufferAttribute;
+    // Resolve model roots and segment math once, rather than searching the full
+    // hierarchy for every terrain vertex × entrance on larger settlements.
+    const approaches = this.definition.roads.flatMap(approach => {
+      if(!approach.accessTo) return [];
+      const building=this.root.getObjectByName(approach.accessTo);
+      if(!building?.visible) return [];
+      const [ax,az]=approach.points[approach.points.length-2],[bx,bz]=approach.points[approach.points.length-1];
+      const dx=bx-ax,dz=bz-az,lengthSquared=dx*dx+dz*dz;
+      return lengthSquared ? [{ax,az,dx,dz,lengthSquared,length:Math.sqrt(lengthSquared),halfWidth:approach.widthMeters/2, floor:building.position.y}] : [];
+    });
     road.surface.points.forEach(([x, z], i) => {
       let y = road.heights![i] + 0.08;
-      for (const approach of this.definition.roads) {
-        if (!approach.accessTo) continue;
-        const building = this.root.getObjectByName(approach.accessTo);
-        if (!building?.visible) continue;
-        const [ax, az] = approach.points[approach.points.length - 2], [bx, bz] = approach.points[approach.points.length - 1];
-        const dx = bx - ax, dz = bz - az, lengthSquared = dx * dx + dz * dz;
+      for (const {ax,az,dx,dz,lengthSquared,length,halfWidth,floor} of approaches) {
         const t = ((x - ax) * dx + (z - az) * dz) / lengthSquared;
-        const across = Math.abs((x - ax) * dz - (z - az) * dx) / Math.sqrt(lengthSquared);
-        if (t < -1e-6 || t > 1.000001 || across > approach.widthMeters / 2 + 1e-6) continue;
+        const across = Math.abs((x - ax) * dz - (z - az) * dx) / length;
+        if (t < -1e-6 || t > 1.000001 || across > halfWidth + 1e-6) continue;
         const blend = Math.max(0, Math.min(1, t));
         const smooth = blend * blend * (3 - 2 * blend);
-        y = y * (1 - smooth) + building.position.y * smooth;
+        y = y * (1 - smooth) + floor * smooth;
       }
       positions.setY(i, y);
     });
@@ -422,7 +461,7 @@ export class SettlementScene {
   private publish(): void {
     const errors = [...this.errors, ...this.scenery.errors, ...(this.ambientLife.status.error ? [this.ambientLife.status.error] : [])];
     const sceneryTotal = this.environment?.scenery.length ?? this.definition.scenery?.length ?? 0;
-    const loading = this.loaded + this.errors.length < this.definition.buildings.length ||
+    const loading = !this.texturesReady || this.loaded + this.errors.length < this.definition.buildings.length ||
       this.scenery.loaded < sceneryTotal && this.scenery.errors.length === 0;
     const state: SettlementStatus["state"] = !this.active ? "unloaded" : loading ? "loading" :
       this.loaded === 0 && this.errors.length ? "error" :

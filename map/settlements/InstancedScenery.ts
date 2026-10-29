@@ -19,6 +19,7 @@ export class InstancedScenery {
   readonly group = new THREE.Group();
   private batches: Batch[] = [];
   private generation = 0;
+  private fineDetail = true;
   loaded = 0;
   errors: string[] = [];
 
@@ -112,11 +113,20 @@ export class InstancedScenery {
         for (const part of batch.parts) part.mesh.setMatrixAt(i, matrix.copy(transform.matrix).multiply(part.local));
       });
       for (const part of batch.parts) {
-        part.mesh.visible = visible > 0;
+        part.mesh.visible = visible > 0 && (this.fineDetail || this.largeBatch(batch));
         if (changed) { part.mesh.instanceMatrix.needsUpdate = true; part.mesh.computeBoundingSphere(); }
       }
     }
     return { pending, retained, steep };
+  }
+
+  private largeBatch(batch: Batch): boolean {
+    return Math.max(...assetRegistry[batch.placements[0].assetId].dimensionsMeters)>2.5;
+  }
+  setFineDetail(enabled: boolean): void {
+    this.fineDetail=enabled;
+    for(const batch of this.batches) for(const part of batch.parts)
+      part.mesh.visible=batch.heights.some(h=>h!==undefined) && (enabled || this.largeBatch(batch));
   }
 
   invalidateTerrain(): void {

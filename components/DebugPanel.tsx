@@ -1,4 +1,6 @@
 "use client";
+import type { StreamingStatus } from "@/map/threeTestLayer";
+import { DEVELOPMENT_SETTLEMENTS, type SettlementLOD } from "@/map/settlements/settlementStreaming";
 
 import { useEffect, useState } from "react";
 import type { Map } from "maplibre-gl";
@@ -25,6 +27,10 @@ import { SETTLEMENT_PROFILES, type SettlementProfile, type GenerationResult } fr
 import { DEFAULT_AMBIENT_LIFE, type AmbientLifeOptions } from "@/map/settlements/AmbientLifeView";
 
 interface DebugPanelProps {
+  streamingStatus?: StreamingStatus;
+  onStreamingFixtures: () => void;
+  onStreamingVisit: (id: string) => void;
+  onLODOverride: (lod: SettlementLOD | "auto") => void;
   onAmbientLife: (options: AmbientLifeOptions) => void;
   proceduralStatus: GenerationResult | null;
   onVisitProcedural: (seed: number, origin?: Coordinate, profile?: SettlementProfile) => void;
@@ -39,7 +45,7 @@ interface DebugPanelProps {
 }
 
 /** Shared debug panel; add future map controls as separate fieldsets here. */
-export function DebugPanel({ onAmbientLife, map, terrainWarning, onRetryTerrain, romanStatus, onRomanTestEnabled, settlementStatus, onSettlementEnabled, onVisitSettlement, proceduralStatus, onVisitProcedural }: DebugPanelProps) {
+export function DebugPanel({ streamingStatus, onStreamingFixtures, onStreamingVisit, onLODOverride, onAmbientLife, map, terrainWarning, onRetryTerrain, romanStatus, onRomanTestEnabled, settlementStatus, onSettlementEnabled, onVisitSettlement, proceduralStatus, onVisitProcedural }: DebugPanelProps) {
   const [life, setLife] = useState({ ...DEFAULT_AMBIENT_LIFE });
   const changeLife = (patch: Partial<AmbientLifeOptions>) => { const next = {...life,...patch}; setLife(next); onAmbientLife(next); };
   const [proceduralProfile, setProceduralProfile] = useState<SettlementProfile>("village");
@@ -82,6 +88,20 @@ export function DebugPanel({ onAmbientLife, map, terrainWarning, onRetryTerrain,
   return (
     <details open className="absolute top-16 left-4 z-20 max-h-[calc(100%-12rem)] w-56 overflow-y-auto rounded-lg border border-panel-border bg-panel p-3 text-xs text-white/70 backdrop-blur-md sm:left-6">
       <summary className="cursor-pointer tracking-wide">Debug tools</summary>
+      <fieldset className="mt-4 border-t border-panel-border pt-3">
+        <legend className="text-white/40">Settlement streaming · fictional fixtures</legend>
+        <button className="mt-2 block underline" onClick={onStreamingFixtures}>Enable three streaming fixtures</button>
+        {DEVELOPMENT_SETTLEMENTS.map(d => <button key={d.id} className="mt-2 block underline" onClick={() => onStreamingVisit(d.id)}>Visit {d.id}</button>)}
+        <label className="mt-2 block">Settlement LOD
+          <select aria-label="Settlement LOD override" className="ml-2 bg-background" value={streamingStatus?.override??"auto"} onChange={e=>onLODOverride(e.target.value as SettlementLOD | "auto")}>
+            {["auto","global","regional","local"].map(lod=><option key={lod}>{lod}</option>)}
+          </select>
+        </label>
+        <p role="status">LOD {streamingStatus?.lod??"global"} · {streamingStatus?.activeId??"none"} · {streamingStatus?.detailedScenes??0}/1 detailed · {streamingStatus?.descriptors??3} descriptors</p>
+        <p>{streamingStatus?.stage??"idle"} · {streamingStatus?.distanceMeters??"—"} m from extent</p>
+        <p>GLB cache: {streamingStatus?.cache.entries??0} entries · {streamingStatus?.cache.users??0} leases · {streamingStatus?.cache.hits??0} hits · {((streamingStatus?.cache.bytes??0)/1048576).toFixed(1)} MiB estimated</p>
+        {streamingStatus?.scene && <p>Textures {Math.round(streamingStatus.scene.ms.textureWall??0)} ms · placement {Math.round(streamingStatus.scene.ms.terrainPlacement??0)} ms · ready {Math.round(streamingStatus.scene.ms.readyWall??0)} ms</p>}
+      </fieldset>
       <fieldset disabled={!map} className="disabled:opacity-50">
         <legend className="mt-3 text-white/40">Terrain</legend>
         <label className="mt-3 flex items-center justify-between gap-3">

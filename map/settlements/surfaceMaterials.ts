@@ -28,7 +28,7 @@ function boxDistance(x: number, z: number, halfX: number, halfZ: number): number
 }
 
 /** Two small, mipmapped CPU-authored maps: no downloads or per-frame noise work. */
-export function settlementSurfaceMaps(definition: SettlementDefinition, footprints: readonly GroundFootprint[], environment = createSettlementEnvironment(definition)) {
+function* surfaceMapSteps(definition: SettlementDefinition, footprints: readonly GroundFootprint[], environment = createSettlementEnvironment(definition)) {
   const groundWidth = definition.groundSizeMeters ?? GROUND_WIDTH, groundDepth = definition.groundSizeMeters ?? GROUND_DEPTH;
   const seedOffset = (environment.seed >>> 0) % 8192;
   const heading = definition.roadFrameHeadingRadians ?? 0;
@@ -57,8 +57,29 @@ export function settlementSurfaceMaps(definition: SettlementDefinition, footprin
   });
   const roadDistance = (x: number, z: number) => {
     const [rx,rz] = frame([x,z]);
-    return Math.min(...joined.map((s) => boxDistance(rx - s.x, rz - s.z, s.hx, s.hz)));
+    let distance = Infinity;
+    for (const s of joined) distance = Math.min(distance, boxDistance(rx-s.x, rz-s.z, s.hx, s.hz));
+    return distance;
   };
+  // Precompute local influence bins; exact formulas below remain unchanged.
+  const contacts = (environment.contacts.length ? environment.contacts : footprints).map(f => ({...f, radius: Math.hypot(f.width,f.depth)/2 + config.wallWearMeters + 1.5}));
+  const bins = 24;
+  const contactBins = Array.from({length:bins*bins},(_,index) => {
+    const x0=(index%bins/bins-.5)*groundWidth,x1=x0+groundWidth/bins;
+    const z0=(Math.floor(index/bins)/bins-.5)*groundDepth,z1=z0+groundDepth/bins;
+    return contacts.filter(f => f.offset[0]+f.radius>=x0 && f.offset[0]-f.radius<=x1 && f.offset[1]+f.radius>=z0 && f.offset[1]-f.radius<=z1);
+  });
+  const entranceBins = Array.from({length:bins*bins},(_,index) => {
+    const x0=(index%bins/bins-.5)*groundWidth,x1=x0+groundWidth/bins;
+    const z0=(Math.floor(index/bins)/bins-.5)*groundDepth,z1=z0+groundDepth/bins;
+    const r=config.entranceRadiusMeters;
+    return environment.entrances.filter(e => Math.max(e.point[0],e.from[0])+r>=x0 && Math.min(e.point[0],e.from[0])-r<=x1 && Math.max(e.point[1],e.from[1])+r>=z0 && Math.min(e.point[1],e.from[1])-r<=z1);
+  });
+  const tracks = definition.roads.filter(r=>r.widthMeters>=2.8).flatMap(r=>r.points.slice(1).map((b,i)=> {
+    const a=r.points[i],dx=b[0]-a[0],dz=b[1]-a[1],length=Math.hypot(dx,dz);
+    return {road:r,a,b,dx,dz,length};
+  }));
+  const junctions = definition.roads.flatMap(r=>r.points.slice(1).map((b,i)=>({road:r,a:r.points[i],b})));
   const width = 512, height = 704; // About 18 cm texels over the compact village and field margins.
   const ground = new Uint8Array(width * height * 4), road = new Uint8Array(ground.length);
   // Bounded splats, authored scenery positions only. These temporary fields tie
@@ -82,7 +103,9 @@ export function settlementSurfaceMaps(definition: SettlementDefinition, footprin
       field[j * width + i] = Math.max(field[j * width + i], influence);
     }
   }
-  for (let j = 0; j < height; j++) for (let i = 0; i < width; i++) {
+  for (let j = 0; j < height; j++) {
+    if (j % 16 === 0) yield;
+    for (let i = 0; i < width; i++) {
     const x = groundWidth * (i / (width - 1) - 0.5), z = groundDepth * (j / (height - 1) - 0.5);
     const broad = noise(x * 0.17 + seedOffset, z * 0.17), grain = noise(x * 6, z * 6 + seedOffset);
     const flecks = hash(i + seedOffset, j);
@@ -90,11 +113,13 @@ export function settlementSurfaceMaps(definition: SettlementDefinition, footprin
     const distance = roadDistance(x, z);
     const verge = 1 - smooth(0.05, 0.8 + broad * 2.2, distance + irregular);
     let apron = 0;
-    for (const f of environment.contacts.length ? environment.contacts : footprints) {
+    const bin = Math.min(bins-1,Math.floor(j/(height-1)*bins))*bins+Math.min(bins-1,Math.floor(i/(width-1)*bins));
+    for (const f of contactBins[bin]) {
       const d = footprintDistance([x, z], f);
       apron = Math.max(apron, 1 - smooth(0, config.wallWearMeters + broad * 0.65, d + irregular * 0.6));
     }
-    const entrance = environment.entranceWear([x, z]);
+    let entrance = 0;
+    for (const e of entranceBins[bin]) entrance = Math.max(entrance, 1-smooth(.3,config.entranceRadiusMeters,Math.min(Math.hypot(x-e.point[0],z-e.point[1]),segmentDistance([x,z],e.from,e.point))));
     // Transparent perimeter and broken patches expose the actual biome/hillshade.
     const edge = 1 - smooth(0.65, 1, Math.hypot(x / (groundWidth / 2), z / (groundDepth / 2)));
     const wear = Math.max(verge * 0.85, apron * 0.78, entrance * 0.95);
@@ -130,37 +155,71 @@ export function settlementSurfaceMaps(definition: SettlementDefinition, footprin
     const shoulder = smooth(-1, -0.05, distance + irregular);
     // Broken paired tracks only on cart-width streets, fading before junctions.
     let track = 0;
-    for (const r of definition.roads) {
-      if (r.widthMeters < 2.8) continue;
-      for (let j = 1; j < r.points.length; j++) {
-        const a = r.points[j - 1], b = r.points[j];
-        const dx = b[0] - a[0], dz = b[1] - a[1], length = Math.hypot(dx, dz);
+    for (const {road:r,a,dx,dz,length} of tracks) {
         if (!length) continue;
         const along = ((x - a[0]) * dx + (z - a[1]) * dz) / length;
         if (along < 1 || along > length - 1) continue;
         const across = Math.abs(((x - a[0]) * dz - (z - a[1]) * dx) / length);
+        if (Math.abs(across-config.trackGaugeMeters/2) > config.trackWidthMeters+.16) continue;
         const rut = 1 - smooth(0.03, config.trackWidthMeters + 0.1,
           Math.abs(across - config.trackGaugeMeters / 2 + (noise(x * 0.4, z * 0.4) - 0.5) * 0.12));
         if (rut <= 0) continue;
-        const junction = definition.roads.some((other) => other !== r && other.points.slice(1).some((p, k) =>
-          segmentDistance([x, z], other.points[k], p) < other.widthMeters / 2 + 0.55));
+        const junction = junctions.some(s => s.road !== r && segmentDistance([x,z],s.a,s.b) < s.road.widthMeters/2+.55);
         if (!junction) track = Math.max(track, rut * smooth(0.25, 0.65, noise(x * 0.3 + seedOffset, z * 0.3)));
-      }
     }
     const roadShade = 0.9 + broad * 0.12 + grain * 0.08 + (flecks > 0.96 ? 0.11 : 0) - shoulder * 0.06 - track * 0.13;
     for (let k = 0; k < 3; k++) road[p + k] = [151, 137, 109][k] * roadShade;
     road[p + 3] = (1 - smooth(-0.48, -0.04, distance + irregular)) * 255;
   }
+  }
+  return {ground,road,width,height};
+}
+
+type SurfacePixels = ReturnType<ReturnType<typeof surfaceMapSteps>["next"]>["value"];
+const pixelCache = new Map<string, Exclude<SurfacePixels, void>>();
+const MAX_PIXEL_CACHE_BYTES = 9*1024*1024;
+export function surfaceMapCacheInfo() {return {entries:pixelCache.size,bytes:[...pixelCache.values()].reduce((n,p)=>n+p.ground.byteLength+p.road.byteLength,0)};}
+export function clearSurfaceMapCache() {pixelCache.clear();}
+function mapKey(definition: SettlementDefinition, footprints: readonly GroundFootprint[]) {
+  // Terrain-independent, relocation-independent. New scene textures own their GPU lifecycle.
+  return JSON.stringify([{...definition,origin:undefined},definition.buildings.length ? [] : footprints]);
+}
+function textures(pixels: Exclude<SurfacePixels,void>) {
   const texture = (data: Uint8Array) => {
-    const map = new THREE.DataTexture(data, width, height, THREE.RGBAFormat);
-    map.colorSpace = THREE.SRGBColorSpace;
-    map.magFilter = THREE.LinearFilter;
-    map.minFilter = THREE.LinearMipmapLinearFilter;
-    map.generateMipmaps = true;
-    map.needsUpdate = true;
-    return map;
+    const map = new THREE.DataTexture(data,pixels.width,pixels.height,THREE.RGBAFormat);
+    map.colorSpace=THREE.SRGBColorSpace;map.magFilter=THREE.LinearFilter;
+    map.minFilter=THREE.LinearMipmapLinearFilter;map.generateMipmaps=true;map.needsUpdate=true;return map;
   };
-  return { ground: texture(ground), road: texture(road) };
+  return {ground:texture(pixels.ground),road:texture(pixels.road)};
+}
+function remember(key: string,pixels: Exclude<SurfacePixels,void>) {
+  pixelCache.delete(key);pixelCache.set(key,pixels);
+  while(surfaceMapCacheInfo().bytes>MAX_PIXEL_CACHE_BYTES) pixelCache.delete(pixelCache.keys().next().value!);
+}
+/** Synchronous API retained for reproducibility checks and offline tooling. */
+export function settlementSurfaceMaps(definition: SettlementDefinition, footprints: readonly GroundFootprint[], environment = createSettlementEnvironment(definition)) {
+  const key=mapKey(definition,footprints),cached=pixelCache.get(key);
+  if(cached) {remember(key,cached);return textures(cached);}
+  const steps=surfaceMapSteps(definition,footprints,environment);
+  let result=steps.next();while(!result.done)result=steps.next();
+  remember(key,result.value);return textures(result.value);
+}
+/** Cooperative rows keep camera input/cancellation responsive; no worker dependency.
+ * Cancelled jobs never publish or retain partially generated maps.
+ */
+export async function settlementSurfaceMapsAsync(definition: SettlementDefinition, footprints: readonly GroundFootprint[], environment: ReturnType<typeof createSettlementEnvironment>, cancelled: ()=>boolean, measured?: (cpuMs:number)=>void) {
+  const key=mapKey(definition,footprints),cached=pixelCache.get(key);
+  if(cancelled()) return;
+  if(cached) {remember(key,cached);measured?.(0);return textures(cached);}
+  let cpuMs=0;
+  const steps=surfaceMapSteps(definition,footprints,environment);
+  for(;;) {
+    if(cancelled()) {steps.return(undefined as never);return;}
+    const started=performance.now();
+    const result=steps.next();cpuMs+=performance.now()-started;
+    if(result.done) {remember(key,result.value);measured?.(cpuMs);return textures(result.value);}
+    await new Promise<void>(resolve=>setTimeout(resolve,0));
+  }
 }
 
 /** Object-space detail keeps the source UVs, geometry and cache immutable. */

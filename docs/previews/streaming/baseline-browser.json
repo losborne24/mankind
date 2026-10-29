@@ -1,0 +1,175 @@
+{
+  "note": "Archived Step 8 browser observations, recorded before this change. See settlement-density.md for camera/methodology; not a new instrumented browser run. The fresh stage baseline is baseline-cpu.json.",
+  "results": [
+    {
+      "profile": "hamlet",
+      "seed": 7,
+      "loadMs": 1600.2999999523163,
+      "frames": 303,
+      "medianMs": 8.300000071525574,
+      "p95Ms": 9.699999928474426,
+      "calls": 32,
+      "triangles": 208930,
+      "hiddenFrames": 0,
+      "viewport": [
+        3456,
+        1674
+      ],
+      "memory": {
+        "geometries": 29,
+        "textures": 9
+      },
+      "accepted": 6,
+      "scenery": 147,
+      "state": "ready",
+      "requested": 6,
+      "rejected": 10,
+      "attempts": 16,
+      "terrainSamples": 886,
+      "nodes": 14,
+      "edges": 13,
+      "ambient": {
+        "active": 2,
+        "walking": 2,
+        "idle": 0,
+        "paused": false
+      }
+    },
+    {
+      "profile": "village",
+      "seed": 7,
+      "loadMs": 5377.399999976158,
+      "frames": 284,
+      "medianMs": 8.600000023841858,
+      "p95Ms": 11.700000047683716,
+      "calls": 65,
+      "triangles": 413064,
+      "hiddenFrames": 0,
+      "viewport": [
+        3456,
+        1674
+      ],
+      "memory": {
+        "geometries": 52,
+        "textures": 11
+      },
+      "accepted": 22,
+      "scenery": 236,
+      "state": "ready",
+      "requested": 22,
+      "rejected": 137,
+      "attempts": 159,
+      "terrainSamples": 3510,
+      "nodes": 52,
+      "edges": 51,
+      "ambient": {
+        "active": 4,
+        "walking": 4,
+        "idle": 0,
+        "paused": false
+      }
+    },
+    {
+      "profile": "village",
+      "seed": 42,
+      "loadMs": 4593.200000047684,
+      "frames": 282,
+      "medianMs": 8.5,
+      "p95Ms": 11.700000047683716,
+      "calls": 64,
+      "triangles": 430466,
+      "hiddenFrames": 0,
+      "viewport": [
+        3456,
+        1674
+      ],
+      "memory": {
+        "geometries": 51,
+        "textures": 11
+      },
+      "accepted": 21,
+      "scenery": 241,
+      "state": "partial",
+      "requested": 22,
+      "rejected": 507,
+      "attempts": 528,
+      "terrainSamples": 5447,
+      "nodes": 50,
+      "edges": 49,
+      "ambient": {
+        "active": 4,
+        "walking": 4,
+        "idle": 0,
+        "paused": false
+      }
+    },
+    {
+      "profile": "small-town",
+      "seed": 7,
+      "loadMs": 8460.600000023842,
+      "frames": 245,
+      "medianMs": 10,
+      "p95Ms": 13.099999904632568,
+      "calls": 87,
+      "triangles": 610998,
+      "hiddenFrames": 0,
+      "viewport": [
+        3456,
+        1674
+      ],
+      "memory": {
+        "geometries": 70,
+        "textures": 11
+      },
+      "accepted": 40,
+      "scenery": 287,
+      "state": "ready",
+      "requested": 40,
+      "rejected": 79,
+      "attempts": 119,
+      "terrainSamples": 7283,
+      "nodes": 96,
+      "edges": 97,
+      "ambient": {
+        "active": 5,
+        "walking": 5,
+        "idle": 0,
+        "paused": false
+      }
+    },
+    {
+      "profile": "village",
+      "seed": 7,
+      "loadMs": 5947,
+      "frames": 284,
+      "medianMs": 8.399999976158142,
+      "p95Ms": 13,
+      "calls": 65,
+      "triangles": 413064,
+      "hiddenFrames": 0,
+      "viewport": [
+        3456,
+        1674
+      ],
+      "memory": {
+        "geometries": 52,
+        "textures": 11
+      },
+      "accepted": 22,
+      "scenery": 236,
+      "state": "ready",
+      "requested": 22,
+      "rejected": 137,
+      "attempts": 159,
+      "terrainSamples": 3510,
+      "nodes": 52,
+      "edges": 51,
+      "ambient": {
+        "active": 4,
+        "walking": 4,
+        "idle": 0,
+        "paused": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "hamlet": {
+    "ground": "9a083a109b5c0617750a134c7e41975bc9be88c56ed588ae6ef0e6997dd86f27",
+    "road": "9872b13f03c9aeda9091d0ba5f6caa73074d3616650ca7e2e6833fbc5b753ea9"
+  },
+  "village": {
+    "ground": "2d022b81cd4b8c5b47a6447850429446f13d7299369a8dedefd8e54c0c94983a",
+    "road": "3d169b94d8edad873e8f4493e89d2777a49bce732e1540ec8b82977793538d7e"
+  },
+  "small-town": {
+    "ground": "a4c5da583baa0e08e8eaaa39d72283116c5034ba61f3f5cee72839138d65806b",
+    "road": "599163363caf47df7a09e1f10bbab652e085b3e4ca9ff78691dcefbc08d39fe0"
+  }
+}

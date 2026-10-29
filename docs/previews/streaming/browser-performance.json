@@ -1,0 +1,1096 @@
+{
+  "note": "Fresh reload, final source-generated silhouettes; visible development Chrome, 500ms camera settling and 100ms readiness polling; not production benchmarks.",
+  "results": [
+    {
+      "label": "global",
+      "lod": "global",
+      "override": "auto",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": 9139537,
+      "stage": "global",
+      "cache": {
+        "entries": 0,
+        "users": 0,
+        "idle": 0,
+        "bytes": 0,
+        "requests": 0,
+        "hits": 0,
+        "decodeWallMs": 0,
+        "cloneMs": 0
+      },
+      "surfaceCache": {
+        "entries": 0,
+        "bytes": 0
+      },
+      "memory": {
+        "geometries": 2,
+        "textures": 1
+      },
+      "render": {
+        "frame": 70,
+        "calls": 2,
+        "triangles": 104,
+        "points": 0,
+        "lines": 0
+      },
+      "hidden": false,
+      "viewport": [
+        3456,
+        1674
+      ]
+    },
+    {
+      "label": "regional",
+      "lod": "regional",
+      "override": "auto",
+      "activeId": "fictional-village",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": 4188,
+      "stage": "regional",
+      "cache": {
+        "entries": 0,
+        "users": 0,
+        "idle": 0,
+        "bytes": 0,
+        "requests": 0,
+        "hits": 0,
+        "decodeWallMs": 0,
+        "cloneMs": 0
+      },
+      "surfaceCache": {
+        "entries": 0,
+        "bytes": 0
+      },
+      "memory": {
+        "geometries": 4,
+        "textures": 1
+      },
+      "render": {
+        "frame": 106,
+        "calls": 2,
+        "triangles": 396,
+        "points": 0,
+        "lines": 0
+      },
+      "hidden": false,
+      "viewport": [
+        3456,
+        1674
+      ]
+    },
+    {
+      "label": "hamlet",
+      "lod": "local",
+      "override": "auto",
+      "activeId": "fictional-hamlet",
+      "detailedScenes": 1,
+      "descriptors": 3,
+      "distanceMeters": 121,
+      "stage": "ready",
+      "cache": {
+        "entries": 9,
+        "users": 14,
+        "idle": 0,
+        "bytes": 12346298.666666664,
+        "requests": 9,
+        "hits": 5,
+        "decodeWallMs": 445.39999997615814,
+        "cloneMs": 0.7000000476837158
+      },
+      "surfaceCache": {
+        "entries": 1,
+        "bytes": 2883584
+      },
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 6.600000023841858,
+          "terrainPlacement": 37.5,
+          "ambientUpdate": 20.000000476837158,
+          "buildingAssembly": 1.600000023841858,
+          "assetWallIncludingAssembly": 76.80000007152557,
+          "cpuTextures": 254.9999998807907,
+          "textureWall": 451.7999999523163,
+          "batchAssembly": 0.2999999523162842,
+          "readyWall": 547.7000000476837,
+          "renderWithShadowCpu": 133.09999990463257,
+          "renderCpu": 70.00000071525574
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "terrainPlacement": 5,
+          "ambientUpdate": 227,
+          "buildingAssembly": 6,
+          "assetWallIncludingAssembly": 1,
+          "textureWall": 1,
+          "batchAssembly": 1,
+          "renderWithShadowCpu": 2,
+          "renderCpu": 216
+        }
+      },
+      "layout": {
+        "stage": "ready",
+        "ms": {
+          "demQueries": 1.5999999046325684,
+          "layoutGeneration": 6.100000023841858,
+          "readyWall": 6.299999952316284,
+          "terrainWaitWall": 0.19999992847442627
+        },
+        "counts": {
+          "demQueries": 886,
+          "layoutGeneration": 1
+        }
+      },
+      "memory": {
+        "geometries": 31,
+        "textures": 9
+      },
+      "render": {
+        "frame": 356,
+        "calls": 32,
+        "triangles": 208930,
+        "points": 0,
+        "lines": 0
+      },
+      "hidden": false,
+      "viewport": [
+        3456,
+        1674
+      ],
+      "loadMs": 896.8999999761581,
+      "buildings": 6,
+      "medianFrameMs": 8.300000071525574,
+      "p95FrameMs": 9.199999928474426,
+      "frames": 166,
+      "ambient": {
+        "active": 2,
+        "walking": 2,
+        "idle": 0,
+        "paused": false
+      }
+    },
+    {
+      "label": "hamlet-left",
+      "lod": "regional",
+      "override": "auto",
+      "activeId": "fictional-village",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": 4188,
+      "stage": "regional",
+      "cache": {
+        "entries": 9,
+        "users": 0,
+        "idle": 9,
+        "bytes": 12346298.666666664,
+        "requests": 9,
+        "hits": 5,
+        "decodeWallMs": 445.39999997615814,
+        "cloneMs": 0.7000000476837158
+      },
+      "surfaceCache": {
+        "entries": 1,
+        "bytes": 2883584
+      },
+      "memory": {
+        "geometries": 22,
+        "textures": 5
+      },
+      "render": {
+        "frame": 394,
+        "calls": 2,
+        "triangles": 396,
+        "points": 0,
+        "lines": 0
+      },
+      "hidden": false,
+      "viewport": [
+        3456,
+        1674
+      ]
+    },
+    {
+      "label": "village",
+      "lod": "local",
+      "override": "auto",
+      "activeId": "fictional-village",
+      "detailedScenes": 1,
+      "descriptors": 3,
+      "distanceMeters": 81,
+      "stage": "ready",
+      "cache": {
+        "entries": 10,
+        "users": 31,
+        "idle": 0,
+        "bytes": 13761079.999999998,
+        "requests": 10,
+        "hits": 35,
+        "decodeWallMs": 509,
+        "cloneMs": 1.2000000476837158
+      },
+      "surfaceCache": {
+        "entries": 2,
+        "bytes": 5767168
+      },
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 7.599999904632568,
+          "terrainPlacement": 62.10000002384186,
+          "ambientUpdate": 120.5000011920929,
+          "buildingAssembly": 2.4000000953674316,
+          "assetWallIncludingAssembly": 63.5,
+          "cpuTextures": 381.19999969005585,
+          "textureWall": 577.9000000953674,
+          "batchAssembly": 0.19999992847442627,
+          "readyWall": 664.5,
+          "renderWithShadowCpu": 45.700000047683716,
+          "renderCpu": 66.79999959468842
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "terrainPlacement": 5,
+          "ambientUpdate": 226,
+          "buildingAssembly": 22,
+          "assetWallIncludingAssembly": 1,
+          "textureWall": 1,
+          "batchAssembly": 1,
+          "renderWithShadowCpu": 2,
+          "renderCpu": 218
+        }
+      },
+      "layout": {
+        "stage": "ready",
+        "ms": {
+          "demQueries": 2.7999995946884155,
+          "layoutGeneration": 16,
+          "readyWall": 16,
+          "terrainWaitWall": 0
+        },
+        "counts": {
+          "demQueries": 3553,
+          "layoutGeneration": 1
+        }
+      },
+      "memory": {
+        "geometries": 54,
+        "textures": 11
+      },
+      "render": {
+        "frame": 645,
+        "calls": 65,
+        "triangles": 429792,
+        "points": 0,
+        "lines": 0
+      },
+      "hidden": false,
+      "viewport": [
+        3456,
+        1674
+      ],
+      "loadMs": 965.2999999523163,
+      "buildings": 22,
+      "medianFrameMs": 8.300000071525574,
+      "p95FrameMs": 9.100000023841858,
+      "frames": 166,
+      "ambient": {
+        "active": 4,
+        "walking": 1,
+        "idle": 3,
+        "paused": false
+      }
+    },
+    {
+      "label": "village-left",
+      "lod": "regional",
+      "override": "auto",
+      "activeId": "fictional-town",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": 4128,
+      "stage": "regional",
+      "cache": {
+        "entries": 10,
+        "users": 0,
+        "idle": 10,
+        "bytes": 13761079.999999998,
+        "requests": 10,
+        "hits": 35,
+        "decodeWallMs": 509,
+        "cloneMs": 1.2000000476837158
+      },
+      "surfaceCache": {
+        "entries": 2,
+        "bytes": 5767168
+      },
+      "memory": {
+        "geometries": 29,
+        "textures": 7
+      },
+      "render": {
+        "frame": 685,
+        "calls": 2,
+        "triangles": 720,
+        "points": 0,
+        "lines": 0
+      },
+      "hidden": false,
+      "viewport": [
+        3456,
+        1674
+      ]
+    },
+    {
+      "label": "town",
+      "lod": "local",
+      "override": "auto",
+      "activeId": "fictional-town",
+      "detailedScenes": 1,
+      "descriptors": 3,
+      "distanceMeters": 21,
+      "stage": "ready",
+      "cache": {
+        "entries": 11,
+        "users": 50,
+        "idle": 0,
+        "bytes": 13768423.999999998,
+        "requests": 11,
+        "hits": 84,
+        "decodeWallMs": 590.8999999761581,
+        "cloneMs": 1.7000000476837158
+      },
+      "surfaceCache": {
+        "entries": 3,
+        "bytes": 8650752
+      },
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 14.900000095367432,
+          "terrainPlacement": 128.80000007152557,
+          "ambientUpdate": 447.5000002384186,
+          "buildingAssembly": 3,
+          "assetWallIncludingAssembly": 82,
+          "cpuTextures": 509.900000333786,
+          "textureWall": 719.7999999523163,
+          "batchAssembly": 0.20000004768371582,
+          "readyWall": 847,
+          "renderWithShadowCpu": 58,
+          "renderCpu": 93.59999990463257
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "terrainPlacement": 5,
+          "ambientUpdate": 219,
+          "buildingAssembly": 40,
+          "assetWallIncludingAssembly": 1,
+          "textureWall": 1,
+          "batchAssembly": 1,
+          "renderWithShadowCpu": 2,
+          "renderCpu": 213
+        }
+      },
+      "layout": {
+        "stage": "ready",
+        "ms": {
+          "demQueries": 4.100000619888306,
+          "layoutGeneration": 43.60000002384186,
+          "readyWall": 43.60000002384186,
+          "terrainWaitWall": 0
+        },
+        "counts": {
+          "demQueries": 8693,
+          "layoutGeneration": 1
+        }
+      },
+      "memory": {
+        "geometries": 75,
+        "textures": 11
+      },
+      "render": {
+        "frame": 928,
+        "calls": 90,
+        "triangles": 620610,
+        "points": 0,
+        "lines": 0
+      },
+      "hidden": false,
+      "viewport": [
+        3456,
+        1674
+      ],
+      "loadMs": 1203.3999999761581,
+      "buildings": 40,
+      "medianFrameMs": 8.399999976158142,
+      "p95FrameMs": 9.5,
+      "frames": 163,
+      "ambient": {
+        "active": 5,
+        "walking": 4,
+        "idle": 1,
+        "paused": false
+      }
+    },
+    {
+      "label": "town-left",
+      "lod": "regional",
+      "override": "auto",
+      "activeId": "fictional-town",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": 4273,
+      "stage": "regional",
+      "cache": {
+        "entries": 11,
+        "users": 0,
+        "idle": 11,
+        "bytes": 13768423.999999998,
+        "requests": 11,
+        "hits": 84,
+        "decodeWallMs": 590.8999999761581,
+        "cloneMs": 1.7000000476837158
+      },
+      "surfaceCache": {
+        "entries": 3,
+        "bytes": 8650752
+      },
+      "memory": {
+        "geometries": 32,
+        "textures": 7
+      },
+      "render": {
+        "frame": 966,
+        "calls": 2,
+        "triangles": 792,
+        "points": 0,
+        "lines": 0
+      },
+      "hidden": false,
+      "viewport": [
+        3456,
+        1674
+      ]
+    },
+    {
+      "label": "hamlet-return",
+      "lod": "local",
+      "override": "auto",
+      "activeId": "fictional-hamlet",
+      "detailedScenes": 1,
+      "descriptors": 3,
+      "distanceMeters": 121,
+      "stage": "ready",
+      "cache": {
+        "entries": 11,
+        "users": 14,
+        "idle": 2,
+        "bytes": 13768423.999999998,
+        "requests": 11,
+        "hits": 98,
+        "decodeWallMs": 590.8999999761581,
+        "cloneMs": 1.899999976158142
+      },
+      "surfaceCache": {
+        "entries": 3,
+        "bytes": 8650752
+      },
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 4,
+          "terrainPlacement": 16.09999990463257,
+          "ambientUpdate": 18.09999966621399,
+          "buildingAssembly": 2.399999976158142,
+          "assetWallIncludingAssembly": 14.299999952316284,
+          "cpuTextures": 0,
+          "textureWall": 0.10000002384185791,
+          "batchAssembly": 0,
+          "readyWall": 29.799999952316284,
+          "renderWithShadowCpu": 50.40000009536743,
+          "renderCpu": 69.30000030994415
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "terrainPlacement": 3,
+          "ambientUpdate": 257,
+          "buildingAssembly": 6,
+          "assetWallIncludingAssembly": 1,
+          "textureWall": 1,
+          "batchAssembly": 1,
+          "renderWithShadowCpu": 2,
+          "renderCpu": 254
+        }
+      },
+      "layout": {
+        "stage": "ready",
+        "ms": {
+          "demQueries": 0.40000009536743164,
+          "layoutGeneration": 2.5999999046325684,
+          "readyWall": 2.5999999046325684,
+          "terrainWaitWall": 0
+        },
+        "counts": {
+          "demQueries": 886,
+          "layoutGeneration": 1
+        }
+      },
+      "memory": {
+        "geometries": 41,
+        "textures": 11
+      },
+      "render": {
+        "frame": 1246,
+        "calls": 32,
+        "triangles": 208930,
+        "points": 0,
+        "lines": 0
+      },
+      "hidden": false,
+      "viewport": [
+        3456,
+        1674
+      ],
+      "loadMs": 602.5,
+      "buildings": 6,
+      "medianFrameMs": 8.300000071525574,
+      "p95FrameMs": 8.900000095367432,
+      "frames": 167,
+      "ambient": {
+        "active": 2,
+        "walking": 2,
+        "idle": 0,
+        "paused": false
+      }
+    },
+    {
+      "label": "hamlet-return-left",
+      "lod": "regional",
+      "override": "auto",
+      "activeId": "fictional-village",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": 4188,
+      "stage": "regional",
+      "cache": {
+        "entries": 11,
+        "users": 0,
+        "idle": 11,
+        "bytes": 13768423.999999998,
+        "requests": 11,
+        "hits": 98,
+        "decodeWallMs": 590.8999999761581,
+        "cloneMs": 1.899999976158142
+      },
+      "surfaceCache": {
+        "entries": 3,
+        "bytes": 8650752
+      },
+      "memory": {
+        "geometries": 32,
+        "textures": 7
+      },
+      "render": {
+        "frame": 1284,
+        "calls": 2,
+        "triangles": 432,
+        "points": 0,
+        "lines": 0
+      },
+      "hidden": false,
+      "viewport": [
+        3456,
+        1674
+      ]
+    },
+    {
+      "label": "rapid-global",
+      "lod": "global",
+      "override": "auto",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": 13183059,
+      "stage": "global",
+      "cache": {
+        "entries": 11,
+        "users": 0,
+        "idle": 11,
+        "bytes": 13768423.999999998,
+        "requests": 11,
+        "hits": 98,
+        "decodeWallMs": 590.8999999761581,
+        "cloneMs": 1.899999976158142
+      },
+      "surfaceCache": {
+        "entries": 3,
+        "bytes": 8650752
+      },
+      "memory": {
+        "geometries": 30,
+        "textures": 7
+      },
+      "render": {
+        "frame": 1334,
+        "calls": 2,
+        "triangles": 104,
+        "points": 0,
+        "lines": 0
+      },
+      "hidden": false,
+      "viewport": [
+        3456,
+        1674
+      ]
+    },
+    {
+      "label": "idle-global",
+      "lod": "global",
+      "override": "auto",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": 13183059,
+      "stage": "global",
+      "cache": {
+        "entries": 11,
+        "users": 0,
+        "idle": 11,
+        "bytes": 13768423.999999998,
+        "requests": 11,
+        "hits": 98,
+        "decodeWallMs": 590.8999999761581,
+        "cloneMs": 1.899999976158142
+      },
+      "surfaceCache": {
+        "entries": 3,
+        "bytes": 8650752
+      },
+      "memory": {
+        "geometries": 30,
+        "textures": 7
+      },
+      "render": {
+        "frame": 1334,
+        "calls": 2,
+        "triangles": 104,
+        "points": 0,
+        "lines": 0
+      },
+      "hidden": false,
+      "viewport": [
+        3456,
+        1674
+      ],
+      "frames": 0
+    },
+    {
+      "label": "authored",
+      "lod": "local",
+      "override": "auto",
+      "activeId": "roman-layout-prototype",
+      "detailedScenes": 1,
+      "descriptors": 1,
+      "distanceMeters": 141,
+      "stage": "ready",
+      "cache": {
+        "entries": 17,
+        "users": 21,
+        "idle": 0,
+        "bytes": 21276653.33333333,
+        "requests": 17,
+        "hits": 113,
+        "decodeWallMs": 955.8999998569489,
+        "cloneMs": 2.299999952316284
+      },
+      "surfaceCache": {
+        "entries": 3,
+        "bytes": 8650752
+      },
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 5.600000023841858,
+          "terrainPlacement": 27.09999990463257,
+          "ambientUpdate": 1.2000000476837158,
+          "buildingAssembly": 0.8999999761581421,
+          "assetWallIncludingAssembly": 78,
+          "cpuTextures": 394.19999980926514,
+          "textureWall": 591.7999999523163,
+          "batchAssembly": 0,
+          "readyWall": 685.3999999761581,
+          "renderWithShadowCpu": 54.700000047683716,
+          "renderCpu": 0.2999999523162842
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "terrainPlacement": 5,
+          "ambientUpdate": 13,
+          "buildingAssembly": 7,
+          "assetWallIncludingAssembly": 1,
+          "textureWall": 1,
+          "batchAssembly": 1,
+          "renderWithShadowCpu": 1,
+          "renderCpu": 1
+        }
+      },
+      "memory": {
+        "geometries": 49,
+        "textures": 19
+      },
+      "render": {
+        "frame": 1365,
+        "calls": 43,
+        "triangles": 565440,
+        "points": 0,
+        "lines": 0
+      },
+      "hidden": false,
+      "viewport": [
+        3456,
+        1674
+      ],
+      "buildings": 7
+    },
+    {
+      "label": "authored-2x",
+      "lod": "local",
+      "override": "auto",
+      "activeId": "roman-layout-prototype",
+      "detailedScenes": 1,
+      "descriptors": 1,
+      "distanceMeters": 141,
+      "stage": "ready",
+      "cache": {
+        "entries": 17,
+        "users": 21,
+        "idle": 0,
+        "bytes": 21276653.33333333,
+        "requests": 17,
+        "hits": 113,
+        "decodeWallMs": 955.8999998569489,
+        "cloneMs": 2.299999952316284
+      },
+      "surfaceCache": {
+        "entries": 3,
+        "bytes": 8650752
+      },
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 5.600000023841858,
+          "terrainPlacement": 34.39999985694885,
+          "ambientUpdate": 37.4000004529953,
+          "buildingAssembly": 0.8999999761581421,
+          "assetWallIncludingAssembly": 78,
+          "cpuTextures": 394.19999980926514,
+          "textureWall": 591.7999999523163,
+          "batchAssembly": 0,
+          "readyWall": 685.3999999761581,
+          "renderWithShadowCpu": 66.50000011920929,
+          "renderCpu": 32.19999980926514
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "terrainPlacement": 6,
+          "ambientUpdate": 108,
+          "buildingAssembly": 7,
+          "assetWallIncludingAssembly": 1,
+          "textureWall": 1,
+          "batchAssembly": 1,
+          "renderWithShadowCpu": 2,
+          "renderCpu": 95
+        }
+      },
+      "memory": {
+        "geometries": 49,
+        "textures": 19
+      },
+      "render": {
+        "frame": 1460,
+        "calls": 43,
+        "triangles": 565440,
+        "points": 0,
+        "lines": 0
+      },
+      "hidden": false,
+      "viewport": [
+        3456,
+        1674
+      ],
+      "terrainPending": 0
+    },
+    {
+      "label": "authored-relocated",
+      "lod": "local",
+      "override": "auto",
+      "activeId": "roman-layout-prototype",
+      "detailedScenes": 1,
+      "descriptors": 1,
+      "distanceMeters": 141,
+      "stage": "ready",
+      "cache": {
+        "entries": 17,
+        "users": 21,
+        "idle": 0,
+        "bytes": 21276653.333333332,
+        "requests": 22,
+        "hits": 129,
+        "decodeWallMs": 1123.6999998092651,
+        "cloneMs": 2.700000047683716
+      },
+      "surfaceCache": {
+        "entries": 3,
+        "bytes": 8650752
+      },
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 3.9000000953674316,
+          "terrainPlacement": 19.399999976158142,
+          "ambientUpdate": 16.09999978542328,
+          "buildingAssembly": 0.7000000476837158,
+          "assetWallIncludingAssembly": 44.89999997615814,
+          "cpuTextures": 0,
+          "textureWall": 0.10000002384185791,
+          "batchAssembly": 0.09999990463256836,
+          "readyWall": 58.10000002384186,
+          "renderWithShadowCpu": 46.299999952316284,
+          "renderCpu": 10.600000143051147
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "terrainPlacement": 4,
+          "ambientUpdate": 37,
+          "buildingAssembly": 7,
+          "assetWallIncludingAssembly": 1,
+          "textureWall": 1,
+          "batchAssembly": 1,
+          "renderWithShadowCpu": 1,
+          "renderCpu": 33
+        }
+      },
+      "memory": {
+        "geometries": 49,
+        "textures": 19
+      },
+      "render": {
+        "frame": 1565,
+        "calls": 43,
+        "triangles": 565440,
+        "points": 0,
+        "lines": 0
+      },
+      "hidden": false,
+      "viewport": [
+        3456,
+        1674
+      ],
+      "buildings": 7
+    },
+    {
+      "label": "giza",
+      "lod": "global",
+      "override": "auto",
+      "detailedScenes": 0,
+      "descriptors": 1,
+      "distanceMeters": null,
+      "stage": "global",
+      "cache": {
+        "entries": 15,
+        "users": 3,
+        "idle": 12,
+        "bytes": 22633606.666666664,
+        "requests": 23,
+        "hits": 131,
+        "decodeWallMs": 1177.3999998569489,
+        "cloneMs": 2.799999952316284
+      },
+      "surfaceCache": {
+        "entries": 3,
+        "bytes": 8650752
+      },
+      "memory": {
+        "geometries": 34,
+        "textures": 17
+      },
+      "render": {
+        "frame": 1663,
+        "calls": 1,
+        "triangles": 9882,
+        "points": 0,
+        "lines": 0
+      },
+      "hidden": false,
+      "viewport": [
+        3456,
+        1674
+      ],
+      "romanStatus": {
+        "state": "ready",
+        "loaded": 3,
+        "errors": []
+      },
+      "romanInstances": 3
+    },
+    {
+      "label": "giza-left",
+      "lod": "global",
+      "override": "auto",
+      "detailedScenes": 0,
+      "descriptors": 1,
+      "distanceMeters": 13183132,
+      "stage": "global",
+      "cache": {
+        "entries": 12,
+        "users": 0,
+        "idle": 12,
+        "bytes": 19763795.999999996,
+        "requests": 23,
+        "hits": 131,
+        "decodeWallMs": 1177.3999998569489,
+        "cloneMs": 2.799999952316284
+      },
+      "surfaceCache": {
+        "entries": 3,
+        "bytes": 8650752
+      },
+      "memory": {
+        "geometries": 31,
+        "textures": 13
+      },
+      "render": {
+        "frame": 1701,
+        "calls": 2,
+        "triangles": 104,
+        "points": 0,
+        "lines": 0
+      },
+      "hidden": false,
+      "viewport": [
+        3456,
+        1674
+      ],
+      "romanInstances": 0
+    },
+    {
+      "label": "final-town",
+      "lod": "local",
+      "override": "auto",
+      "activeId": "fictional-town",
+      "detailedScenes": 1,
+      "descriptors": 3,
+      "distanceMeters": 21,
+      "stage": "ready",
+      "cache": {
+        "entries": 16,
+        "users": 50,
+        "idle": 5,
+        "bytes": 21247601.33333333,
+        "requests": 27,
+        "hits": 177,
+        "decodeWallMs": 1549.1999999284744,
+        "cloneMs": 3.299999952316284
+      },
+      "surfaceCache": {
+        "entries": 3,
+        "bytes": 8650752
+      },
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 13.399999976158142,
+          "terrainPlacement": 104.80000007152557,
+          "ambientUpdate": 35.799999833106995,
+          "buildingAssembly": 3.100000023841858,
+          "assetWallIncludingAssembly": 122,
+          "cpuTextures": 0,
+          "textureWall": 0.20000004768371582,
+          "batchAssembly": 0.10000002384185791,
+          "readyWall": 172.80000007152557,
+          "renderWithShadowCpu": 53.39999997615814,
+          "renderCpu": 7.4999998807907104
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "terrainPlacement": 4,
+          "ambientUpdate": 20,
+          "buildingAssembly": 40,
+          "assetWallIncludingAssembly": 1,
+          "textureWall": 1,
+          "batchAssembly": 1,
+          "renderWithShadowCpu": 1,
+          "renderCpu": 14
+        }
+      },
+      "layout": {
+        "stage": "ready",
+        "ms": {
+          "demQueries": 3.399999737739563,
+          "layoutGeneration": 41.39999997615814,
+          "readyWall": 41.39999997615814,
+          "terrainWaitWall": 0
+        },
+        "counts": {
+          "demQueries": 8693,
+          "layoutGeneration": 1
+        }
+      },
+      "memory": {
+        "geometries": 80,
+        "textures": 19
+      },
+      "render": {
+        "frame": 1743,
+        "calls": 90,
+        "triangles": 620610,
+        "points": 0,
+        "lines": 0
+      },
+      "hidden": false,
+      "viewport": [
+        3456,
+        1674
+      ]
+    },
+    {
+      "label": "regional-comparison",
+      "lod": "regional",
+      "override": "regional",
+      "activeId": "fictional-town",
+      "detailedScenes": 0,
+      "descriptors": 3,
+      "distanceMeters": 21,
+      "stage": "regional",
+      "cache": {
+        "entries": 12,
+        "users": 0,
+        "idle": 12,
+        "bytes": 15890137.333333334,
+        "requests": 27,
+        "hits": 177,
+        "decodeWallMs": 1549.1999999284744,
+        "cloneMs": 3.299999952316284
+      },
+      "surfaceCache": {
+        "entries": 3,
+        "bytes": 8650752
+      },
+      "memory": {
+        "geometries": 33,
+        "textures": 9
+      },
+      "render": {
+        "frame": 1746,
+        "calls": 2,
+        "triangles": 792,
+        "points": 0,
+        "lines": 0
+      },
+      "hidden": false,
+      "viewport": [
+        3456,
+        1674
+      ]
+    }
+  ]
+}

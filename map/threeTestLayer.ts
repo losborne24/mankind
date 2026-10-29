@@ -1,3 +1,7 @@
+import { clearSurfaceMapCache, surfaceMapCacheInfo } from "@/map/settlements/surfaceMaterials";
+import { DEVELOPMENT_SETTLEMENTS, SettlementLODController, settlementDistance, type SettlementDescriptor, type SettlementLOD } from "@/map/settlements/settlementStreaming";
+import { RegionalSettlement } from "@/map/settlements/RegionalSettlement";
+
 /**
  * Three.js ⇄ MapLibre integration (Phase 1 proof).
  *
@@ -71,7 +75,15 @@ const MARKER = {
   beaconRadiusMeters: 34_000,
 } as const;
 
+export interface StreamingStatus {
+  lod: SettlementLOD; override: SettlementLOD | "auto"; activeId?: string; detailedScenes: number; descriptors: number;
+  distanceMeters: number | null; stage: string; cache: ReturnType<typeof glbCache.snapshot>;
+  surfaceCache: ReturnType<typeof surfaceMapCacheInfo>;
+  scene?: ReturnType<SettlementScene["timing"]["snapshot"]>;
+  layout?: ReturnType<ProceduralSettlementSession["timing"]["snapshot"]>;
+}
 export interface ThreeTestLayerOptions {
+  onStreamingStatus?: (status: StreamingStatus) => void;
   id?: string;
   /** [longitude, latitude] in degrees to anchor the marker. */
   lngLat: readonly [number, number];
@@ -95,6 +107,20 @@ export class ThreeTestLayer implements CustomLayerInterface {
   /** Disposables tracked for leak-free teardown. */
   private readonly disposables: Array<{ dispose(): void }> = [];
 
+  readonly lodController = new SettlementLODController();
+  private descriptors: readonly SettlementDescriptor[] = process.env.NODE_ENV === "development" ? DEVELOPMENT_SETTLEMENTS : [];
+  private streamingEnabled = true;
+  private activeDescriptor?: SettlementDescriptor;
+  private regional?: RegionalSettlement;
+  private regionalAnchor?: AnchoredScene;
+  private readonly layouts = new Map<string, import("@/map/settlements/romanSettlement").SettlementDefinition>();
+  private localCandidate?: string;
+  private candidateSince = 0;
+  private streamTimer?: ReturnType<typeof setTimeout>;
+  private lastStreamStatus = 0;
+  private streamSignature = "";
+  private markerFilter = "";
+  private onStreamingStatus?: (status: StreamingStatus) => void;
   private procedural: ProceduralSettlementSession | null = null;
   private committedProcedural?: GenerationResult;
   private readonly onProceduralStatus?: (status: GenerationResult | null) => void;
@@ -105,12 +131,14 @@ export class ThreeTestLayer implements CustomLayerInterface {
   private readonly onSettlementStatus?: (status: SettlementStatus) => void;
   private readonly onVisibility = () => { this.settlement?.ambientLife.pause(); this.map?.triggerRepaint(); };
   private readonly onSettlementMove = () => {
+    this.regional?.invalidate();
     this.procedural?.invalidate();
     this.settlement?.invalidateTerrain();
     this.map?.triggerRepaint();
   };
   private readonly onSettlementTerrain = () => {
     // Exaggeration/source changes invalidate heights in the old displayed frame.
+    this.regional?.invalidate();
     if (this.procedural) {
       this.procedural.invalidate(true);
       this.settlement?.dispose();
@@ -139,6 +167,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
   constructor(options: ThreeTestLayerOptions) {
     this.id = options.id ?? "three-test-marker";
     this.lngLat = options.lngLat;
+    this.onStreamingStatus = options.onStreamingStatus;
     this.onRomanStatus = options.onRomanStatus;
     this.onSettlementStatus = options.onSettlementStatus;
     this.onProceduralStatus = options.onProceduralStatus;
@@ -166,9 +195,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
 
     this.beacon = { scene: this.scene, lngLat: this.lngLat, altitude: NaN, anchor: geographicAnchor(this.lngLat, 0) };
     this.onRomanStatus?.(this.romanStatus);
-    this.settlement = new SettlementScene(ROMAN_SETTLEMENT,
-      (status) => this.onSettlementStatus?.(status), () => this.map?.triggerRepaint());
-    this.updateSettlementAnchor();
+    this.installSettlementMarkers();
     document.addEventListener("visibilitychange", this.onVisibility);
     map.on("moveend", this.onSettlementMove);
     map.on("terrain", this.onSettlementTerrain);
@@ -180,8 +207,9 @@ export class ThreeTestLayer implements CustomLayerInterface {
     this.map?.off("moveend", this.onSettlementMove);
     this.map?.off("terrain", this.onSettlementTerrain);
     this.map?.off("sourcedata", this.onSettlementSource);
-    this.procedural?.cancel();
-    this.procedural = null;
+    this.clearStreamingScene();
+    this.regional?.dispose();this.regional=undefined;
+    this.removeSettlementMarkers();
     this.settlement?.dispose();
     this.settlement = null;
     this.settlementAnchor = null;
@@ -193,6 +221,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
     this.disposables.length = 0;
     // Dispose Three's own resources without destroying MapLibre's shared
     // context (we never call forceContextLoss, which would kill the map).
+    glbCache.clearIdle();clearSurfaceMapCache();
     this.renderer?.dispose();
     this.renderer = null;
     this.scene = null;
@@ -210,6 +239,12 @@ export class ThreeTestLayer implements CustomLayerInterface {
         Math.abs(center.lng - ROMAN_TEST_CENTER[0]) < 0.15 && Math.abs(center.lat - ROMAN_TEST_CENTER[1]) < 0.15) {
       this.loadRomans();
     }
+    // The preserved Giza integration fixture must also release live leases on departure.
+    if (this.romanRequested && (map.getZoom() < 11 || Math.abs(center.lng-ROMAN_TEST_CENTER[0]) > .2 || Math.abs(center.lat-ROMAN_TEST_CENTER[1]) > .2)) {
+      this.clearRomans();
+      this.romanStatus = {state:this.romanEnabled ? "waiting" : "disabled",loaded:0,errors:[]};
+      this.onRomanStatus?.(this.romanStatus);
+    }
     renderer.resetState();
     // Shadow passes restore Three's viewport; keep it aligned after map resize.
     renderer.setViewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
@@ -218,13 +253,28 @@ export class ThreeTestLayer implements CustomLayerInterface {
     if (this.romanEnabled && map.getZoom() >= 12) {
       for (const entry of this.romans) this.drawAnchored(entry, args);
     }
-    if (this.settlementEnabled && this.procedural && map.getZoom() >= 12) this.updateProcedural();
-    if (this.settlementEnabled && this.settlement && this.settlementAnchor && map.getZoom() >= 12) {
+    this.updateStreaming();
+    if (this.settlementEnabled && this.procedural) this.updateProcedural();
+    if (this.settlementEnabled && this.settlement && this.settlementAnchor && this.lodController.current.lod === "local") {
+      this.settlement.setFineDetail(this.lodController.current.distance < 250);
       this.settlement.updateTerrain((coordinate) =>
         queryTerrainSample(map, { lng: coordinate[0], lat: coordinate[1] }));
-      this.updateAmbientFrame(center.lng, center.lat);
-      this.drawAnchored(this.settlementAnchor, args, false);
+      if (this.settlement.timing.stage === "ready") {
+        this.updateAmbientFrame(center.lng, center.lat);
+        this.drawAnchored(this.settlementAnchor, args, false);
+      } else this.settlement.updateAmbientLife(performance.now(),false);
     } else this.settlement?.updateAmbientLife(performance.now(),false);
+    if (this.regional && this.regionalAnchor) {
+      this.regional.scene.visible = this.settlement?.timing.stage !== "ready";
+      if (this.regional.scene.visible) {
+        this.regional.updateTerrain(coordinate => {
+          const sample = queryTerrainSample(map,{lng:coordinate[0],lat:coordinate[1]});
+          return sample.readiness === "confirmed" ? sample.displayMeters ?? undefined : undefined;
+        });
+        this.drawAnchored(this.regionalAnchor,args,false);
+      }
+    }
+    this.publishStreamingStatus();
 
   }
 
@@ -234,7 +284,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
       const origin = this.settlement.origin;
       const east = (lng-origin[0])*Math.cos(origin[1]*Math.PI/180)*111320;
       const south = (lat-origin[1])*111320;
-      const visible = this.settlementEnabled && map.getZoom() >= 17 && Math.hypot(east,south) < 350 &&
+      const visible = this.settlementEnabled && this.lodController.current.lod === "local" && Math.hypot(east,south) < 850 &&
         !document.hidden && map.getBounds().contains([origin[0],origin[1]]);
       if (this.settlement.updateAmbientLife(performance.now(),visible)) map.triggerRepaint();
     }
@@ -254,62 +304,118 @@ export class ThreeTestLayer implements CustomLayerInterface {
     this.map?.triggerRepaint();
   }
 
+  /** Explicit debug visits use the same distance gates, cancellation and single scene slot. */
   setSettlementEnabled(enabled: boolean): void {
-    this.settlementEnabled = enabled;
-    if (enabled) {
-      if (this.procedural) this.procedural.start();
-      else void this.settlement?.load();
-    } else {
-      const wasProcedural = Boolean(this.procedural);
-      this.procedural?.cancel(); this.procedural = null;
-      this.committedProcedural = undefined;
-      this.onProceduralStatus?.(null);
-      if (wasProcedural) {
-        this.settlement?.dispose();
-        this.settlement = new SettlementScene(ROMAN_SETTLEMENT,
-          (status) => this.onSettlementStatus?.(status), () => this.map?.triggerRepaint());
-        this.updateSettlementAnchor();
-      } else this.settlement?.unload();
-    }
+    this.streamingEnabled=enabled;
+    if(this.map?.getLayer("settlement-descriptors")) this.map.setLayoutProperty("settlement-descriptors","visibility",enabled?"visible":"none");
+    if (!enabled) {this.clearStreamingScene();this.regional?.dispose();this.regional=undefined;this.regionalAnchor=undefined;}
     this.map?.triggerRepaint();
   }
 
-  /** Developer review fixture uses the same loader, foundations and anchor lifecycle. */
   previewRomanVariants(enabled: boolean | "baseline" = true): void {
-    this.procedural?.cancel(); this.procedural = null;
-    this.committedProcedural = undefined; this.onProceduralStatus?.(null);
-    this.settlement?.dispose();
-    this.settlement = new SettlementScene(enabled === "baseline" ? ROMAN_SETTLEMENT_BASELINE : enabled ? ROMAN_VARIATION_PREVIEW : ROMAN_SETTLEMENT,
-      (status) => this.onSettlementStatus?.(status), () => this.map?.triggerRepaint());
-    this.updateSettlementAnchor();
-    this.visitSettlement();
+    this.visitDefinition(enabled === "baseline" ? ROMAN_SETTLEMENT_BASELINE : enabled ? ROMAN_VARIATION_PREVIEW : ROMAN_SETTLEMENT);
   }
-
-  visitSettlement(origin?: Coordinate): void {
-    if (this.procedural || this.settlement?.definition.id === "fictional-procedural-roman-village") {
-      this.previewRomanVariants(false);
-    }
-    if (!this.settlement || !this.map) return;
-    if (origin) {
-      this.settlement.relocate(origin);
-      this.updateSettlementAnchor();
-    }
-    this.setSettlementEnabled(true);
-    this.map.flyTo({ center: [...this.settlement.origin], zoom: 18.4, pitch: 55, bearing: -25 });
-  }
-
-  /** Fictional/debug only; swaps the one existing settlement slot. */
-  visitProceduralSettlement(seed = 7, origin: Coordinate = DEFAULT_PROCEDURAL_CONFIG.origin, overrides?: Partial<ProceduralSettlementConfig>): void {
-    this.procedural?.cancel();
-    this.settlement?.dispose(); this.settlement = null; this.settlementAnchor = null;
-    this.committedProcedural = undefined;
-    const config = {...(overrides?.profile ? settlementProfileConfig(overrides.profile) : DEFAULT_PROCEDURAL_CONFIG),...overrides,seed,origin};
-    if (config.profile && this.procedural?.config.profile !== config.profile) this.ambientLifeOptions.count = SETTLEMENT_PROFILES[config.profile].villagers;
-    this.procedural = new ProceduralSettlementSession(config);
-    this.procedural.start(); this.settlementEnabled = true;
-    this.onProceduralStatus?.({state:"waiting-terrain",seed,requested:config.targetBuildingCount,accepted:0,rejected:0,terrainReady:false,message:"Waiting for confirmed DEM coverage.",navigation:{nodes:[],edges:[]}});
+  private visitDefinition(definition: import("@/map/settlements/romanSettlement").SettlementDefinition, origin: Coordinate=definition.origin): void {
+    this.setDebugDescriptor({id:definition.id,origin,radiusMeters:(definition.groundSizeMeters??140)/2,profile:"village",seed:definition.seed??7,definition:{...definition,origin}});
     this.map?.flyTo({center:[...origin],zoom:18.4,pitch:55,bearing:-25});
-    this.map?.triggerRepaint();
+  }
+  visitSettlement(origin?: Coordinate): void {
+    this.visitDefinition(ROMAN_SETTLEMENT,origin??ROMAN_SETTLEMENT.origin);
+  }
+  visitProceduralSettlement(seed = 7, origin: Coordinate = DEFAULT_PROCEDURAL_CONFIG.origin, overrides?: Partial<ProceduralSettlementConfig>): void {
+    const config={...(overrides?.profile ? settlementProfileConfig(overrides.profile) : DEFAULT_PROCEDURAL_CONFIG),...overrides,seed,origin};
+    this.setDebugDescriptor({id:"debug-procedural",origin,radiusMeters:config.extentMeters+25,profile:config.profile??"village",seed,config});
+    this.map?.flyTo({center:[...origin],zoom:18.4,pitch:55,bearing:-25});
+  }
+  private setDebugDescriptor(descriptor: SettlementDescriptor): void {
+    this.clearStreamingScene();this.regional?.dispose();this.regional=undefined;this.regionalAnchor=undefined;
+    this.layouts.clear();this.descriptors=[descriptor];this.streamingEnabled=true;
+    this.lodController.current={lod:"global",distance:Infinity};
+    this.installSettlementMarkers();this.map?.triggerRepaint();
+  }
+  useDevelopmentSettlements(): void {
+    this.clearStreamingScene();this.regional?.dispose();this.regional=undefined;this.regionalAnchor=undefined;
+    this.descriptors=DEVELOPMENT_SETTLEMENTS;this.streamingEnabled=true;
+    this.lodController.current={lod:"global",distance:Infinity};
+    this.installSettlementMarkers();this.map?.triggerRepaint();
+  }
+  visitStreamingSettlement(id: string): void {
+    this.useDevelopmentSettlements();const d=this.descriptors.find(d=>d.id===id);
+    if(d)this.map?.flyTo({center:[...d.origin],zoom:18.4,pitch:55,bearing:-25});
+  }
+  setSettlementLOD(override: SettlementLOD | "auto"): void {this.lodController.override=override;this.map?.triggerRepaint();}
+  getStreamingStatus(): StreamingStatus {
+    const c=this.lodController.current;
+    return {lod:c.lod,override:this.lodController.override,activeId:this.activeDescriptor?.id??(c.lod!=="global"?c.descriptor?.id:undefined),detailedScenes:this.settlement?1:0,descriptors:this.descriptors.length,distanceMeters:Number.isFinite(c.distance)?Math.round(c.distance):null,
+      stage:!this.streamingEnabled?"disabled":this.settlement?.timing.stage??this.procedural?.timing.stage??(this.localCandidate?"queued":c.lod),cache:glbCache.snapshot(),surfaceCache:surfaceMapCacheInfo(),scene:this.settlement?.timing.snapshot(),layout:this.procedural?.timing.snapshot()};
+  }
+  private clearStreamingScene(): void {
+    if(this.streamTimer)clearTimeout(this.streamTimer);this.streamTimer=undefined;this.localCandidate=undefined;
+    this.procedural?.cancel();this.procedural=null;this.committedProcedural=undefined;
+    this.settlementEnabled=false;this.activeDescriptor=undefined;
+    this.settlement?.dispose();this.settlement=null;this.settlementAnchor=null;
+    this.onProceduralStatus?.(null);
+  }
+  private updateStreaming(): void {
+    const map=this.map;if(!map)return;
+    // MapLibre 6.15 exposes its projection-aware camera via _camera; keep this adapter here.
+    const eye=map._camera.transform.getCameraLngLat(), altitude=Math.max(0,map._camera.transform.getCameraAltitude()-map.getCameraTargetElevation());
+    const observations=this.streamingEnabled?this.descriptors.map(descriptor=>{
+      const p=map.project([...descriptor.origin]),canvas=map.getCanvas();
+      return {descriptor,distance:settlementDistance([eye.lng,eye.lat],altitude,descriptor),visible:Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.x>=-100&&p.y>=-100&&p.x<=canvas.clientWidth+100&&p.y<=canvas.clientHeight+100};
+    }):[];
+    const decision=this.lodController.update(observations),d=decision.descriptor;
+    const markerFilter=decision.lod === "global" ? "" : d?.id ?? "";
+    if(markerFilter!==this.markerFilter && map.getLayer("settlement-descriptors")) {
+      this.markerFilter=markerFilter;
+      map.setFilter("settlement-descriptors",["!=",["get","id"],markerFilter]);
+    }
+    if (this.activeDescriptor && (decision.lod!=="local" || this.activeDescriptor.id!==d?.id)) this.clearStreamingScene();
+    if (decision.lod==="global" || !d) {
+      if(this.localCandidate)this.clearStreamingScene();
+      this.regional?.dispose();this.regional=undefined;this.regionalAnchor=undefined;
+    } else {
+      if(this.regional?.descriptor!==d) {
+        this.regional?.dispose();this.regional=new RegionalSettlement(d,this.layouts.get(d.id)??d.definition);
+        this.regionalAnchor={scene:this.regional.scene,lngLat:d.origin,altitude:0,anchor:geographicAnchor(d.origin,0)};
+      }
+      // Remain on the cheap silhouette while travelling or waiting for DEM/assets.
+      if (decision.lod==="local" && !this.activeDescriptor) {
+        const now=performance.now();
+        if(this.localCandidate!==d.id) {this.localCandidate=d.id;this.candidateSince=now;}
+        if(!map.isMoving() && now-this.candidateSince>=200) {
+          this.activeDescriptor=d;this.localCandidate=undefined;
+          this.settlementEnabled=true;
+          if(d.definition) {
+            this.settlement=new SettlementScene(d.definition,s=>this.onSettlementStatus?.(s),()=>this.map?.triggerRepaint());
+            this.updateSettlementAnchor();void this.settlement.load();
+          } else {
+            const config={...settlementProfileConfig(d.profile),...d.config,origin:d.origin,seed:d.seed};
+            this.ambientLifeOptions.count=config.profile ? SETTLEMENT_PROFILES[config.profile].villagers : DEFAULT_AMBIENT_LIFE.count;
+            this.procedural=new ProceduralSettlementSession(config);this.procedural.start();
+          }
+        } else if(!this.streamTimer) this.streamTimer=setTimeout(()=>{this.streamTimer=undefined;this.map?.triggerRepaint();},220);
+      } else if(decision.lod!=="local" && this.localCandidate) this.clearStreamingScene();
+    }
+    // Hide the proxy once terrain-attached detailed buildings are visible.
+    if(this.regional)this.regional.scene.visible=!(this.settlement && this.settlement.timing.stage==="ready");
+  }
+  private publishStreamingStatus(): void {
+    const status=this.getStreamingStatus();
+    const signature=JSON.stringify([status.lod,status.override,status.activeId,status.detailedScenes,status.descriptors,status.stage,status.cache.entries,status.cache.users]);
+    if(signature!==this.streamSignature || performance.now()-this.lastStreamStatus>400) {
+      this.streamSignature=signature;this.lastStreamStatus=performance.now();this.onStreamingStatus?.(status);
+    }
+  }
+  private installSettlementMarkers(): void {
+    const map=this.map;if(!map)return;
+    this.removeSettlementMarkers();this.markerFilter="";
+    map.addSource("settlement-descriptors",{type:"geojson",data:{type:"FeatureCollection",features:this.descriptors.map(d=>({type:"Feature",properties:{id:d.id,profile:d.profile,fictional:true},geometry:{type:"Point",coordinates:[...d.origin]}}))}});
+    map.addLayer({id:"settlement-descriptors",type:"circle",source:"settlement-descriptors",paint:{"circle-radius":3,"circle-color":"#d1ad7a","circle-stroke-color":"#40382a","circle-stroke-width":1}});
+  }
+  private removeSettlementMarkers(): void {
+    if(this.map?.getLayer("settlement-descriptors"))this.map.removeLayer("settlement-descriptors");
+    if(this.map?.getSource("settlement-descriptors"))this.map.removeSource("settlement-descriptors");
   }
 
   private updateProcedural(): void {
@@ -320,6 +426,12 @@ export class ThreeTestLayer implements CustomLayerInterface {
       // Invalidated plots must never remain visible while their replacement waits for DEM.
       this.settlement?.dispose(); this.settlement = null; this.settlementAnchor = null;
       this.committedProcedural = result;
+      if(result.definition && this.activeDescriptor) {
+        this.layouts.set(this.activeDescriptor.id,result.definition);
+        // Upgrade representative clusters to real footprint metadata without a second GLB.
+        this.regional?.dispose();this.regional=new RegionalSettlement(this.activeDescriptor,result.definition);
+        this.regionalAnchor={scene:this.regional.scene,lngLat:this.activeDescriptor.origin,altitude:0,anchor:geographicAnchor(this.activeDescriptor.origin,0)};
+      }
       this.onProceduralStatus?.(result);
       if (result.definition) {
         this.settlement = new SettlementScene(result.definition,
@@ -404,9 +516,12 @@ export class ThreeTestLayer implements CustomLayerInterface {
     }
     camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
     const settlement = entry.scene === this.settlement?.scene ? this.settlement : null;
+    const renderStarted = performance.now();
+    const shadows = settlement?.shadowsEnabled && settlement.consumeShadowUpdate();
     renderer.shadowMap.enabled = settlement?.shadowsEnabled ?? false;
-    if (settlement) renderer.shadowMap.needsUpdate = settlement.consumeShadowUpdate();
+    if (settlement) renderer.shadowMap.needsUpdate = Boolean(shadows);
     renderer.render(entry.scene, camera);
+    settlement?.timing.add(shadows ? "renderWithShadowCpu" : "renderCpu", renderStarted);
   }
 
   // ── construction helpers ───────────────────────────────────────────────

@@ -1,0 +1,107 @@
+{
+  "note": "Node CPU, real GLB parse, synthetic confirmed flat DEM; no network, GPU or browser timings. Single run per profile.",
+  "rows": [
+    {
+      "profile": "hamlet",
+      "buildings": 6,
+      "layout": {
+        "stage": "ready",
+        "ms": {
+          "layoutGeneration": 5.758792000000085,
+          "readyWall": 5.811292000000094
+        },
+        "counts": {
+          "layoutGeneration": 1
+        }
+      },
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 6.090541999999914,
+          "buildingAssembly": 1.861208000000488,
+          "assetWallIncludingAssembly": 22.599459000000024,
+          "cpuTextures": 405.046791,
+          "batchAssembly": 0.21558299999992414,
+          "terrainPlacement": 13.893749999999955,
+          "readyWall": 448.0325
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "buildingAssembly": 6,
+          "assetWallIncludingAssembly": 1,
+          "cpuTextures": 1,
+          "batchAssembly": 1,
+          "terrainPlacement": 1
+        }
+      }
+    },
+    {
+      "profile": "village",
+      "buildings": 22,
+      "layout": {
+        "stage": "ready",
+        "ms": {
+          "layoutGeneration": 16.325500000000147,
+          "readyWall": 16.340834000000086
+        },
+        "counts": {
+          "layoutGeneration": 1
+        }
+      },
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 13.774415999999974,
+          "buildingAssembly": 3.710747999999967,
+          "assetWallIncludingAssembly": 26.44704200000001,
+          "cpuTextures": 566.777041,
+          "batchAssembly": 0.21091700000033597,
+          "terrainPlacement": 45.21562500000027,
+          "readyWall": 652.4837910000001
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "buildingAssembly": 22,
+          "assetWallIncludingAssembly": 1,
+          "cpuTextures": 1,
+          "batchAssembly": 1,
+          "terrainPlacement": 1
+        }
+      }
+    },
+    {
+      "profile": "small-town",
+      "buildings": 40,
+      "layout": {
+        "stage": "ready",
+        "ms": {
+          "layoutGeneration": 34.82020800000009,
+          "readyWall": 34.82895800000006
+        },
+        "counts": {
+          "layoutGeneration": 1
+        }
+      },
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 19.2018750000002,
+          "buildingAssembly": 9.056583000000956,
+          "assetWallIncludingAssembly": 29.07508400000006,
+          "cpuTextures": 651.0512920000001,
+          "batchAssembly": 0.17395899999974063,
+          "terrainPlacement": 238.4989169999999,
+          "readyWall": 938.08275
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "buildingAssembly": 40,
+          "assetWallIncludingAssembly": 1,
+          "cpuTextures": 1,
+          "batchAssembly": 1,
+          "terrainPlacement": 1
+        }
+      }
+    }
+  ]
+}
