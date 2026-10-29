@@ -90,3 +90,9 @@ export function fractionToYear(fraction: number): number {
   const clamped = Math.min(1, Math.max(0, fraction));
   return clampYear(Math.round(MIN_YEAR + clamped * (MAX_YEAR - MIN_YEAR)));
 }
+
+/** Exact dates refine the same historical year authority; astronomical BCE is preserved. */
+export function formatHistoricalDate(date: { year: number; month?: number; day?: number }): string {
+  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  return `${date.day ? `${date.day} ` : ""}${date.month ? `${months[date.month - 1]} ` : ""}${formatHistoricalYear(date.year)}`;
+}

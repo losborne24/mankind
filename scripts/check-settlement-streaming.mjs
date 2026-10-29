@@ -39,6 +39,7 @@ try {
  approach(a,4000);assert.equal(layer.getStreamingStatus().lod,'regional');assert.ok(layer.regional);assert.equal(requests,initial,'Regional clusters load no GLBs');
  const proxy=layer.regional;proxy.updateTerrain(()=>0);assert.equal(proxy.walls.count,6);assert.equal(proxy.walls.geometry.index.count/3,12);
  moving=true;approach(a);await settle();assert.equal(layer.settlement,null,'No new detail during camera travel');moving=false;
+ layer.setScenarioTravel(true);await settle();assert.equal(layer.settlement,null,'Scenario RAF travel also defers detail despite jumpTo reporting stationary');layer.setScenarioTravel(false);
  await settle();assert.equal(layer.getStreamingStatus().detailedScenes,1);assert.equal(layer.settlement.loaded,6);assert.equal(layer.settlement.timing.stage,'ready');
  const old=layer.settlement;old.updateAmbientLife(100,true);old.updateAmbientLife(150,true);const state=JSON.stringify(old.ambientLife.simulation.villagers),p=paints;
  for(let i=0;i<30;i++)assert.equal(old.updateAmbientLife(200+i*33,false),false);

@@ -108,7 +108,8 @@ function usePlaybackLoop(): void {
       const dtSeconds = Math.min(0.1, (now - last) / 1000);
       last = now;
 
-      const { speed, setYear, pause } = store();
+      const { speed, setYear, pause, isPlaying: stillPlaying } = store();
+      if (!stillPlaying) return;
       yearAccumulator.current += speed * dtSeconds;
 
       if (yearAccumulator.current >= MAX_YEAR) {

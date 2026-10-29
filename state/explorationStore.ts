@@ -9,6 +9,7 @@
  * component can react to year/camera changes without touching WebGL objects.
  */
 
+import type { HistoricalTime } from "@/lib/scenarios/schema";
 import { create } from "zustand";
 import { clampYear, DEFAULT_YEAR } from "@/lib/historicalDate";
 
@@ -39,6 +40,8 @@ export const DEFAULT_VIEW: GlobeView = {
 interface ExplorationState {
   /** Current historical year in astronomical numbering (see lib/historicalDate). */
   year: number;
+  historicalTime: HistoricalTime | null;
+  setHistoricalTime: (time: HistoricalTime) => void;
   isPlaying: boolean;
   /** Playback rate in historical years per real second. */
   speed: PlaybackSpeed;
@@ -60,19 +63,21 @@ interface ExplorationState {
 
 export const useExplorationStore = create<ExplorationState>((set, get) => ({
   year: DEFAULT_YEAR,
+  historicalTime: null,
+  setHistoricalTime: (time) => set({year: clampYear(time.start.year), historicalTime: time, isPlaying: false}),
   isPlaying: false,
   speed: 100,
   view: DEFAULT_VIEW,
   selected: null,
 
-  setYear: (year) => set({ year: clampYear(year) }),
+  setYear: (year) => set({ year: clampYear(year), historicalTime: null }),
   advanceYear: (deltaYears) => {
     const next = clampYear(get().year + deltaYears);
     // Auto-pause when playback reaches the end of the covered range.
     if (next === get().year && get().isPlaying) {
-      set({ year: next, isPlaying: false });
+      set({ year: next, historicalTime: null, isPlaying: false });
     } else {
-      set({ year: next });
+      set({ year: next, historicalTime: null });
     }
   },
   play: () => set({ isPlaying: true }),

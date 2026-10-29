@@ -9,6 +9,7 @@
 import { useId } from "react";
 import {
   formatHistoricalYear,
+  formatHistoricalDate,
   MAX_YEAR,
   MIN_YEAR,
 } from "@/lib/historicalDate";
@@ -22,6 +23,7 @@ const STEP_YEARS = 100;
 
 export function Timeline() {
   const sliderId = useId();
+  const historicalTime = useExplorationStore((s) => s.historicalTime);
   const year = useExplorationStore((s) => s.year);
   const isPlaying = useExplorationStore((s) => s.isPlaying);
   const speed = useExplorationStore((s) => s.speed);
@@ -65,7 +67,7 @@ export function Timeline() {
               className="font-mono text-xl font-semibold tabular-nums tracking-tight text-white sm:text-2xl"
               aria-live="polite"
             >
-              {formatHistoricalYear(year)}
+              {historicalTime ? `${formatHistoricalDate(historicalTime.start)}${historicalTime.end ? ` – ${formatHistoricalDate(historicalTime.end)}` : ""}` : formatHistoricalYear(year)}
             </span>
             <span className="mt-1 text-[10px] uppercase tracking-widest text-white/40">
               selected year

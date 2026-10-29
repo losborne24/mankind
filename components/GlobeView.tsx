@@ -31,6 +31,7 @@ import { ThreeTestLayer, type StreamingStatus, type RomanTestStatus } from "@/ma
 import type { SettlementStatus } from "@/map/settlements/SettlementScene";
 import type { GenerationResult } from "@/map/settlements/proceduralSettlement";
 import { ROMAN_SETTLEMENT } from "@/map/settlements/romanSettlement";
+import { ScenarioPanel } from "@/components/ScenarioPanel";
 import { DebugPanel } from "@/components/DebugPanel";
 import { MapReadout } from "@/components/MapReadout";
 import { queryTerrainHeights } from "@/map/terrain";
@@ -47,6 +48,7 @@ interface GlobeViewProps {
 
 export default function GlobeView({ onStatus }: GlobeViewProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [scenarioLayer, setScenarioLayer] = useState<ThreeTestLayer | null>(null);
   const [debugMap, setDebugMap] = useState<maplibregl.Map | null>(null);
   const [terrainWarning, setTerrainWarning] = useState(false);
   const threeLayerRef = useRef<ThreeTestLayer | null>(null);
@@ -89,6 +91,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
       if (disposed) return;
       const layer = new ThreeTestLayer({ lngLat: TEST_MARKER_LNGLAT, onStreamingStatus: setStreamingStatus, onRomanStatus: setRomanStatus, onSettlementStatus: setSettlementStatus, onProceduralStatus: setProceduralStatus });
       threeLayerRef.current = layer;
+      setScenarioLayer(layer);
       map.addLayer(layer);
       setDebugMap(map);
       ready = true;
@@ -155,6 +158,8 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
     <>
       <div ref={containerRef} className="h-full w-full" aria-hidden />
       <MapReadout map={debugMap} />
+      {debugMap && <ScenarioPanel map={debugMap} layer={scenarioLayer} streaming={streamingStatus} />}
+      <div data-manual-camera>
       <DebugPanel
         streamingStatus={streamingStatus}
         onStreamingFixtures={() => threeLayerRef.current?.useDevelopmentSettlements()}
@@ -175,6 +180,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
           debugMap?.refreshTiles(TERRAIN_SOURCE);
         }}
       />
+      </div>
     </>
   );
 }

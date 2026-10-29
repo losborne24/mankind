@@ -356,6 +356,9 @@ export class ThreeTestLayer implements CustomLayerInterface {
     this.settlement?.dispose();this.settlement=null;this.settlementAnchor=null;
     this.onProceduralStatus?.(null);
   }
+  /** Scenario travel shares the existing debounce and scene/cache ownership. No speculative asset loads. */
+  private scenarioTravelling = false;
+  setScenarioTravel(active: boolean): void { this.scenarioTravelling = active; this.map?.triggerRepaint(); }
   private updateStreaming(): void {
     const map=this.map;if(!map)return;
     // MapLibre 6.15 exposes its projection-aware camera via _camera; keep this adapter here.
@@ -383,7 +386,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
       if (decision.lod==="local" && !this.activeDescriptor) {
         const now=performance.now();
         if(this.localCandidate!==d.id) {this.localCandidate=d.id;this.candidateSince=now;}
-        if(!map.isMoving() && now-this.candidateSince>=200) {
+        if(!this.scenarioTravelling && !map.isMoving() && now-this.candidateSince>=200) {
           this.activeDescriptor=d;this.localCandidate=undefined;
           this.settlementEnabled=true;
           if(d.definition) {
