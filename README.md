@@ -394,3 +394,11 @@ Use **Debug tools → Historical dataset** to load the reviewed London example a
 inspect exact/coarse dates, map-only context and scenario date updates. No period
 architecture is fabricated. [Loading, selection and lifecycle contract](docs/historical-dataset-loading.md).
 Run `node scripts/check-phase3.mjs docs/previews/historical-loading` for the full gate.
+
+
+### Historical place inspection (Phase 4 Step 3)
+
+With a historical dataset loaded, use an Inspect button or click a place marker
+to review dates, evidence, sources and layout availability before choosing Visit.
+[Inspection and navigation contract](docs/historical-place-inspection.md).
+Run `node scripts/check-phase3.mjs docs/previews/historical-inspection` for the full gate.

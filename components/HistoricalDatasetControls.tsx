@@ -1,5 +1,8 @@
 "use client";
 import { useEffect, useState, useSyncExternalStore } from 'react';
+import { createPortal } from 'react-dom';
+import { HistoricalInspector } from '@/components/HistoricalInspector';
+import { useScenarioController } from '@/components/ScenarioContext';
 import type { Map } from 'maplibre-gl';
 import type { ThreeTestLayer } from '@/map/threeTestLayer';
 import { HistoricalDatasetSession } from '@/lib/history/session';
@@ -10,7 +13,7 @@ import { historicalWorldOverlays } from '@/map/historicalWorldOverlays';
 export function HistoricalDatasetControls({ map, layer }: { map: Map; layer: ThreeTestLayer }) {
   const [session, setSession] = useState<HistoricalDatasetSession | null>(null);
   useEffect(() => {
-    const overlays = historicalWorldOverlays(map);
+    const overlays = historicalWorldOverlays(map, id => controller.inspect({ kind: 'place', id }));
     const controller = new HistoricalDatasetSession({
       time: () => { const state = useExplorationStore.getState(); return state.historicalTime ?? { start: { year: state.year } }; },
       subscribeTime: listener => useExplorationStore.subscribe((state, previous) => { if (state.year !== previous.year || state.historicalTime !== previous.historicalTime) listener(); }),
@@ -30,6 +33,14 @@ export function HistoricalDatasetControls({ map, layer }: { map: Map; layer: Thr
 }
 function DatasetControls({ session, map }: { session: HistoricalDatasetSession; map: Map }) {
   const snapshot = useSyncExternalStore(session.subscribe, session.getSnapshot, session.getSnapshot);
+  const { player } = useScenarioController();
+  const visit = (placeId: string) => {
+    const target = session.getVisitTarget(placeId);
+    if (!target) return;
+    player?.pause('Visiting historical place');
+    useExplorationStore.getState().setSelected(target.center);
+    map.flyTo({ center: target.center, zoom: target.zoom, pitch: target.pitch, bearing: target.bearing, duration: 2000 });
+  };
   const [date, setDate] = useState('2012-07-27');
   const [error, setError] = useState('');
   const applyDate = () => {
@@ -40,7 +51,7 @@ function DatasetControls({ session, map }: { session: HistoricalDatasetSession; 
       validateHistoricalDate(value); useExplorationStore.getState().setHistoricalTime({ start: value }); setError('');
     } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
   };
-  return <details className="mt-3 border-t border-panel-border pt-2">
+  return <><details className="mt-3 border-t border-panel-border pt-2">
     <summary className="cursor-pointer">Historical dataset</summary>
     <p className="my-2 text-white/50">Reviewed event context · approximate geography · no London architecture.</p>
     <button className="underline" onClick={() => void session.load('london2012')}>{snapshot.status === 'loading' ? 'Reload London dataset' : 'Load London dataset'}</button>
@@ -49,6 +60,12 @@ function DatasetControls({ session, map }: { session: HistoricalDatasetSession; 
     <button className="mt-2 underline" onClick={applyDate}>Apply dataset date</button>
     <button data-manual-camera className="mt-2 block underline" onClick={() => { setDate('2012-07-27'); setError(''); useExplorationStore.getState().setHistoricalTime({ start: { year: 2012, month: 7, day: 27 } }); map.flyTo({ center: [-.0166, 51.5387], zoom: 13, pitch: 35 }); }}>View ceremony context</button>
     {(error || snapshot.error) && <p role="alert" className="my-2 text-red-300">{error || snapshot.error}</p>}
+    {snapshot.status === 'ready' && <section aria-label="Historical records" className="mt-3 border-t border-panel-border pt-2">
+      <p className="text-white/55">Inspect records at the selected date</p>
+      {snapshot.selection?.places.filter(row => ['within', 'possible'].includes(row.presence)).map(row => <button key={row.place.id} className="mt-2 block text-left underline" onClick={() => session.inspect({ kind: 'place', id: row.place.id })}>Inspect {row.place.title}</button>)}
+      {snapshot.selection?.events.map(({ event }) => <button key={event.id} className="mt-2 block text-left underline" onClick={() => session.inspect({ kind: 'event', id: event.id })}>Inspect {event.title}</button>)}
+      {!snapshot.selection?.places.some(row => ['within', 'possible'].includes(row.presence)) && !snapshot.selection?.events.length && <p className="mt-2 text-white/50">No records match this date.</p>}
+    </section>}
     <pre aria-label="Historical dataset diagnostics" className="mt-2 whitespace-pre-wrap text-[10px]">{JSON.stringify({ status: snapshot.status, dataset: snapshot.datasetId, time: snapshot.selection?.time, places: snapshot.selection?.places.map(row => ({ id: row.place.id, presence: row.presence, basis: row.basis, layout: row.layoutStatus, candidates: row.layoutIds, warnings: row.warnings })), events: snapshot.selection?.events.map(row => ({ id: row.event.id, match: row.match })), detailedLayouts: snapshot.selection?.descriptors.length }, null, 2)}</pre>
-  </details>;
+  </details>{snapshot.inspection && createPortal(<HistoricalInspector inspection={snapshot.inspection} onClose={() => session.closeInspection()} onVisit={visit} onInspectPlace={id => session.inspect({ kind: 'place', id })} />, document.body)}</>;
 }

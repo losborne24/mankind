@@ -1,5 +1,7 @@
 # Historical dataset loading and date selection — Phase 4 Step 2
 
+Step 3 now adds [historical place/event inspection and explicit navigation](historical-place-inspection.md) to loaded datasets.
+
 One explicit dataset can now be loaded into the live development globe and selected against the existing historical-date store. The London example supplies map-only event/place/route context. It supplies no historical building layout or model, and produces zero detailed settlement descriptors. Existing guided playback and Roman development fixtures retain their separate, explicit ownership paths.
 
 ## Implementation
