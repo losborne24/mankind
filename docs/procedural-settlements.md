@@ -1,5 +1,7 @@
 # Procedural settlement layout v1
 
+The preserved eight-building benchmark is documented below. For current profiles, multi-street navigation, validation and measured village/town review, see [Settlement density — Step 8.5](settlement-density.md).
+
 This is a fictional Roman roadside village debug fixture, independent of the historical timeline. The hand-authored `ROMAN_SETTLEMENT` remains unchanged and available through **Return to hand-authored reference**. Only one settlement occupies the existing Three.js settlement slot.
 
 ## Interface and separation

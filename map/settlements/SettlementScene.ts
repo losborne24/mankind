@@ -83,12 +83,13 @@ export class SettlementScene {
     if (this.active) return this.loading ?? Promise.resolve();
     this.active = true;
     const generation = this.generation;
+    const width = this.definition.groundSizeMeters ?? GROUND_WIDTH, depth = this.definition.groundSizeMeters ?? GROUND_DEPTH;
     this.environment = createSettlementEnvironment(this.definition);
     const sky = new THREE.HemisphereLight(0xd3dce0, 0x85765e, 1.65);
     this.sun = new THREE.DirectionalLight(0xffeed4, 2.15);
     this.sun.castShadow = true;
     this.sun.shadow.mapSize.set(1024, 1024);
-    Object.assign(this.sun.shadow.camera, { left: -68, right: 68, top: 78, bottom: -78, near: 1, far: 180 });
+    Object.assign(this.sun.shadow.camera, { left: -Math.max(68,width/2+12), right: Math.max(68,width/2+12), top: Math.max(78,depth/2+12), bottom: -Math.max(78,depth/2+12), near: 1, far: Math.max(180,depth+60) });
     this.sun.shadow.camera.updateProjectionMatrix();
     this.sun.shadow.radius = 2;
     this.sun.shadow.bias = -0.00015;
@@ -108,11 +109,11 @@ export class SettlementScene {
     const footprints: GroundFootprint[] = [];
     const groundMaterial = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide, forceSinglePass: true });
     this.resources.push(groundMaterial);
-    const treatment = this.addSurface(groundSurface(GROUND_WIDTH, GROUND_DEPTH, 2), groundMaterial, "settlement-ground");
+    const treatment = this.addSurface(groundSurface(width, depth, 2), groundMaterial, "settlement-ground");
     treatment.mesh.renderOrder = 1;
     const catcher = new THREE.ShadowMaterial({ opacity: 0.27, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1 });
     this.resources.push(catcher);
-    const ground = this.addSurface(groundSurface(GROUND_WIDTH, GROUND_DEPTH, 2), catcher, "terrain-shadow-receiver");
+    const ground = this.addSurface(groundSurface(width, depth, 2), catcher, "terrain-shadow-receiver");
     ground.shadowReceiver = true;
     ground.mesh.renderOrder = 2;
     this.entries[0].mesh.renderOrder = 3;
@@ -280,7 +281,8 @@ export class SettlementScene {
     const stableFloors = this.entries.filter((entry) => entry.model?.visible).map((entry) => entry.model!.position.y);
     const center = stableFloors.length ? { height: stableFloors.reduce((sum, value) => sum + value, 0) / stableFloors.length } : resolve([0, 0]);
     if (this.sun && center.height !== undefined) {
-      this.sun.position.set(-40, center.height + 65, -40);
+      const lightScale = Math.max(1, (this.definition.groundSizeMeters ?? GROUND_DEPTH) / GROUND_DEPTH);
+      this.sun.position.set(-40 * lightScale, center.height + 65 * lightScale, -40 * lightScale);
       this.sun.target.position.set(0, center.height, 0);
     }
     this.updateAccessPaths();
@@ -399,6 +401,12 @@ export class SettlementScene {
   }
 
   private addSurface(surface: TerrainSurface, material: THREE.Material, name: string): SurfaceEntry {
+    if (this.definition.groundSizeMeters) {
+      const size = this.definition.groundSizeMeters;
+      const uv = surface.geometry.getAttribute("uv") as THREE.BufferAttribute;
+      surface.points.forEach(([x,z],i) => uv.setXY(i,x/size+0.5,z/size+0.5));
+      uv.needsUpdate = true;
+    }
     const mesh = new THREE.Mesh(surface.geometry, material);
     mesh.name = name;
     mesh.visible = false;

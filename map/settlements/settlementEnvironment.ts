@@ -76,25 +76,39 @@ export function createSettlementEnvironment(definition: SettlementDefinition) {
 }
 
 /** Local layout candidates for procedural scenes, using the same clearance, traffic and seeded samples. */
-export function populateSettlementEnvironment(definition: SettlementDefinition, extent: number) {
+export function populateSettlementEnvironment(definition: SettlementDefinition, extent: number, profile?: { vegetation: number; farmland: number }) {
   const environment = createSettlementEnvironment(definition);
-  const areas: GroundArea[] = [];
+  const areas: GroundArea[] = [...definition.groundAreas ?? []];
   const scenery: NonNullable<SettlementDefinition["scenery"]>[number][] = [];
   // Small safe cultivated patches outside the street. All cells/props use shared clearance.
-  const safe = (p: LocalPoint, radius: number) => environment.clearance(p, radius) && areas.every((a) => footprintDistance(p, {offset:a.offset,width:a.widthMeters,depth:a.depthMeters,heading:0}) > radius + 0.3);
-  for (let i = 0; i < 12; i++) {
+  const safe = (p: LocalPoint, radius: number) => environment.clearance(p, radius) && areas.every((a) => footprintDistance(p, {offset:a.offset,width:a.widthMeters,depth:a.depthMeters,heading:a.headingRadians??0}) > radius + 0.3);
+  for (let i = 0; i < (profile ? 32 : 12); i++) {
     const p: LocalPoint = [(environment.random(i, 5) - 0.5) * extent * 0.9, (environment.random(i, 9) - 0.5) * extent * 0.9];
     if (!safe(p, 4.5)) continue;
-    const kind = i % 2 ? "field" : "garden";
+    const kind = (profile ? Math.hypot(...p) > extent * 0.32 : i % 2) ? "field" : "garden";
     areas.push({id: `cultivated-${i}`, kind, offset:p, widthMeters:6, depthMeters:5});
     for (let x = -2; x <= 2; x++) for (let z = -2; z <= 2; z++) scenery.push({assetId:kind === "garden" ? "environment-garden-plant-01" : "environment-grain-clump-01", offset:[p[0]+x,p[1]+z], scale:0.65, tags:["cultivated",kind]});
-    if (areas.length === 3) break;
+    if (areas.filter(a=>a.kind!=="courtyard").length === (profile?.farmland ?? 3)) break;
   }
-  for (let i = 0; i < 160; i++) {
+  if (profile) {
+    // A few useful boundaries and storage details, all outside the clear shared spaces.
+    for (const area of areas) {
+      const candidates: SceneryPlacement[] = area.kind === "courtyard"
+        ? [{assetId:"roman-stone-bench-01",offset:localToSettlement([area.widthMeters/2+2.3,0],area.offset,area.headingRadians??0),scale:0.75,headingRadians:(area.headingRadians??0)+Math.PI/2}]
+        : [{assetId:"environment-low-stone-boundary-01",offset:[area.offset[0],area.offset[1]+area.depthMeters/2+1.7],scale:0.85,maxGroundRiseMeters:0.35},
+           {assetId:"roman-wine-barrel-01",offset:[area.offset[0]+area.widthMeters/2+1.5,area.offset[1]],scale:0.75}];
+      for (const prop of candidates) {
+        const size=assetRegistry[prop.assetId].dimensionsMeters, radius=Math.max(size[0],size[2])*(prop.scale??1)/2;
+        if(safe(prop.offset,radius)) scenery.push(prop);
+      }
+    }
+  }
+  for (let i = 0; i < (profile?.vegetation ?? 160); i++) {
     const p: LocalPoint = [(environment.random(i, 11) - 0.5) * extent, (environment.random(i, 17) - 0.5) * extent];
     const assetId = i % 13 === 0 ? "environment-olive-tree-01" : i % 7 === 0 ? "environment-mediterranean-shrub-01" : i % 11 === 0 ? "environment-limestone-rock-01" : "environment-dry-grass-tuft-01";
     const asset = assetRegistry[assetId], scale = 0.65 + environment.random(i, 21) * 0.3;
     const radius = Math.max(asset.dimensionsMeters[0],asset.dimensionsMeters[2]) * scale / 2;
+    if (profile && Math.hypot(...p) < extent * 0.2) continue;
     if (!safe(p,radius) || scenery.some((s) => Math.hypot(s.offset[0]-p[0],s.offset[1]-p[1]) < radius + Math.max(assetRegistry[s.assetId].dimensionsMeters[0],assetRegistry[s.assetId].dimensionsMeters[2]) * (s.scale ?? 1) / 2 + 0.2)) continue;
     scenery.push({assetId,offset:p,scale,headingRadians:environment.random(i, 25)*Math.PI*2,tags:assetId.includes("grass") ? ["ground-cover"] : assetId.includes("tree") ? ["tree"] : []});
   }

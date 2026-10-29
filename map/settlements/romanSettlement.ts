@@ -24,6 +24,9 @@ export interface GroundArea {
   headingRadians?: number;
 }
 export interface SettlementDefinition {
+  profile?: "hamlet" | "village" | "small-town";
+  /** Explicit square treatment/receiver size for expanded procedural sites. */
+  groundSizeMeters?: number;
   id: string;
   seed?: number;
   origin: Coordinate;

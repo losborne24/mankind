@@ -20,14 +20,14 @@ import { ROMAN_TEST_CENTER } from "@/map/romanTestScene";
 import type { SettlementStatus } from "@/map/settlements/SettlementScene";
 import { ROMAN_SETTLEMENT, ROMAN_SETTLEMENT_ALTERNATE, type Coordinate } from "@/map/settlements/romanSettlement";
 
-import type { GenerationResult } from "@/map/settlements/proceduralSettlement";
+import { SETTLEMENT_PROFILES, type SettlementProfile, type GenerationResult } from "@/map/settlements/proceduralSettlement";
 
 import { DEFAULT_AMBIENT_LIFE, type AmbientLifeOptions } from "@/map/settlements/AmbientLifeView";
 
 interface DebugPanelProps {
   onAmbientLife: (options: AmbientLifeOptions) => void;
   proceduralStatus: GenerationResult | null;
-  onVisitProcedural: (seed: number, origin?: Coordinate) => void;
+  onVisitProcedural: (seed: number, origin?: Coordinate, profile?: SettlementProfile) => void;
   map: Map | null;
   terrainWarning: boolean;
   romanStatus: RomanTestStatus;
@@ -42,6 +42,7 @@ interface DebugPanelProps {
 export function DebugPanel({ onAmbientLife, map, terrainWarning, onRetryTerrain, romanStatus, onRomanTestEnabled, settlementStatus, onSettlementEnabled, onVisitSettlement, proceduralStatus, onVisitProcedural }: DebugPanelProps) {
   const [life, setLife] = useState({ ...DEFAULT_AMBIENT_LIFE });
   const changeLife = (patch: Partial<AmbientLifeOptions>) => { const next = {...life,...patch}; setLife(next); onAmbientLife(next); };
+  const [proceduralProfile, setProceduralProfile] = useState<SettlementProfile>("village");
   const [proceduralSeed, setProceduralSeed] = useState("7");
   const [proceduralNearby, setProceduralNearby] = useState(false);
   const seedValid = proceduralSeed.trim() !== "" && Number.isSafeInteger(Number(proceduralSeed));
@@ -74,6 +75,9 @@ export function DebugPanel({ onAmbientLife, map, terrainWarning, onRetryTerrain,
     map?.setGlobalStateProperty(GLOBAL_HILLSHADE_STRENGTH, globalHillshadeStrength);
     map?.setGlobalStateProperty(LOCAL_HILLSHADE_STRENGTH, hillshadeIntensity);
   }, [map, globalHillshadeStrength, hillshadeIntensity]);
+
+  // Keep the existing biome/hillshade setup effects active in production.
+  if (process.env.NODE_ENV !== "development") return null;
 
   return (
     <details open className="absolute top-16 left-4 z-20 max-h-[calc(100%-12rem)] w-56 overflow-y-auto rounded-lg border border-panel-border bg-panel p-3 text-xs text-white/70 backdrop-blur-md sm:left-6">
@@ -166,25 +170,33 @@ export function DebugPanel({ onAmbientLife, map, terrainWarning, onRetryTerrain,
         <p className="mt-2 text-white/40">Project-owned Roman architecture, level foundations and Mediterranean scenery. No historical reconstruction claimed.</p>
       </fieldset>
       <fieldset disabled={!map} className="mt-3 border-t border-panel-border pt-2 disabled:opacity-50">
-        <legend className="text-white/40">Procedural Roman village · fictional</legend>
+        <legend className="text-white/40">Procedural Roman settlement · fictional</legend>
+        <label className="mt-2 block">Profile
+          <select aria-label="Settlement profile" value={proceduralProfile} className="w-full rounded border border-panel-border bg-background p-1" onChange={event => {
+            const profile = event.target.value as SettlementProfile;
+            setProceduralProfile(profile); changeLife({count:SETTLEMENT_PROFILES[profile].villagers});
+            if (seedValid) onVisitProcedural(Number(proceduralSeed), proceduralNearby ? ROMAN_SETTLEMENT_ALTERNATE : ROMAN_SETTLEMENT.origin, profile);
+          }}>{Object.entries(SETTLEMENT_PROFILES).map(([id,p]) => <option key={id} value={id}>{p.label}</option>)}</select>
+        </label>
         <label className="mt-2 block">Seed
           <input aria-label="Procedural settlement seed" className="mt-1 w-full rounded border border-panel-border bg-background p-1"
             value={proceduralSeed} onChange={(event) => setProceduralSeed(event.target.value)} inputMode="numeric" />
         </label>
         {!seedValid && <p className="mt-1 text-amber-200/80">Enter a safe integer seed.</p>}
         <button disabled={!seedValid} className="mt-2 block underline disabled:opacity-40" onClick={() => {
-          setProceduralNearby(false); onVisitProcedural(Number(proceduralSeed));
+          setProceduralNearby(false); changeLife({count:SETTLEMENT_PROFILES[proceduralProfile].villagers}); onVisitProcedural(Number(proceduralSeed), undefined, proceduralProfile);
         }}>Visit procedural settlement</button>
-        <button disabled={!seedValid} className="mt-2 block underline disabled:opacity-40" onClick={() => onVisitProcedural(Number(proceduralSeed), proceduralNearby ? ROMAN_SETTLEMENT_ALTERNATE : ROMAN_SETTLEMENT.origin)}>Regenerate settlement</button>
+        <button disabled={!seedValid} className="mt-2 block underline disabled:opacity-40" onClick={() => onVisitProcedural(Number(proceduralSeed), proceduralNearby ? ROMAN_SETTLEMENT_ALTERNATE : ROMAN_SETTLEMENT.origin, proceduralProfile)}>Regenerate settlement</button>
         <button disabled={!seedValid} className="mt-2 block underline disabled:opacity-40" onClick={() => {
-          setProceduralNearby(!proceduralNearby); onVisitProcedural(Number(proceduralSeed), proceduralNearby ? ROMAN_SETTLEMENT.origin : ROMAN_SETTLEMENT_ALTERNATE);
+          setProceduralNearby(!proceduralNearby); onVisitProcedural(Number(proceduralSeed), proceduralNearby ? ROMAN_SETTLEMENT.origin : ROMAN_SETTLEMENT_ALTERNATE, proceduralProfile);
         }}>Relocate procedural nearby</button>
         <button className="mt-2 block underline" onClick={() => onVisitSettlement()}>Return to hand-authored reference</button>
         <button className="mt-2 block underline" disabled={!proceduralStatus} onClick={() => onSettlementEnabled(false)}>Unload procedural settlement</button>
         <p role="status" className="mt-2">{proceduralStatus ? `Seed ${proceduralStatus.seed} · ${proceduralStatus.accepted}/${proceduralStatus.requested} buildings · ${proceduralStatus.state}` : "Procedural scene unloaded."}</p>
         {proceduralStatus && <>
           <p className="mt-1">Terrain {proceduralStatus.terrainReady ? "confirmed" : "pending"} · {proceduralStatus.rejected} rejected plots</p>
-          <p className="mt-1">Navigation: {proceduralStatus.navigation.nodes.length} nodes · {proceduralStatus.navigation.edges.length} edges</p>
+          <p className="mt-1">Roads: {proceduralStatus.definition?.roads.length ?? 0} · Navigation: {proceduralStatus.navigation.nodes.length} nodes · {proceduralStatus.navigation.edges.length} edges</p>
+          <p className="mt-1">Search: {proceduralStatus.attempts ?? 0} plots · {proceduralStatus.terrainSamples ?? 0} terrain samples</p>
           <p className="mt-1 text-white/40">{proceduralStatus.message}</p>
         </>}
         <label className="mt-3 block"><input type="checkbox" checked={life.enabled} onChange={e => changeLife({enabled:e.target.checked})} /> Ambient life</label>

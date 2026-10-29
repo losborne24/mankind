@@ -106,7 +106,11 @@ export class AmbientLifeView {
       const a=this.actors[i],v=this.simulation.villagers[i],h=this.heightAt(v.x,v.z);
       if (h === undefined) { a.model.visible = false; continue; }
       a.frameHeight = a.height;
-      if (a.height === undefined) a.height = h;
+      // A newly confirmed DEM can replace a coarse retained surface by many metres.
+      // Hidden actors can reseat immediately; small changes still interpolate below.
+      if (a.height === undefined || !a.model.visible && Math.abs(h-a.height) > 8) {
+        a.height = h; a.frameHeight = undefined;
+      }
       else a.height += Math.max(-dt*.8,Math.min(dt*.8,h-a.height));
       a.model.visible = Math.abs(a.height-h) < .12;
       placed++;

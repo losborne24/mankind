@@ -1,0 +1,104 @@
+{
+  "context": "Local development Chrome, Rome origin [12.55,41.85], 1x terrain unless specified. Frame measurements are in browser-performance.json.",
+  "checks": [
+    {
+      "check": "hamlet cold startup after hidden-height recovery fix",
+      "accepted": 6,
+      "rendered": 6,
+      "active": 2,
+      "walking": 2,
+      "state": "ready"
+    },
+    {
+      "check": "hamlet terrain exaggeration 2x",
+      "accepted": 6,
+      "rendered": 6,
+      "active": 2,
+      "walking": 1,
+      "idle": 1,
+      "state": "ready"
+    },
+    {
+      "check": "restored 1x village seed 7",
+      "accepted": 22,
+      "requested": 22,
+      "nodes": 52,
+      "edges": 51,
+      "active": 4,
+      "state": "ready"
+    },
+    {
+      "check": "village seed 42 (measured orbit)",
+      "accepted": 21,
+      "requested": 22,
+      "nodes": 50,
+      "edges": 49,
+      "active": 4,
+      "walking": 4,
+      "state": "partial"
+    },
+    {
+      "check": "experimental town seed 7 (measured orbit)",
+      "accepted": 40,
+      "requested": 40,
+      "nodes": 96,
+      "edges": 97,
+      "active": 5,
+      "walking": 5,
+      "state": "ready"
+    },
+    {
+      "check": "ordinary bearing changes preserve committed layout",
+      "profiles": [
+        "hamlet",
+        "village",
+        "small-town",
+        "village"
+      ],
+      "stable": true
+    },
+    {
+      "check": "village repeated after town",
+      "geometries": 52,
+      "textures": 11,
+      "matchesFirstVillage": true
+    },
+    {
+      "check": "unload after repeated profile switching",
+      "geometries": 2,
+      "textures": 1
+    },
+    {
+      "check": "village relocation to [12.5515,41.851]",
+      "accepted": 22,
+      "rendered": 22,
+      "scenery": 240,
+      "active": 4,
+      "walking": 3,
+      "idle": 1,
+      "state": "ready"
+    },
+    {
+      "check": "return to hand-authored reference",
+      "rendered": 7,
+      "scenery": 522,
+      "active": 4,
+      "walking": 4,
+      "state": "ready"
+    },
+    {
+      "check": "final village at original origin after reference",
+      "accepted": 22,
+      "rendered": 22,
+      "scenery": 236,
+      "active": 4,
+      "walking": 4,
+      "state": "ready"
+    }
+  ],
+  "notes": [
+    "Synthetic terrain and real GLB lifecycle tests cover relocation, cancellation during asset loading, retained DEM, terrain resets and reload.",
+    "Clean browser profile switching reproduced the measured resource counts. Earlier texture warnings occurred during development refresh; they did not recur in the clean review.",
+    "The first clean hamlet run exposed hidden actors slowly interpolating a large DEM height change; this was fixed and tested separately before the final cold-start check."
+  ]
+}

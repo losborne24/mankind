@@ -160,7 +160,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
         settlementStatus={settlementStatus}
         onAmbientLife={(options) => threeLayerRef.current?.configureAmbientLife(options)}
         proceduralStatus={proceduralStatus}
-        onVisitProcedural={(seed, origin) => threeLayerRef.current?.visitProceduralSettlement(seed, origin)}
+        onVisitProcedural={(seed, origin, profile) => threeLayerRef.current?.visitProceduralSettlement(seed, origin, {profile})}
         onSettlementEnabled={(enabled) => threeLayerRef.current?.setSettlementEnabled(enabled)}
         onVisitSettlement={(origin) => threeLayerRef.current?.visitSettlement(origin)}
         romanStatus={romanStatus}

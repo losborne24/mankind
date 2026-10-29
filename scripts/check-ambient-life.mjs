@@ -80,6 +80,10 @@ try {
   for(let i=0;i<before.length;i++)assert.ok(Math.abs(models[i].height-before[i])<.06,'Changed terrain height cannot jump');
   for(let i=1;i<=120;i++)scene.updateAmbientLife(10133+i*1000/30,true);
   assert.ok(models.every(a=>a.height>1.9));
+  scene.invalidateTerrain();scene.updateTerrain(()=>({displayMeters:60,readiness:'confirmed'}));
+  scene.updateAmbientLife(14167,true);scene.updateAmbientLife(14200,true);
+  assert.equal(status.ambientLife.active,3,'Hidden villagers recover promptly after a large confirmed DEM refinement');
+  assert.ok(models.every(a=>a.height>59.9));
   scene.invalidateTerrain();scene.updateTerrain(()=>({displayMeters:null,readiness:'unavailable'}));
   assert.ok(scene.updateAmbientLife(14200,true),'Retained road remains usable during DEM loss');
   scene.invalidateTerrain(true);scene.updateTerrain(()=>({displayMeters:0,readiness:'uncertain'}));

@@ -29,6 +29,7 @@ function boxDistance(x: number, z: number, halfX: number, halfZ: number): number
 
 /** Two small, mipmapped CPU-authored maps: no downloads or per-frame noise work. */
 export function settlementSurfaceMaps(definition: SettlementDefinition, footprints: readonly GroundFootprint[], environment = createSettlementEnvironment(definition)) {
+  const groundWidth = definition.groundSizeMeters ?? GROUND_WIDTH, groundDepth = definition.groundSizeMeters ?? GROUND_DEPTH;
   const seedOffset = (environment.seed >>> 0) % 8192;
   const heading = definition.roadFrameHeadingRadians ?? 0;
   const c = Math.cos(heading), s = Math.sin(heading);
@@ -71,18 +72,18 @@ export function settlementSurfaceMaps(definition: SettlementDefinition, footprin
     const field = asset.category === "rock" ? mineral : tree ? litter : cover;
     const radius = (tree ? 3.2 : asset.category === "rock" ? 2 : 1.25) * (placement.scale ?? 1);
     const [cx, cz] = placement.offset;
-    const x0 = Math.max(0, Math.floor((cx - radius + GROUND_WIDTH / 2) / GROUND_WIDTH * (width - 1)));
-    const x1 = Math.min(width - 1, Math.ceil((cx + radius + GROUND_WIDTH / 2) / GROUND_WIDTH * (width - 1)));
-    const z0 = Math.max(0, Math.floor((cz - radius + GROUND_DEPTH / 2) / GROUND_DEPTH * (height - 1)));
-    const z1 = Math.min(height - 1, Math.ceil((cz + radius + GROUND_DEPTH / 2) / GROUND_DEPTH * (height - 1)));
+    const x0 = Math.max(0, Math.floor((cx - radius + groundWidth / 2) / groundWidth * (width - 1)));
+    const x1 = Math.min(width - 1, Math.ceil((cx + radius + groundWidth / 2) / groundWidth * (width - 1)));
+    const z0 = Math.max(0, Math.floor((cz - radius + groundDepth / 2) / groundDepth * (height - 1)));
+    const z1 = Math.min(height - 1, Math.ceil((cz + radius + groundDepth / 2) / groundDepth * (height - 1)));
     for (let j = z0; j <= z1; j++) for (let i = x0; i <= x1; i++) {
-      const x = GROUND_WIDTH * (i / (width - 1) - 0.5), z = GROUND_DEPTH * (j / (height - 1) - 0.5);
+      const x = groundWidth * (i / (width - 1) - 0.5), z = groundDepth * (j / (height - 1) - 0.5);
       const influence = 1 - smooth(0.15, 1, Math.hypot(x - cx, z - cz) / radius);
       field[j * width + i] = Math.max(field[j * width + i], influence);
     }
   }
   for (let j = 0; j < height; j++) for (let i = 0; i < width; i++) {
-    const x = GROUND_WIDTH * (i / (width - 1) - 0.5), z = GROUND_DEPTH * (j / (height - 1) - 0.5);
+    const x = groundWidth * (i / (width - 1) - 0.5), z = groundDepth * (j / (height - 1) - 0.5);
     const broad = noise(x * 0.17 + seedOffset, z * 0.17), grain = noise(x * 6, z * 6 + seedOffset);
     const flecks = hash(i + seedOffset, j);
     const irregular = (noise(x * 1.4, z * 1.4) - 0.5) * 0.35 + (broad - 0.5) * 0.65;
@@ -95,7 +96,7 @@ export function settlementSurfaceMaps(definition: SettlementDefinition, footprin
     }
     const entrance = environment.entranceWear([x, z]);
     // Transparent perimeter and broken patches expose the actual biome/hillshade.
-    const edge = 1 - smooth(0.65, 1, Math.hypot(x / (GROUND_WIDTH / 2), z / (GROUND_DEPTH / 2)));
+    const edge = 1 - smooth(0.65, 1, Math.hypot(x / (groundWidth / 2), z / (groundDepth / 2)));
     const wear = Math.max(verge * 0.85, apron * 0.78, entrance * 0.95);
     const dry = smooth(0.35, 0.8, broad);
     const index = j * width + i;

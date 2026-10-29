@@ -43,7 +43,7 @@ import { prepareAsset, ROMAN_TEST_CENTER, ROMAN_TEST_PLACEMENTS, type AssetPlace
 import { SettlementScene, type SettlementStatus } from "@/map/settlements/SettlementScene";
 import { ROMAN_SETTLEMENT, ROMAN_VARIATION_PREVIEW, ROMAN_SETTLEMENT_BASELINE, type Coordinate } from "@/map/settlements/romanSettlement";
 
-import { DEFAULT_PROCEDURAL_CONFIG, type GenerationResult, type ProceduralSettlementConfig } from "@/map/settlements/proceduralSettlement";
+import { settlementProfileConfig, SETTLEMENT_PROFILES, DEFAULT_PROCEDURAL_CONFIG, type GenerationResult, type ProceduralSettlementConfig } from "@/map/settlements/proceduralSettlement";
 import { ProceduralSettlementSession } from "@/map/settlements/ProceduralSettlementSession";
 
 type AnchoredScene = {
@@ -303,7 +303,8 @@ export class ThreeTestLayer implements CustomLayerInterface {
     this.procedural?.cancel();
     this.settlement?.dispose(); this.settlement = null; this.settlementAnchor = null;
     this.committedProcedural = undefined;
-    const config = {...DEFAULT_PROCEDURAL_CONFIG,...overrides,seed,origin};
+    const config = {...(overrides?.profile ? settlementProfileConfig(overrides.profile) : DEFAULT_PROCEDURAL_CONFIG),...overrides,seed,origin};
+    if (config.profile && this.procedural?.config.profile !== config.profile) this.ambientLifeOptions.count = SETTLEMENT_PROFILES[config.profile].villagers;
     this.procedural = new ProceduralSettlementSession(config);
     this.procedural.start(); this.settlementEnabled = true;
     this.onProceduralStatus?.({state:"waiting-terrain",seed,requested:config.targetBuildingCount,accepted:0,rejected:0,terrainReady:false,message:"Waiting for confirmed DEM coverage.",navigation:{nodes:[],edges:[]}});
