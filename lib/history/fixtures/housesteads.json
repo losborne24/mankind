@@ -44,6 +44,14 @@
       "url": "https://www.english-heritage.org.uk/visit/places/housesteads-roman-fort-hadrians-wall/history/description/",
       "accessed": "2026-10-29",
       "citation": "Fort interior and wall/gates sections. Page reviewed directly; no images or measurements transcribed."
+    },
+    {
+      "id": "source:wallgis",
+      "title": "WallGIS — Hadrian’s Wall GIS, fort polygon CUID 499",
+      "url": "https://doi.org/10.5284/1100071",
+      "publisher": "Archaeology Data Service",
+      "accessed": "2026-10-30",
+      "citation": "Murphy, Turner and Collins (2024). Fort shapefile reviewed directly; archive metadata declares CC BY 4.0. Source polygon retained without simplification; coordinates transformed. Roman phase unspecified."
     }
   ],
   "places": [
@@ -363,6 +371,225 @@
           "source:eh-housesteads-description"
         ],
         "note": "A future reconstruction request. Source descriptions guide review; no complete scene or model fidelity is established."
+      }
+    }
+  ],
+  "referenceAreas": [
+    {
+      "id": "reference:housesteads-fort-outline",
+      "title": "WallGIS fort outline · phase unspecified",
+      "placeId": "place:housesteads-fort",
+      "kind": "site-outline",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -2.33182804,
+              55.01358094
+            ],
+            [
+              -2.33179694,
+              55.0136136
+            ],
+            [
+              -2.33175902,
+              55.01363498
+            ],
+            [
+              -2.33171527,
+              55.01364597
+            ],
+            [
+              -2.33167509,
+              55.01365249
+            ],
+            [
+              -2.32926767,
+              55.01395282
+            ],
+            [
+              -2.32920627,
+              55.0139587
+            ],
+            [
+              -2.32914381,
+              55.01395446
+            ],
+            [
+              -2.32909196,
+              55.01394778
+            ],
+            [
+              -2.32905243,
+              55.013932
+            ],
+            [
+              -2.32902589,
+              55.01391268
+            ],
+            [
+              -2.32900968,
+              55.01389046
+            ],
+            [
+              -2.32897762,
+              55.01382346
+            ],
+            [
+              -2.32894321,
+              55.01373121
+            ],
+            [
+              -2.32892239,
+              55.01367537
+            ],
+            [
+              -2.32889437,
+              55.01360027
+            ],
+            [
+              -2.32887226,
+              55.01354098
+            ],
+            [
+              -2.32886697,
+              55.01352553
+            ],
+            [
+              -2.32885311,
+              55.01349457
+            ],
+            [
+              -2.32883527,
+              55.01345508
+            ],
+            [
+              -2.32881961,
+              55.01341675
+            ],
+            [
+              -2.32872307,
+              55.01317343
+            ],
+            [
+              -2.32870225,
+              55.01309137
+            ],
+            [
+              -2.32870471,
+              55.01306915
+            ],
+            [
+              -2.32871768,
+              55.01304532
+            ],
+            [
+              -2.32873484,
+              55.01302802
+            ],
+            [
+              -2.32875455,
+              55.01301336
+            ],
+            [
+              -2.32878901,
+              55.01299814
+            ],
+            [
+              -2.32882834,
+              55.01298989
+            ],
+            [
+              -2.3292422,
+              55.0129375
+            ],
+            [
+              -2.32950457,
+              55.01290319
+            ],
+            [
+              -2.33127521,
+              55.01267527
+            ],
+            [
+              -2.33135214,
+              55.01266818
+            ],
+            [
+              -2.33138188,
+              55.01266791
+            ],
+            [
+              -2.33141454,
+              55.0126703
+            ],
+            [
+              -2.33146399,
+              55.01268393
+            ],
+            [
+              -2.33150004,
+              55.0127005
+            ],
+            [
+              -2.33152892,
+              55.01272147
+            ],
+            [
+              -2.33154045,
+              55.01274077
+            ],
+            [
+              -2.33157405,
+              55.01283594
+            ],
+            [
+              -2.3316446,
+              55.01302533
+            ],
+            [
+              -2.33167684,
+              55.01310364
+            ],
+            [
+              -2.33169032,
+              55.01314155
+            ],
+            [
+              -2.33169767,
+              55.01316379
+            ],
+            [
+              -2.33181948,
+              55.0134897
+            ],
+            [
+              -2.33183727,
+              55.0135375
+            ],
+            [
+              -2.3318374,
+              55.01355368
+            ],
+            [
+              -2.33182804,
+              55.01358094
+            ]
+          ]
+        ]
+      },
+      "licence": {
+        "title": "CC BY 4.0",
+        "url": "https://creativecommons.org/licenses/by/4.0/",
+        "attribution": "Murphy, K., Turner, A. and Collins, R. (2024), WallGIS, Archaeology Data Service, doi:10.5284/1100071. Data © Newcastle University, Prof Rob Collins. Housesteads outline extracted and transformed to WGS84 by Mankind."
+      },
+      "evidence": {
+        "certainty": "documented",
+        "sources": [
+          "source:wallgis"
+        ],
+        "note": "Published fort polygon CUID 499, transformed from British National Grid. Reference outline only: no phase attribution, building footprint or survey accuracy asserted."
       }
     }
   ]

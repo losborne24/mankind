@@ -23,7 +23,7 @@ const ledger = JSON.parse(await readFile('lib/history/curation/housesteads-revie
 const world = validate(raw), at = year => ({ start: { year } });
 assert.deepEqual(await GET().json(), raw);
 assert.equal(world.places.length, 2); assert.equal(world.layouts.length, 3); assert.equal(world.events.length, 2);
-assert.equal(world.sources.length, 5); assert.equal(world.roadNetworks.length + world.routes.length, 0);
+assert.equal(world.sources.length, 6); assert.equal(world.roadNetworks.length + world.routes.length, 0);
 assert.ok(world.assets.every(asset => !asset.registryId));
 assert.ok(world.layouts.every(layout => !layout.buildings.length));
 assert.ok(world.scenes.every(scene => scene.fallback === 'map-only' && !scene.required));
@@ -53,7 +53,7 @@ const invalid = structuredClone(raw); invalid.layouts[0].period.approximate = 'c
 const routeWorld = structuredClone(raw); routeWorld.routes.push({ id: 'route:approximate-test', title: 'Synthetic date adapter test', period: { start: { year: 200 }, approximate: true }, coordinates: [[0, 0], [1, 0]], placeIds: [], evidence: { certainty: 'illustrative', sources: [], note: 'Synthetic test only.' } });
 const projection = toScenarioContent(routeWorld); assert.equal(projection.content.routes[0].time, undefined); assert.ok(projection.warnings.some(w => w.includes('Uncertain route')));
 
-const records = new Map(['places', 'layouts', 'events', 'scenes', 'assets'].flatMap(key => world[key].map(record => [record.id, record])));
+const records = new Map(['places', 'layouts', 'events', 'scenes', 'assets', 'referenceAreas'].flatMap(key => (world[key] ?? []).map(record => [record.id, record])));
 assert.equal(ledger.datasetId, world.id);
 for (const claim of ledger.claims) {
   assert.ok(records.has(claim.recordId));

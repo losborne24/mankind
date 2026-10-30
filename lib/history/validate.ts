@@ -1,5 +1,6 @@
 import type { HistoricalWorldData, HistoricalPeriod } from '@/lib/history/schema';
 import { periodBounds, validateHistoricalDate } from '@/lib/history/time';
+import { validateReferencePolygon } from '@/lib/history/referenceGeometry';
 
 type RecordValue = Record<string, unknown>;
 const object = (value: unknown, keys: string[]): RecordValue => {
@@ -59,7 +60,7 @@ export function validateHistoricalWorld(value: unknown): HistoricalWorldData {
     ancestors.delete(v);
   };
   json(value);
-  const root = object(value, ['version', 'id', 'title', 'coordinateSystem', 'calendar', 'sources', 'places', 'assets', 'roadNetworks', 'layouts', 'events', 'routes', 'scenes']);
+  const root = object(value, ['version', 'id', 'title', 'coordinateSystem', 'calendar', 'sources', 'places', 'referenceAreas', 'assets', 'roadNetworks', 'layouts', 'events', 'routes', 'scenes']);
   if (root.version !== 1 || root.coordinateSystem !== 'WGS84' || root.calendar !== 'proleptic-gregorian') throw Error('Unsupported historical world conventions');
   const id = (v: unknown): string => { const s = text(v); if (!/^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,127}$/.test(s)) throw Error('Invalid historical ID'); return s; };
   id(root.id); text(root.title);
@@ -110,6 +111,18 @@ export function validateHistoricalWorld(value: unknown): HistoricalWorldData {
       if (chain.has(parent.parentId) || chain.size > 64) throw Error('Cyclic or excessive place ancestry');
       chain.add(parent.parentId); parent = ref(parent.parentId, 'places');
     }
+  }
+  const areas = root.referenceAreas === undefined ? [] : list(root.referenceAreas);
+  if (areas.length > 100) throw Error('Reference area budget');
+  for (const value of areas) {
+    const area = object(value, ['id', 'title', 'placeId', 'kind', 'geometry', 'licence', 'evidence']);
+    const key = id(area.id); if (allIds.has(key)) throw Error('Duplicate historical ID'); allIds.add(key);
+    text(area.title); oneOf(area.kind, ['site-outline']);
+    const place = ref(area.placeId, 'places');
+    validateReferencePolygon(area.geometry, (place.position as { coordinate: [number, number] }).coordinate);
+    evidence(area.evidence);
+    if (!list((area.evidence as RecordValue).sources).length) throw Error('Reference geometry needs source evidence');
+    const licence = object(area.licence, ['title', 'url', 'attribution']); text(licence.title); url(licence.url); text(licence.attribution);
   }
   for (const a of indexes.assets.values()) {
     object(a, ['id', 'category', 'registryId', 'licence', 'evidence']);

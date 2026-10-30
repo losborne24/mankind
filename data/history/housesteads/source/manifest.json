@@ -1,0 +1,22 @@
+{
+  "sourceURL": "https://archaeologydataservice.ac.uk/catalogue/adsdata/arch-4975-1/dissemination/Shapefiles/WallGIS_Fort_polygon.zip",
+  "metadataURL": "https://archaeologydataservice.ac.uk/archives/collections/view/1004975/metadata.cfm",
+  "retrieved": "2026-10-30",
+  "sha256": "4bc1cc1144a46c9107cfa31966294baaf7f0d3c786199356fb74acc4e0ac99f6",
+  "record": {
+    "CUID": "499",
+    "ModernName": "Housesteads"
+  },
+  "sourceCRS": "EPSG:27700",
+  "targetCRS": "EPSG:4326",
+  "rasterioVersion": "1.4.3",
+  "vertices": 48,
+  "method": "Source vertices retained, transformed and rounded to 8 decimal places; accuracy unquantified.",
+  "phaseStatus": "unspecified",
+  "geometryRole": "site-outline",
+  "licence": {
+    "title": "CC BY 4.0",
+    "url": "https://creativecommons.org/licenses/by/4.0/",
+    "attribution": "Murphy, K., Turner, A. and Collins, R. (2024), WallGIS, Archaeology Data Service, doi:10.5284/1100071. Data © Newcastle University, Prof Rob Collins. Housesteads outline extracted and transformed to WGS84 by Mankind."
+  }
+}

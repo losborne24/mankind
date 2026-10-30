@@ -30,6 +30,7 @@ export interface HistoricalInspection {
     layoutStatus: HistoricalPlaceSelection['layoutStatus'];
     layouts: { title: string; period: HistoricalPeriod }[];
     warnings: string[];
+    referenceAreas?: { title: string; licence: { title: string; url: string; attribution: string } }[];
     target?: HistoricalVisitTarget;
     unavailableReason?: string;
   }[];
@@ -51,6 +52,8 @@ export function inspectHistoricalRecord(world: HistoricalWorldData, selection: H
     const supported = Math.abs(p.position.coordinate[1]) <= 85;
     const detailed = selected.layoutStatus === 'ready';
     const layouts = selected.layoutIds.map(id => world.layouts.find(layout => layout.id === id)!);
+    const areas = (world.referenceAreas ?? []).filter(area => area.placeId === p.id);
+    for (const area of areas) evidence.push({ label: `Reference outline · ${area.title}`, value: area.evidence });
     for (const layout of layouts) evidence.push({ label: `Layout · ${layout.title}`, value: layout.evidence });
     const warnings = selected.warnings.flatMap(warning => {
       if (warning.includes('pedestrian navigation')) return [];
@@ -65,6 +68,7 @@ export function inspectHistoricalRecord(world: HistoricalWorldData, selection: H
       layoutStatus: selected.layoutStatus,
       layouts: layouts.map(layout => ({ title: layout.title, period: layout.period })),
       warnings: [...new Set(warnings)],
+      referenceAreas: areas.map(area => ({ title: area.title, licence: area.licence })),
       ...(eligible && supported ? { target: { placeId: p.id, center: [...p.position.coordinate] as [number, number], zoom: detailed ? 18.4 : p.kind === 'region' ? 11 : 14, pitch: detailed ? 55 : 35, bearing: detailed ? -25 : 0 } } : { unavailableReason: supported ? 'This record is not dated for the current selection.' : 'This location is outside the current map navigation range.' }),
     };
   });

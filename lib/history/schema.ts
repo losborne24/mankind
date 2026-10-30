@@ -32,6 +32,16 @@ export interface HistoricalPlace {
   radiusMeters: number;
   evidence: Evidence;
 }
+/** Source reference geometry, never a dated layout or a reconstruction footprint. */
+export interface HistoricalReferenceArea {
+  id: string;
+  title: string;
+  placeId: string;
+  kind: 'site-outline';
+  geometry: { type: 'Polygon'; coordinates: [number, number][][] };
+  licence: { title: string; url: string; attribution: string };
+  evidence: Evidence;
+}
 /** Logical reference only. No URL is fetched and no architectural era is inferred. */
 export interface HistoricalAsset {
   id: string;
@@ -103,6 +113,7 @@ export interface HistoricalWorldData {
   calendar: 'proleptic-gregorian';
   sources: HistoricalSource[];
   places: HistoricalPlace[];
+  referenceAreas?: HistoricalReferenceArea[];
   assets: HistoricalAsset[];
   roadNetworks: HistoricalRoadNetwork[];
   layouts: HistoricalLayout[];

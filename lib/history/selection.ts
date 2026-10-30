@@ -1,4 +1,4 @@
-import type { HistoricalWorldData, HistoricalPlace, HistoricalEvent, HistoricalRoute, HistoricalPeriod } from '@/lib/history/schema';
+import type { HistoricalWorldData, HistoricalPlace, HistoricalEvent, HistoricalRoute, HistoricalPeriod, HistoricalReferenceArea } from '@/lib/history/schema';
 import type { HistoricalTime } from '@/lib/scenarios/schema';
 import type { SettlementDescriptor } from '@/map/settlements/settlementStreaming';
 import { matchHistoricalTime, periodBounds } from '@/lib/history/time';
@@ -19,6 +19,7 @@ export interface HistoricalSelection {
   events: { event: HistoricalEvent; match: Exclude<Match, 'outside'> }[];
   routes: { route: HistoricalRoute; match: Exclude<Match, 'outside'> }[];
   descriptors: SettlementDescriptor[];
+  referenceAreas?: HistoricalReferenceArea[];
 }
 /** Input must be a validated dataset. No camera/date mutations or asset requests. */
 export function selectHistoricalWorld(world: HistoricalWorldData, time: HistoricalTime): HistoricalSelection {
@@ -57,5 +58,6 @@ export function selectHistoricalWorld(world: HistoricalWorldData, time: Historic
     if (result.descriptor) descriptors.push(result.descriptor);
     return row;
   });
-  return { time: structuredClone(time), places, events, routes, descriptors };
+  const visible = new Set(places.filter(row => ['within', 'possible'].includes(row.presence)).map(row => row.place.id));
+  return { time: structuredClone(time), places, events, routes, descriptors, referenceAreas: (world.referenceAreas ?? []).filter(area => visible.has(area.placeId)) };
 }

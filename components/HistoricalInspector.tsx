@@ -41,6 +41,7 @@ export function HistoricalInspector({ inspection, onClose, onVisit, onInspectPla
         <p className="mt-1 font-mono text-[11px] text-white/50">{location.coordinate.map(value => value.toFixed(4)).join(', ')} · {location.uncertaintyMeters !== undefined ? `stated uncertainty ${location.uncertaintyMeters} m` : 'accuracy unquantified'}</p>
         {location.layouts.map((layout, i) => <p key={i} className="mt-2 text-xs text-white/60">{layout.title} · {formatInspectionPeriod(layout.period)}</p>)}
         {location.warnings.map((warning, i) => <p key={i} className="mt-2 text-xs leading-relaxed text-white/60">{warning}</p>)}
+        {location.referenceAreas?.map((area, i) => <div key={i} className="mt-3 text-xs leading-relaxed text-white/65"><p>{area.title}</p><p>Dashed blue outline · source reference only; no phase-specific building geometry.</p><p>{area.licence.attribution} · <a href={area.licence.url} target="_blank" rel="noreferrer" className="text-accent underline">{area.licence.title}</a></p></div>)}
         {location.unavailableReason && <p className="mt-2 text-xs text-white/60">{location.unavailableReason}</p>}
         <button disabled={!location.target} className="journey-button mt-2 bg-white/10 text-xs disabled:opacity-40" onClick={() => onVisit(location.placeId)}>Visit {location.target && location.layoutStatus === 'ready' ? 'dated layout' : 'geographic context'}</button>
         {inspection.key.kind === 'event' && <button className="journey-button text-xs text-accent" onClick={() => onInspectPlace(location.placeId)}>Inspect place</button>}

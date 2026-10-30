@@ -63,4 +63,6 @@ This validates metadata and map behavior. No architectural accuracy, detailed 3D
 
 ## Next step
 
+Step 5a now adds a separately sourced fort reference outline and a sixth citation: [reference geometry report](housesteads-reference-geometry.md). The Step 4 counts above describe the original curation milestone; building geometry and phase reconstruction remain unavailable.
+
 Phase 4 Step 5: acquire and review rights-cleared, georeferenced building footprints for one selected phase, then validate their ingestion before introducing reconstruction models. Resolve the geometry and chronology gaps in the ledger first; generic Roman models do not establish site evidence.

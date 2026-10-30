@@ -409,3 +409,9 @@ Choose Housesteads in **Debug tools → Historical dataset** to review sourced
 phase contexts, approximate dates and explicit geometry gaps. The site remains
 map-only. [Curation, source review and validation](docs/housesteads-curation.md).
 Run `node scripts/check-phase3.mjs docs/previews/housesteads` for the full gate.
+
+### Housesteads reference geometry (Phase 4 Step 5a)
+
+The Housesteads dataset now includes the attributed WallGIS fort outline as a
+dashed reference overlay. Its phase is unspecified; dated building footprints
+remain outstanding. [Import, validation and remaining work](docs/housesteads-reference-geometry.md).

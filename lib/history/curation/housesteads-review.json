@@ -1,7 +1,7 @@
 {
   "datasetId": "world:housesteads-reviewed-v1",
   "reviewed": "2026-10-29",
-  "scope": "One fort, one associated monument, two dating windows and three geometry-free phase contexts. Not a reconstructed settlement.",
+  "scope": "One fort, one associated monument, two dating windows, three geometry-free phase contexts and a separately sourced, phase-unspecified reference outline. Not a reconstructed settlement.",
   "claims": [
     {
       "id": "claim:fort-identity",
@@ -93,6 +93,16 @@
       ],
       "status": "inferred",
       "note": "Legend band describes phased fabric, not mutually exclusive complete settlement snapshots."
+    },
+    {
+      "id": "claim:fort-reference-outline",
+      "recordId": "reference:housesteads-fort-outline",
+      "field": "geometry",
+      "sourceIds": [
+        "source:wallgis"
+      ],
+      "status": "documented",
+      "note": "Published fort polygon CUID 499 transformed to WGS84; reference outline only, no phase or building attribution."
     }
   ],
   "anchors": {
@@ -142,5 +152,6 @@
       "note": "Circa boundaries, the gap between phase bands, boundary overlap and late occupation limits require review; do not interpolate a missing phase."
     }
   ],
-  "rights": "No drawing, image or traced geometry is distributed. Source references are citations, not asset licences."
+  "rights": "English Heritage drawings, images and traced geometry are not distributed. The separately acquired WallGIS fort polygon archive and derived outline are distributed under CC BY 4.0 with attribution and a source manifest.",
+  "geometryReview": "2026-10-30"
 }

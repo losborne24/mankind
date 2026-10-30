@@ -1,0 +1,64 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import ts from 'typescript';
+const modules = new Map();
+async function load(path) {
+  if (modules.has(path)) return modules.get(path);
+  const { outputText: code } = ts.transpileModule(await readFile(`${path}.ts`, 'utf8').catch(() => readFile(`${path}.tsx`, 'utf8')), { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX } });
+  let output = code;
+  for (const match of [...output.matchAll(/from ['"]([^'"]+)['"]/g)]) {
+    const spec = match[1], url = spec.startsWith('@/') ? await load(spec.slice(2)) : import.meta.resolve(spec);
+    output = output.replace(match[0], `from "${url}"`);
+  }
+  const url = `data:text/javascript;base64,${Buffer.from(output).toString('base64')}`; modules.set(path, url); return url;
+}
+const { validateHistoricalWorld: validate } = await import(await load('lib/history/validate'));
+const { selectHistoricalWorld: select } = await import(await load('lib/history/selection'));
+const { inspectHistoricalRecord: inspect } = await import(await load('lib/history/inspection'));
+const { historicalWorldOverlays } = await import(await load('map/historicalWorldOverlays'));
+const { HistoricalInspector } = await import(await load('components/HistoricalInspector'));
+const { createElement } = await import('react'); const { renderToStaticMarkup } = await import('react-dom/server');
+const raw = JSON.parse(await readFile('lib/history/fixtures/housesteads.json', 'utf8'));
+const manifest = JSON.parse(await readFile('data/history/housesteads/source/manifest.json', 'utf8'));
+assert.equal(createHash('sha256').update(await readFile('data/history/housesteads/source/WallGIS_Fort_polygon.zip')).digest('hex'), manifest.sha256);
+const world = validate(raw), at = year => select(world, { start: { year } });
+assert.equal(world.referenceAreas.length, 1); assert.equal(world.referenceAreas[0].geometry.coordinates[0].length, 48);
+assert.equal(world.referenceAreas[0].licence.title, 'CC BY 4.0'); assert.equal(manifest.phaseStatus, 'unspecified');
+assert.equal(world.referenceAreas[0].kind, 'site-outline');
+for (const year of [125, 200, 270, 300]) { assert.equal(at(year).referenceAreas.length, 1); assert.equal(at(year).descriptors.length, 0); }
+assert.equal(at(150).referenceAreas.length, 0, 'Outline does not establish presence in the phase gap');
+assert.equal(at(500).referenceAreas.length, 0);
+const view = inspect(world, at(200), { kind: 'place', id: 'place:housesteads-fort' });
+assert.equal(view.locations[0].layoutStatus, 'unavailable');
+assert.ok(view.sources.some(source => source.id === 'source:wallgis'));
+const html = renderToStaticMarkup(createElement(HistoricalInspector, { inspection: view, onClose() {}, onVisit() {}, onInspectPlace() {} }));
+assert.ok(html.includes('source reference only')); assert.ok(html.includes('CC BY 4.0')); assert.ok(html.includes('Newcastle University'));
+const reject = change => { const value = structuredClone(raw); change(value.referenceAreas[0], value); assert.throws(() => validate(value)); };
+reject(a => a.geometry.coordinates[0].pop());
+reject(a => a.geometry.coordinates.push(a.geometry.coordinates[0]));
+reject(a => a.geometry.coordinates[0][0][0] = NaN);
+reject(a => a.geometry.coordinates[0] = [[0, 0], [1, 0], [0, 1], [0, 0]]);
+reject(a => a.geometry.coordinates[0].splice(1, 0, a.geometry.coordinates[0][0]));
+const p = [-2.33031, 55.013259];
+reject(a => a.geometry.coordinates[0] = [p, [p[0]+.001,p[1]+.001], [p[0],p[1]+.001], [p[0]+.001,p[1]], p]);
+reject(a => a.geometry.coordinates[0] = [p, [p[0]+.001,p[1]], [p[0]+.002,p[1]], p]);
+reject(a => a.geometry.coordinates[0] = [p, [p[0]+.002,p[1]], [p[0]+.001,p[1]], [p[0]+.001,p[1]+.001], p]);
+reject(a => a.geometry.type = 'MultiPolygon'); reject(a => a.placeId = 'missing');
+reject(a => a.id = raw.places[0].id); reject(a => a.evidence.sources = []);
+reject(a => a.licence.attribution = ''); reject(a => a.licence.url = 'file:///tmp/source');
+reject(a => a.period = { start: { year: 200 } });
+reject(a => a.kind = 'building-footprint');
+reject((a, value) => value.referenceAreas = [a, structuredClone(a)]);
+const detached = validate(raw); detached.referenceAreas[0].geometry.coordinates[0][0][0] = 0;
+assert.notEqual(raw.referenceAreas[0].geometry.coordinates[0][0][0], 0);
+const sources = new Map(), layers = new Map(); let data;
+const map = { addSource: id => sources.set(id, { setData: value => { data = value; } }), addLayer: layer => layers.set(layer.id, layer), getSource: id => sources.get(id), getLayer: id => layers.get(id), removeLayer: id => layers.delete(id), removeSource: id => sources.delete(id) };
+const overlay = historicalWorldOverlays(map); overlay.update(at(200));
+assert.equal(data.features.filter(f => f.geometry.type === 'Polygon').length, 1);
+assert.deepEqual(layers.get('historical-world-reference-areas').paint['line-dasharray'], [3, 2]);
+overlay.update(at(500)); assert.equal(data.features.length, 0);
+overlay.update(at(270)); assert.equal(data.features.filter(f => f.geometry.type === 'Polygon').length, 1);
+overlay.update(null); assert.equal(data.features.length, 0); overlay.dispose(); overlay.dispose();
+assert.equal(sources.size + layers.size, 0);
+console.log('Reference geometry: archived source hash, polygon validation, phase separation, attribution, date visibility, no scene descriptors and overlay cleanup pass.');
