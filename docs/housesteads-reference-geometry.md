@@ -34,4 +34,6 @@ Chrome acceptance at localhost verified the [outline with attribution at AD 200]
 
 ## Remaining geometry work
 
+The general dated-footprint pipeline now has a [Menander property-extent pilot](historical-footprint-ingestion.md). This uses a different site with reusable geometry and retains inferred phase uncertainty. It does not resolve the Housesteads building-footprint gap described below.
+
 Step 5b requires rights-cleared individual building footprints with a justified phase attribution. The reviewed WallGIS outline cannot supply these. The linked English Heritage phase plan remains reference-only under its published reproduction restriction. Obtain an appropriate geometry source or express reuse permission before tracing it; then review CRS, georeferencing accuracy, building identity and phase interpretation before adding a dated footprint contract or reconstruction assets. No permission request or message has been sent to a source owner.

@@ -1,0 +1,11 @@
+{
+  "revision": "0f723ab5fb38bf46c2402811e0f0698267387c9c",
+  "sourceURL": "https://raw.githubusercontent.com/p-lod/p-lod-data/0f723ab5fb38bf46c2402811e0f0698267387c9c/property.ttl",
+  "retrieved": "2026-10-30",
+  "sourceFileSHA256": "79d623289a145750b4bc3f83650b5f5360b6fc5f819264a61ed68109bdea81fa",
+  "excerptSHA256": "e11696679b169621cf78421c3f757aabfedb245e56acd7b68c47441c9368a924",
+  "recordURN": "urn:p-lod:id:r1-i10-p4",
+  "licenceDeclaration": "https://p-lod.org/",
+  "licenceNote": "Publisher declares CC-By for all RDF data, using URNs as attribution; licence version unspecified. Images are separately licensed and not included.",
+  "adaptation": "One RDF subject excerpted. GeoJSON XY retained exactly; source Z omitted without interpreting it as height. No tracing, simplification or coordinate transformation."
+}

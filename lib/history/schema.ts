@@ -42,6 +42,19 @@ export interface HistoricalReferenceArea {
   licence: { title: string; url: string; attribution: string };
   evidence: Evidence;
 }
+/** Dated, evidenced 2D extent; never an implicit building model or height. */
+export interface HistoricalFootprint {
+  id: string;
+  title: string;
+  placeId: string;
+  representation: 'property-extent' | 'wall-footprint';
+  period: HistoricalPeriod;
+  phaseTitle: string;
+  phaseEvidence: Evidence;
+  geometry: HistoricalReferenceArea['geometry'];
+  licence: HistoricalReferenceArea['licence'];
+  evidence: Evidence;
+}
 /** Logical reference only. No URL is fetched and no architectural era is inferred. */
 export interface HistoricalAsset {
   id: string;
@@ -114,6 +127,7 @@ export interface HistoricalWorldData {
   sources: HistoricalSource[];
   places: HistoricalPlace[];
   referenceAreas?: HistoricalReferenceArea[];
+  footprints?: HistoricalFootprint[];
   assets: HistoricalAsset[];
   roadNetworks: HistoricalRoadNetwork[];
   layouts: HistoricalLayout[];

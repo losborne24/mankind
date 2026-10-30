@@ -60,7 +60,7 @@ export function validateHistoricalWorld(value: unknown): HistoricalWorldData {
     ancestors.delete(v);
   };
   json(value);
-  const root = object(value, ['version', 'id', 'title', 'coordinateSystem', 'calendar', 'sources', 'places', 'referenceAreas', 'assets', 'roadNetworks', 'layouts', 'events', 'routes', 'scenes']);
+  const root = object(value, ['version', 'id', 'title', 'coordinateSystem', 'calendar', 'sources', 'places', 'referenceAreas', 'footprints', 'assets', 'roadNetworks', 'layouts', 'events', 'routes', 'scenes']);
   if (root.version !== 1 || root.coordinateSystem !== 'WGS84' || root.calendar !== 'proleptic-gregorian') throw Error('Unsupported historical world conventions');
   const id = (v: unknown): string => { const s = text(v); if (!/^[a-zA-Z0-9][a-zA-Z0-9._:-]{0,127}$/.test(s)) throw Error('Invalid historical ID'); return s; };
   id(root.id); text(root.title);
@@ -123,6 +123,23 @@ export function validateHistoricalWorld(value: unknown): HistoricalWorldData {
     evidence(area.evidence);
     if (!list((area.evidence as RecordValue).sources).length) throw Error('Reference geometry needs source evidence');
     const licence = object(area.licence, ['title', 'url', 'attribution']); text(licence.title); url(licence.url); text(licence.attribution);
+  }
+  const footprints = root.footprints === undefined ? [] : list(root.footprints);
+  if (footprints.length > 100) throw Error('Historical footprint budget');
+  for (const value of footprints) {
+    const f = object(value, ['id', 'title', 'placeId', 'representation', 'period', 'phaseTitle', 'phaseEvidence', 'geometry', 'licence', 'evidence']);
+    const key = id(f.id); if (allIds.has(key)) throw Error('Duplicate historical ID'); allIds.add(key);
+    text(f.title); oneOf(f.representation, ['property-extent', 'wall-footprint']); text(f.phaseTitle);
+    const place = ref(f.placeId, 'places'); period(f.period);
+    if (place.period !== undefined) overlap(f.period, place.period);
+    validateReferencePolygon(f.geometry, (place.position as { coordinate: [number, number] }).coordinate);
+    for (const claim of [f.evidence, f.phaseEvidence]) {
+      evidence(claim);
+      if (!list((claim as RecordValue).sources).length) throw Error('Footprint geometry and phase each need source evidence');
+      if (!['documented', 'inferred'].includes((claim as RecordValue).certainty as string)) throw Error('Footprints need reviewed geometry and phase evidence');
+    }
+    if ((f.phaseEvidence as RecordValue).certainty === 'inferred' && !(f.period as HistoricalPeriod).approximate && !(f.period as HistoricalPeriod).uncertaintyYears) throw Error('Inferred footprint phase must retain date uncertainty');
+    const licence = object(f.licence, ['title', 'url', 'attribution']); text(licence.title); url(licence.url); text(licence.attribution);
   }
   for (const a of indexes.assets.values()) {
     object(a, ['id', 'category', 'registryId', 'licence', 'evidence']);

@@ -1,0 +1,38 @@
+{
+  "datasetId": "world:menander-footprint-v1",
+  "reviewed": "2026-10-30",
+  "claims": [
+    {
+      "recordId": "footprint:menander-property-ad79",
+      "field": "geometry",
+      "status": "documented",
+      "sourceIds": [
+        "source:plod-menander"
+      ]
+    },
+    {
+      "recordId": "footprint:menander-property-ad79",
+      "field": "period",
+      "status": "inferred",
+      "sourceIds": [
+        "source:ling-menander",
+        "source:plod-menander"
+      ]
+    },
+    {
+      "recordId": "place:house-of-menander",
+      "field": "position.coordinate",
+      "status": "inferred",
+      "sourceIds": [
+        "source:plod-menander"
+      ]
+    }
+  ],
+  "limits": [
+    "Property extent includes open spaces; cannot be extruded as a solid building.",
+    "No wall footprints, floor levels, heights, roofs, materials or doors approved.",
+    "AD 79 phase association is inferred and remains a possible match.",
+    "RDF CC-By declaration is the reuse basis; separate ArcGIS service does not supply the grant.",
+    "No protected plan traced. No images included. Housesteads phase geometry remains unresolved."
+  ]
+}

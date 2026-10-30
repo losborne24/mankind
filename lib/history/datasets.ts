@@ -5,6 +5,9 @@ export const HISTORICAL_DATASETS = [
   { id: 'housesteads', title: 'Housesteads Roman Fort · phase contexts', label: 'Housesteads', url: '/api/historical-world/housesteads',
     description: 'Curated phase evidence · partial date coverage · reconstruction geometry unavailable.',
     preview: { date: { year: 200 }, center: [-2.330310, 55.013259] as [number, number], zoom: 14, label: 'View Housesteads context' } },
+  { id: 'menander', title: 'House of Menander · AD 79 property extent', label: 'Menander', url: '/api/historical-world/menander',
+    description: 'Sourced property extent · inferred final phase · no reconstructed architecture.',
+    preview: { date: { year: 79 }, center: [14.489955676746913, 40.749670168045924] as [number, number], zoom: 18, label: 'View Menander footprint' } },
 ] as const;
 /** Only explicitly registered local datasets are fetched. Citations are never fetched. */
 export async function loadHistoricalDataset(id: string, signal: AbortSignal): Promise<unknown> {

@@ -415,3 +415,10 @@ Run `node scripts/check-phase3.mjs docs/previews/housesteads` for the full gate.
 The Housesteads dataset now includes the attributed WallGIS fort outline as a
 dashed reference overlay. Its phase is unspecified; dated building footprints
 remain outstanding. [Import, validation and remaining work](docs/housesteads-reference-geometry.md).
+
+### Dated footprint ingestion (Phase 4 Step 5b pilot)
+
+Choose **House of Menander · AD 79 property extent** in the historical dataset
+controls to review a sourced property polygon with an inferred final-phase date.
+It remains 2D; open spaces are not treated as buildings.
+[Source review, data contract and validation](docs/historical-footprint-ingestion.md).

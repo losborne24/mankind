@@ -1,5 +1,9 @@
 # Historical World Data Schema v1 — Phase 4 Step 1
 
+Step 5b adds optional `footprints` with separate geometry/phase evidence, date
+uncertainty, representation and attribution. These dated 2D extents do not create
+3D settlement descriptors. [Footprint ingestion pilot](historical-footprint-ingestion.md).
+
 Step 5a adds optional `referenceAreas`: cited, attributed single-ring site outlines, separate from dated layouts. These have no phase or building binding and never produce scene descriptors. [Reference geometry contract and validation](housesteads-reference-geometry.md).
 
 Step 2 now implements [explicit dataset loading and date-aware selection](historical-dataset-loading.md). The Step 1 limits below describe the original schema milestone; see Step 2 for the current live opt-in integration.

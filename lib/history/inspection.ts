@@ -1,4 +1,4 @@
-import type { Evidence, HistoricalPeriod, HistoricalSource, HistoricalWorldData } from '@/lib/history/schema';
+import type { Evidence, HistoricalPeriod, HistoricalSource, HistoricalWorldData, HistoricalFootprint } from '@/lib/history/schema';
 import type { HistoricalTime } from '@/lib/scenarios/schema';
 import type { HistoricalSelection, HistoricalPlaceSelection } from '@/lib/history/selection';
 import { matchHistoricalTime } from '@/lib/history/time';
@@ -31,6 +31,7 @@ export interface HistoricalInspection {
     layouts: { title: string; period: HistoricalPeriod }[];
     warnings: string[];
     referenceAreas?: { title: string; licence: { title: string; url: string; attribution: string } }[];
+    footprints?: { title: string; phaseTitle: string; period: HistoricalPeriod; match: 'within' | 'possible' | 'outside'; representation: HistoricalFootprint['representation']; licence: HistoricalFootprint['licence'] }[];
     target?: HistoricalVisitTarget;
     unavailableReason?: string;
   }[];
@@ -53,6 +54,11 @@ export function inspectHistoricalRecord(world: HistoricalWorldData, selection: H
     const detailed = selected.layoutStatus === 'ready';
     const layouts = selected.layoutIds.map(id => world.layouts.find(layout => layout.id === id)!);
     const areas = (world.referenceAreas ?? []).filter(area => area.placeId === p.id);
+    const footprints = (world.footprints ?? []).filter(footprint => footprint.placeId === p.id);
+    for (const footprint of footprints) {
+      evidence.push({ label: `Footprint geometry · ${footprint.title}`, value: footprint.evidence });
+      evidence.push({ label: `Footprint phase · ${footprint.phaseTitle}`, value: footprint.phaseEvidence });
+    }
     for (const area of areas) evidence.push({ label: `Reference outline · ${area.title}`, value: area.evidence });
     for (const layout of layouts) evidence.push({ label: `Layout · ${layout.title}`, value: layout.evidence });
     const warnings = selected.warnings.flatMap(warning => {
@@ -69,7 +75,8 @@ export function inspectHistoricalRecord(world: HistoricalWorldData, selection: H
       layouts: layouts.map(layout => ({ title: layout.title, period: layout.period })),
       warnings: [...new Set(warnings)],
       referenceAreas: areas.map(area => ({ title: area.title, licence: area.licence })),
-      ...(eligible && supported ? { target: { placeId: p.id, center: [...p.position.coordinate] as [number, number], zoom: detailed ? 18.4 : p.kind === 'region' ? 11 : 14, pitch: detailed ? 55 : 35, bearing: detailed ? -25 : 0 } } : { unavailableReason: supported ? 'This record is not dated for the current selection.' : 'This location is outside the current map navigation range.' }),
+      footprints: footprints.map(f => ({ title: f.title, phaseTitle: f.phaseTitle, period: f.period, representation: f.representation, licence: f.licence, match: matchHistoricalTime(f.period, selection.time) })),
+      ...(eligible && supported ? { target: { placeId: p.id, center: [...p.position.coordinate] as [number, number], zoom: detailed ? 18.4 : footprints.some(f => matchHistoricalTime(f.period, selection.time) !== 'outside') ? 18 : p.kind === 'region' ? 11 : 14, pitch: detailed ? 55 : 35, bearing: detailed ? -25 : 0 } } : { unavailableReason: supported ? 'This record is not dated for the current selection.' : 'This location is outside the current map navigation range.' }),
     };
   });
   const sourceIds = new Set(evidence.flatMap(group => group.value.sources));
