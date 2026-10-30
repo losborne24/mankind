@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "id": "catalogue:menander-reconstruction",
+      "version": 1,
+      "title": "House of Menander — reconstruction draft",
+      "placeId": "place:house-of-menander",
+      "category": "building",
+      "period": {
+        "start": {
+          "year": 79
+        },
+        "approximate": true
+      },
+      "sources": [
+        {
+          "id": "source:plod-menander",
+          "title": "P-LOD property I.10.4 — House of Menander",
+          "url": "https://github.com/p-lod/p-lod-data/blob/0f723ab5fb38bf46c2402811e0f0698267387c9c/property.ttl",
+          "publisher": "Pompeii Linked Open Data",
+          "accessed": "2026-10-30",
+          "citation": "Pinned RDF revision 0f723ab5fb38bf46c2402811e0f0698267387c9c; subject urn:p-lod:id:r1-i10-p4; ArcGIS ID BLD_000011. Source record inspected directly."
+        },
+        {
+          "id": "source:plod-licence",
+          "title": "P-LOD data licensing declaration",
+          "url": "https://p-lod.org/",
+          "publisher": "Pompeii Linked Open Data",
+          "accessed": "2026-10-30",
+          "citation": "About section declares CC-By for all RDF data and URNs as attribution. No licence version stated. Image licensing is separate; no images imported."
+        },
+        {
+          "id": "source:pbmp-method",
+          "title": "PBMP Buildings — geometry lineage and limitations",
+          "url": "https://services.arcgis.com/2gdL2gxYNFY2TOUb/arcgis/rest/services/PBMP_NavMap2_BLD/FeatureServer",
+          "publisher": "Pompeii Bibliography and Mapping Project",
+          "accessed": "2026-10-30",
+          "citation": "Description reviewed directly: GIS lineage from digitized RICA mapping; rectification and projection discrepancies possible. Used as methodological context, not as the reuse grant or geometry download."
+        },
+        {
+          "id": "source:ling-menander",
+          "title": "The Insula of the Menander at Pompeii: Interim Report",
+          "url": "https://doi.org/10.1017/S0003581500014347",
+          "publisher": "Roger Ling · The Antiquaries Journal",
+          "accessed": "2026-10-30",
+          "citation": "1983, volume 63(1), pp. 34–57; p. 36 (PDF page 3) directly reviewed for final AD 79 context. Textual interpretation only; no figure, plan or image copied."
+        }
+      ],
+      "features": [
+        {
+          "title": "Property extent",
+          "certainty": "documented",
+          "sourceIds": [
+            "source:plod-menander"
+          ],
+          "note": "A property boundary including open spaces; not a wall plan."
+        },
+        {
+          "title": "Final AD 79 context",
+          "certainty": "inferred",
+          "sourceIds": [
+            "source:ling-menander",
+            "source:plod-menander"
+          ],
+          "note": "Interpretive phase association, retained as approximate."
+        },
+        {
+          "title": "Walls, heights, openings and roof",
+          "certainty": "unknown",
+          "sourceIds": [],
+          "note": "No reconstruction geometry or architectural interpretation has been supplied."
+        }
+      ],
+      "limitations": [
+        "Metadata draft only. No model binary, wall geometry or appearance is provided."
+      ],
+      "rights": {
+        "status": "unresolved",
+        "title": "Reconstruction rights not yet established",
+        "note": "P-LOD permissions cover the sourced RDF extent; no model has been acquired or authored. A future model needs its own provenance and reuse record."
+      }
+    }
+  ],
+  "reviews": []
+}

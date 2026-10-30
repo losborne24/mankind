@@ -100,11 +100,16 @@ Chrome acceptance at localhost verified:
 The ready 3D path is tested with a synthetic record; it is not claimed as a
 browser-visible reconstruction of any of these historical sites.
 
-## Remaining work and next step
+## Remaining work and revised sequence
+
+The [revised Phase 4 plan](phase4-plan.md) places a persistent catalogue and one
+visible reconstruction before the guided journey. [Step 7 catalogue](asset-catalogue.md)
+is now implemented; Step 8 is the first building. Menander's request pins a draft
+catalogue version and remains map-only.
 
 The current Scenario Player still treats historical scene declarations as
 descriptive. It does not apply dataset scene plans or use them as a preparation
-barrier. That integration belongs to Step 7: author one evidence-grounded journey,
+barrier. That integration now belongs to Step 9: author one evidence-grounded journey,
 bind its scene requirements to this resolver, permit declared map fallbacks and
 reject unmet mandatory requirements before playback. Keep the existing
 interrupt/explore/resume contract.

@@ -33,7 +33,7 @@ world = dict(version=1, id='world:menander-footprint-v1', title='House of Menand
     footprints=[dict(id='footprint:menander-property-ad79', title='Menander property extent', placeId='place:house-of-menander', representation='property-extent',
         period=dict(start=dict(year=79), approximate=True), phaseTitle='Final AD 79 context', phaseEvidence=phase_evidence,
         geometry=dict(type='Polygon', coordinates=[xy]), licence=licence, evidence=geometry_evidence)],
-    assets=[dict(id='asset:menander-architecture', category='building', evidence=evidence('unknown', [], 'No source-grounded Menander reconstruction model has an approved registry binding. The property extent does not supply a building model.'))],
+    assets=[dict(id='asset:menander-architecture', category='building', catalogueRef=dict(id='catalogue:menander-reconstruction', version=1), evidence=evidence('unknown', [], 'No source-grounded Menander reconstruction model has an approved registry binding. The property extent does not supply a building model.'))],
     roadNetworks=[], layouts=[], events=[], routes=[],
     scenes=[dict(id='scene:menander-final-context', title='Menander final-phase scene requirements', description='Show the sourced property extent and evidence. Reconstructed walls, heights and architecture are unavailable.',
         placeId='place:house-of-menander', period=dict(start=dict(year=79), approximate=True), layoutIds=[], assetIds=['asset:menander-architecture'], required=False, fallback='map-only',

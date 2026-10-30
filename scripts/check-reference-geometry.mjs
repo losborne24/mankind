@@ -5,6 +5,7 @@ import ts from 'typescript';
 const modules = new Map();
 async function load(path) {
   if (modules.has(path)) return modules.get(path);
+  if (path.endsWith('.json')) { const url = `data:text/javascript;base64,${Buffer.from(`export default JSON.parse(${JSON.stringify(await readFile(path, 'utf8'))});`).toString('base64')}`; modules.set(path, url); return url; }
   const { outputText: code } = ts.transpileModule(await readFile(`${path}.ts`, 'utf8').catch(() => readFile(`${path}.tsx`, 'utf8')), { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX } });
   let output = code;
   for (const match of [...output.matchAll(/from ['"]([^'"]+)['"]/g)]) {

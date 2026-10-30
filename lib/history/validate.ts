@@ -142,9 +142,13 @@ export function validateHistoricalWorld(value: unknown): HistoricalWorldData {
     const licence = object(f.licence, ['title', 'url', 'attribution']); text(licence.title); url(licence.url); text(licence.attribution);
   }
   for (const a of indexes.assets.values()) {
-    object(a, ['id', 'category', 'registryId', 'licence', 'evidence']);
+    object(a, ['id', 'category', 'registryId', 'catalogueRef', 'licence', 'evidence']);
     oneOf(a.category, ['building', 'infrastructure', 'prop', 'vegetation', 'rock', 'character']); evidence(a.evidence);
     if (a.registryId !== undefined) id(a.registryId);
+    if (a.catalogueRef !== undefined) {
+      const pin = object(a.catalogueRef, ['id', 'version']); id(pin.id); number(pin.version, 1, 1000000);
+      if (!Number.isSafeInteger(pin.version) || a.registryId !== undefined) throw Error('Catalogue pin needs an integer version and cannot also bind a registry ID');
+    }
     if (a.licence !== undefined) { const l = object(a.licence, ['title', 'url']); text(l.title); url(l.url); }
   }
   for (const n of indexes.roadNetworks.values()) {

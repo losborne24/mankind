@@ -60,6 +60,7 @@ export interface HistoricalAsset {
   id: string;
   category: 'building' | 'infrastructure' | 'prop' | 'vegetation' | 'rock' | 'character';
   registryId?: string;
+  catalogueRef?: { id: string; version: number };
   licence?: { title: string; url: string };
   evidence: Evidence;
 }

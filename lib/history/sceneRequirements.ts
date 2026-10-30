@@ -1,4 +1,4 @@
-import { assetRegistry } from '@/lib/assets/registry';
+import { resolveHistoricalAsset, type HistoricalAssetBinding } from '@/lib/history/assetResolution';
 import type { HistoricalSceneRequirement, HistoricalWorldData } from '@/lib/history/schema';
 import type { HistoricalTime } from '@/lib/scenarios/schema';
 import type { HistoricalPlaceSelection } from '@/lib/history/selection';
@@ -11,7 +11,7 @@ export interface HistoricalSceneResolution {
   /** Static projection readiness; does not assert that GLB bytes have loaded. */
   status: 'ready' | 'map-only' | 'unavailable' | 'outside-period';
   issues: { code: string; message: string; assetId?: string }[];
-  assets: { id: string; registryId?: string; status: 'registered' | 'unresolved' | 'category-mismatch' | 'unplaced' | 'unsupported' | 'unreviewed' }[];
+  assets: { id: string; registryId?: string; status: 'registered' | 'unresolved' | 'category-mismatch' | 'unplaced' | 'unsupported' | 'unreviewed' | 'catalogue-blocked'; catalogue?: HistoricalAssetBinding['catalogue'] }[];
   descriptorIds: string[];
   footprintIds: string[];
 }
@@ -39,11 +39,10 @@ export function resolveSceneRequirements(world: HistoricalWorldData, time: Histo
     const assets = new Set([...scene.assetIds, ...placedAssets]);
     result.assets = [...assets].map(id => {
       const reference = world.assets.find(a => a.id === id)!;
-      const registryId = reference.registryId;
-      const registered = registryId && Object.hasOwn(assetRegistry, registryId) ? assetRegistry[registryId as keyof typeof assetRegistry] : undefined;
-      const status = !registered ? 'unresolved' : registered.category !== reference.category ? 'category-mismatch' : reference.evidence.certainty === 'unknown' ? 'unreviewed' : !['building', 'infrastructure'].includes(reference.category) ? 'unsupported' : !placedAssets.has(id) ? 'unplaced' : 'registered';
-      if (status !== 'registered') issue(`asset-${status}`, status === 'unresolved' ? 'A requested building model is unavailable.' : status === 'category-mismatch' ? 'An assigned model has the wrong category.' : status === 'unreviewed' ? 'A model has no established historical interpretation.' : status === 'unplaced' ? 'A requested model has no building placement.' : 'This asset category has no historical scene placement support.', id);
-      return { id, ...(registryId ? { registryId } : {}), status };
+      const binding = resolveHistoricalAsset(reference, scene.placeId, time);
+      const status = binding.status !== 'registered' ? binding.status : reference.evidence.certainty === 'unknown' ? 'unreviewed' : !['building', 'infrastructure'].includes(reference.category) ? 'unsupported' : !placedAssets.has(id) ? 'unplaced' : 'registered';
+      if (status !== 'registered') issue(`asset-${status}`, status === 'catalogue-blocked' ? binding.reason! : status === 'unresolved' ? 'A requested building model is unavailable.' : status === 'category-mismatch' ? 'An assigned model has the wrong category.' : status === 'unreviewed' ? 'A model has no established historical interpretation.' : status === 'unplaced' ? 'A requested model has no building placement.' : 'This asset category has no historical scene placement support.', id);
+      return { id, ...(binding.registryId ? { registryId: binding.registryId } : {}), status, ...(binding.catalogue ? { catalogue: binding.catalogue } : {}) };
     });
     result.status = !result.issues.length && descriptor ? 'ready' : locationSupported && !scene.required && scene.fallback === 'map-only' ? 'map-only' : 'unavailable';
     if (result.status === 'ready') result.descriptorIds = [descriptor!.id];

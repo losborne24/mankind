@@ -6,6 +6,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 const modules = new Map();
 async function load(path) {
   if (modules.has(path)) return modules.get(path);
+  if (path.endsWith('.json')) { const url = `data:text/javascript;base64,${Buffer.from(`export default JSON.parse(${JSON.stringify(await readFile(path, 'utf8'))});`).toString('base64')}`; modules.set(path, url); return url; }
   let { outputText } = ts.transpileModule(await readFile(`${path}.ts`, 'utf8').catch(() => readFile(`${path}.tsx`, 'utf8')), { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020, jsx: ts.JsxEmit.ReactJSX } });
   for (const match of [...outputText.matchAll(/from ['"]([^'"]+)['"]/g)]) { const spec = match[1], url = spec.startsWith('@/') ? await load(spec.slice(2)) : import.meta.resolve(spec); outputText = outputText.replace(match[0], `from "${url}"`); }
   const url = `data:text/javascript;base64,${Buffer.from(outputText).toString('base64')}`; modules.set(path, url); return url;

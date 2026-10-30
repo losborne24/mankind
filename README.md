@@ -429,3 +429,11 @@ Scene requests now resolve against dates, layouts, registered models and placeme
 The inspector explains map-only fallbacks and unavailable requirements. Ready
 projections use the existing streamer; no new historical reconstruction is supplied.
 [Resolution, assembly rules and validation](docs/historical-scene-resolution.md).
+
+### Persistent asset catalogue (Phase 4 Step 7)
+
+Historical assets can now pin a reviewed catalogue version with phase, provenance,
+rights and model-integrity metadata. The initial Menander entry remains a draft.
+[Catalogue workflow and validation](docs/asset-catalogue.md).
+[Revised Phase 4 roadmap](docs/phase4-plan.md): the next deliverable is the first
+visible evidence-backed building.

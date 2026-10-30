@@ -1,5 +1,5 @@
-import { assetRegistry, type AssetId } from '@/lib/assets/registry';
-import { validateScenario, type ScenarioDefinition, type HistoricalDate, type Certainty } from '@/lib/scenarios/schema';
+import { resolveHistoricalAsset } from '@/lib/history/assetResolution';
+import { validateScenario, type ScenarioDefinition, type HistoricalDate, type HistoricalTime, type Certainty } from '@/lib/scenarios/schema';
 import type { SettlementDefinition } from '@/map/settlements/romanSettlement';
 import type { SettlementDescriptor } from '@/map/settlements/settlementStreaming';
 import type { Evidence, HistoricalPeriod } from '@/lib/history/schema';
@@ -66,7 +66,7 @@ export function resolveHistoricalSettlement(value: unknown, layoutId: string, at
   return resolveValidatedSettlement(validateHistoricalWorld(value), layoutId, at);
 }
 /** Internal projection for an already validated session snapshot; avoids revalidating per place/date. */
-export function resolveValidatedSettlement(world: import('@/lib/history/schema').HistoricalWorldData, layoutId: string, at: HistoricalDate): SettlementResolution {
+export function resolveValidatedSettlement(world: import('@/lib/history/schema').HistoricalWorldData, layoutId: string, at: HistoricalDate, selectedTime?: HistoricalTime): SettlementResolution {
   const layout = world.layouts.find(l => l.id === layoutId);
   if (!layout) throw Error(`Unknown historical layout ${layoutId}`);
   const place = world.places.find(p => p.id === layout.placeId)!;
@@ -83,10 +83,11 @@ export function resolveValidatedSettlement(world: import('@/lib/history/schema')
   const buildings: SettlementDefinition['buildings'][number][] = [];
   for (const building of layout.buildings) {
     const reference = world.assets.find(asset => asset.id === building.assetId)!;
-    const registryId = reference.registryId;
-    if (!registryId || !Object.hasOwn(assetRegistry, registryId)) { warnings.push(`Unresolved historical asset ${reference.id}; no substitute selected.`); continue; }
-    const assetId = registryId as AssetId, asset = assetRegistry[assetId];
-    if (asset.category !== reference.category) { warnings.push(`Asset category mismatch for ${reference.id}.`); continue; }
+    const binding = resolveHistoricalAsset(reference, place.id, selectedTime ?? { start: at });
+    if (binding.status === 'catalogue-blocked') { warnings.push(binding.reason!); continue; }
+    if (binding.status === 'unresolved') { warnings.push(`Unresolved historical asset ${reference.id}; no substitute selected.`); continue; }
+    if (binding.status === 'category-mismatch') { warnings.push(`Asset category mismatch for ${reference.id}.`); continue; }
+    const assetId = binding.registryId!;
     buildings.push({ id: building.id, assetId, offset: [...building.offset], ...(building.headingRadians !== undefined ? { headingRadians: building.headingRadians } : {}) });
   }
   if (warnings.length) return { status: 'unavailable', warnings };

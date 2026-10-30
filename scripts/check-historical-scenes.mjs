@@ -4,6 +4,7 @@ import ts from 'typescript';
 const modules = new Map();
 async function load(path) {
   if (modules.has(path)) return modules.get(path);
+  if (path.endsWith('.json')) { const url = `data:text/javascript;base64,${Buffer.from(`export default JSON.parse(${JSON.stringify(await readFile(path, 'utf8'))});`).toString('base64')}`; modules.set(path, url); return url; }
   const { outputText: code } = ts.transpileModule(await readFile(`${path}.ts`, 'utf8').catch(() => readFile(`${path}.tsx`, 'utf8')), { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX } });
   let output = code;
   for (const match of [...output.matchAll(/from ['"]([^'"]+)['"]/g)]) {
@@ -25,14 +26,14 @@ const result = resolve(menander, at(79))[0];
 assert.equal(result.status, 'map-only'); assert.equal(result.match, 'possible');
 assert.deepEqual(result.descriptorIds, []); assert.deepEqual(result.footprintIds, ['footprint:menander-property-ad79']);
 assert.ok(result.issues.some(i => i.code === 'uncertain-date')); assert.ok(result.issues.some(i => i.code === 'missing-layout'));
-assert.equal(result.assets[0].status, 'unresolved'); assert.equal(resolve(menander, at(80))[0].status, 'outside-period');
+assert.equal(result.assets[0].status, 'catalogue-blocked'); assert.equal(result.assets[0].catalogue.status, 'draft'); assert.equal(resolve(menander, at(80))[0].status, 'outside-period');
 assert.equal(resolve(london, { start: { year: 2012, month: 7, day: 27 } })[0].status, 'map-only');
 assert.equal(resolve(fort, at(200)).filter(r => r.status === 'map-only').length, 1);
 assert.equal(resolve(fort, at(270)).filter(r => r.status === 'map-only').length, 2);
 
 // Explicitly synthetic model/layout: does not add a reconstruction to the real fixture.
 const synthetic = structuredClone(menander), evidence = { certainty: 'illustrative', sources: [], note: 'Synthetic scene resolver fixture only; no archaeological claim.' };
-synthetic.assets[0].registryId = 'roman-villa-01'; synthetic.assets[0].evidence = evidence;
+delete synthetic.assets[0].catalogueRef; synthetic.assets[0].registryId = 'roman-villa-01'; synthetic.assets[0].evidence = evidence;
 synthetic.layouts.push({ id: 'layout:synthetic', title: 'Synthetic scene layout', placeId: synthetic.places[0].id, period: at(79), frame: 'local-east-south-metres', extentMeters: 100, maxFoundationRiseMeters: 3, buildings: [{ id: 'building:test', assetId: synthetic.assets[0].id, offset: [0, 0], evidence }], evidence });
 synthetic.scenes[0].period = at(79); synthetic.scenes[0].layoutIds = ['layout:synthetic'];
 const selected = value => select(validate(value), at(79));
@@ -80,7 +81,7 @@ try { globalThis.fetch = () => { throw Error('Resolver must not fetch'); }; asse
 finally { globalThis.fetch = originalFetch; }
 const world = validate(menander), view = inspect(world, select(world, at(79)), { kind: 'place', id: world.places[0].id });
 const html = renderToStaticMarkup(createElement(HistoricalInspector, { inspection: view, onClose() {}, onVisit() {}, onInspectPlace() {} }));
-assert.ok(html.includes('Map-only fallback')); assert.ok(html.includes('A requested building model is unavailable.')); assert.ok(html.includes('2D extent is available'));
+assert.ok(html.includes('Map-only fallback')); assert.ok(html.includes('Catalogue version is draft')); assert.ok(html.includes('2D extent is available'));
 assert.equal(view.locations[0].target.zoom, 18); assert.ok(view.evidence.some(e => e.label.startsWith('Model requirement')));
 let time = at(79), listener, applied, applies = 0;
 const session = new HistoricalDatasetSession({ time: () => time, subscribeTime: fn => { listener = fn; return () => {}; }, apply: value => { applied = value; applies++; }, release: () => { applied = null; }, load: async () => menander });

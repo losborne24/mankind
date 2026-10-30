@@ -274,6 +274,10 @@
     {
       "id": "asset:menander-architecture",
       "category": "building",
+      "catalogueRef": {
+        "id": "catalogue:menander-reconstruction",
+        "version": 1
+      },
       "evidence": {
         "certainty": "unknown",
         "sources": [],

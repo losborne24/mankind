@@ -3,6 +3,7 @@ import type { HistoricalTime } from '@/lib/scenarios/schema';
 import type { HistoricalSelection, HistoricalPlaceSelection } from '@/lib/history/selection';
 import { matchHistoricalTime } from '@/lib/history/time';
 import type { HistoricalSceneResolution } from '@/lib/history/sceneRequirements';
+import { resolveHistoricalAsset, type HistoricalAssetBinding } from '@/lib/history/assetResolution';
 
 export type HistoricalInspectionKey = { kind: 'place' | 'event'; id: string };
 export interface HistoricalVisitTarget {
@@ -34,6 +35,7 @@ export interface HistoricalInspection {
     referenceAreas?: { title: string; licence: { title: string; url: string; attribution: string } }[];
     footprints?: { title: string; phaseTitle: string; period: HistoricalPeriod; match: 'within' | 'possible' | 'outside'; representation: HistoricalFootprint['representation']; licence: HistoricalFootprint['licence'] }[];
     scenes?: HistoricalSceneResolution[];
+    catalogueModels?: NonNullable<HistoricalAssetBinding['catalogue']>[];
     target?: HistoricalVisitTarget;
     unavailableReason?: string;
   }[];
@@ -58,6 +60,11 @@ export function inspectHistoricalRecord(world: HistoricalWorldData, selection: H
     const areas = (world.referenceAreas ?? []).filter(area => area.placeId === p.id);
     const footprints = (world.footprints ?? []).filter(footprint => footprint.placeId === p.id);
     const scenes = (selection.scenes ?? []).filter(resolution => resolution.scene.placeId === p.id);
+    const modelIds = new Set([...world.scenes.filter(s => s.placeId === p.id).flatMap(s => s.assetIds), ...world.layouts.filter(l => l.placeId === p.id).flatMap(l => l.buildings.map(b => b.assetId))]);
+    const catalogueModels = world.assets.filter(a => modelIds.has(a.id) && a.catalogueRef).flatMap(a => {
+      const binding = resolveHistoricalAsset(a, p.id, selection.time);
+      return binding.catalogue ? [binding.catalogue] : [];
+    });
     for (const resolution of scenes) evidence.push({ label: `Scene requirement · ${resolution.scene.title}`, value: resolution.scene.evidence });
     for (const id of new Set(scenes.flatMap(s => s.assets.map(a => a.id)))) {
       const asset = world.assets.find(a => a.id === id)!;
@@ -84,6 +91,7 @@ export function inspectHistoricalRecord(world: HistoricalWorldData, selection: H
       warnings: [...new Set(warnings)],
       referenceAreas: areas.map(area => ({ title: area.title, licence: area.licence })),
       scenes,
+      catalogueModels,
       footprints: footprints.map(f => ({ title: f.title, phaseTitle: f.phaseTitle, period: f.period, representation: f.representation, licence: f.licence, match: matchHistoricalTime(f.period, selection.time) })),
       ...(eligible && supported ? { target: { placeId: p.id, center: [...p.position.coordinate] as [number, number], zoom: detailed ? 18.4 : footprints.some(f => matchHistoricalTime(f.period, selection.time) !== 'outside') ? 18 : p.kind === 'region' ? 11 : 14, pitch: detailed ? 55 : 35, bearing: detailed ? -25 : 0 } } : { unavailableReason: supported ? 'This record is not dated for the current selection.' : 'This location is outside the current map navigation range.' }),
     };

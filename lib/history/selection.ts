@@ -60,7 +60,7 @@ export function selectHistoricalWorld(world: HistoricalWorldData, time: Historic
       if (candidates.some(layout => !layout.buildings.length)) row.warnings.push('Candidate phase records contain no building positions or reconstructed geometry.');
       return row;
     }
-    const result = resolveValidatedSettlement(world, candidate.id, time.start);
+    const result = resolveValidatedSettlement(world, candidate.id, time.start, time);
     row.warnings = result.warnings;
     row.layoutStatus = result.status === 'ready' ? 'ready' : result.status === 'uncertain-period' ? 'ambiguous' : 'unavailable';
     if (result.descriptor) descriptors.push(result.descriptor);
