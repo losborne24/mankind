@@ -12,6 +12,8 @@ export interface ContextGroundSpec {
   paving: readonly (readonly LocalPoint[])[];
   /** River surface (closed rings, outer boundaries). */
   water: readonly (readonly LocalPoint[])[];
+  /** More river, unioned with `water`: the strip modern embankments took. The ground is cut down to the river bed there. */
+  waterExtra?: readonly (readonly LocalPoint[])[];
   /** Guessed surfaces (switchable): cobbled streets, the widened square and the built-up footprint. */
   streets?: readonly { width: number; points: readonly LocalPoint[] }[];
   squares?: readonly (readonly LocalPoint[])[];
@@ -79,6 +81,7 @@ export function buildGroundMask(spec: ContextGroundSpec, contacts: readonly Cont
   const data = new Uint8Array(res * res * 4), texel = spec.sizeMeters / res;
   fillRings(data, res, spec.sizeMeters, spec.paving, 0);
   fillRings(data, res, spec.sizeMeters, spec.water, 1);
+  fillRings(data, res, spec.sizeMeters, spec.waterExtra ?? [], 1);
   // Trodden halo: paving and building footprints, spread ~25 m.
   const halo = new Uint8Array(data.length);
   fillRings(halo, res, spec.sizeMeters, spec.paving, 2);

@@ -1,7 +1,7 @@
 import type { LocalPoint } from "@/map/settlements/romanSettlement";
 
 export type ReconstructionCertainty = "documented" | "evidence-based" | "best-guess";
-export type ReconstructionKind = "temple" | "bridge" | "quay" | "street" | "lane" | "stage" | "barge" | "square" | "altar" | "pen" | "stall" | "shop" | "insula" | "flats" | "warehouse" | "circus" | "palace";
+export type ReconstructionKind = "temple" | "bridge" | "quay" | "street" | "lane" | "stage" | "barge" | "square" | "altar" | "pen" | "stall" | "shop" | "insula" | "flats" | "warehouse" | "circus" | "palace" | "drain";
 export interface ReconstructionObject {
   id: string;
   kind: ReconstructionKind;
@@ -17,6 +17,8 @@ export interface ReconstructionObject {
   shape: Record<string, any>;
   time?: { start: { year: number }; end?: { year: number } };
   uncertaintyYears?: number;
+  /** Why the object is shown at this date when its evidence comes from another one (undated find, later survey). */
+  snap?: string;
 }
 /** Everything placed around the temples for one layout. Pure data: renderers and checks both read it. */
 export interface ReconstructionSpec {
@@ -25,6 +27,8 @@ export interface ReconstructionSpec {
   origin: [number, number];
   sources: { id: string; title: string; url: string; licence?: string }[];
   streets: { id: string; width: number; points: LocalPoint[] }[];
+  /** River the modern embankments took, as rings: water on the map and in the scene, with the ground cut down to the river bed. */
+  waterExtra?: LocalPoint[][];
   objects: ReconstructionObject[];
   /** Open courtyards inside the blocks: ground treatment only, not mapped objects. */
   courts?: { offset: LocalPoint; width: number; depth: number; heading: number }[];

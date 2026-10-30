@@ -45,5 +45,5 @@ export function hydrateReconstruction(raw: RawReconstruction): ReconstructionSpe
   const t = raw.templates.lane;
   for (const lane of lanes) objects.push({ id: lane.id, kind: 'lane', title: t.title, certainty: 'best-guess', note: t.note, sources: t.sources, footprint: laneRibbon(lane.points, lane.width), time: AD100, uncertaintyYears: 25,
     shape: { type: 'street', points: lane.points, width: lane.width } });
-  return { seed: raw.seed, origin: raw.origin, sources: raw.sources, streets: [...raw.streets, ...lanes], objects, courts: raw.courts.map(([cx, cz, w, d, heading]) => ({ offset: [cx, cz] as LocalPoint, width: w, depth: d, heading })) };
+  return { seed: raw.seed, origin: raw.origin, sources: raw.sources, streets: [...raw.streets, ...lanes], waterExtra: raw.waterExtra, objects, courts: raw.courts.map(([cx, cz, w, d, heading]) => ({ offset: [cx, cz] as LocalPoint, width: w, depth: d, heading })) };
 }

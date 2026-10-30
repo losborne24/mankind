@@ -166,6 +166,7 @@ export class ContextGround {
     }
     if (retained && this.heights) heights.splice(0, heights.length, ...this.heights);
     this.heights = heights;
+    this.cutRiverStrip(heights, spec);
     const radius = spec.sizeMeters / 2;
     const ground = this.groundGeometry.getAttribute("position") as THREE.BufferAttribute;
     const water = this.waterGeometry.getAttribute("position") as THREE.BufferAttribute;
@@ -210,6 +211,30 @@ export class ContextGround {
     if (!this.shownSince) this.shownSince = performance.now();
     this.ground.visible = true; this.water.visible = this.waterVisible;
     return true;
+  }
+
+  /**
+   * The strip of river the modern embankments took stands on made ground today. Cut it down to the river bed, two metres
+   * under the level of the open channel, so the ancient river is water rather than a raised bank with water painted on it.
+   */
+  private cutRiverStrip(heights: number[], spec: ContextGroundSpec) {
+    const strip = spec.waterExtra ?? [];
+    if (!strip.length) return;
+    const res = MASK_RESOLUTION, inStrip = (x: number, z: number) => strip.some(ring => {
+      let c = false;
+      for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) if ((ring[i][1] > z) !== (ring[j][1] > z) && x < (ring[j][0] - ring[i][0]) * (z - ring[i][1]) / (ring[j][1] - ring[i][1]) + ring[i][0]) c = !c;
+      return c;
+    });
+    const flags = this.points.map(([x, z]) => inStrip(x, z)), channel: number[] = [];
+    for (let i = 0; i < heights.length; i++) {
+      if (flags[i]) continue;
+      const [x, z] = this.points[i], u = Math.floor((x / spec.sizeMeters + 0.5) * res), v = Math.floor((z / spec.sizeMeters + 0.5) * res);
+      if (u >= 0 && v >= 0 && u < res && v < res && this.maskData[(v * res + u) * 4 + 1] > 128) channel.push(heights[i]);
+    }
+    if (channel.length < 4) return;
+    channel.sort((a, b) => a - b);
+    const bed = channel[Math.floor(channel.length / 2)] - 2;
+    for (let i = 0; i < heights.length; i++) if (flags[i]) heights[i] = Math.min(heights[i], bed);
   }
 
   /**

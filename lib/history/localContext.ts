@@ -24,8 +24,9 @@ export function contextGroundFor(layoutId: string, origin: Coordinate): ContextG
     sizeMeters: 1400,
     // The only paved surface shown is the present-day outline of the Forum Boarium site (approximate, modern geometry).
     paving: rings('forum-boarium', origin),
-    // Today's Tiber channel: an approximation of the ancient bank, not its ancient course.
+    // Today's Tiber channel, plus the strip of river the 19th-century embankments took (the bank Lanciani surveyed, about 3-5 m).
     water: rings('tiber', origin),
+    waterExtra: forumReconstruction.waterExtra,
     // Everything below is guessed and switches off with the best-guess toggle.
     streets: forumReconstruction.streets.map(({ width, points }) => ({ width, points })),
     squares: forumReconstruction.objects.filter(o => o.kind === 'square').map(o => o.footprint),

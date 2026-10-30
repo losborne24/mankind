@@ -73,6 +73,7 @@ export function ReconstructionInspector({ id, at, onClose }: { id: string; at: H
       <div><dt className="inline text-white/45">At this date · </dt><dd className="inline">{match === 'within' ? 'within the date range' : match === 'possible' ? 'possibly present' : 'outside the date range'}</dd></div>
     </dl>
     <p className="mt-2 leading-relaxed text-white/65">{o.note}</p>
+    {o.snap && <p className="mt-1.5 leading-relaxed text-white/50"><span className="text-white/70">Date · </span>{o.snap}</p>}
     <ul className="mt-2 space-y-1">{o.sources.map(id => sources.find(s => s.id === id)).filter(Boolean).map(s => <li key={s!.id}>{/^https?:/.test(s!.url) ? <a href={s!.url} target="_blank" rel="noreferrer" className="text-[10px] text-accent underline">{s!.title}</a> : <span className="text-[10px] text-white/70">{s!.title} · {s!.url}</span>}{s!.licence && <span className="block text-[10px] text-white/40">{s!.licence}</span>}</li>)}</ul>
   </section>;
 }

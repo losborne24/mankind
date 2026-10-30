@@ -26,8 +26,9 @@ assert.equal(sources.size, data.sources.length, 'source ids are unique');
 for (const s of data.sources) {
   assert.ok(s.title && s.licence, `${s.id} has a title and a licence`);
   assert.ok(/^https:\/\//.test(s.url) || s.url.startsWith('scripts/'), `${s.id} has a resolvable location`);
-  // Orientation-only references: no geometry may come from these (see RECONSTRUCTION.md).
-  assert.doesNotMatch(s.url, /formaurbis\.stanford|lanciani|mapping-augustan/i, `${s.id} is not a restricted geometry source`);
+  // Orientation-only references: no geometry may come from these (see RECONSTRUCTION.md). Lanciani's 1901 plate is public domain and is allowed.
+  assert.doesNotMatch(s.url, /formaurbis\.stanford|mapping-augustan/i, `${s.id} is not a restricted geometry source`);
+  if (/lanciani/i.test(s.url)) assert.match(s.licence, /public domain/i, `${s.id} is public domain`);
 }
 const ids = new Set();
 const forbidden = /arch of janus|arcus argentariorum|santa maria in cosmedin|constantin|septimius/i;
@@ -106,4 +107,19 @@ for (const b of buildings) {
 }
 // Temples stay readable: nothing taller than three storeys within 120 m of them, nothing above two within 75 m.
 for (const b of buildings) { const d = Math.hypot(b.shape.centre[0] - 6, b.shape.centre[1] - 20); if (d < 75) assert.ok(b.shape.storeys <= 2 || b.kind === 'warehouse', `${b.id} is low beside the temples`); else if (d < 120) assert.ok(b.shape.storeys <= 3, `${b.id} is at most three storeys near the temples`); }
-console.log(`Reconstruction: ${data.objects.length} objects (${counts.documented} documented, ${counts['evidence-based']} evidence-based, ${counts['best-guess']} best guess), ${buildings.length} attached buildings, ${raw.courts.length} courtyards, Circus Maximus and palace from OpenStreetMap/Pleiades, documented streets marked, nothing after AD 100, deterministic, no overlapping buildings.`);
+// Pass D: the period survey. The ancient bank, the bridge piers, the drains, the paved street and the Statio Annonae come from Lanciani's plate 28,
+// carry his source, are evidence-based and say why a find of uncertain date is shown at AD 100.
+const lanciani = data.objects.filter(o => o.sources.includes('source:lanciani-fur-28'));
+assert.ok(lanciani.length >= 8, `objects placed from the plate: ${lanciani.length}`);
+for (const id of ['quay-wall', 'street-basalt', 'street-basalt-cross', 'cloaca-maxima', 'cloaca-circi-maximi', 'statio-annonae', 'pons-aemilius']) assert.equal(data.objects.find(o => o.id === id)?.certainty, 'evidence-based', `${id} is evidence-based`);
+for (const id of ['quay-wall', 'street-basalt', 'street-basalt-cross', 'statio-annonae']) assert.ok(data.objects.find(o => o.id === id).snap?.length > 40, `${id} says why it is shown at AD 100`);
+for (const id of ['cloaca-maxima', 'cloaca-circi-maximi']) assert.equal(data.objects.find(o => o.id === id).kind, 'drain', `${id} is a drain`);
+const piersE = data.objects.find(o => o.id === 'pons-aemilius').shape.piersE;
+assert.equal(piersE.length, 8, 'eight piers, seven spans'); assert.ok(Math.abs(piersE.at(-1) + 154.5) < 0.2 && Math.abs(piersE[4] + 98.6) < 0.2, 'the four drawn piers are where the plate puts them');
+assert.ok(data.waterExtra?.[0]?.length > 20, 'the strip of river the embankments took is carried as water');
+// The ancient east bank lies east of today's: every point of the strip's east edge is further east than its west edge.
+{ const ring = data.waterExtra[0], half = ring.length / 2, east = ring.slice(0, half), west = ring.slice(half).reverse(); assert.ok(east.every((p, i) => p[0] > west[i][0] + 1), 'the ancient bank is east of the modern one'); }
+// No building stands in the ancient river.
+for (const b of buildings) assert.ok(!insidePolygon(b.shape.centre, data.waterExtra[0]), `${b.id} is not in the ancient river`);
+
+console.log(`Reconstruction: ${data.objects.length} objects (${counts.documented} documented, ${counts['evidence-based']} evidence-based, ${counts['best-guess']} best guess), ${buildings.length} attached buildings, ${raw.courts.length} courtyards, Circus Maximus and palace from OpenStreetMap/Pleiades, documented streets marked, ancient bank, piers, drains and paved street from Lanciani's plate 28, nothing after AD 100, deterministic, no overlapping buildings.`);

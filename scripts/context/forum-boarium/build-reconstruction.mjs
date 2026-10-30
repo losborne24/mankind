@@ -3,8 +3,9 @@
 //
 // Inputs are data already in the repository: the context-layer file (OpenStreetMap/Pleiades/Wikidata snapshots) and the
 // landmark snapshots from fetch-landmark-sources.mjs (OpenStreetMap relations and ways, Pleiades records), plus the rules in
-// this file. Nothing here reads Lanciani's Forma Urbis Romae, the Stanford Digital Forma Urbis Romae Project or Mapping
-// Augustan Rome: they were consulted for orientation only (see RECONSTRUCTION.md), so no restricted geometry enters.
+// this file, plus positions read by hand off plate 28 of Lanciani's Forma Urbis Romae (public domain; the scan is not shipped).
+// Nothing here reads the Stanford Digital Forma Urbis Romae Project or Mapping Augustan Rome: they were consulted for
+// orientation only (see RECONSTRUCTION.md), so no restricted geometry enters.
 //
 // Frame: metres east (E) and south (S) of the Forum Boarium temple-pair layout origin, as in the scene definition.
 // Output: `objects` (landmarks, bridge, quays, streets, square ...), `lots` (compact building rows), `lanes`, `courts`.
@@ -34,10 +35,29 @@ function crossings(s) {
   return xs.sort((a, b) => a - b);
 }
 const eastBank = s => Math.max(...crossings(s)), westBank = s => Math.min(...crossings(s).filter(x => x > -400));
+// The ancient east bank. Today's embankments (from 1876) narrowed the channel, so the OpenStreetMap bank is 10 to 30 m west of
+// the bank Lanciani surveyed before they were built. Anchors are [south, east] read by hand off plate 28 (within about 3-5 m):
+// the pre-embankment shore, and from S 0 to S 123 the excavated riverfront wall he marks "RIPA". Beyond them the shift fades out.
+const BANK_ANCHORS = [[-200, -146.8], [-190, -138.8], [-180, -130], [-170, -121], [-160, -115], [-150, -111.2], [-140, -107.5], [-130, -100.8], [-120, -96], [-110, -90.2], [-100, -84.5], [-90, -78.8], [-80, -73.2], [-70, -67.2], [-50, -57.5], [-40, -48.2], [-30, -44.2], [-20, -37.5],
+  [-10, -31.6], [0, -32.6], [20, -34.1], [44, -36.7], [71, -40.1], [99, -42.6], [122, -44.1], [130, -43.2], [140, -49.8], [150, -53.8], [160, -56.2]];
+const WALL = [-10, 123];
+const anchorShift = BANK_ANCHORS.map(([s, x]) => [s, x - eastBank(s)]);
+function bankShift(s) {
+  const first = anchorShift[0], last = anchorShift.at(-1);
+  if (s <= first[0]) return first[1] * Math.max(0, 1 - (first[0] - s) / 90);
+  if (s >= last[0]) return last[1] * Math.max(0, 1 - (s - last[0]) / 80);
+  for (let i = 0; i < anchorShift.length - 1; i++) { const [a, b] = [anchorShift[i], anchorShift[i + 1]]; if (s >= a[0] && s <= b[0]) return a[1] + (b[1] - a[1]) * (s - a[0]) / (b[0] - a[0]); }
+  return 0;
+}
+const BANK_S0 = -300;
 const bankLine = [];
-for (let s = -270; s <= 330; s += 10) bankLine.push([eastBank(s), s]);
+for (let s = BANK_S0; s <= 340; s += 10) bankLine.push([eastBank(s) + bankShift(s), s]);
 const smoothed = bankLine.map((p, i) => { const w = bankLine.slice(Math.max(0, i - 2), i + 3); return [w.reduce((a, q) => a + q[0], 0) / w.length, p[1]]; });
-const bankAt = s => { const i = Math.max(0, Math.min(smoothed.length - 2, Math.floor((s + 270) / 10))), t = (s - smoothed[i][1]) / 10; return smoothed[i][0] * (1 - t) + smoothed[i + 1][0] * t; };
+const bankAt = s => { const i = Math.max(0, Math.min(smoothed.length - 2, Math.floor((s - BANK_S0) / 10))), t = (s - smoothed[i][1]) / 10; return smoothed[i][0] * (1 - t) + smoothed[i + 1][0] * t; };
+/** The strip of river the modern embankments took: from today's east bank out to the ancient one. Drawn as water and cut into the ground. */
+const stripS = []; for (let s = BANK_S0; s <= 340; s += 10) if (bankShift(s) > 0.4) stripS.push(s);
+const waterExtra = [[...stripS.map(s => pt([Math.max(bankAt(s), eastBank(s) + 0.5), s])), ...stripS.slice().reverse().map(s => pt([eastBank(s) - 2.5, s]))]];
+const bankEdge = stripS.map(s => [bankAt(s), s]);
 
 // ── Small geometry kit ───────────────────────────────────────────────────────────────────────────────────────
 const len = (a, b) => Math.hypot(b[0] - a[0], b[1] - a[1]);
@@ -107,6 +127,8 @@ const sources = [
   { id: 'source:pleiades-clivus-victoriae', title: 'Pleiades · Clivus Victoriae (steep street at the Palatine corner)', url: 'https://pleiades.stoa.org/places/668537796', licence: 'CC BY 3.0 · Pleiades contributors' },
   { id: 'source:osm-clivus-victoriae', title: 'OpenStreetMap · Clivus Victoriae (way 132682585)', url: 'https://www.openstreetmap.org/way/132682585', licence: 'ODbL · mapped line of the street' },
   { id: 'source:osm-valley-streets', title: 'OpenStreetMap · Via di San Teodoro, Via del Velabro, Via della Consolazione, Via dei Cerchi (ways 366796445, 52938659, 123817468, 82201173 and neighbours)', url: 'https://www.openstreetmap.org/way/366796445', licence: 'ODbL · modern streets in the same valleys, used only as the guide for the lines of guessed streets' },
+  // Pass D: a period survey.
+  { id: 'source:lanciani-fur-28', title: 'Lanciani, Forma Urbis Romae (1893-1901), plate 28 (Isola Tiberina): Forum Boarium, Pons Aemilius, Cloaca Maxima, Tiber banks', url: 'https://commons.wikimedia.org/wiki/File:Rodolfo_Lanciani_-_Forma_Urbis_Romae_-_Tavola_28.jpg', licence: 'Public domain (published 1901; Lanciani died 1929) · positions read by hand against the two temples and the Ponte Rotto, good to about 3-5 m; the scan itself is not shipped' },
   { id: 'source:project-rules', title: 'Mankind project rules for the best-guess neighbourhood (scripts/context/forum-boarium/build-reconstruction.mjs)', url: 'scripts/context/forum-boarium/RECONSTRUCTION.md', licence: 'Project-authored; seed 100; see RECONSTRUCTION.md' },
 ];
 const GUESS = 'best-guess', BASED = 'evidence-based', DOCUMENTED = 'documented';
@@ -119,27 +141,30 @@ add({ id: 'temple-portunus', kind: 'temple', title: 'Temple of Portunus', certai
   note: 'The standing temple, modelled in the catalogue. Footprint is the present-day OpenStreetMap outline; the model itself is drawn from a historic plan (see its own evidence card).', time: { start: { year: -120 }, end: { year: 2025 } } });
 add({ id: 'temple-hercules-victor', kind: 'temple', title: 'Temple of Hercules Victor', certainty: DOCUMENTED, shape: { type: 'catalogue' }, footprint: hercules, sources: ['source:osm-hercules'],
   note: 'The standing round temple, modelled in the catalogue. Footprint is the present-day OpenStreetMap outline; its original roof is lost.', time: { start: { year: -143 }, end: { year: 2025 } } });
-const bankAtBridge = bankAt(-34), westAtBridge = westBank(-34);
+const bankAtBridge = bankAt(-34);
 
-// Bridge: the Ponte Rotto arch fixes two piers; the rest are spaced to meet the modern banks. Seven spans (Wikipedia).
+// Bridge: Lanciani draws four piers (the Ponte Rotto pier and three more west of the arch) and the deck running on to the east bank.
+// The east piers are spaced evenly to the ancient bank. Seven spans (Wikipedia).
 const fragmentE = [Math.min(...pons.map(p => p[0])), Math.max(...pons.map(p => p[0]))], bridgeS = r1(pons.reduce((a, p) => a + p[1], 0) / pons.length);
-const piers = [bankAtBridge - 1.5, (bankAtBridge - 1.5 + fragmentE[1]) / 2, fragmentE[1], fragmentE[0]];
-const west = westAtBridge + 4, run = (fragmentE[0] - west) / 4;
-for (let i = 1; i <= 4; i++) piers.push(fragmentE[0] - run * i);
+const piersDrawn = [-154.5, -137.5, -121.4, -98.6], abutment = bankAtBridge + 4;
+const piers = [...piersDrawn, ...[1, 2, 3, 4].map(i => piersDrawn[3] + (abutment - piersDrawn[3]) * i / 4)];
 piers.sort((a, b) => b - a);
 add({ id: 'pons-aemilius', kind: 'bridge', title: 'Pons Aemilius', certainty: BASED, shape: { type: 'bridge', axisS: bridgeS, piersE: piers.map(r1), deckWidth: 9, spans: piers.length - 1 },
-  footprint: [[piers[0], bridgeS - 4.5], [piers.at(-1), bridgeS - 4.5], [piers.at(-1), bridgeS + 4.5], [piers[0], bridgeS + 4.5]], sources: ['source:osm-pons-aemilius', 'source:wikipedia-pons-aemilius', 'source:platner-1929'], time: { start: { year: -179 }, end: { year: 2025 } }, uncertaintyYears: 28,
-  note: `Position from the surviving Ponte Rotto arch (two piers fixed at E ${r1(fragmentE[0])} and ${r1(fragmentE[1])} m); stone, seven spans (Wikipedia). The other pier positions, the deck width and the arch profile are guessed so the bridge meets today's banks.` });
+  footprint: [[piers[0], bridgeS - 4.5], [piers.at(-1), bridgeS - 4.5], [piers.at(-1), bridgeS + 4.5], [piers[0], bridgeS + 4.5]], sources: ['source:osm-pons-aemilius', 'source:wikipedia-pons-aemilius', 'source:platner-1929', 'source:lanciani-fur-28'], time: { start: { year: -179 }, end: { year: 2025 } }, uncertaintyYears: 28,
+  note: `Four piers as Lanciani drew them (the Ponte Rotto pier at E ${r1(piersDrawn[2])} m is also fixed by the surviving arch outline at E ${r1(fragmentE[0])} to ${r1(fragmentE[1])} m); stone, seven spans (Wikipedia). The three east piers are spaced evenly to the ancient bank he surveyed; the deck width and arch profile are guessed.` });
 
 // ── River frontage: quay wall, quay road, stages and barges ──────────────────────────────────────────────────
-const quayRuns = [[-262, -52], [-18, 322]];
-const quayLine = run => sample(smoothed.filter(p => p[1] >= run[0] && p[1] <= run[1]), 6).map(q => [q.p[0] + 1.5, q.p[1]]);
-quayRuns.forEach((run, i) => {
-  const line = quayLine(run);
-  add({ id: `quay-${i ? 'south' : 'north'}`, kind: 'quay', title: i ? 'River quay · south of the bridge' : 'River quay · Portus Tiberinus frontage', certainty: GUESS,
-    shape: { type: 'quay', line: line.map(pt), height: 3.2 }, footprint: ribbon(line, 3), sources: ['source:osm-tiber', 'source:it-wikipedia-porto-tiberino'], time: AD100, uncertaintyYears: 25,
-    note: `A stone-faced river wall with steps, set along today's east bank of the Tiber (an approximation of the ancient bank, not its course). That Rome's river harbour had built quays is likely, but no source here records this stretch.` });
-});
+const quayRuns = [{ id: 'quay-north', from: -262, to: -12 }, { id: 'quay-wall', from: WALL[0], to: WALL[1] }, { id: 'quay-south', from: 126, to: 322 }];
+const quayLine = run => sample(smoothed.filter(p => p[1] >= run.from && p[1] <= run.to), 6).map(q => [q.p[0] - 2.5, q.p[1]]);
+for (const run of quayRuns) {
+  const line = quayLine(run), wall = run.id === 'quay-wall';
+  add({ id: run.id, kind: 'quay', title: wall ? 'Tiber quay wall · Forum Boarium frontage' : run.id === 'quay-north' ? 'River quay · Portus Tiberinus frontage' : 'River quay · south of the Forum Boarium', certainty: wall ? BASED : GUESS,
+    shape: { type: 'quay', line: line.map(pt), height: 3.2 }, footprint: ribbon(line, 3), sources: wall ? ['source:lanciani-fur-28', 'source:osm-tiber'] : ['source:lanciani-fur-28', 'source:osm-tiber', 'source:it-wikipedia-porto-tiberino'],
+    time: wall ? { start: { year: -50 }, end: { year: 400 } } : AD100, uncertaintyYears: wall ? 50 : 25,
+    ...(wall ? { snap: 'Lanciani marks this wall (excavated in the 19th century) but does not date it, so it is taken as standing at AD 100; river walls here were Republican to imperial and were repaired, not replaced.' } : {}),
+    note: wall ? 'A stone river wall along the Forum Boarium, on the line Lanciani drew as the excavated riverfront ("RIPA"), 30 to 17 m east of today\'s bank. Its position is read from his plate to about 3-5 m; its height, facing and steps are guessed.'
+      : `A stone-faced river wall with steps, set along the bank as Lanciani's plate shows it before the embankments (an approximation of the ancient shore; here no wall is drawn). That Rome's river harbour had built quays is likely, but no source here records this stretch.` });
+}
 const quayRoad = [];
 for (const q of sample(smoothed, 10)) quayRoad.push([q.p[0] + 8, q.p[1]]);
 
@@ -223,6 +248,28 @@ const flavia = (() => {
 })();
 void flavia;
 
+// Pass D: what Lanciani drew as found. The paved street and the drains are placed from his plate (about 3-5 m); widths are typical.
+street('street-basalt', 'Basalt-paved street to the Forum Holitorium', BASED, [[-12.3, -207.3], [-2.1, -177.2], [7, -147.2], [13.2, -117.3], [20.6, -97.2], [29.7, -67.2], [37.1, -43.2], [39.7, -29.2]], 9, ['source:lanciani-fur-28', 'source:platner-1929'],
+  'A broad street paved with polygonal basalt blocks, found by excavation in 1873 and drawn by Lanciani running from the Forum Holitorium (the Porta Carmentalis end) down to the Forum Boarium; he took it for the Vicus Iugarius, which is likely but not certain. Its line is read from his plate to about 3-5 m; its width follows the plate, its kerbs and gutters are guessed.',
+  { time: { start: { year: -50 }, end: { year: 400 } }, uncertaintyYears: 50, snap: 'The paving is undated on Lanciani\'s plate; basalt-paved city streets are common from the Republic on, so it is taken as laid by AD 100.' });
+street('street-basalt-cross', 'Paved cross street west of the basalt street', BASED, [[-6.2, -58.2], [35.4, -55.1]], 6, ['source:lanciani-fur-28'],
+  'A second paved band, found in 1873 and drawn by Lanciani crossing the basalt street towards the river. Its line and width are read from his plate; what it was (a street or the front of a building) is not stated, so a street is assumed.',
+  { time: { start: { year: -50 }, end: { year: 400 } }, uncertaintyYears: 50, snap: 'Undated on the plate; taken as in place by AD 100 with the street it crosses.' });
+const drain = (id, title, line, width, from, note) => add({ id, kind: 'drain', title, certainty: BASED, shape: { type: 'drain', points: line.map(pt), width }, footprint: ribbon(sample(line.map(pt), 4).map(q => q.p), width), sources: ['source:lanciani-fur-28', 'source:osm-cloaca'],
+  time: { start: { year: from }, end: { year: 400 } }, uncertaintyYears: 50, note });
+drain('cloaca-maxima', 'Cloaca Maxima · course to the river', [[-32.9, 12.1], [45.5, 13.6], [123.4, 32.5]], 5.4, -600,
+  'The great drain, on the course Lanciani drew from the river wall, where it enters between the temples and the bank, east to a bend and on towards the Velabrum. In the market it ran vaulted and underground, so it is shown on the map only; its width is drawn from the plate and its vault is not modelled.');
+drain('cloaca-circi-maximi', 'Cloaca Circi Maximi · drain from the circus', [[-42.6, 100.2], [-26.2, 97.7], [28, 112.5], [48.7, 120], [74.2, 132], [93.5, 151.9]], 4.8, -300,
+  'The channel Lanciani marks from the Circus Maximus valley to the river, passing the Schola Graeca. Its course is read from his plate to about 3-5 m; it was vaulted where it crossed the market, so it is shown on the map only.');
+(() => {
+  const fit = minRect(ring('santa-maria-in-cosmedin'));
+  const volumes = [...ringOf(fit, 3.2, 9.5), vol(fit, 0, 0, fit.long - 12, fit.short - 12, 11.5, 'hall')];
+  add({ id: 'statio-annonae', kind: 'palace', title: 'Statio Annonae · grain-supply office and colonnaded hall', certainty: BASED, shape: { type: 'palace', volumes }, footprint: rectOf(fit.c, fit.v, fit.long, fit.short),
+    sources: ['source:lanciani-fur-28', 'source:wikipedia-great-altar'], time: { start: { year: 50 }, end: { year: 600 } }, uncertaintyYears: 50,
+    snap: 'Lanciani draws the Statio Annonae (found 1778 and later) on the site where Santa Maria in Cosmedin was later built into it. No source here dates the hall exactly; it belongs to the imperial grain service, so it is shown from about AD 100 within a window of 50 years either way.',
+    note: `The grain office and its colonnaded hall, placed on the ${Math.round(fit.long)} by ${Math.round(fit.short)} m site Lanciani gives it beside the Schola Graeca and the Ara Maxima. Its position and size follow his plan; its walls, roof and heights are massing, guessed.` });
+})();
+
 // ── Where nothing may be built, and where building is allowed ─────────────────────────────────────────────────
 const squarePolygon = grow(forumOutline, 8);
 const altar = marker('ara-maxima'), churchBlock = [[40, 74], [112, 74], [112, 130], [40, 130]];
@@ -234,9 +281,10 @@ const roadLines = streets.filter(s => s.id !== 'street-quay').map(s => ({ line: 
 const palatineFoot = [[345, -300], [330, -250], [300, -200], [285, -155], [263, -112], [250, -82], [243, -60], [240, -46], [233, 1], [227, 44], [215, 100], [205, 135]];
 const footE = s => { for (let i = 0; i < palatineFoot.length - 1; i++) { const [a, b] = [palatineFoot[i], palatineFoot[i + 1]]; if (s >= a[1] && s <= b[1]) return a[0] + (b[0] - a[0]) * (s - a[1]) / (b[1] - a[1]); } return s < palatineFoot[0][1] ? palatineFoot[0][0] : palatineFoot.at(-1)[0]; };
 const tiberBox = [Math.min(...tiber.map(p => p[0])) - 14, Math.max(...tiber.map(p => p[0])) + 14, Math.min(...tiber.map(p => p[1])) - 14, Math.max(...tiber.map(p => p[1])) + 14];
+const strip = waterExtra[0];
 const nearWater = (p, pad) => {
   if (p[0] < tiberBox[0] || p[0] > tiberBox[1] || p[1] < tiberBox[2] || p[1] > tiberBox[3]) return false;
-  if (inside(p, tiber)) return true;
+  if (inside(p, tiber) || inside(p, strip) || lineDistance(p, bankEdge) < pad) return true;
   for (let i = 0; i < tiber.length - 1; i++) if (segDistance(p, tiber[i], tiber[i + 1]) < pad) return true;
   return false;
 };
@@ -428,7 +476,7 @@ const templates = {
   lane: { title: 'Back lane', note: 'A narrow lane between blocks, the usual fine grain of Roman districts (Wikipedia, Insula). That a lane ran here, and its width, are guesses; the lines are laid out by the generator, not recorded.', sources: ['source:wikipedia-insula', 'source:project-rules'] },
 };
 const lotRows = lots.map(l => [r1(l.c[0]), r1(l.c[1]), r3(l.front[0]), r3(l.front[1]), r1(l.w), r1(l.d), l.storeys, KINDS.indexOf(l.kind), l.tone]);
-const out = { seed: SEED, origin, sources, objects, streets, templates, kinds: KINDS, lots: lotRows, lanes: lanes.map(l => [l.width, l.points]), courts,
+const out = { seed: SEED, origin, sources, objects, streets, waterExtra, templates, kinds: KINDS, lots: lotRows, lanes: lanes.map(l => [l.width, l.points]), courts,
   notes: { frame: 'Metres east (E) and south (S) of the layout origin', counts: {} } };
 // Counts include hydrated lots and lanes, so the file states what the scene shows.
 const counts = {};

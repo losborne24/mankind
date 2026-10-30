@@ -15,12 +15,11 @@ Nothing here is a survey. The scene is an editorial AD 100 preview.
 | OpenStreetMap, Pleiades, Wikidata snapshots already in `data/history/forum-boarium/source` | ODbL · CC BY 3.0 · CC0 | Yes (modern outlines, labelled as such) | Tiber bank, Forum Boarium site outline, temple footprints, Ponte Rotto arch, Cloaca outlet, Ara Maxima and Portus Tiberinus points |
 | Platner & Ashby, *A Topographical Dictionary of Ancient Rome* (1929), Forum Boarium entry, via LacusCurtius | Public domain (published 1929) | No (text only) | Extent of the market; the road from the bridge towards the Velabrum; Vicus Iugarius and Vicus Tuscus as routes into it; temples and altar listed; porticoed streets |
 | Wikipedia: Forum Boarium, Pons Aemilius, Great Altar of Hercules, Insula, Horrea; it.Wikipedia Porto tiberino | CC BY-SA 4.0 | No (text only, short facts) | Bridge dates (179/151 BC) and seven spans; altar tentatively under Santa Maria in Cosmedin; harbour 6th century BC to at least the Flavian period; typical shops, flats and warehouses; height limits of 70 then 60 Roman feet |
-| Lanciani, *Forma Urbis Romae* (1893–1901) | Public domain (author died 1929; published 1893–1901) | **No** | Consulted for orientation only. His sheets record what the 1890s excavations and the Severan plan showed, not Rome c. AD 100, and no sheet covering this ground was found as a ready-to-use open scan in this session |
+| Lanciani, *Forma Urbis Romae* (1893–1901), **plate 28** (Isola Tiberina) | Public domain (published 1901; author died 1929). Scan: Wikimedia Commons `Rodolfo_Lanciani_-_Forma_Urbis_Romae_-_Tavola_28.jpg`, tagged public domain (David Rumsey / Edizioni Quasar facsimile) | **Yes, since Pass D**: positions read off by hand (see below); the scan is not shipped | Ancient east bank, Pons Aemilius piers, Cloaca Maxima and Cloaca Circi Maximi lines, the basalt-paved street, the Statio Annonae site |
 | Stanford Digital Forma Urbis Romae Project (Severan Marble Plan fragments) | Site notice: text and images may be copied "only for research and personal use"; the Comune di Roma owns the 1960 photographs; a licence is needed for the 3D archive | **No** | Not usable: those terms do not allow redistributing derived geometry in a shipped app. Reference only |
 | *Mapping Augustan Rome* (Haselberger, Romano 2002, JRA Supplement 50) | Copyrighted printed book; no open data licence found | **No** | Reference only: the project did not use its map or gazetteer geometry |
 
-Result: **no third-party geometry beyond the OpenStreetMap/Pleiades/Wikidata snapshots already licensed for the scene.**
-Every other position is derived by rules in the generator. The Severan plan and *Mapping Augustan Rome* are the right
+Result (updated in Pass D): **the only third-party geometry is the OpenStreetMap/Pleiades/Wikidata snapshots and positions I read by hand off Lanciani's public-domain plate 28.** Every other position is derived by rules in the generator. The Severan plan and *Mapping Augustan Rome* are the right
 next references for a scholar's review (see §5) but could not be adopted here without a licence that allows it.
 
 ## 2. What is documented, evidence-based, best guess
@@ -113,3 +112,45 @@ and a 640 m radius: it is about half a square kilometre, not the whole city, and
 * The Theatre of Marcellus, Forum Holitorium, Tiber Island and the Capitoline temples are not modelled; the north of the area is empty.
 * Block sizes, lane widths and street grids are generic; Roman districts were less regular than these grids.
 * Palace and circus heights are typical, not recorded; the circus's stands are cleaner than the partly timber AD 100 original.
+
+
+# Pass D · a period survey and a flexible date (v5.9.0)
+
+## Date policy: snap to the evidence
+
+The scene is still labelled AD 100, but an object is no longer forced to be dated to AD 100 exactly. Where the best evidence is undated or comes from a nearby
+date, the object keeps its real date range and carries a `snap` note, shown in the inspector under **Date ·**, saying why it appears at AD 100. Nothing that
+began after AD 100 is added (the Arcus Argentariorum of AD 204 and everything on the Severan Marble Plan stay out); the check still enforces this.
+The Severan plan itself was not used: Stanford's terms do not allow redistributing derived geometry.
+
+## What was read from Lanciani's plate 28
+
+Method: the plate was fitted to the scene frame on three points (the Temple of Portunus outline, the Round Temple, the Ponte Rotto arch); residuals 1.3–3 m.
+Everything below was then read by hand against a 10 m grid drawn over the scan, so positions are good to **about 3–5 m**. The Round Temple's outline in
+OpenStreetMap sits about 4 m from where Lanciani draws it; no correction was applied.
+
+| Object | Certainty | What was read | Date |
+| --- | --- | --- | --- |
+| Ancient east bank | evidence-based | The riverfront Lanciani surveyed before the embankments (from 1876): the excavated wall he labels RIPA from S 0 to S 123 m, and the pre-embankment shore from S −200 to S −20 and S 130 to S 160. It lies **10 to 30 m east** of today's OpenStreetMap bank, so the ancient river was wider. The strip is drawn as water and the ground there is cut down to the river bed | wall undated on the plate; taken as standing at AD 100 |
+| Tiber quay wall | evidence-based | S −10 to S 123, on that line; height, facing and steps guessed | as above (`snap`) |
+| Pons Aemilius piers | evidence-based | Four piers as drawn (E −154.5, −137.5, −121.4, −98.6 m); the east piers spaced evenly to the bank. Eight piers, seven spans | AD 100 |
+| Cloaca Maxima, Cloaca Circi Maximi | evidence-based | Courses from the river wall to the edge of the plate; vaulted in the market, so map-only (kind `drain`) | Republican origin |
+| Basalt-paved street and a paved cross street | evidence-based | A 9 m wide street excavated in 1873, running from the Forum Holitorium side to the market; Lanciani calls it the Vicus Iugarius (likely, not certain) | undated paving; taken as in place by AD 100 (`snap`) |
+| Statio Annonae | evidence-based | Placed on the Santa Maria in Cosmedin site where Lanciani draws it; walls, roof, heights are massing | shown from about AD 100 within ±50 years (`snap`) |
+
+Effects: the quays, stages and barges moved with the bank; the bridge got its real pier spacing; buildings keep 11 m off the ancient bank; the 1,732 lots
+became 1,622 because the widened river took some plots.
+
+## Bugs found on the way
+
+* **Quays were mostly not drawn (since v5.7.0).** The quay builder skipped any segment where the coarse terrain sat below the shared river level, which was most of
+  the north quay and the whole Forum Boarium frontage. The terrain model puts the Tiber bed at about 16–19 m and the bank lower still. Walls are now at least their
+  own height and stand 1.6 m above the river wherever the terrain is lower.
+* The label of the Cloaca Maxima still comes from today's OpenStreetMap outlet point, which is now in the river 15 m west of the ancient mouth. Not moved: it is a
+  sourced modern datum.
+
+## Still open
+
+* Plates 22 (Fori Imperiali), 29 (Forum Romanum) and 35 (Circus Maximus end) were not traced; plate 35 shows the circus with its Marrana channel but not the river.
+* The Theatre of Marcellus, Forum Holitorium temples, Porticus Minucia and Tiber Island, all drawn on plate 28 north of the market, are still not modelled.
+* The ground mesh is coarse (about 9 m near the temples), so the bank is a soft ramp with a stone coping on top, not a vertical wall face.

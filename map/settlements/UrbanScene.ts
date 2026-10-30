@@ -412,10 +412,11 @@ export class UrbanScene {
   }
 
   private quay(mesher: Mesher, o: ReconstructionObject, h: Height, water: number) {
-    const line = o.shape.line as LocalPoint[];
+    const line = o.shape.line as LocalPoint[], wall = (o.shape.height as number | undefined) ?? 3.2;
     for (let i = 0; i < line.length - 1; i++) {
-      const a = line[i], b = line[i + 1], top = Math.max(h(a) ?? 0, h(b) ?? 0) + 0.3, bottom = Number.isFinite(water) ? water - 2.2 : top - 5;
-      if (top < bottom + 1) continue;
+      // The coarse terrain can sit well below the river surface along the bank, so the coping stands 1.6 m above the river
+      // wherever the terrain is lower, and the wall is never shorter than its own height.
+      const a = line[i], b = line[i + 1], ground = Math.max(h(a) ?? 0, h(b) ?? 0) + 0.3, top = Number.isFinite(water) ? Math.max(ground, water + 1.6) : ground, bottom = Number.isFinite(water) ? Math.min(water - 2.2, top - wall) : top - 5;
       const dx = b[0] - a[0], dz = b[1] - a[1], l = Math.hypot(dx, dz);
       mesher.box((a[0] + b[0]) / 2, (top + bottom) / 2, (a[1] + b[1]) / 2, l + 0.4, top - bottom, 1.8, yawOf(dx, dz), STONE.clone().multiplyScalar(0.95));
       mesher.box((a[0] + b[0]) / 2 - 0.1, top + 0.12, (a[1] + b[1]) / 2, l + 0.4, 0.3, 2.3, yawOf(dx, dz), STONE.clone().multiplyScalar(1.08));
