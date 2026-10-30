@@ -34,7 +34,8 @@ export function MapReadout({ map }: { map: Map | null }) {
   }, [map]);
 
   const readout = useSyncExternalStore(subscribe, getSnapshot, () => "");
-  if (!readout) return null;
+  // Tile/LOD diagnostics are a development aid, not part of the product view.
+  if (!readout || process.env.NODE_ENV !== "development") return null;
 
   return (
     <div className="pointer-events-none absolute bottom-44 left-3 z-10 rounded-md border border-panel-border bg-panel px-3 py-2 font-mono text-[11px] tabular-nums text-white/60 backdrop-blur-md sm:bottom-32 sm:left-6">

@@ -38,6 +38,14 @@ export function ScenarioPanel({ map, layer, streamingStatus, settlementStatus }:
             },
             frame: callback => requestAnimationFrame(callback), cancelFrame: id => cancelAnimationFrame(id),
         });
+        // Centre guided subjects in the space left of the journey card (and above the
+        // scenario bar) on wide screens. Flagged as scenario-owned so it never pauses playback.
+        const framePadding = () => {
+            const wide = window.innerWidth >= 768;
+            map.setPadding({ top: 0, left: 0, bottom: wide ? 120 : 0, right: wide ? Math.min(340, window.innerWidth - 76) + 80 : 0 }, { scenario: true });
+        };
+        framePadding();
+        window.addEventListener('resize', framePadding);
         controller.load(portunusJourney);
         const detach = attachScenarioInput(map.getContainer(), reason => controller.pause(reason));
         const detachControls = attachScenarioControls(document, controller);
@@ -73,7 +81,9 @@ export function ScenarioPanel({ map, layer, streamingStatus, settlementStatus }:
             detachControls();
             map.off('movestart', movement);
             map.off('remove', removed);
+            window.removeEventListener('resize', framePadding);
             controller.dispose();
+            try { map.setPadding({ top: 0, left: 0, bottom: 0, right: 0 }, { scenario: true }); } catch { /* map already removed */ }
             if (map.getSource('scenario-geography'))
                 overlays.dispose();
             if (process.env.NODE_ENV === 'development')

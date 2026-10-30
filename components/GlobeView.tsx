@@ -34,7 +34,6 @@ import { ROMAN_SETTLEMENT } from "@/map/settlements/romanSettlement";
 import { HistoricalWorldSession } from "@/components/HistoricalDatasetControls";
 import { ScenarioPanel } from "@/components/ScenarioPanel";
 import { DebugPanel } from "@/components/DebugPanel";
-import { MapReadout } from "@/components/MapReadout";
 import { queryTerrainHeights } from "@/map/terrain";
 import { attachTerrainTexturePrecision } from "@/map/terrainTexturePrecision";
 import { attachCoastlineDetail } from "@/map/coastlineDetail";
@@ -158,7 +157,6 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
   return (
     <>
       <div ref={containerRef} className="h-full w-full" aria-hidden />
-      <MapReadout map={debugMap} />
       {debugMap && scenarioLayer && <HistoricalWorldSession map={debugMap} layer={scenarioLayer} />}
       {debugMap && <ScenarioPanel map={debugMap} layer={scenarioLayer} streamingStatus={streamingStatus} settlementStatus={settlementStatus} />}
       <DebugPanel

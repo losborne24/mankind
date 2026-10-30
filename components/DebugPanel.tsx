@@ -1,5 +1,6 @@
 "use client";
 import { HistoricalDatasetControls } from "@/components/HistoricalDatasetControls";
+import { MapReadout } from "@/components/MapReadout";
 import type { ThreeTestLayer } from "@/map/threeTestLayer";
 import { ScenarioDiagnostics } from "@/components/ScenarioDiagnostics";
 import type { StreamingStatus } from "@/map/threeTestLayer";
@@ -48,8 +49,9 @@ interface DebugPanelProps {
   onRetryTerrain: () => void;
 }
 
-/** Shared debug panel; add future map controls as separate fieldsets here. */
+/** Shared debug panel (collapsed by default); add future map controls as separate fieldsets here. */
 export function DebugPanel({ historicalLayer, streamingStatus, onStreamingFixtures, onStreamingVisit, onLODOverride, onAmbientLife, map, terrainWarning, onRetryTerrain, romanStatus, onRomanTestEnabled, settlementStatus, onSettlementEnabled, onVisitSettlement, proceduralStatus, onVisitProcedural }: DebugPanelProps) {
+  const [open, setOpen] = useState(false);
   const [life, setLife] = useState({ ...DEFAULT_AMBIENT_LIFE });
   const changeLife = (patch: Partial<AmbientLifeOptions>) => { const next = {...life,...patch}; setLife(next); onAmbientLife(next); };
   const [proceduralProfile, setProceduralProfile] = useState<SettlementProfile>("village");
@@ -90,7 +92,9 @@ export function DebugPanel({ historicalLayer, streamingStatus, onStreamingFixtur
   if (process.env.NODE_ENV !== "development") return null;
 
   return (
-    <details open className="absolute top-16 left-4 z-20 max-h-[calc(100%-12rem)] w-56 overflow-y-auto rounded-lg border border-panel-border bg-panel p-3 text-xs text-white/70 backdrop-blur-md sm:left-6">
+    <>
+    {open && <MapReadout map={map} />}
+    <details onToggle={event => setOpen(event.currentTarget.open)} className="absolute top-16 left-4 z-20 max-h-[calc(100%-12rem)] w-56 overflow-y-auto rounded-lg border border-panel-border bg-panel p-3 text-xs text-white/70 backdrop-blur-md sm:left-6">
       <summary className="cursor-pointer tracking-wide">Debug tools</summary>
       <ScenarioDiagnostics />
       {map && historicalLayer && <HistoricalDatasetControls map={map} />}
@@ -243,5 +247,6 @@ export function DebugPanel({ historicalLayer, streamingStatus, onStreamingFixtur
         </p>
       )}
     </details>
+    </>
   );
 }
