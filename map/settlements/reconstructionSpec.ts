@@ -1,7 +1,7 @@
 import type { LocalPoint } from "@/map/settlements/romanSettlement";
 
 export type ReconstructionCertainty = "documented" | "evidence-based" | "best-guess";
-export type ReconstructionKind = "temple" | "bridge" | "quay" | "street" | "stage" | "barge" | "square" | "altar" | "pen" | "stall" | "shop" | "flats" | "warehouse";
+export type ReconstructionKind = "temple" | "bridge" | "quay" | "street" | "lane" | "stage" | "barge" | "square" | "altar" | "pen" | "stall" | "shop" | "insula" | "flats" | "warehouse" | "circus" | "palace";
 export interface ReconstructionObject {
   id: string;
   kind: ReconstructionKind;
@@ -26,4 +26,6 @@ export interface ReconstructionSpec {
   sources: { id: string; title: string; url: string; licence?: string }[];
   streets: { id: string; width: number; points: LocalPoint[] }[];
   objects: ReconstructionObject[];
+  /** Open courtyards inside the blocks: ground treatment only, not mapped objects. */
+  courts?: { offset: LocalPoint; width: number; depth: number; heading: number }[];
 }

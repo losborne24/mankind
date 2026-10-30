@@ -63,3 +63,53 @@ Procedural walls and roofs are generic; they are not Roman building types recons
 * The 1809–10 lowering of the ground around the temples (Wikipedia, Temple of Hercules Victor) means the ancient ground level near them may have been different; this scene uses today's terrain.
 * Heights, storeys and facade patterns are typical, not recorded.
 * The Cloaca Maxima outlet, Portus Tiberinus and Ara Maxima remain markers of limited accuracy.
+
+
+# Pass C · city, landmarks and streets (v5.8.0)
+
+Pass B read as a village: detached-looking two-storey shops along a few roads, with fields between. Pass C changes the character, not the
+certainty rules. Data: `lib/scenarios/fixtures/forum-boarium-reconstruction.json` (now compact: `lots`, `lanes`, `courts` rows expanded by
+`lib/history/reconstructionHydrate.ts`). Sources fetched by `fetch-landmark-sources.mjs` into `data/history/forum-boarium/source/{osm,pleiades}-landmarks.json`.
+
+## Landmarks (evidence-based massing)
+
+| Object | Position and size from | Massing (guessed) |
+| --- | --- | --- |
+| Circus Maximus | OpenStreetMap relation 11384819 (site outline): axis and centre fitted by smallest enclosing rectangle (axis 37° south of east, centre E 404 / S 350 m); 621 m by 118 m (Wikipedia) | three tiers of stands 30 m deep, 24 m outer wall, sand track graded to the highest ground across each section, central barrier with Augustus's obelisk, gate block. Trajan's stone rebuilding began just after AD 100 |
+| Domus Flavia | OSM relation 1857984 (surviving walls), smallest rectangle (151 × 101 m); completed c. AD 92 (Pleiades 564783056); walls about 16 m, hall over 30 m (Wikipedia) | wings 18 m round an open court, two halls (31 m and 26 m) |
+| Domus Augustana | OSM relation 1805347 (225 × 86 m); Pleiades 792237246; curved exedra facing the circus (Wikipedia) | wings 17 m, exedra 13 m on the side facing the circus |
+| Domus Tiberiana | OSM relation 1860920 (219 × 120 m; Wikipedia says about 150 × 120 m) | ring 20 m round a court on a terraced platform |
+
+Each wing stands on a platform that follows the slope (top at the highest ground under it, base 4 m below the lowest).
+
+## Streets
+
+Radial spokes are gone. Where a source maps a street the mapped line is **evidence-based**; where the line is drawn along a modern street in the same valley it is a **best guess** and says so.
+
+| Street | Certainty | Basis |
+| --- | --- | --- |
+| Vicus Tuscus · Forum end | evidence-based | OSM way 998877106, Pleiades 380281017 |
+| Vicus Tuscus · through the Velabrum to the market | best guess | route from Pleiades/Wikipedia (Forum, western flank of the Palatine, Velabrum, Forum Boarium, processions to the Circus); line along today's Via di San Teodoro and Via del Velabro |
+| Vicus Iugarius · Forum end | evidence-based | OSM way 1000529940, Pleiades 889101791 |
+| Vicus Iugarius · foot of the Capitoline to the market | best guess | Platner; line along Via della Consolazione and Via del Velabro |
+| Clivus Victoriae | evidence-based | OSM way 132682585, Pleiades 668537796 |
+| Road from the bridge to the Velabrum | evidence-based | Platner (unchanged) |
+| Road to the Circus Maximus | best guess | Platner/Wikipedia: the market opened towards the starting gates; line along Via dei Cerchi |
+| Riverside road, road west of the bridge, 119 back lanes | best guess | generator |
+
+Lanes are laid out in five district grids (market, Velabrum, circus side, two on the west bank) aligned to the valley, the river and the circus.
+They are narrow (3.4–4.3 m) and appear only where lots stand beside them.
+
+## The city
+
+Attached blocks (insulae with ground-floor tabernae, flats, shop-houses) of 2–5 storeys (at most 16.8 m, under the 17.75 m limit) fill the blocks between lanes,
+leaving courtyards; lots touch exactly (party walls) with an occasional 2–3 m passage; 1,732 buildings. Storeys are capped near the temples (2 within 75 m, 3 within 120 m,
+4 within 170 m) so they stay readable. Warehouses stay along the river (north quay and a shorter south row). No Roman-kit buildings are used.
+The urban region is bounded by the river, the Palatine foot (Via di San Teodoro line), the Capitoline slope, the circus and palace keep-outs,
+and a 640 m radius: it is about half a square kilometre, not the whole city, and ends abruptly at its edge.
+
+## Known gaps
+
+* The Theatre of Marcellus, Forum Holitorium, Tiber Island and the Capitoline temples are not modelled; the north of the area is empty.
+* Block sizes, lane widths and street grids are generic; Roman districts were less regular than these grids.
+* Palace and circus heights are typical, not recorded; the circus's stands are cleaner than the partly timber AD 100 original.

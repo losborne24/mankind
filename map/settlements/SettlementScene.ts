@@ -59,6 +59,7 @@ export class SettlementScene {
   private shadowReach = 0;
   /** Mean floor height of the visible buildings, settlement frame; the ground the camera is looking at. */
   centreHeight = 0;
+  private readonly focusScratch = new THREE.Vector3();
   private shadowDirty = true;
   shadowsEnabled = true;
   private entries: SurfaceEntry[] = [];
@@ -107,7 +108,7 @@ export class SettlementScene {
     this.sun.castShadow = true;
     this.sun.shadow.mapSize.set(2048, 2048);
     // A neighbourhood needs shadows well beyond the 120 m temple pair, so its shadow box is wider.
-    this.shadowReach = this.definition.reconstruction ? 170 : 0;
+    this.shadowReach = this.definition.reconstruction ? 300 : 0;
     const halfX = Math.max(68, width / 2 + 12, this.shadowReach), halfZ = Math.max(78, depth / 2 + 12, this.shadowReach);
     Object.assign(this.sun.shadow.camera, { left: -halfX, right: halfX, top: halfZ, bottom: -halfZ, near: 1, far: Math.max(180, depth + 60, this.shadowReach * 3.4) });
     this.sun.shadow.camera.updateProjectionMatrix();
@@ -339,7 +340,7 @@ export class SettlementScene {
     this.scenerySteep = sceneryGround.steep;
     const stableFloors = this.entries.filter((entry) => entry.model?.visible).map((entry) => entry.model!.position.y);
     const center = stableFloors.length ? { height: stableFloors.reduce((sum, value) => sum + value, 0) / stableFloors.length } : resolve([0, 0]);
-    if (center.height !== undefined) this.centreHeight = center.height;
+    if (center.height !== undefined) { this.centreHeight = center.height; this.urban?.setFocus(this.focusScratch.set(0, center.height + 6, 0)); }
     if (this.sun && center.height !== undefined) {
       const lightScale = Math.max(1, (this.definition.groundSizeMeters ?? GROUND_DEPTH) / GROUND_DEPTH);
       this.sun.target.position.set(0, center.height, 0);

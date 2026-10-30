@@ -59,3 +59,44 @@ Three decisions worth knowing:
 
 About 80 frames per second typical; one frame in twenty takes about two display intervals. One-off cost on scene build: ~400 ms of CPU for the two ground masks and
 textures, ~160 ms for the first terrain placement. Draw calls in the local scene: 24.
+
+
+# Pass C · a city, not a village (v5.8.0)
+
+Research, sources and rules: `scripts/context/forum-boarium/RECONSTRUCTION.md` (Pass C). Check: `node scripts/check-reconstruction.mjs`.
+
+| Change | Where |
+| --- | --- |
+| Circus Maximus and the three Palatine palace wings as evidence-based massing, with their note and sources | `build-reconstruction.mjs`, `UrbanScene.circus/palace` |
+| Documented streets (Vicus Tuscus, Vicus Iugarius, Clivus Victoriae) marked evidence-based where a source maps them, best guess elsewhere; spokes removed | generator |
+| Dense fabric: 1,732 attached 2–5 storey lots, 119 lanes, 195 courtyards; new `insula` facade kind (shops below, cornices); instanced, still two draws | generator, `UrbanScene.buildings` |
+| Ground: packed earth and paving in courtyards, cobbles on lanes, grass only outside the built area (slopes, banks) | `groundMask.ts` (`courts`, wider urban channel), `ContextGround.ts` |
+| Hills: ground vertex normals from the height field (the ground used to be flat-lit and hid the terrain's slopes); relief ×2 and local hillshade 0.55 while the journey is open, labelled "Relief ×2" beside the legend, switchable | `ContextGround.shadeRelief`, `lib/scenarios/relief.ts`, `ReconstructionControls` |
+| Rome from above: extruded massing drawn by the map at regional zoom (buildings, circus, palace), fading out as the 3D scene takes over | `reconstructionOverlay.massingFeatures` |
+| Temples stay visible: storeys capped near them, and guessed buildings between the camera and the temples (and right beside the camera) are dithered thin | `UrbanScene` shader `seeThrough` |
+
+**Why the hills looked flat.** Not the DEM source alone: Mapterhorn at zoom 12 gives Palatine 47 m, Capitoline 43 m, Aventine 38 m against 16.5 m at the temples
+(about 30 m of rise where the hills rise about 40 m; a 30 m-class model with buildings in it), at exaggeration 1. The local ground was also lit with straight-up normals and covered the terrain's own shading.
+Normals now come from the heights; the correction is a labelled ×2 exaggeration, not a change to any source height.
+
+**Fix found on the way.** `ReconstructionControls` rebuilt its map overlay on every playback tick and never refilled it, so the inspection outlines were empty while a journey played. It now refills on creation.
+
+## Frame time
+
+Measured as `map.redraw()` followed by `gl.finish()` over 90 frames at the same camera, 2048 × 1536 canvas, Chrome in the app's browser pane. The usual 5 s continuous-repaint method was
+not usable at the time: the pane was throttled to about 1 frame per second when not in view, whichever code ran (including with the city layers off and the camera far away). `gl.finish()` may not wait for the GPU on this stack, so treat these as lower bounds; draw calls stayed at 24.
+
+| View | before: median / p95 | after: median / p95 |
+| --- | --- | --- |
+| Market, z17.2 pitch 58 | 1.6 / 3.3 ms | 1.8 / 3.4 ms |
+| Temples, z18.3 pitch 58 | 1.1 / 2.5 ms | 1.3 / 2.8 ms |
+| Circus and palace, z16.9 pitch 60 | 1.1 / 1.7 ms | 1.4 / 2.6 ms |
+
+One-off scene build: terrain placement 68 → 144 ms (a 10 m height lattice instead of one query per lot corner), context ground 419 → 459 ms.
+Triangles in the local scene about 139k → 170k. Instancing was already in place for the buildings, so no LOD was added.
+
+## What was and was not looked at
+
+Looked at in the browser pane at 1024 × 768: the Rome-from-above, crossing, market, two-temples, exterior and evidence-ends poses, a Palatine-foot view for relief, and a view of the circus and palace; at 390 × 844: the two-temples and Rome-from-above poses
+(the journey card covers most of the map on a phone, as before, so that view was checked with the card hidden). Not looked at: the explore beat's own free camera, playing the journey through at speed, the orbit frames between the checked bearings
+(temples at 165° and 205° and the market at 70° were checked), and Safari/Firefox.

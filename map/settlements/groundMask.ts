@@ -16,6 +16,8 @@ export interface ContextGroundSpec {
   streets?: readonly { width: number; points: readonly LocalPoint[] }[];
   squares?: readonly (readonly LocalPoint[])[];
   built?: readonly ContactRect[];
+  /** Open courtyards inside the blocks of the guessed city: packed earth and paving, never grass. */
+  courts?: readonly ContactRect[];
 }
 /** A rotated rectangle that touches the ground; darkens the ground beside it. */
 export interface ContactRect { offset: LocalPoint; width: number; depth: number; heading: number }
@@ -98,12 +100,15 @@ function fillLines(out: Uint8Array, res: number, size: number, lines: readonly {
     fillRects(out, res, size, [{ offset: [(ax + bx) / 2, (az + bz) / 2], width: length + line.width * 0.6, depth: line.width, heading: -Math.atan2(bz - az, bx - ax) }], channel, 0);
   }
 }
-/** Second mask: R streets, G widened square, B built-up footprint (packed yards), A reserved. Everything here is a guess, so it is its own texture. */
+/** Second mask: R streets, G widened square, B urban ground (blocks, courtyards, lanes: packed earth and paving), A reserved. Everything here is a guess, so it is its own texture. */
 export function buildSurfaceMask(spec: ContextGroundSpec, res = MASK_RESOLUTION): Uint8Array {
   const data = new Uint8Array(res * res * 4), texel = spec.sizeMeters / res;
   fillLines(data, res, spec.sizeMeters, spec.streets ?? [], 0);
   fillRings(data, res, spec.sizeMeters, spec.squares ?? [], 1);
-  fillRects(data, res, spec.sizeMeters, spec.built ?? [], 2, 2.5);
+  // Urban ground: every lot grown 4.5 m (so lanes and party-wall gaps are covered), the courtyards, and the streets widened.
+  fillRects(data, res, spec.sizeMeters, spec.built ?? [], 2, 4.5);
+  fillRects(data, res, spec.sizeMeters, spec.courts ?? [], 2, 0);
+  fillLines(data, res, spec.sizeMeters, (spec.streets ?? []).map(s => ({ ...s, width: s.width + 5 })), 2);
   blur(data, res, 0, 1); blur(data, res, 1, 1);
   for (let pass = 0; pass < 2; pass++) blur(data, res, 2, Math.max(1, Math.round(3 / texel)));
   return data;

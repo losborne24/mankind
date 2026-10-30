@@ -1,5 +1,6 @@
 import context from '@/lib/scenarios/fixtures/forum-boarium-context.json';
 import reconstruction from '@/lib/scenarios/fixtures/forum-boarium-reconstruction.json';
+import { hydrateReconstruction, type RawReconstruction } from '@/lib/history/reconstructionHydrate';
 import type { ReconstructionSpec } from '@/map/settlements/reconstructionSpec';
 import type { ContextGroundSpec } from '@/map/settlements/groundMask';
 import type { Coordinate, LocalPoint } from '@/map/settlements/romanSettlement';
@@ -13,7 +14,7 @@ const rings = (id: string, origin: Coordinate) =>
   (context.geometries.find(g => g.id === id)?.coordinates ?? []).map(ring => (ring as number[][]).map(p => toLocal(origin, p)));
 
 /** The generated best-guess neighbourhood (scripts/context/forum-boarium/build-reconstruction.mjs), shared by the scene and the map layer. */
-export const forumReconstruction = reconstruction as unknown as ReconstructionSpec;
+export const forumReconstruction: ReconstructionSpec = hydrateReconstruction(reconstruction as unknown as RawReconstruction);
 export function reconstructionFor(layoutId: string): ReconstructionSpec | undefined { return layoutId === 'layout:forum-boarium-temples' ? forumReconstruction : undefined; }
 
 /** Local ground for layouts that have one; styling over data already carried by the scenario's map layers. */
@@ -29,5 +30,6 @@ export function contextGroundFor(layoutId: string, origin: Coordinate): ContextG
     streets: forumReconstruction.streets.map(({ width, points }) => ({ width, points })),
     squares: forumReconstruction.objects.filter(o => o.kind === 'square').map(o => o.footprint),
     built: forumReconstruction.objects.filter(o => o.shape.type === 'building').map(o => ({ offset: o.shape.centre, width: o.shape.size[0], depth: o.shape.size[1], heading: Math.atan2(-o.shape.front[0], -o.shape.front[1]) })),
+    courts: forumReconstruction.courts,
   };
 }

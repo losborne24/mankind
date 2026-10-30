@@ -7,6 +7,9 @@ import { forumReconstruction } from '@/lib/history/localContext';
 import { certaintyColour, certaintyShare, reconstructionMatch, reconstructionOverlay } from '@/map/reconstructionOverlay';
 import type { ReconstructionCertainty, ReconstructionObject } from '@/map/settlements/reconstructionSpec';
 import { contextPeriod } from '@/components/ContextLayers';
+import { DEFAULT_TERRAIN_EXAGGERATION, TERRAIN_SOURCE } from '@/map/mapStyle';
+import { DEFAULT_LOCAL_HILLSHADE, LOCAL_RELIEF_EXAGGERATION, LOCAL_RELIEF_HILLSHADE } from '@/lib/scenarios/relief';
+import { LOCAL_HILLSHADE_STRENGTH } from '@/map/hillshade';
 import type { Coordinate } from '@/map/settlements/romanSettlement';
 
 const label: Record<ReconstructionCertainty, string> = { documented: 'Documented', 'evidence-based': 'Evidence-based', 'best-guess': 'Best guess' };
@@ -22,12 +25,26 @@ export function ReconstructionControls({ map, layer, at, onInspect, inspectedId,
   map: Map; layer: ThreeTestLayer | null; at: HistoricalTime; inspectedId: string | null; onInspect(id: string): void; onClose(): void;
 }) {
   const spec = forumReconstruction, origin = useMemo(() => spec.origin as unknown as Coordinate, [spec]);
-  const [showGuess, setShowGuess] = useState(true), [tint, setTint] = useState(false), [view, setView] = useState(0);
+  const [showGuess, setShowGuess] = useState(true), [tint, setTint] = useState(false), [view, setView] = useState(0), [relief, setRelief] = useState(true);
   const overlay = useRef<ReturnType<typeof reconstructionOverlay> | null>(null);
-  useEffect(() => { overlay.current = reconstructionOverlay(map, spec, origin, onInspect, point => layer?.pickReconstruction(point)); const move = () => setView(v => v + 1); map.on('moveend', move); return () => { map.off('moveend', move); overlay.current?.dispose(); overlay.current = null; }; }, [map, spec, origin, onInspect, layer]);
+  // The parent re-renders on every playback tick with a fresh onInspect; keep the overlay (and its data) alive across that.
+  const inspect = useRef(onInspect), latest = useRef({ at, showGuess, tint, inspectedId });
+  useEffect(() => { inspect.current = onInspect; latest.current = { at, showGuess, tint, inspectedId }; });
+  useEffect(() => {
+    overlay.current = reconstructionOverlay(map, spec, origin, id => inspect.current(id), point => layer?.pickReconstruction(point));
+    const { at, showGuess, tint, inspectedId } = latest.current;
+    overlay.current.update(at, showGuess, tint, inspectedId ?? undefined);
+    const move = () => setView(v => v + 1); map.on('moveend', move);
+    return () => { map.off('moveend', move); overlay.current?.dispose(); overlay.current = null; };
+  }, [map, spec, origin, layer]);
   useEffect(() => { overlay.current?.update(at, showGuess, tint, inspectedId ?? undefined); }, [at, showGuess, tint, inspectedId, map]);
   useEffect(() => { layer?.setBestGuessVisible(showGuess); }, [layer, showGuess]);
   useEffect(() => { layer?.setReconstructionTint(tint); }, [layer, tint]);
+  // Local relief correction: the global DEM is coarse and understates Rome's hills, so the journey exaggerates relief (labelled below).
+  useEffect(() => {
+    try { map.setTerrain({ source: TERRAIN_SOURCE, exaggeration: relief ? LOCAL_RELIEF_EXAGGERATION : DEFAULT_TERRAIN_EXAGGERATION }); map.setGlobalStateProperty(LOCAL_HILLSHADE_STRENGTH, relief ? LOCAL_RELIEF_HILLSHADE : DEFAULT_LOCAL_HILLSHADE); } catch { /* style not ready */ }
+    return () => { try { map.setTerrain({ source: TERRAIN_SOURCE, exaggeration: DEFAULT_TERRAIN_EXAGGERATION }); map.setGlobalStateProperty(LOCAL_HILLSHADE_STRENGTH, DEFAULT_LOCAL_HILLSHADE); } catch { /* map removed */ } };
+  }, [map, relief]);
   const share = useMemo(() => map.getZoom() >= 15.5 ? certaintyShare(spec, origin, map.getBounds(), at, showGuess) : null, [map, spec, origin, at, showGuess, view]);
   const percent = (k: ReconstructionCertainty) => `${Math.round((share?.share(k) ?? 0) * 100)}%`;
   return <div className="mt-3 border-t border-white/10 pt-2 text-[11px] text-white/70">
@@ -37,6 +54,8 @@ export function ReconstructionControls({ map, layer, at, onInspect, inspectedId,
       <label className="flex items-center gap-1.5"><input type="checkbox" checked={showGuess} onChange={e => setShowGuess(e.target.checked)} />Show best guesses</label>
       <label className="flex items-center gap-1.5"><input type="checkbox" checked={tint} onChange={e => setTint(e.target.checked)} />Colour by certainty</label>
     </div>
+    <label className="mt-1 flex items-start gap-1.5" title="The global elevation model (cells of about 30 m, with modern buildings in it) shows about 30 m of rise from the Forum Boarium to the Palatine; the hills rise about 40 m. Relief is exaggerated ×2 so the Capitoline, Palatine and Aventine read as hills. Turn it off for the model's own heights.">
+      <input className="mt-0.5" type="checkbox" checked={relief} onChange={e => setRelief(e.target.checked)} /><span>Relief ×{LOCAL_RELIEF_EXAGGERATION} <span className="text-white/40">· hills exaggerated for legibility</span></span></label>
   </div>;
 }
 

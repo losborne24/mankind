@@ -96,6 +96,9 @@ export class ContextGround {
         vec3 ground = mix(scrub, earth, clamp(trodden + bare * 0.5, 0.0, 1.0));
         float paved = smoothstep(0.38, 0.62, m.r + (mid - 0.5) * 0.22);
         float square = smoothstep(0.4, 0.6, m2.g + (mid - 0.5) * 0.2) * uGuess;
+        // Inside the guessed city the ground is packed earth and paving in courtyards, never grass.
+        float yard = smoothstep(0.35, 0.7, m2.b) * uGuess;
+        ground = mix(ground, mix(earth * 0.9, pave * 0.82, smoothstep(0.5, 0.64, vnoise(vGround * 0.1 + 11.0))), yard);
         vec3 col = mix(ground, pave, max(paved, square));
         vec3 cobble = texture2D(tCobble, vGround / 5.0).rgb * 0.7 + texture2D(tCobble, spin / 2.3).rgb * 0.3;
         col = mix(col, cobble, smoothstep(0.3, 0.7, m2.r) * uGuess);
@@ -107,7 +110,7 @@ export class ContextGround {
         diffuseColor.a *= rim * uFade * (1.0 - smoothstep(0.5, 0.85, m.g));
       `);
     };
-    this.groundMaterial.customProgramCacheKey = () => "context-ground-v2";
+    this.groundMaterial.customProgramCacheKey = () => "context-ground-v3";
     this.ground = new THREE.Mesh(this.groundGeometry, this.groundMaterial);
     this.ground.receiveShadow = true; this.ground.renderOrder = 1; this.ground.visible = false; this.ground.frustumCulled = false;
 
@@ -169,7 +172,7 @@ export class ContextGround {
     // The coarse rim sits higher so the terrain mesh cannot poke through between vertices.
     for (let i = 0; i < heights.length; i++) ground.setY(i, heights[i] + 0.07 + Math.hypot(this.points[i][0], this.points[i][1]) / radius * 0.8);
     ground.needsUpdate = true;
-    // Normals stay straight up: DEM relief is shown by the terrain beneath, and polar-grid facets would stripe the lighting.
+    this.shadeRelief(heights);
     this.groundGeometry.computeBoundingSphere();
     // River level: high enough that the terrain only breaks the surface at the banks.
     const wet: number[] = [];
@@ -190,6 +193,27 @@ export class ContextGround {
     if (!this.shownSince) this.shownSince = performance.now();
     this.ground.visible = true; this.water.visible = this.waterVisible;
     return true;
+  }
+
+  /**
+   * Per-vertex normals from the height field (central differences along and across the rings), so hills are lit and
+   * read as hills. Face normals of the polar grid would stripe; differences between neighbouring vertices do not.
+   */
+  private shadeRelief(heights: number[]) {
+    const normal = this.groundGeometry.getAttribute("normal") as THREE.BufferAttribute;
+    const at = (index: number, out: THREE.Vector3) => out.set(this.points[index][0], heights[index], this.points[index][1]);
+    const a = new THREE.Vector3(), b = new THREE.Vector3(), tangent = new THREE.Vector3(), radial = new THREE.Vector3(), n = new THREE.Vector3();
+    for (let i = 0; i <= RINGS; i++) for (let k = 0; k < SEGMENTS; k++) {
+      const index = i * SEGMENTS + k;
+      if (i === 0) { normal.setXYZ(index, 0, 1, 0); continue; }
+      tangent.copy(at(i * SEGMENTS + (k + 1) % SEGMENTS, a)).sub(at(i * SEGMENTS + (k + SEGMENTS - 1) % SEGMENTS, b));
+      radial.copy(at(Math.min(RINGS, i + 1) * SEGMENTS + k, a)).sub(at((i - 1) * SEGMENTS + k, b));
+      n.crossVectors(tangent, radial);
+      if (n.y < 0) n.negate();
+      n.normalize();
+      normal.setXYZ(index, n.x, n.y, n.z);
+    }
+    normal.needsUpdate = true;
   }
 
   /** Fades the guessed surfaces (streets, widened square, yards) in or out with the best-guess switch. */
