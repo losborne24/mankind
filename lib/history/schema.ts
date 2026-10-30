@@ -11,6 +11,8 @@ export interface HistoricalPeriod {
   start: HistoricalDate;
   end?: HistoricalDate;
   uncertaintyYears?: number;
+  /** Qualitative circa date; no invented numeric error margin. */
+  approximate?: boolean;
 }
 export interface HistoricalSource {
   id: string;

@@ -5,7 +5,7 @@ import type { HistoricalPeriod } from '@/lib/history/schema';
 import { formatHistoricalDate } from '@/lib/historicalDate';
 
 export function formatInspectionPeriod(period: HistoricalPeriod) {
-  return `${formatHistoricalDate(period.start)}${period.end ? ` – ${formatHistoricalDate(period.end)}` : ''}${period.uncertaintyYears ? ` (±${period.uncertaintyYears} years)` : ''}`;
+  return `${formatHistoricalDate(period.start)}${period.end ? ` – ${formatHistoricalDate(period.end)}` : ''}${period.uncertaintyYears ? ` (±${period.uncertaintyYears} years)` : ''}${period.approximate ? ' (approximate)' : ''}`;
 }
 export function HistoricalInspector({ inspection, onClose, onVisit, onInspectPlace }: {
   inspection: HistoricalInspection;

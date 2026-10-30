@@ -1,0 +1,146 @@
+{
+  "datasetId": "world:housesteads-reviewed-v1",
+  "reviewed": "2026-10-29",
+  "scope": "One fort, one associated monument, two dating windows and three geometry-free phase contexts. Not a reconstructed settlement.",
+  "claims": [
+    {
+      "id": "claim:fort-identity",
+      "recordId": "place:housesteads-fort",
+      "field": "evidence",
+      "sourceIds": [
+        "source:eh-housesteads-history",
+        "source:nt-housesteads"
+      ],
+      "status": "documented",
+      "note": "Site identity only; no exact lifetime inferred."
+    },
+    {
+      "id": "claim:fort-anchor",
+      "recordId": "place:housesteads-fort",
+      "field": "position.coordinate",
+      "sourceIds": [
+        "source:nt-housesteads"
+      ],
+      "status": "inferred",
+      "note": "Grid-square-centre transform. Unquantified accuracy, no footprint."
+    },
+    {
+      "id": "claim:granary-anchor",
+      "recordId": "place:housesteads-granaries",
+      "field": "position.coordinate",
+      "sourceIds": [
+        "source:nt-housesteads-granaries"
+      ],
+      "status": "inferred",
+      "note": "Separate monument record; no plan digitisation."
+    },
+    {
+      "id": "claim:granary-period",
+      "recordId": "place:housesteads-granaries",
+      "field": "period",
+      "sourceIds": [
+        "source:nt-housesteads-granaries"
+      ],
+      "status": "approximate",
+      "note": "Broad classification, not continuous occupation/building state."
+    },
+    {
+      "id": "claim:construction-window",
+      "recordId": "event:housesteads-construction-window",
+      "field": "period",
+      "sourceIds": [
+        "source:eh-housesteads-history"
+      ],
+      "status": "inferred",
+      "note": "Editorial date window, not exact event duration."
+    },
+    {
+      "id": "claim:granary-rebuilding",
+      "recordId": "event:housesteads-granary-rebuilding",
+      "field": "period",
+      "sourceIds": [
+        "source:eh-housesteads-history"
+      ],
+      "status": "approximate",
+      "note": "Dating window, no daily activity claim."
+    },
+    {
+      "id": "claim:phase-early",
+      "recordId": "layout:housesteads-early",
+      "field": "period",
+      "sourceIds": [
+        "source:eh-housesteads-phases"
+      ],
+      "status": "inferred",
+      "note": "Legend band describes phased fabric, not mutually exclusive complete settlement snapshots."
+    },
+    {
+      "id": "claim:phase-middle",
+      "recordId": "layout:housesteads-middle",
+      "field": "period",
+      "sourceIds": [
+        "source:eh-housesteads-phases"
+      ],
+      "status": "inferred",
+      "note": "Legend band describes phased fabric, not mutually exclusive complete settlement snapshots."
+    },
+    {
+      "id": "claim:phase-late",
+      "recordId": "layout:housesteads-late",
+      "field": "period",
+      "sourceIds": [
+        "source:eh-housesteads-phases"
+      ],
+      "status": "inferred",
+      "note": "Legend band describes phased fabric, not mutually exclusive complete settlement snapshots."
+    }
+  ],
+  "anchors": {
+    "method": "Centre of 10 m National Grid square, rasterio 1.4.3 EPSG:27700 to EPSG:4326, rounded to 6 decimal places. Decimal digits do not establish survey accuracy.",
+    "rows": [
+      {
+        "recordId": "place:housesteads-fort",
+        "gridReference": "NY 7897 6879",
+        "easting": 378975,
+        "northing": 568795,
+        "coordinate": [
+          -2.33031,
+          55.013259
+        ]
+      },
+      {
+        "recordId": "place:housesteads-granaries",
+        "gridReference": "NY 7898 6882",
+        "easting": 378985,
+        "northing": 568825,
+        "coordinate": [
+          -2.330156,
+          55.013529
+        ]
+      }
+    ]
+  },
+  "gaps": [
+    {
+      "id": "gap:placements",
+      "status": "open",
+      "note": "No approved surveyed building footprints, elevations or positions have been ingested."
+    },
+    {
+      "id": "gap:roads",
+      "status": "open",
+      "note": "No road geometry is provided. The published drawing is linked for reference only."
+    },
+    {
+      "id": "gap:architecture",
+      "status": "open",
+      "note": "No site-specific GLBs, material reconstructions or character appearances are approved."
+    },
+    {
+      "id": "gap:chronology",
+      "status": "open",
+      "note": "Circa boundaries, the gap between phase bands, boundary overlap and late occupation limits require review; do not interpolate a missing phase."
+    }
+  ],
+  "rights": "No drawing, image or traced geometry is distributed. Source references are citations, not asset licences."
+}

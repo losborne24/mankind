@@ -1,0 +1,28 @@
+{
+  "rasterioVersion": "1.4.3",
+  "sourceCRS": "EPSG:27700",
+  "targetCRS": "EPSG:4326",
+  "method": "10 m grid-square centre; coordinate accuracy remains unquantified",
+  "rows": [
+    {
+      "recordId": "place:housesteads-fort",
+      "gridReference": "NY 7897 6879",
+      "easting": 378975,
+      "northing": 568795,
+      "coordinate": [
+        -2.33031,
+        55.013259
+      ]
+    },
+    {
+      "recordId": "place:housesteads-granaries",
+      "gridReference": "NY 7898 6882",
+      "easting": 378985,
+      "northing": 568825,
+      "coordinate": [
+        -2.330156,
+        55.013529
+      ]
+    }
+  ]
+}

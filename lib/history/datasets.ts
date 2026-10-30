@@ -1,4 +1,11 @@
-export const HISTORICAL_DATASETS = [{ id: 'london2012', title: 'London 2012 ceremony context', url: '/api/historical-world/london2012' }] as const;
+export const HISTORICAL_DATASETS = [
+  { id: 'london2012', title: 'London 2012 ceremony context', label: 'London', url: '/api/historical-world/london2012',
+    description: 'Reviewed event context · approximate geography · no London architecture.',
+    preview: { date: { year: 2012, month: 7, day: 27 }, center: [-.0166, 51.5387] as [number, number], zoom: 13, label: 'View ceremony context' } },
+  { id: 'housesteads', title: 'Housesteads Roman Fort · phase contexts', label: 'Housesteads', url: '/api/historical-world/housesteads',
+    description: 'Curated phase evidence · partial date coverage · reconstruction geometry unavailable.',
+    preview: { date: { year: 200 }, center: [-2.330310, 55.013259] as [number, number], zoom: 14, label: 'View Housesteads context' } },
+] as const;
 /** Only explicitly registered local datasets are fetched. Citations are never fetched. */
 export async function loadHistoricalDataset(id: string, signal: AbortSignal): Promise<unknown> {
   const dataset = HISTORICAL_DATASETS.find(dataset => dataset.id === id);

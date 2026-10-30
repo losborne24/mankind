@@ -33,11 +33,11 @@ export function matchHistoricalTime(period: HistoricalPeriod, selection: Histori
   const [lower, upper] = periodBounds(period), [from, to] = periodBounds(selection);
   const uncertainty = (period.uncertaintyYears ?? 0) * 372;
   if (to < lower - uncertainty || from > upper + uncertainty) return 'outside';
-  return uncertainty || from < lower || to > upper ? 'possible' : 'within';
+  return uncertainty || period.approximate || from < lower || to > upper ? 'possible' : 'within';
 }
 /** Never turn an uncertain historical interval into a falsely exact scenario command. */
 export function toHistoricalTime(period: HistoricalPeriod): HistoricalTime {
   periodBounds(period);
-  if (period.uncertaintyYears) throw Error('Uncertain period needs an explicit presentation date');
+  if (period.uncertaintyYears || period.approximate) throw Error('Uncertain period needs an explicit presentation date');
   return { start: { ...period.start }, ...(period.end ? { end: { ...period.end } } : {}) };
 }

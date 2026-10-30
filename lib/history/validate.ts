@@ -31,10 +31,11 @@ const coordinate = (value: unknown, geographic = true) => {
   number(pair[1], geographic ? -90 : -10000, geographic ? 90 : 10000);
 };
 const period = (value: unknown) => {
-  const p = object(value, ['start', 'end', 'uncertaintyYears']);
+  const p = object(value, ['start', 'end', 'uncertaintyYears', 'approximate']);
   validateHistoricalDate(p.start);
   if (p.end !== undefined) validateHistoricalDate(p.end);
   if (p.uncertaintyYears !== undefined) number(p.uncertaintyYears, 0, 1000);
+  if (p.approximate !== undefined && typeof p.approximate !== 'boolean') throw Error('Expected approximate date flag');
   periodBounds(p as unknown as HistoricalPeriod);
 };
 /** Validate before data can reach adapters. Returns a detached, plain JSON snapshot. */

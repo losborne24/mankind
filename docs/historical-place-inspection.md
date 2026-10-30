@@ -67,4 +67,6 @@ Dataset unload also removed the open inspector and restored fixture discovery. T
 
 ## Recommended next step
 
-Phase 4 Step 4: curate the first reviewed historical place dataset, with dated layout alternatives, claim-level citations and explicit reconstruction/asset gaps. Use this inspector to review evidence and availability before introducing scene content. General non-orthogonal road surfaces/navigation and a historical scene-requirement resolver remain separately scoped rendering work.
+Phase 4 Step 4 is now implemented: [Housesteads curation and validation](housesteads-curation.md). It provides sourced phase contexts with explicit geometry gaps. See that report for the next geometry-ingestion milestone.
+
+The next milestone is reviewed geometry ingestion for one phase. General non-orthogonal road surfaces/navigation and a historical scene-requirement resolver remain separately scoped rendering work.

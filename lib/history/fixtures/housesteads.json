@@ -1,0 +1,369 @@
+{
+  "version": 1,
+  "id": "world:housesteads-reviewed-v1",
+  "title": "Housesteads — reviewed archaeological phase contexts",
+  "coordinateSystem": "WGS84",
+  "calendar": "proleptic-gregorian",
+  "sources": [
+    {
+      "id": "source:eh-housesteads-history",
+      "title": "History of Housesteads Roman Fort",
+      "publisher": "English Heritage",
+      "url": "https://www.english-heritage.org.uk/visit/places/housesteads-roman-fort-hadrians-wall/history/",
+      "accessed": "2026-10-29",
+      "citation": "History sections: building of the fort; Tungrian garrison. Page reviewed directly."
+    },
+    {
+      "id": "source:eh-housesteads-phases",
+      "title": "Housesteads Roman Fort — phased plans",
+      "publisher": "English Heritage",
+      "url": "https://www.english-heritage.org.uk/siteassets/home/visit/places-to-visit/housesteads-roman-fort/history/housesteads-roman-fort-phased-plans.pdf",
+      "accessed": "2026-10-29",
+      "citation": "February 2015, page 1 phase legend. Chronological labels referenced only; drawing and geometry not reproduced."
+    },
+    {
+      "id": "source:nt-housesteads",
+      "title": "Housesteads Fort — MNA111210",
+      "publisher": "National Trust Heritage Records",
+      "url": "https://heritagerecords.nationaltrust.org.uk/HBSMR/MonRecord.aspx?skin=printerfriendly&uid=MNA111210",
+      "accessed": "2026-10-29",
+      "citation": "Record 12230*0; grid reference NY 7897 6879. Search-index record reviewed; direct page fetch timed out."
+    },
+    {
+      "id": "source:nt-housesteads-granaries",
+      "title": "Building 8 — The Granaries — MNA111089",
+      "publisher": "National Trust Heritage Records",
+      "url": "https://heritagerecords.nationaltrust.org.uk/HBSMR/MonRecord.aspx?skin=printerfriendly&uid=MNA111089",
+      "accessed": "2026-10-29",
+      "citation": "Record 12230*13; grid reference NY 7898 6882; broad monument classification 123–410 AD. Search-index record reviewed."
+    },
+    {
+      "id": "source:eh-housesteads-description",
+      "title": "Description of Housesteads Roman Fort",
+      "publisher": "English Heritage",
+      "url": "https://www.english-heritage.org.uk/visit/places/housesteads-roman-fort-hadrians-wall/history/description/",
+      "accessed": "2026-10-29",
+      "citation": "Fort interior and wall/gates sections. Page reviewed directly; no images or measurements transcribed."
+    }
+  ],
+  "places": [
+    {
+      "id": "place:housesteads-fort",
+      "title": "Housesteads Roman Fort",
+      "kind": "settlement",
+      "position": {
+        "coordinate": [
+          -2.33031,
+          55.013259
+        ],
+        "evidence": {
+          "certainty": "inferred",
+          "sources": [
+            "source:nt-housesteads"
+          ],
+          "note": "Discovery anchor derived from the centre of National Trust grid square NY 7897 6879 using EPSG:27700 to WGS84. Transformation accuracy is unquantified; this is not a surveyed outline."
+        }
+      },
+      "radiusMeters": 250,
+      "evidence": {
+        "certainty": "documented",
+        "sources": [
+          "source:eh-housesteads-history",
+          "source:nt-housesteads"
+        ],
+        "note": "The sources identify an auxiliary fort on Hadrian’s Wall. Discovery radius is a display setting. No complete site lifespan or unchanged historical layout is asserted."
+      }
+    },
+    {
+      "id": "place:housesteads-granaries",
+      "title": "Housesteads granaries",
+      "kind": "landmark",
+      "parentId": "place:housesteads-fort",
+      "period": {
+        "start": {
+          "year": 123
+        },
+        "end": {
+          "year": 410
+        },
+        "approximate": true
+      },
+      "position": {
+        "coordinate": [
+          -2.330156,
+          55.013529
+        ],
+        "evidence": {
+          "certainty": "inferred",
+          "sources": [
+            "source:nt-housesteads-granaries"
+          ],
+          "note": "Discovery anchor derived from the centre of National Trust grid square NY 7898 6882. Grid resolution is not a surveyed positional error estimate."
+        }
+      },
+      "radiusMeters": 40,
+      "evidence": {
+        "certainty": "documented",
+        "sources": [
+          "source:nt-housesteads-granaries"
+        ],
+        "note": "The heritage record identifies the granaries. Its broad monument date classification is indexed here approximately; it does not establish an unchanged building form or continuous use."
+      }
+    }
+  ],
+  "assets": [
+    {
+      "id": "asset:housesteads-architecture",
+      "category": "building",
+      "evidence": {
+        "certainty": "unknown",
+        "sources": [],
+        "note": "Site-specific architecture is a reconstruction requirement with no approved registry binding. Generic Roman fixture models have not been assigned."
+      }
+    },
+    {
+      "id": "asset:housesteads-granaries",
+      "category": "building",
+      "evidence": {
+        "certainty": "unknown",
+        "sources": [],
+        "note": "No source-grounded granary model, surveyed footprint or approved material reconstruction is supplied."
+      }
+    }
+  ],
+  "roadNetworks": [],
+  "layouts": [
+    {
+      "id": "layout:housesteads-early",
+      "title": "Early phase context",
+      "placeId": "place:housesteads-fort",
+      "period": {
+        "start": {
+          "year": 122
+        },
+        "end": {
+          "year": 138
+        },
+        "approximate": true
+      },
+      "frame": "local-east-south-metres",
+      "extentMeters": 300,
+      "maxFoundationRiseMeters": 0,
+      "buildings": [],
+      "evidence": {
+        "certainty": "inferred",
+        "sources": [
+          "source:eh-housesteads-phases"
+        ],
+        "note": "Phase band from the published legend, adapted as context rather than a whole-site snapshot. Building/road geometry is absent. Extent and foundation values are inactive renderer settings, not archaeological measurements."
+      }
+    },
+    {
+      "id": "layout:housesteads-middle",
+      "title": "Middle phase context",
+      "placeId": "place:housesteads-fort",
+      "period": {
+        "start": {
+          "year": 170
+        },
+        "end": {
+          "year": 270
+        }
+      },
+      "frame": "local-east-south-metres",
+      "extentMeters": 300,
+      "maxFoundationRiseMeters": 0,
+      "buildings": [],
+      "evidence": {
+        "certainty": "inferred",
+        "sources": [
+          "source:eh-housesteads-phases"
+        ],
+        "note": "Phase band from the published legend, adapted as context rather than a whole-site snapshot. Building/road geometry is absent. Extent and foundation values are inactive renderer settings, not archaeological measurements."
+      }
+    },
+    {
+      "id": "layout:housesteads-late",
+      "title": "Late phase context",
+      "placeId": "place:housesteads-fort",
+      "period": {
+        "start": {
+          "year": 270
+        },
+        "end": {
+          "year": 400
+        },
+        "approximate": true
+      },
+      "frame": "local-east-south-metres",
+      "extentMeters": 300,
+      "maxFoundationRiseMeters": 0,
+      "buildings": [],
+      "evidence": {
+        "certainty": "inferred",
+        "sources": [
+          "source:eh-housesteads-phases"
+        ],
+        "note": "Phase band from the published legend, adapted as context rather than a whole-site snapshot. Building/road geometry is absent. Extent and foundation values are inactive renderer settings, not archaeological measurements."
+      }
+    }
+  ],
+  "events": [
+    {
+      "id": "event:housesteads-construction-window",
+      "title": "Early fort construction — dating window",
+      "description": "The fort belongs to the early Hadrianic building programme; the source places its construction within a decade of AD 122.",
+      "period": {
+        "start": {
+          "year": 122
+        },
+        "end": {
+          "year": 132
+        },
+        "approximate": true
+      },
+      "locations": [
+        {
+          "placeId": "place:housesteads-fort",
+          "role": "fort site"
+        }
+      ],
+      "evidence": {
+        "certainty": "inferred",
+        "sources": [
+          "source:eh-housesteads-history"
+        ],
+        "note": "122–132 is an editorial indexing window for the source’s relative dating, not a measured event duration or an exact foundation year."
+      }
+    },
+    {
+      "id": "event:housesteads-granary-rebuilding",
+      "title": "Granary rebuilding — dating window",
+      "description": "English Heritage dates major granary rebuilding to AD 205–208.",
+      "period": {
+        "start": {
+          "year": 205
+        },
+        "end": {
+          "year": 208
+        },
+        "approximate": true
+      },
+      "locations": [
+        {
+          "placeId": "place:housesteads-fort",
+          "role": "fort context"
+        },
+        {
+          "placeId": "place:housesteads-granaries",
+          "role": "granary record"
+        }
+      ],
+      "evidence": {
+        "certainty": "documented",
+        "sources": [
+          "source:eh-housesteads-history"
+        ],
+        "note": "This is an archaeological dating window, not evidence of continuous work on every date in the interval. No reconstructed building state is supplied."
+      }
+    }
+  ],
+  "routes": [],
+  "scenes": [
+    {
+      "id": "scene:housesteads-early",
+      "title": "Early phase context requirements",
+      "description": "Geographic phase context only. Detailed architecture, mapped road geometry and source-grounded building placement remain unavailable.",
+      "placeId": "place:housesteads-fort",
+      "period": {
+        "start": {
+          "year": 122
+        },
+        "end": {
+          "year": 138
+        },
+        "approximate": true
+      },
+      "layoutIds": [
+        "layout:housesteads-early"
+      ],
+      "assetIds": [
+        "asset:housesteads-architecture",
+        "asset:housesteads-granaries"
+      ],
+      "required": false,
+      "fallback": "map-only",
+      "evidence": {
+        "certainty": "illustrative",
+        "sources": [
+          "source:eh-housesteads-phases",
+          "source:eh-housesteads-description"
+        ],
+        "note": "A future reconstruction request. Source descriptions guide review; no complete scene or model fidelity is established."
+      }
+    },
+    {
+      "id": "scene:housesteads-middle",
+      "title": "Middle phase context requirements",
+      "description": "Geographic phase context only. Detailed architecture, mapped road geometry and source-grounded building placement remain unavailable.",
+      "placeId": "place:housesteads-fort",
+      "period": {
+        "start": {
+          "year": 170
+        },
+        "end": {
+          "year": 270
+        }
+      },
+      "layoutIds": [
+        "layout:housesteads-middle"
+      ],
+      "assetIds": [
+        "asset:housesteads-architecture",
+        "asset:housesteads-granaries"
+      ],
+      "required": false,
+      "fallback": "map-only",
+      "evidence": {
+        "certainty": "illustrative",
+        "sources": [
+          "source:eh-housesteads-phases",
+          "source:eh-housesteads-description"
+        ],
+        "note": "A future reconstruction request. Source descriptions guide review; no complete scene or model fidelity is established."
+      }
+    },
+    {
+      "id": "scene:housesteads-late",
+      "title": "Late phase context requirements",
+      "description": "Geographic phase context only. Detailed architecture, mapped road geometry and source-grounded building placement remain unavailable.",
+      "placeId": "place:housesteads-fort",
+      "period": {
+        "start": {
+          "year": 270
+        },
+        "end": {
+          "year": 400
+        },
+        "approximate": true
+      },
+      "layoutIds": [
+        "layout:housesteads-late"
+      ],
+      "assetIds": [
+        "asset:housesteads-architecture",
+        "asset:housesteads-granaries"
+      ],
+      "required": false,
+      "fallback": "map-only",
+      "evidence": {
+        "certainty": "illustrative",
+        "sources": [
+          "source:eh-housesteads-phases",
+          "source:eh-housesteads-description"
+        ],
+        "note": "A future reconstruction request. Source descriptions guide review; no complete scene or model fidelity is established."
+      }
+    }
+  ]
+}

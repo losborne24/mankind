@@ -402,3 +402,10 @@ With a historical dataset loaded, use an Inspect button or click a place marker
 to review dates, evidence, sources and layout availability before choosing Visit.
 [Inspection and navigation contract](docs/historical-place-inspection.md).
 Run `node scripts/check-phase3.mjs docs/previews/historical-inspection` for the full gate.
+
+### First curated site dataset (Phase 4 Step 4)
+
+Choose Housesteads in **Debug tools → Historical dataset** to review sourced
+phase contexts, approximate dates and explicit geometry gaps. The site remains
+map-only. [Curation, source review and validation](docs/housesteads-curation.md).
+Run `node scripts/check-phase3.mjs docs/previews/housesteads` for the full gate.

@@ -47,7 +47,9 @@ export function selectHistoricalWorld(world: HistoricalWorldData, time: Historic
       row.layoutStatus = 'unavailable'; row.warnings.push('The layout road network is outside the selected date.'); return row;
     }
     if (presence !== 'within' || candidates.length !== 1 || match(candidate.period) !== 'within' || (network && match(network.period) !== 'within')) {
-      row.layoutStatus = 'ambiguous'; row.warnings.push('Date precision or overlapping layouts prevent automatic selection.'); return row;
+      row.layoutStatus = 'ambiguous'; row.warnings.push('Date precision or overlapping layouts prevent automatic selection.');
+      if (candidates.some(layout => !layout.buildings.length)) row.warnings.push('Candidate phase records contain no building positions or reconstructed geometry.');
+      return row;
     }
     const result = resolveValidatedSettlement(world, candidate.id, time.start);
     row.warnings = result.warnings;

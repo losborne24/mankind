@@ -18,7 +18,7 @@ export function toScenarioContent(value: unknown): { content: ScenarioDefinition
   const content: ScenarioDefinition['content'] = {
     sources: world.sources.map(({ id, title, url }) => ({ id, title, url })),
     locations: world.places.map(p => ({ id: p.id, title: p.title, coordinate: renderCoordinate(p.position.coordinate), certainty: certainty(p.position.evidence), sources: p.position.evidence.sources })),
-    routes: world.routes.map(r => ({ id: r.id, coordinates: r.coordinates.map(renderCoordinate), certainty: certainty(r.evidence), sources: r.evidence.sources, ...(!r.period.uncertaintyYears ? { time: toHistoricalTime(r.period) } : {}) })),
+    routes: world.routes.map(r => ({ id: r.id, coordinates: r.coordinates.map(renderCoordinate), certainty: certainty(r.evidence), sources: r.evidence.sources, ...(!r.period.uncertaintyYears && !r.period.approximate ? { time: toHistoricalTime(r.period) } : {}) })),
     scenes: world.scenes.map(s => ({ id: s.id, description: s.description, certainty: certainty(s.evidence), sources: s.evidence.sources, required: s.required })),
     overlays: [
       ...world.events.flatMap(event => [
@@ -28,7 +28,7 @@ export function toScenarioContent(value: unknown): { content: ScenarioDefinition
       ...world.routes.map(route => ({ id: `route:${route.id}`, type: 'route' as const, route: route.id })),
     ],
   };
-  if (world.routes.some(r => r.period.uncertaintyYears)) warnings.push('Uncertain route periods remain in the historical record; no exact route time was inferred.');
+  if (world.routes.some(r => r.period.uncertaintyYears || r.period.approximate)) warnings.push('Uncertain route periods remain in the historical record; no exact route time was inferred.');
   return { content, warnings };
 }
 /** Direction is supplied separately and goes through the same validator as developer scenarios. */
@@ -50,7 +50,7 @@ export function bindHistoricalScenario(value: unknown, direction: Omit<ScenarioD
       const selectedEvents = world.events.filter(e => action.overlays.some(id => id === `event:${e.id}` || id.startsWith(`event:${e.id}:location:`)));
       const selectedRoutes = world.routes.filter(r => action.overlays.includes(`route:${r.id}`) || (action.camera.type === 'followRoute' && action.camera.route === r.id));
       if ([...selectedEvents, ...selectedRoutes, ...scenes].some(entity => !overlaps(entity.period, time))) throw Error('Historical content outside action date');
-      if ([...selectedEvents, ...selectedRoutes, ...scenes].some(entity => entity.period.uncertaintyYears)) projection.warnings.push(`Beat ${beat.id} uses an uncertain historical period; direction supplies the presentation date.`);
+      if ([...selectedEvents, ...selectedRoutes, ...scenes].some(entity => entity.period.uncertaintyYears || entity.period.approximate)) projection.warnings.push(`Beat ${beat.id} uses an uncertain historical period; direction supplies the presentation date.`);
     }
   }
   return { scenario, warnings: [...new Set(projection.warnings)] };
@@ -79,7 +79,7 @@ export function resolveValidatedSettlement(world: import('@/lib/history/schema')
   if (layout.extentMeters > 1000 || Math.abs(place.position.coordinate[1]) > 85) warnings.push('Layout exceeds the current compact-scene renderer boundary.');
   if (layout.buildings.length > 100 || (network?.roads.reduce((count, road) => count + road.points.length - 1, 0) ?? 0) > 256) warnings.push('Layout exceeds the current scene assembly budget.');
   if (network?.roads.some(road => road.points.some((point, i) => i > 0 && point[0] !== road.points[i - 1][0] && point[1] !== road.points[i - 1][1]))) warnings.push('Current terrain road assembler requires orthogonal segments; historical geometry was not regenerated.');
-  if (!layout.buildings.length) warnings.push('No building geometry is specified for the current settlement assembler.');
+  if (!layout.buildings.length) warnings.push('Building positions and reconstruction geometry have not been supplied.');
   const buildings: SettlementDefinition['buildings'][number][] = [];
   for (const building of layout.buildings) {
     const reference = world.assets.find(asset => asset.id === building.assetId)!;
