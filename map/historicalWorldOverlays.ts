@@ -24,7 +24,7 @@ export function historicalWorldOverlays(map: Map, onInspectPlace?: (id: string) 
       for (const area of selection?.referenceAreas ?? []) features.push({ type: 'Feature', properties: { id: area.id, title: area.title, referenceOnly: true }, geometry: area.geometry });
       for (const { footprint, match } of selection?.footprints ?? []) features.push({ type: 'Feature', properties: { id: footprint.id, title: footprint.title, footprint: true, possible: match === 'possible', representation: footprint.representation }, geometry: footprint.geometry });
       for (const row of selection?.places ?? []) {
-        if (!['within', 'possible'].includes(row.presence) || Math.abs(row.place.position.coordinate[1]) > 85) continue;
+        if (!['within', 'possible'].includes(row.presence) || row.place.marker === false || Math.abs(row.place.position.coordinate[1]) > 85) continue;
         const events = selection!.events.filter(e => e.event.locations.some(l => l.placeId === row.place.id));
         visibleIds.add(row.place.id);
         features.push({ type: 'Feature', properties: { id: row.place.id, title: row.place.title, possible: row.presence === 'possible', certainty: row.place.position.evidence.certainty, events: events.map(e => e.event.title).join('; '), basis: row.basis }, geometry: { type: 'Point', coordinates: row.place.position.coordinate } });

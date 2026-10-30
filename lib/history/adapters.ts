@@ -83,7 +83,7 @@ export function resolveValidatedSettlement(world: import('@/lib/history/schema')
   const buildings: SettlementDefinition['buildings'][number][] = [];
   for (const building of layout.buildings) {
     const reference = world.assets.find(asset => asset.id === building.assetId)!;
-    const binding = resolveHistoricalAsset(reference, place.id, selectedTime ?? { start: at }, undefined, explicitInterpretation);
+    const binding = resolveHistoricalAsset(reference, building.placeId ?? place.id, selectedTime ?? { start: at }, undefined, explicitInterpretation);
     if (binding.status === 'catalogue-blocked') { warnings.push(binding.reason!); continue; }
     if (binding.status === 'unresolved') { warnings.push(`Unresolved historical asset ${reference.id}; no substitute selected.`); continue; }
     if (binding.status === 'category-mismatch') { warnings.push(`Asset category mismatch for ${reference.id}.`); continue; }

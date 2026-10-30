@@ -1,0 +1,324 @@
+{
+  "version": 1,
+  "id": "world:forum-boarium-temples-v1",
+  "title": "Forum Boarium · two temple interpretations",
+  "coordinateSystem": "WGS84",
+  "calendar": "proleptic-gregorian",
+  "sources": [
+    {
+      "id": "source:psu-fletcher",
+      "title": "Fletcher 1921, p.105 · Portunus plan and elevations",
+      "publisher": "Penn State University Libraries · courtesy Allan Kohl",
+      "url": "https://www.flickr.com/photos/psulibscollections/5832798550/",
+      "accessed": "2026-10-30",
+      "citation": "WB2007-0510. Historic illustration visually reviewed at linked larger resolution. Holder declares public-domain use; reconstruction drawings are interpretive. No image pixels used in model materials."
+    },
+    {
+      "id": "source:rome-heritage",
+      "title": "Tempio di Portunus · heritage authority",
+      "publisher": "Soprintendenza Speciale Archeologia Belle Arti e Paesaggio di Roma",
+      "url": "https://soprintendenzaspecialeroma.it/luoghi/tempio-di-portunus/",
+      "accessed": "2026-10-30",
+      "citation": "Direct text review: identity, Ionic order, frontal columns, structural materials and Republican rebuilding context. No images copied."
+    },
+    {
+      "id": "source:rome-tourism",
+      "title": "Temple of Portunus · city location and description",
+      "publisher": "Roma Capitale · Turismo Roma",
+      "url": "https://www.turismoroma.it/en/places/temple-portunus",
+      "accessed": "2026-10-30",
+      "citation": "Direct text review: geographic POINT, high podium, steps and side-column description. Point is a visitor location, not a surveyed model anchor."
+    },
+    {
+      "id": "source:wikipedia-hercules",
+      "title": "Temple of Hercules Victor · Wikipedia",
+      "publisher": "Wikipedia (citing Loar 2017)",
+      "url": "https://en.wikipedia.org/wiki/Temple_of_Hercules_Victor",
+      "accessed": "2026-10-30",
+      "citation": "Direct text review: peripteral tholos, 20 Corinthian columns (19 survive), 14.8 m overall diameter, column height 10.65 m, later 2nd c. BC date, point coordinate 41.88861 N 12.48083 E (rounded). Secondary source; figures corroborated by World History Encyclopedia."
+    },
+    {
+      "id": "source:whe-hercules",
+      "title": "Temple of Vesta/Hercules, Rome · World History Encyclopedia",
+      "publisher": "World History Encyclopedia",
+      "url": "https://www.worldhistory.org/article/625/temple-of-vestahercules-rome/",
+      "accessed": "2026-10-30",
+      "citation": "Direct text review: five-step tufa base, Pentelic marble, 1st c. AD column replacements, dimensions agreeing with Wikipedia."
+    },
+    {
+      "id": "source:palladio-1570",
+      "title": "Palladio, I quattro libri dell'architettura (1570), Book IV ch. XIV, p. 90-91",
+      "publisher": "Getty Research Institute via Internet Archive",
+      "url": "https://archive.org/details/qvattrolibridel00pall/",
+      "accessed": "2026-10-30",
+      "citation": "Public domain by age; the scan carries no stated licence. Plan ratios measured by eye (cella/colonnade ~0.645, wall ~0.073); Palladio draws about 12 columns, not 20, and a dome; both rejected. No image pixels used."
+    },
+    {
+      "id": "source:pleiades-hercules-victor",
+      "title": "Pleiades · Temple of Hercules Victor",
+      "publisher": "Pleiades (ISAW/NYU)",
+      "url": "https://pleiades.stoa.org/places/825969667",
+      "accessed": "2026-10-30",
+      "citation": "CC BY 3.0 · Pleiades contributors. Location is an OpenStreetMap outline with stated accuracy 20 m."
+    },
+    {
+      "id": "source:pleiades-portunus",
+      "title": "Pleiades · Temple of Portunus",
+      "publisher": "Pleiades (ISAW/NYU)",
+      "url": "https://pleiades.stoa.org/places/494660670",
+      "accessed": "2026-10-30",
+      "citation": "CC BY 3.0 · Pleiades contributors. Location is an OpenStreetMap outline with stated accuracy 20 m."
+    },
+    {
+      "id": "source:osm-hercules",
+      "title": "OpenStreetMap · Tempio di Ercole Vincitore (way 251342364)",
+      "publisher": "OpenStreetMap contributors",
+      "url": "https://www.openstreetmap.org/way/251342364",
+      "accessed": "2026-10-30",
+      "citation": "ODbL 1.0 · © OpenStreetMap contributors"
+    },
+    {
+      "id": "source:osm-portunus",
+      "title": "OpenStreetMap · Tempio di Portuno (way 251331418)",
+      "publisher": "OpenStreetMap contributors",
+      "url": "https://www.openstreetmap.org/way/251331418",
+      "accessed": "2026-10-30",
+      "citation": "ODbL 1.0 · © OpenStreetMap contributors"
+    }
+  ],
+  "places": [
+    {
+      "id": "place:temple-of-portunus",
+      "title": "Temple of Portunus",
+      "kind": "landmark",
+      "radiusMeters": 35,
+      "marker": false,
+      "period": {
+        "start": {
+          "year": -120
+        },
+        "end": {
+          "year": 2025
+        }
+      },
+      "position": {
+        "coordinate": [
+          12.480893167165,
+          41.889289401004
+        ],
+        "evidence": {
+          "certainty": "inferred",
+          "sources": [
+            "source:rome-tourism"
+          ],
+          "note": "City visitor point adopted as a model discovery anchor, with unquantified positional accuracy. Not a surveyed footprint."
+        }
+      },
+      "evidence": {
+        "certainty": "documented",
+        "sources": [
+          "source:rome-heritage",
+          "source:pleiades-portunus"
+        ],
+        "note": "Named Roman temple. Pleiades dates it to the late 2nd or early 1st century BC; the date range here is approximate and encodes no unchanged appearance."
+      }
+    },
+    {
+      "id": "place:temple-of-hercules-victor",
+      "title": "Temple of Hercules Victor",
+      "kind": "landmark",
+      "radiusMeters": 35,
+      "marker": false,
+      "period": {
+        "start": {
+          "year": -143
+        },
+        "end": {
+          "year": 2025
+        }
+      },
+      "position": {
+        "coordinate": [
+          12.480753332,
+          41.888777148
+        ],
+        "uncertaintyMeters": 25,
+        "evidence": {
+          "certainty": "inferred",
+          "sources": [
+            "source:osm-hercules",
+            "source:osm-portunus",
+            "source:rome-tourism"
+          ],
+          "note": "Derived, not surveyed: the Portunus visitor anchor plus the vector (-11.6 m east, 56.6 m south) between the two OpenStreetMap temple outlines, whose stated accuracy is 20 m. The earlier rounded Wikipedia point (41.88861 N, 12.48083 E) lies about 20 m away from the OpenStreetMap outline centre and was not used."
+        }
+      },
+      "evidence": {
+        "certainty": "documented",
+        "sources": [
+          "source:wikipedia-hercules",
+          "source:whe-hercules"
+        ],
+        "note": "Named Roman temple, standing, dated to the later 2nd century BC. Peripteral tholos of 20 Corinthian columns."
+      }
+    },
+    {
+      "id": "place:forum-boarium-temples",
+      "title": "Forum Boarium temple pair · layout origin",
+      "kind": "landmark",
+      "radiusMeters": 90,
+      "marker": false,
+      "position": {
+        "coordinate": [
+          12.48082325,
+          41.889033274
+        ],
+        "uncertaintyMeters": 25,
+        "evidence": {
+          "certainty": "inferred",
+          "sources": [
+            "source:osm-hercules",
+            "source:osm-portunus",
+            "source:rome-tourism"
+          ],
+          "note": "Midpoint of the two temple anchors, chosen only as the origin of the combined layout. It is not a surveyed centre and marks no ancient feature."
+        }
+      },
+      "evidence": {
+        "certainty": "illustrative",
+        "sources": [],
+        "note": "A presentation anchor for showing two reviewed buildings together. It asserts no ancient neighbourhood."
+      }
+    }
+  ],
+  "assets": [
+    {
+      "id": "asset:portunus-exterior",
+      "category": "building",
+      "catalogueRef": {
+        "id": "catalogue:portunus-exterior",
+        "version": 1
+      },
+      "evidence": {
+        "certainty": "inferred",
+        "sources": [
+          "source:psu-fletcher",
+          "source:rome-heritage"
+        ],
+        "note": "Specific exterior model derived from historic illustration and official structural descriptions. Inferred detail is documented in the pinned catalogue version."
+      }
+    },
+    {
+      "id": "asset:hercules-victor-exterior",
+      "category": "building",
+      "catalogueRef": {
+        "id": "catalogue:hercules-victor-exterior",
+        "version": 1
+      },
+      "evidence": {
+        "certainty": "inferred",
+        "sources": [
+          "source:wikipedia-hercules",
+          "source:whe-hercules",
+          "source:palladio-1570"
+        ],
+        "note": "Specific exterior model: standing plan and counts documented, cella, roof and door inferred. Details in the pinned catalogue version."
+      }
+    }
+  ],
+  "layouts": [
+    {
+      "id": "layout:forum-boarium-temples",
+      "title": "Two reviewed temple exteriors · editorial AD 100 preview",
+      "placeId": "place:forum-boarium-temples",
+      "period": {
+        "start": {
+          "year": 100
+        },
+        "approximate": true
+      },
+      "frame": "local-east-south-metres",
+      "extentMeters": 120,
+      "maxFoundationRiseMeters": 4,
+      "buildings": [
+        {
+          "id": "building:portunus",
+          "assetId": "asset:portunus-exterior",
+          "placeId": "place:temple-of-portunus",
+          "offset": [
+            5.79,
+            -28.32
+          ],
+          "headingRadians": 3.141592653589793,
+          "evidence": {
+            "certainty": "inferred",
+            "sources": [
+              "source:rome-tourism",
+              "source:psu-fletcher"
+            ],
+            "note": "One temple at visitor anchor. North-facing pose is approximate; no georeferenced wall survey was supplied."
+          }
+        },
+        {
+          "id": "building:hercules-victor",
+          "assetId": "asset:hercules-victor-exterior",
+          "placeId": "place:temple-of-hercules-victor",
+          "offset": [
+            -5.79,
+            28.32
+          ],
+          "evidence": {
+            "certainty": "inferred",
+            "sources": [
+              "source:osm-hercules",
+              "source:osm-portunus",
+              "source:wikipedia-hercules"
+            ],
+            "note": "Position from the two OpenStreetMap outlines (accuracy about 20 m). The door orientation is not documented, so the display pose is arbitrary and the models are not rotated to match the outlines."
+          }
+        }
+      ],
+      "evidence": {
+        "certainty": "inferred",
+        "sources": [
+          "source:psu-fletcher",
+          "source:rome-heritage",
+          "source:palladio-1570",
+          "source:osm-hercules"
+        ],
+        "note": "Combines two separately reviewed exterior interpretations. Their relative placement is approximate; extent and foundation rise are renderer limits. The preview date is editorial, not a verified state."
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "scene:forum-boarium-temples",
+      "title": "Two temples side by side",
+      "description": "Two explicitly selected, evidence-labelled temple exteriors in one scene. No reconstructed square, neighbourhood or population.",
+      "placeId": "place:forum-boarium-temples",
+      "period": {
+        "start": {
+          "year": 100
+        },
+        "approximate": true
+      },
+      "layoutIds": [
+        "layout:forum-boarium-temples"
+      ],
+      "assetIds": [
+        "asset:portunus-exterior",
+        "asset:hercules-victor-exterior"
+      ],
+      "required": false,
+      "fallback": "map-only",
+      "evidence": {
+        "certainty": "illustrative",
+        "sources": [],
+        "note": "Presentation requirement. Usable models do not make inferred dates or features exact."
+      }
+    }
+  ],
+  "roadNetworks": [],
+  "events": [],
+  "routes": []
+}

@@ -66,8 +66,9 @@ export function inspectHistoricalRecord(world: HistoricalWorldData, selection: H
     const footprints = (world.footprints ?? []).filter(footprint => footprint.placeId === p.id);
     const scenes = (selection.scenes ?? []).filter(resolution => resolution.scene.placeId === p.id);
     const modelIds = new Set([...world.scenes.filter(s => s.placeId === p.id).flatMap(s => s.assetIds), ...world.layouts.filter(l => l.placeId === p.id).flatMap(l => l.buildings.map(b => b.assetId))]);
+    const buildingPlaces = new Map(world.layouts.filter(l => l.placeId === p.id).flatMap(l => l.buildings.map(b => [b.assetId, b.placeId ?? p.id] as const)));
     const catalogueModels = world.assets.filter(a => modelIds.has(a.id) && a.catalogueRef).flatMap(a => {
-      const binding = resolveHistoricalAsset(a, p.id, selection.time);
+      const binding = resolveHistoricalAsset(a, buildingPlaces.get(a.id) ?? p.id, selection.time);
       return binding.catalogue ? [binding.catalogue] : [];
     });
     for (const resolution of scenes) evidence.push({ label: `Scene requirement · ${resolution.scene.title}`, value: resolution.scene.evidence });

@@ -13,6 +13,20 @@ export type HistoricalTime = {
     end?: HistoricalDate;
 };
 export type Certainty = 'established' | 'illustrative' | 'unverified';
+/** How firmly a map layer is grounded; always shown to the viewer. */
+export type ContextCertainty = 'documented' | 'approximate' | 'illustrative';
+export type ContextBasis = 'ancient-evidence' | 'modern-geometry' | 'point-only' | 'schematic';
+export type ContextStyle = 'water' | 'ground' | 'extent' | 'footprint' | 'structure' | 'orientation';
+/** Inspectable provenance for a marker, line or polygon. No time means a landform present throughout. */
+export interface ContextInfo {
+    certainty: ContextCertainty;
+    basis: ContextBasis;
+    style: ContextStyle;
+    time?: HistoricalTime;
+    /** Years either side of the date range within which presence is only possible. */
+    uncertaintyYears?: number;
+    note: string;
+}
 export type CameraCommand = {
     type: 'flyTo';
     center: Coordinate;
@@ -46,6 +60,10 @@ export type ScenarioOverlay = {
     location: string;
 } | {
     id: string;
+    type: 'polygon' | 'line';
+    geometry: string;
+} | {
+    id: string;
     type: 'route';
     route: string;
 } | {
@@ -75,6 +93,7 @@ export interface ScenarioDefinition {
             id: string;
             title: string;
             url: string;
+            licence?: string;
         }[];
         locations: {
             id: string;
@@ -82,7 +101,16 @@ export interface ScenarioDefinition {
             coordinate: Coordinate;
             certainty: Certainty;
             sources: string[];
+            context?: ContextInfo;
         }[];
+        /** Polygon: rings (first is the outer boundary). Line: one or more lines. */
+        geometries?: ({
+            id: string;
+            title: string;
+            kind: 'polygon' | 'line';
+            coordinates: Coordinate[][];
+            sources: string[];
+        } & ContextInfo)[];
         routes: {
             id: string;
             coordinates: Coordinate[];
@@ -219,7 +247,7 @@ export function validateScenario(value: unknown): ScenarioDefinition {
         }
         return result;
     };
-    const sources = ids(c.sources), locations = ids(c.locations), routes = ids(c.routes), overlays = ids(c.overlays), scenes = ids(c.scenes ?? []);
+    const sources = ids(c.sources), locations = ids(c.locations), routes = ids(c.routes), overlays = ids(c.overlays), scenes = ids(c.scenes ?? []), geometries = ids(c.geometries ?? []);
     const refs = (v: unknown, set: Set<string>) => list(v).forEach(x => {
         if (!set.has(str(x)))
             throw Error(`Unknown reference ${x}`);
@@ -229,9 +257,36 @@ export function validateScenario(value: unknown): ScenarioDefinition {
             throw Error('Unknown certainty');
         refs(v.sources, sources);
     };
+    const context = (v: Record<string, unknown>) => {
+        if (!['documented', 'approximate', 'illustrative'].includes(str(v.certainty)))
+            throw Error('Unknown context certainty');
+        if (!['ancient-evidence', 'modern-geometry', 'point-only', 'schematic'].includes(str(v.basis)))
+            throw Error('Unknown context basis');
+        if (!['water', 'ground', 'extent', 'footprint', 'structure', 'orientation'].includes(str(v.style)))
+            throw Error('Unknown context style');
+        str(v.note);
+        if (v.time !== undefined)
+            time(v.time);
+        if (v.uncertaintyYears !== undefined) {
+            num(v.uncertaintyYears, 0, 1000);
+            if (v.time === undefined)
+                throw Error('Uncertainty needs a date range');
+        }
+        // Modern geometry may stand in for an ancient feature, but never as documented fact.
+        if (v.basis === 'modern-geometry' && v.certainty === 'documented')
+            throw Error('Modern geometry cannot be documented');
+        if (v.basis === 'schematic' && v.certainty !== 'illustrative')
+            throw Error('Schematic geometry is illustrative');
+        if (v.basis === 'point-only' && v.certainty === 'documented')
+            throw Error('A point location cannot be documented extent');
+        if (v.certainty !== 'illustrative' && !list(v.sources).length)
+            throw Error('Documented or approximate context needs a source');
+    };
     for (const x of list(c.sources)) {
         const v = object(x);
         str(v.title);
+        if (v.licence !== undefined)
+            str(v.licence);
         if (!/^https?:\/\//.test(str(v.url)))
             throw Error('Source needs HTTP URL');
     }
@@ -240,6 +295,39 @@ export function validateScenario(value: unknown): ScenarioDefinition {
         str(v.title);
         coord(v.coordinate);
         provenance(v);
+        if (v.context !== undefined) {
+            const info = object(v.context);
+            context({ ...info, sources: v.sources });
+            if (info.basis !== 'point-only' && info.basis !== 'schematic')
+                throw Error('A marker is a point-only or schematic location');
+        }
+    }
+    for (const x of list(c.geometries ?? [])) {
+        const v = object(x);
+        str(v.title);
+        refs(v.sources, sources);
+        context(v);
+        if (v.basis === 'point-only')
+            throw Error('Point-only data stays a marker, not a polygon or line');
+        if (v.kind !== 'polygon' && v.kind !== 'line')
+            throw Error('Unknown geometry kind');
+        const parts = list(v.coordinates);
+        if (!parts.length)
+            throw Error('Geometry needs coordinates');
+        for (const part of parts) {
+            const points = list(part);
+            points.forEach(coord);
+            if (v.kind === 'line' && points.length < 2)
+                throw Error('Line needs two points');
+            if (v.kind === 'polygon') {
+                const first = points[0] as number[], last = points[points.length - 1] as number[];
+                if (points.length < 4 || first[0] !== last[0] || first[1] !== last[1])
+                    throw Error('Polygon ring must be closed with three distinct points');
+            }
+            for (const p of points as number[][])
+                if (p[0] < (bounds[0] as number) || p[0] > (bounds[2] as number) || p[1] < (bounds[1] as number) || p[1] > (bounds[3] as number))
+                    throw Error('Geometry outside scenario bounds');
+        }
     }
     for (const x of list(c.routes)) {
         const v = object(x);
@@ -268,6 +356,14 @@ export function validateScenario(value: unknown): ScenarioDefinition {
             case 'route':
                 refs([v.route], routes);
                 break;
+            case 'polygon':
+            case 'line': {
+                refs([v.geometry], geometries);
+                const geometry = list(c.geometries).find(g => object(g).id === v.geometry);
+                if (object(geometry).kind !== v.type)
+                    throw Error('Overlay type does not match geometry kind');
+                break;
+            }
             case 'caption':
             case 'card':
                 str(v.text);

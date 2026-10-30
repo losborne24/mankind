@@ -26,6 +26,8 @@ export interface HistoricalPlace {
   id: string;
   title: string;
   kind: 'settlement' | 'landmark' | 'region';
+  /** False hides this place's own map marker, e.g. a layout anchor or a place a journey labels itself. */
+  marker?: boolean;
   parentId?: string;
   period?: HistoricalPeriod;
   position: { coordinate: [number, number]; uncertaintyMeters?: number; evidence: Evidence };
@@ -67,6 +69,8 @@ export interface HistoricalAsset {
 export interface HistoricalBuilding {
   id: string;
   assetId: string;
+  /** The place this building represents, when a layout combines several places. Defaults to the layout's own place. */
+  placeId?: string;
   offset: [number, number];
   headingRadians?: number;
   evidence: Evidence;

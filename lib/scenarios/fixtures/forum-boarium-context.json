@@ -1,0 +1,2970 @@
+{
+ "sources": [
+  {
+   "id": "source:pleiades-forum-boarium",
+   "title": "Pleiades · Forum Boarium (at Rome)",
+   "url": "https://pleiades.stoa.org/places/207271756",
+   "licence": "CC BY 3.0 · Pleiades contributors"
+  },
+  {
+   "id": "source:pleiades-ara-maxima",
+   "title": "Pleiades · Ara Maxima Herculis",
+   "url": "https://pleiades.stoa.org/places/207271757",
+   "licence": "CC BY 3.0 · Pleiades contributors"
+  },
+  {
+   "id": "source:pleiades-pons-aemilius",
+   "title": "Pleiades · Pons Aemilius",
+   "url": "https://pleiades.stoa.org/places/425068",
+   "licence": "CC BY 3.0 · Pleiades contributors"
+  },
+  {
+   "id": "source:pleiades-hercules-victor",
+   "title": "Pleiades · Temple of Hercules Victor",
+   "url": "https://pleiades.stoa.org/places/825969667",
+   "licence": "CC BY 3.0 · Pleiades contributors"
+  },
+  {
+   "id": "source:pleiades-portunus",
+   "title": "Pleiades · Temple of Portunus",
+   "url": "https://pleiades.stoa.org/places/494660670",
+   "licence": "CC BY 3.0 · Pleiades contributors"
+  },
+  {
+   "id": "source:pleiades-cloaca-maxima",
+   "title": "Pleiades · Cloaca Maxima",
+   "url": "https://pleiades.stoa.org/places/867802692",
+   "licence": "CC BY 3.0 · Pleiades contributors"
+  },
+  {
+   "id": "source:pleiades-arch-of-janus",
+   "title": "Pleiades · Ianus Quadrifons",
+   "url": "https://pleiades.stoa.org/places/367835399",
+   "licence": "CC BY 3.0 · Pleiades contributors"
+  },
+  {
+   "id": "source:pleiades-santa-maria-in-cosmedin",
+   "title": "Pleiades · Santa Maria in Cosmedin",
+   "url": "https://pleiades.stoa.org/places/934591702",
+   "licence": "CC BY 3.0 · Pleiades contributors"
+  },
+  {
+   "id": "source:pleiades-capitoline",
+   "title": "Pleiades · Capitolinus Mons",
+   "url": "https://pleiades.stoa.org/places/347036492",
+   "licence": "CC BY 3.0 · Pleiades contributors"
+  },
+  {
+   "id": "source:pleiades-palatine",
+   "title": "Pleiades · Palatinus Mons",
+   "url": "https://pleiades.stoa.org/places/971691208",
+   "licence": "CC BY 3.0 · Pleiades contributors"
+  },
+  {
+   "id": "source:pleiades-aventine",
+   "title": "Pleiades · Aventinus mons",
+   "url": "https://pleiades.stoa.org/places/865014139",
+   "licence": "CC BY 3.0 · Pleiades contributors"
+  },
+  {
+   "id": "source:pleiades-tiber-island",
+   "title": "Pleiades · Tiber Island",
+   "url": "https://pleiades.stoa.org/places/771725842",
+   "licence": "CC BY 3.0 · Pleiades contributors"
+  },
+  {
+   "id": "source:pleiades-aedes-fauni",
+   "title": "Pleiades · Aedes Fauni",
+   "url": "https://pleiades.stoa.org/places/455817200",
+   "licence": "CC BY 3.0 · Pleiades contributors"
+  },
+  {
+   "id": "source:pleiades-circus-maximus",
+   "title": "Pleiades · Circus Maximus",
+   "url": "https://pleiades.stoa.org/places/458808506",
+   "licence": "CC BY 3.0 · Pleiades contributors"
+  },
+  {
+   "id": "source:osm-tiber",
+   "title": "OpenStreetMap · Tiber water polygon (relation 5071)",
+   "url": "https://www.openstreetmap.org/relation/5071",
+   "licence": "ODbL 1.0 · © OpenStreetMap contributors"
+  },
+  {
+   "id": "source:osm-forum-boarium",
+   "title": "OpenStreetMap · Foro Boario site (way 27350575)",
+   "url": "https://www.openstreetmap.org/way/27350575",
+   "licence": "ODbL 1.0 · © OpenStreetMap contributors"
+  },
+  {
+   "id": "source:osm-hercules",
+   "title": "OpenStreetMap · Tempio di Ercole Vincitore (way 251342364)",
+   "url": "https://www.openstreetmap.org/way/251342364",
+   "licence": "ODbL 1.0 · © OpenStreetMap contributors"
+  },
+  {
+   "id": "source:osm-portunus",
+   "title": "OpenStreetMap · Tempio di Portuno (way 251331418)",
+   "url": "https://www.openstreetmap.org/way/251331418",
+   "licence": "ODbL 1.0 · © OpenStreetMap contributors"
+  },
+  {
+   "id": "source:osm-pons-aemilius",
+   "title": "OpenStreetMap · Ponte Emilio (relation 6384861)",
+   "url": "https://www.openstreetmap.org/relation/6384861",
+   "licence": "ODbL 1.0 · © OpenStreetMap contributors"
+  },
+  {
+   "id": "source:osm-cloaca",
+   "title": "OpenStreetMap · mouth of the Cloaca Maxima (node 4754734734)",
+   "url": "https://www.openstreetmap.org/node/4754734734",
+   "licence": "ODbL 1.0 · © OpenStreetMap contributors"
+  },
+  {
+   "id": "source:osm-arch-of-janus",
+   "title": "OpenStreetMap · Arco di Giano (way 52924046)",
+   "url": "https://www.openstreetmap.org/way/52924046",
+   "licence": "ODbL 1.0 · © OpenStreetMap contributors"
+  },
+  {
+   "id": "source:osm-santa-maria",
+   "title": "OpenStreetMap · Santa Maria in Cosmedin (way 120854225)",
+   "url": "https://www.openstreetmap.org/way/120854225",
+   "licence": "ODbL 1.0 · © OpenStreetMap contributors"
+  },
+  {
+   "id": "source:wikidata-portus",
+   "title": "Wikidata · Portus Tiberinus (Q3909304), coordinate",
+   "url": "https://www.wikidata.org/wiki/Q3909304",
+   "licence": "CC0 1.0"
+  },
+  {
+   "id": "source:wikipedia-tiber",
+   "title": "Wikipedia · Tiber (embankments begun 1876)",
+   "url": "https://en.wikipedia.org/wiki/Tiber",
+   "licence": "CC BY-SA 4.0 · text read for one dated claim"
+  },
+  {
+   "id": "source:wikipedia-pons-aemilius",
+   "title": "Wikipedia · Pons Aemilius (stone bridge begun 179 BC, completed 151 BC)",
+   "url": "https://en.wikipedia.org/wiki/Pons_Aemilius",
+   "licence": "CC BY-SA 4.0 · text read for dates"
+  },
+  {
+   "id": "source:wikipedia-great-altar",
+   "title": "Wikipedia · Great Altar of Hercules (foundations possibly under Santa Maria in Cosmedin)",
+   "url": "https://en.wikipedia.org/wiki/Great_Altar_of_Hercules",
+   "licence": "CC BY-SA 4.0 · text read for one claim"
+  },
+  {
+   "id": "source:wikipedia-hercules",
+   "title": "Wikipedia · Temple of Hercules Victor (later 2nd century BC)",
+   "url": "https://en.wikipedia.org/wiki/Temple_of_Hercules_Victor",
+   "licence": "CC BY-SA 4.0 · text read for the date"
+  },
+  {
+   "id": "source:it-wikipedia-porto-tiberino",
+   "title": "Wikipedia (it) · Porto tiberino (6th century BC; kept active at least to the Flavians)",
+   "url": "https://it.wikipedia.org/wiki/Porto_tiberino",
+   "licence": "CC BY-SA 4.0 · text read for dates and setting"
+  }
+ ],
+ "locations": [
+  {
+   "id": "portus-tiberinus",
+   "title": "Portus Tiberinus · river harbour (approximate)",
+   "coordinate": [
+    12.480556,
+    41.889722
+   ],
+   "certainty": "established",
+   "sources": [
+    "source:wikidata-portus",
+    "source:it-wikipedia-porto-tiberino"
+   ],
+   "context": {
+    "certainty": "approximate",
+    "basis": "point-only",
+    "style": "structure",
+    "time": {
+     "start": {
+      "year": -550
+     },
+     "end": {
+      "year": 96
+     }
+    },
+    "uncertaintyYears": 50,
+    "note": "Marker only. The coordinate is a Wikidata point whose declared precision is about 1 km, so it shows the harbour's neighbourhood, not its quays. Italian Wikipedia places it between the Palatine and Capitoline slopes and says it stayed in use at least to the Flavian period (to AD 96); use at AD 100 is possible, not documented."
+   }
+  },
+  {
+   "id": "ara-maxima",
+   "title": "Ara Maxima of Hercules · approximate",
+   "coordinate": [
+    12.481298,
+    41.888472
+   ],
+   "certainty": "established",
+   "sources": [
+    "source:pleiades-ara-maxima",
+    "source:wikipedia-great-altar"
+   ],
+   "context": {
+    "certainty": "approximate",
+    "basis": "point-only",
+    "style": "structure",
+    "time": {
+     "start": {
+      "year": -30
+     },
+     "end": {
+      "year": 640
+     }
+    },
+    "note": "Marker only. Pleiades gives this altar no location of its own; its representative point is derived. Foundations possibly lie beneath Santa Maria in Cosmedin (tentative identification). Date range is the Pleiades attestation span, not the altar's origin."
+   }
+  },
+  {
+   "id": "cloaca-maxima-outlet",
+   "title": "Cloaca Maxima · outlet into the Tiber",
+   "coordinate": [
+    12.480237,
+    41.888834
+   ],
+   "certainty": "established",
+   "sources": [
+    "source:osm-cloaca",
+    "source:pleiades-cloaca-maxima"
+   ],
+   "context": {
+    "certainty": "approximate",
+    "basis": "point-only",
+    "style": "structure",
+    "time": {
+     "start": {
+      "year": -525
+     },
+     "end": {
+      "year": 2025
+     }
+    },
+    "uncertaintyYears": 25,
+    "note": "Marker only: the mapped mouth of the sewer today, recorded by Pleiades. Pleiades describes a canalised drain from the late sixth century BC draining into the Tiber; the ancient outlet may have lain elsewhere."
+   }
+  },
+  {
+   "id": "capitoline",
+   "title": "Capitoline",
+   "coordinate": [
+    12.482215,
+    41.892578
+   ],
+   "certainty": "illustrative",
+   "sources": [
+    "source:pleiades-capitoline"
+   ],
+   "context": {
+    "certainty": "illustrative",
+    "basis": "point-only",
+    "style": "orientation",
+    "note": "Orientation label at the mapped summit point. A landform present throughout; not part of the evidence."
+   }
+  },
+  {
+   "id": "palatine",
+   "title": "Palatine",
+   "coordinate": [
+    12.487109,
+    41.889306
+   ],
+   "certainty": "illustrative",
+   "sources": [
+    "source:pleiades-palatine"
+   ],
+   "context": {
+    "certainty": "illustrative",
+    "basis": "point-only",
+    "style": "orientation",
+    "note": "Orientation label at the mapped summit point. A landform present throughout; not part of the evidence."
+   }
+  },
+  {
+   "id": "aventine",
+   "title": "Aventine",
+   "coordinate": [
+    12.483333,
+    41.883333
+   ],
+   "certainty": "illustrative",
+   "sources": [
+    "source:pleiades-aventine"
+   ],
+   "context": {
+    "certainty": "illustrative",
+    "basis": "point-only",
+    "style": "orientation",
+    "note": "Orientation label at the Pleiades summit point (stated accuracy about 2 km). A landform present throughout; not part of the evidence."
+   }
+  },
+  {
+   "id": "tiber-island",
+   "title": "Tiber Island",
+   "coordinate": [
+    12.477152,
+    41.890732
+   ],
+   "certainty": "illustrative",
+   "sources": [
+    "source:pleiades-tiber-island",
+    "source:pleiades-aedes-fauni"
+   ],
+   "context": {
+    "certainty": "illustrative",
+    "basis": "point-only",
+    "style": "orientation",
+    "time": {
+     "start": {
+      "year": -196
+     },
+     "end": {
+      "year": 2025
+     }
+    },
+    "note": "Orientation label. Pleiades records a temple of Faunus on the island dedicated in 196 BC, so the island was occupied by then."
+   }
+  },
+  {
+   "id": "circus-maximus",
+   "title": "Circus Maximus (direction)",
+   "coordinate": [
+    12.485711,
+    41.88593
+   ],
+   "certainty": "illustrative",
+   "sources": [
+    "source:pleiades-circus-maximus"
+   ],
+   "context": {
+    "certainty": "illustrative",
+    "basis": "point-only",
+    "style": "orientation",
+    "time": {
+     "start": {
+      "year": -30
+     },
+     "end": {
+      "year": 300
+     }
+    },
+    "note": "Orientation label for the direction of the Circus Maximus, at the Pleiades representative point. Date range is the Pleiades location span."
+   }
+  }
+ ],
+ "geometries": [
+  {
+   "id": "ground",
+   "title": "Ancient ground · illustrative",
+   "kind": "polygon",
+   "coordinates": [
+    [
+     [
+      12.47,
+      41.88
+     ],
+     [
+      12.49,
+      41.88
+     ],
+     [
+      12.49,
+      41.9
+     ],
+     [
+      12.47,
+      41.9
+     ],
+     [
+      12.47,
+      41.88
+     ]
+    ]
+   ],
+   "certainty": "illustrative",
+   "basis": "schematic",
+   "style": "ground",
+   "sources": [],
+   "note": "A neutral tone over the scenario area so no beat shows the modern vegetation plane. It carries no information about ancient terrain, paving or surfaces."
+  },
+  {
+   "id": "tiber",
+   "title": "Tiber · modern channel, approximate ancient bank",
+   "kind": "polygon",
+   "coordinates": [
+    [
+     [
+      12.470372,
+      41.88
+     ],
+     [
+      12.470418,
+      41.880078
+     ],
+     [
+      12.470548,
+      41.880242
+     ],
+     [
+      12.470689,
+      41.880344
+     ],
+     [
+      12.470967,
+      41.880603
+     ],
+     [
+      12.471268,
+      41.880883
+     ],
+     [
+      12.471665,
+      41.881223
+     ],
+     [
+      12.472094,
+      41.881479
+     ],
+     [
+      12.472157,
+      41.881529
+     ],
+     [
+      12.472221,
+      41.881586
+     ],
+     [
+      12.472403,
+      41.881697
+     ],
+     [
+      12.47264,
+      41.881899
+     ],
+     [
+      12.475035,
+      41.883613
+     ],
+     [
+      12.475588,
+      41.883992
+     ],
+     [
+      12.475826,
+      41.884191
+     ],
+     [
+      12.475816,
+      41.884265
+     ],
+     [
+      12.47704,
+      41.885183
+     ],
+     [
+      12.477843,
+      41.885848
+     ],
+     [
+      12.478095,
+      41.886091
+     ],
+     [
+      12.478262,
+      41.886278
+     ],
+     [
+      12.478552,
+      41.886668
+     ],
+     [
+      12.478753,
+      41.886895
+     ],
+     [
+      12.478936,
+      41.887188
+     ],
+     [
+      12.479037,
+      41.887375
+     ],
+     [
+      12.479105,
+      41.887566
+     ],
+     [
+      12.479174,
+      41.887831
+     ],
+     [
+      12.479166,
+      41.88801
+     ],
+     [
+      12.479138,
+      41.888188
+     ],
+     [
+      12.479079,
+      41.888405
+     ],
+     [
+      12.478937,
+      41.888643
+     ],
+     [
+      12.478845,
+      41.888774
+     ],
+     [
+      12.478721,
+      41.888897
+     ],
+     [
+      12.478583,
+      41.889046
+     ],
+     [
+      12.478318,
+      41.889259
+     ],
+     [
+      12.478189,
+      41.889359
+     ],
+     [
+      12.478122,
+      41.889412
+     ],
+     [
+      12.478064,
+      41.889452
+     ],
+     [
+      12.478007,
+      41.889485
+     ],
+     [
+      12.477969,
+      41.889504
+     ],
+     [
+      12.47797,
+      41.889515
+     ],
+     [
+      12.477966,
+      41.889522
+     ],
+     [
+      12.477815,
+      41.889591
+     ],
+     [
+      12.477744,
+      41.88962
+     ],
+     [
+      12.477732,
+      41.889622
+     ],
+     [
+      12.477718,
+      41.88962
+     ],
+     [
+      12.477687,
+      41.889634
+     ],
+     [
+      12.477613,
+      41.88966
+     ],
+     [
+      12.477551,
+      41.88968
+     ],
+     [
+      12.477535,
+      41.889685
+     ],
+     [
+      12.477327,
+      41.88976
+     ],
+     [
+      12.477366,
+      41.889863
+     ],
+     [
+      12.477326,
+      41.889876
+     ],
+     [
+      12.477329,
+      41.889883
+     ],
+     [
+      12.477337,
+      41.889894
+     ],
+     [
+      12.477337,
+      41.889907
+     ],
+     [
+      12.477335,
+      41.889917
+     ],
+     [
+      12.477334,
+      41.889922
+     ],
+     [
+      12.477326,
+      41.889928
+     ],
+     [
+      12.477229,
+      41.889953
+     ],
+     [
+      12.477188,
+      41.889962
+     ],
+     [
+      12.477176,
+      41.889961
+     ],
+     [
+      12.477165,
+      41.889957
+     ],
+     [
+      12.477158,
+      41.889949
+     ],
+     [
+      12.477146,
+      41.88992
+     ],
+     [
+      12.477114,
+      41.889913
+     ],
+     [
+      12.47705,
+      41.889906
+     ],
+     [
+      12.476976,
+      41.889906
+     ],
+     [
+      12.476921,
+      41.889914
+     ],
+     [
+      12.476774,
+      41.889972
+     ],
+     [
+      12.476605,
+      41.89003
+     ],
+     [
+      12.476455,
+      41.890077
+     ],
+     [
+      12.475883,
+      41.890247
+     ],
+     [
+      12.475744,
+      41.890287
+     ],
+     [
+      12.475326,
+      41.890397
+     ],
+     [
+      12.474991,
+      41.890482
+     ],
+     [
+      12.474813,
+      41.890518
+     ],
+     [
+      12.47464,
+      41.890548
+     ],
+     [
+      12.474334,
+      41.890601
+     ],
+     [
+      12.47365,
+      41.890689
+     ],
+     [
+      12.473391,
+      41.890727
+     ],
+     [
+      12.473133,
+      41.890772
+     ],
+     [
+      12.472736,
+      41.890858
+     ],
+     [
+      12.472417,
+      41.890949
+     ],
+     [
+      12.472135,
+      41.891052
+     ],
+     [
+      12.471804,
+      41.89119
+     ],
+     [
+      12.471322,
+      41.891435
+     ],
+     [
+      12.470966,
+      41.891672
+     ],
+     [
+      12.470731,
+      41.891839
+     ],
+     [
+      12.470589,
+      41.891906
+     ],
+     [
+      12.470512,
+      41.89196
+     ],
+     [
+      12.470459,
+      41.892002
+     ],
+     [
+      12.47048,
+      41.892018
+     ],
+     [
+      12.470309,
+      41.892136
+     ],
+     [
+      12.470228,
+      41.892172
+     ],
+     [
+      12.470156,
+      41.892229
+     ],
+     [
+      12.470059,
+      41.892341
+     ],
+     [
+      12.47,
+      41.892388
+     ],
+     [
+      12.47,
+      41.9
+     ],
+     [
+      12.47,
+      41.9
+     ],
+     [
+      12.47,
+      41.893464
+     ],
+     [
+      12.470363,
+      41.893179
+     ],
+     [
+      12.470694,
+      41.892908
+     ],
+     [
+      12.470859,
+      41.892798
+     ],
+     [
+      12.470922,
+      41.892774
+     ],
+     [
+      12.470973,
+      41.892734
+     ],
+     [
+      12.471209,
+      41.892527
+     ],
+     [
+      12.471363,
+      41.892434
+     ],
+     [
+      12.471431,
+      41.89236
+     ],
+     [
+      12.471515,
+      41.892278
+     ],
+     [
+      12.471618,
+      41.892198
+     ],
+     [
+      12.471777,
+      41.892097
+     ],
+     [
+      12.471868,
+      41.89204
+     ],
+     [
+      12.471961,
+      41.891986
+     ],
+     [
+      12.4721,
+      41.891915
+     ],
+     [
+      12.47224,
+      41.891847
+     ],
+     [
+      12.4724,
+      41.89178
+     ],
+     [
+      12.472534,
+      41.89173
+     ],
+     [
+      12.472649,
+      41.891691
+     ],
+     [
+      12.472795,
+      41.891649
+     ],
+     [
+      12.472939,
+      41.891613
+     ],
+     [
+      12.473045,
+      41.89159
+     ],
+     [
+      12.473096,
+      41.891581
+     ],
+     [
+      12.473185,
+      41.891564
+     ],
+     [
+      12.473276,
+      41.891548
+     ],
+     [
+      12.473485,
+      41.891521
+     ],
+     [
+      12.473652,
+      41.891509
+     ],
+     [
+      12.473806,
+      41.891502
+     ],
+     [
+      12.473965,
+      41.891499
+     ],
+     [
+      12.474424,
+      41.891505
+     ],
+     [
+      12.474705,
+      41.891499
+     ],
+     [
+      12.474744,
+      41.891499
+     ],
+     [
+      12.474888,
+      41.891501
+     ],
+     [
+      12.475167,
+      41.891515
+     ],
+     [
+      12.475383,
+      41.89153
+     ],
+     [
+      12.475584,
+      41.891549
+     ],
+     [
+      12.475844,
+      41.891576
+     ],
+     [
+      12.476031,
+      41.8916
+     ],
+     [
+      12.476222,
+      41.891621
+     ],
+     [
+      12.47636,
+      41.891633
+     ],
+     [
+      12.476473,
+      41.891639
+     ],
+     [
+      12.476512,
+      41.89164
+     ],
+     [
+      12.476613,
+      41.891642
+     ],
+     [
+      12.476735,
+      41.89164
+     ],
+     [
+      12.476843,
+      41.891634
+     ],
+     [
+      12.476946,
+      41.891626
+     ],
+     [
+      12.477062,
+      41.891615
+     ],
+     [
+      12.477178,
+      41.891598
+     ],
+     [
+      12.477314,
+      41.891575
+     ],
+     [
+      12.477444,
+      41.891553
+     ],
+     [
+      12.477585,
+      41.891524
+     ],
+     [
+      12.477712,
+      41.891492
+     ],
+     [
+      12.477848,
+      41.891453
+     ],
+     [
+      12.477944,
+      41.891383
+     ],
+     [
+      12.478004,
+      41.891359
+     ],
+     [
+      12.478075,
+      41.891322
+     ],
+     [
+      12.478163,
+      41.891272
+     ],
+     [
+      12.478246,
+      41.891235
+     ],
+     [
+      12.478314,
+      41.891206
+     ],
+     [
+      12.478336,
+      41.891193
+     ],
+     [
+      12.478396,
+      41.891153
+     ],
+     [
+      12.478418,
+      41.891138
+     ],
+     [
+      12.478481,
+      41.891057
+     ],
+     [
+      12.47852,
+      41.891029
+     ],
+     [
+      12.478563,
+      41.891011
+     ],
+     [
+      12.478617,
+      41.890994
+     ],
+     [
+      12.478661,
+      41.890962
+     ],
+     [
+      12.478686,
+      41.890921
+     ],
+     [
+      12.478729,
+      41.890887
+     ],
+     [
+      12.478778,
+      41.890873
+     ],
+     [
+      12.478826,
+      41.890837
+     ],
+     [
+      12.47886,
+      41.890804
+     ],
+     [
+      12.478906,
+      41.890767
+     ],
+     [
+      12.478988,
+      41.890725
+     ],
+     [
+      12.479072,
+      41.890659
+     ],
+     [
+      12.47928,
+      41.890447
+     ],
+     [
+      12.479403,
+      41.890298
+     ],
+     [
+      12.479555,
+      41.890087
+     ],
+     [
+      12.479679,
+      41.889871
+     ],
+     [
+      12.479878,
+      41.889591
+     ],
+     [
+      12.480005,
+      41.889289
+     ],
+     [
+      12.480103,
+      41.888948
+     ],
+     [
+      12.480144,
+      41.888755
+     ],
+     [
+      12.480168,
+      41.888454
+     ],
+     [
+      12.480164,
+      41.888157
+     ],
+     [
+      12.480113,
+      41.887779
+     ],
+     [
+      12.480057,
+      41.887538
+     ],
+     [
+      12.47998,
+      41.887296
+     ],
+     [
+      12.479888,
+      41.887093
+     ],
+     [
+      12.479782,
+      41.886883
+     ],
+     [
+      12.479472,
+      41.886597
+     ],
+     [
+      12.479407,
+      41.886412
+     ],
+     [
+      12.479307,
+      41.886259
+     ],
+     [
+      12.478891,
+      41.885775
+     ],
+     [
+      12.478688,
+      41.885578
+     ],
+     [
+      12.478467,
+      41.885338
+     ],
+     [
+      12.477988,
+      41.884945
+     ],
+     [
+      12.477388,
+      41.884535
+     ],
+     [
+      12.477211,
+      41.884406
+     ],
+     [
+      12.477135,
+      41.884298
+     ],
+     [
+      12.477084,
+      41.884258
+     ],
+     [
+      12.477034,
+      41.884224
+     ],
+     [
+      12.476978,
+      41.884176
+     ],
+     [
+      12.476841,
+      41.884073
+     ],
+     [
+      12.476579,
+      41.883893
+     ],
+     [
+      12.476263,
+      41.883626
+     ],
+     [
+      12.475974,
+      41.883451
+     ],
+     [
+      12.475611,
+      41.883211
+     ],
+     [
+      12.474301,
+      41.882365
+     ],
+     [
+      12.473961,
+      41.882135
+     ],
+     [
+      12.473619,
+      41.881905
+     ],
+     [
+      12.473136,
+      41.881523
+     ],
+     [
+      12.472279,
+      41.880845
+     ],
+     [
+      12.471562,
+      41.880227
+     ],
+     [
+      12.471351,
+      41.88
+     ],
+     [
+      12.470372,
+      41.88
+     ]
+    ],
+    [
+     [
+      12.474655,
+      41.890982
+     ],
+     [
+      12.474737,
+      41.890978
+     ],
+     [
+      12.474799,
+      41.890974
+     ],
+     [
+      12.474889,
+      41.890967
+     ],
+     [
+      12.474995,
+      41.890952
+     ],
+     [
+      12.475135,
+      41.890922
+     ],
+     [
+      12.475306,
+      41.890879
+     ],
+     [
+      12.475457,
+      41.890837
+     ],
+     [
+      12.475636,
+      41.890793
+     ],
+     [
+      12.475968,
+      41.890704
+     ],
+     [
+      12.47626,
+      41.890623
+     ],
+     [
+      12.476629,
+      41.890512
+     ],
+     [
+      12.476863,
+      41.890437
+     ],
+     [
+      12.476964,
+      41.890407
+     ],
+     [
+      12.477041,
+      41.890385
+     ],
+     [
+      12.477231,
+      41.890338
+     ],
+     [
+      12.477247,
+      41.890313
+     ],
+     [
+      12.477256,
+      41.890289
+     ],
+     [
+      12.477258,
+      41.890266
+     ],
+     [
+      12.477245,
+      41.890221
+     ],
+     [
+      12.477242,
+      41.890201
+     ],
+     [
+      12.477247,
+      41.890185
+     ],
+     [
+      12.477253,
+      41.890175
+     ],
+     [
+      12.477267,
+      41.890167
+     ],
+     [
+      12.477309,
+      41.890154
+     ],
+     [
+      12.477355,
+      41.890141
+     ],
+     [
+      12.477398,
+      41.890129
+     ],
+     [
+      12.47741,
+      41.890126
+     ],
+     [
+      12.477438,
+      41.890127
+     ],
+     [
+      12.477437,
+      41.89014
+     ],
+     [
+      12.477449,
+      41.89015
+     ],
+     [
+      12.477467,
+      41.890142
+     ],
+     [
+      12.477501,
+      41.890202
+     ],
+     [
+      12.477565,
+      41.890229
+     ],
+     [
+      12.477655,
+      41.890193
+     ],
+     [
+      12.477739,
+      41.890151
+     ],
+     [
+      12.477849,
+      41.890095
+     ],
+     [
+      12.478046,
+      41.890019
+     ],
+     [
+      12.478052,
+      41.89001
+     ],
+     [
+      12.478063,
+      41.890002
+     ],
+     [
+      12.478109,
+      41.889982
+     ],
+     [
+      12.478266,
+      41.88992
+     ],
+     [
+      12.478285,
+      41.889925
+     ],
+     [
+      12.478305,
+      41.889956
+     ],
+     [
+      12.478536,
+      41.889866
+     ],
+     [
+      12.478519,
+      41.88984
+     ],
+     [
+      12.478524,
+      41.889829
+     ],
+     [
+      12.478559,
+      41.889814
+     ],
+     [
+      12.47898,
+      41.889627
+     ],
+     [
+      12.479038,
+      41.889606
+     ],
+     [
+      12.479092,
+      41.889591
+     ],
+     [
+      12.479137,
+      41.889591
+     ],
+     [
+      12.479181,
+      41.889598
+     ],
+     [
+      12.479232,
+      41.889619
+     ],
+     [
+      12.47927,
+      41.889643
+     ],
+     [
+      12.479297,
+      41.88967
+     ],
+     [
+      12.479315,
+      41.889698
+     ],
+     [
+      12.479322,
+      41.889728
+     ],
+     [
+      12.479324,
+      41.889753
+     ],
+     [
+      12.479318,
+      41.889782
+     ],
+     [
+      12.479306,
+      41.889809
+     ],
+     [
+      12.479204,
+      41.889969
+     ],
+     [
+      12.479161,
+      41.890028
+     ],
+     [
+      12.479074,
+      41.890165
+     ],
+     [
+      12.478981,
+      41.890282
+     ],
+     [
+      12.478873,
+      41.890389
+     ],
+     [
+      12.478727,
+      41.890504
+     ],
+     [
+      12.478626,
+      41.890586
+     ],
+     [
+      12.478533,
+      41.890648
+     ],
+     [
+      12.478435,
+      41.890699
+     ],
+     [
+      12.478321,
+      41.890749
+     ],
+     [
+      12.478196,
+      41.890796
+     ],
+     [
+      12.478135,
+      41.890818
+     ],
+     [
+      12.478079,
+      41.890843
+     ],
+     [
+      12.478054,
+      41.890861
+     ],
+     [
+      12.477993,
+      41.890892
+     ],
+     [
+      12.477933,
+      41.890925
+     ],
+     [
+      12.477865,
+      41.890967
+     ],
+     [
+      12.47778,
+      41.891027
+     ],
+     [
+      12.477709,
+      41.891076
+     ],
+     [
+      12.477626,
+      41.891121
+     ],
+     [
+      12.477558,
+      41.89115
+     ],
+     [
+      12.477446,
+      41.891189
+     ],
+     [
+      12.477341,
+      41.89122
+     ],
+     [
+      12.477248,
+      41.891244
+     ],
+     [
+      12.477167,
+      41.891264
+     ],
+     [
+      12.477076,
+      41.891281
+     ],
+     [
+      12.476995,
+      41.891296
+     ],
+     [
+      12.476871,
+      41.891314
+     ],
+     [
+      12.476771,
+      41.891325
+     ],
+     [
+      12.476697,
+      41.891329
+     ],
+     [
+      12.476608,
+      41.891327
+     ],
+     [
+      12.476504,
+      41.891323
+     ],
+     [
+      12.47635,
+      41.891311
+     ],
+     [
+      12.476201,
+      41.891296
+     ],
+     [
+      12.476121,
+      41.891286
+     ],
+     [
+      12.475968,
+      41.891267
+     ],
+     [
+      12.475815,
+      41.891242
+     ],
+     [
+      12.475662,
+      41.891211
+     ],
+     [
+      12.475504,
+      41.891177
+     ],
+     [
+      12.475407,
+      41.89115
+     ],
+     [
+      12.475349,
+      41.891138
+     ],
+     [
+      12.475268,
+      41.891126
+     ],
+     [
+      12.475188,
+      41.891116
+     ],
+     [
+      12.47511,
+      41.891109
+     ],
+     [
+      12.475024,
+      41.891106
+     ],
+     [
+      12.474948,
+      41.891105
+     ],
+     [
+      12.474884,
+      41.891106
+     ],
+     [
+      12.474767,
+      41.891112
+     ],
+     [
+      12.474672,
+      41.891132
+     ],
+     [
+      12.474358,
+      41.891138
+     ],
+     [
+      12.474304,
+      41.891129
+     ],
+     [
+      12.474276,
+      41.891116
+     ],
+     [
+      12.474262,
+      41.8911
+     ],
+     [
+      12.474256,
+      41.891081
+     ],
+     [
+      12.474256,
+      41.891061
+     ],
+     [
+      12.474262,
+      41.891044
+     ],
+     [
+      12.474272,
+      41.891031
+     ],
+     [
+      12.474289,
+      41.891021
+     ],
+     [
+      12.474323,
+      41.891011
+     ],
+     [
+      12.474655,
+      41.890982
+     ]
+    ],
+    [
+     [
+      12.479457,
+      41.889307
+     ],
+     [
+      12.479346,
+      41.889288
+     ],
+     [
+      12.479361,
+      41.889262
+     ],
+     [
+      12.479358,
+      41.88924
+     ],
+     [
+      12.479338,
+      41.889224
+     ],
+     [
+      12.47931,
+      41.889215
+     ],
+     [
+      12.479276,
+      41.889214
+     ],
+     [
+      12.479246,
+      41.889217
+     ],
+     [
+      12.479212,
+      41.889228
+     ],
+     [
+      12.479188,
+      41.889249
+     ],
+     [
+      12.479176,
+      41.889266
+     ],
+     [
+      12.479165,
+      41.889287
+     ],
+     [
+      12.479165,
+      41.889313
+     ],
+     [
+      12.479169,
+      41.889345
+     ],
+     [
+      12.479173,
+      41.889377
+     ],
+     [
+      12.479175,
+      41.889399
+     ],
+     [
+      12.47918,
+      41.889417
+     ],
+     [
+      12.479196,
+      41.889424
+     ],
+     [
+      12.479216,
+      41.889423
+     ],
+     [
+      12.479239,
+      41.889411
+     ],
+     [
+      12.479259,
+      41.889398
+     ],
+     [
+      12.479274,
+      41.889392
+     ],
+     [
+      12.47929,
+      41.889391
+     ],
+     [
+      12.479303,
+      41.889388
+     ],
+     [
+      12.479315,
+      41.889382
+     ],
+     [
+      12.479322,
+      41.889374
+     ],
+     [
+      12.47945,
+      41.889395
+     ],
+     [
+      12.479445,
+      41.889415
+     ],
+     [
+      12.47945,
+      41.889431
+     ],
+     [
+      12.479462,
+      41.889445
+     ],
+     [
+      12.479483,
+      41.889452
+     ],
+     [
+      12.479518,
+      41.889457
+     ],
+     [
+      12.479552,
+      41.889451
+     ],
+     [
+      12.479596,
+      41.889435
+     ],
+     [
+      12.47963,
+      41.889412
+     ],
+     [
+      12.479658,
+      41.889373
+     ],
+     [
+      12.479678,
+      41.889336
+     ],
+     [
+      12.479691,
+      41.889287
+     ],
+     [
+      12.479687,
+      41.88924
+     ],
+     [
+      12.479658,
+      41.889209
+     ],
+     [
+      12.47962,
+      41.889201
+     ],
+     [
+      12.479571,
+      41.889207
+     ],
+     [
+      12.479537,
+      41.889215
+     ],
+     [
+      12.479505,
+      41.889234
+     ],
+     [
+      12.479483,
+      41.88925
+     ],
+     [
+      12.479466,
+      41.889274
+     ],
+     [
+      12.479462,
+      41.889294
+     ],
+     [
+      12.479457,
+      41.889307
+     ]
+    ],
+    [
+     [
+      12.478301,
+      41.891121
+     ],
+     [
+      12.478314,
+      41.891116
+     ],
+     [
+      12.478356,
+      41.891095
+     ],
+     [
+      12.478387,
+      41.891071
+     ],
+     [
+      12.478422,
+      41.891035
+     ],
+     [
+      12.478442,
+      41.891008
+     ],
+     [
+      12.47845,
+      41.890978
+     ],
+     [
+      12.478453,
+      41.890949
+     ],
+     [
+      12.478442,
+      41.890925
+     ],
+     [
+      12.478414,
+      41.890918
+     ],
+     [
+      12.478378,
+      41.890922
+     ],
+     [
+      12.478357,
+      41.890934
+     ],
+     [
+      12.478332,
+      41.890951
+     ],
+     [
+      12.478288,
+      41.890974
+     ],
+     [
+      12.478255,
+      41.890987
+     ],
+     [
+      12.478219,
+      41.890999
+     ],
+     [
+      12.478154,
+      41.891024
+     ],
+     [
+      12.478115,
+      41.891044
+     ],
+     [
+      12.478065,
+      41.891071
+     ],
+     [
+      12.478022,
+      41.891094
+     ],
+     [
+      12.477997,
+      41.891113
+     ],
+     [
+      12.47798,
+      41.891131
+     ],
+     [
+      12.477976,
+      41.891147
+     ],
+     [
+      12.47798,
+      41.891169
+     ],
+     [
+      12.477999,
+      41.891183
+     ],
+     [
+      12.478025,
+      41.891189
+     ],
+     [
+      12.478054,
+      41.891191
+     ],
+     [
+      12.478107,
+      41.891186
+     ],
+     [
+      12.478197,
+      41.891161
+     ],
+     [
+      12.478272,
+      41.891133
+     ],
+     [
+      12.478301,
+      41.891121
+     ]
+    ],
+    [
+     [
+      12.470804,
+      41.892284
+     ],
+     [
+      12.470861,
+      41.892327
+     ],
+     [
+      12.470742,
+      41.892415
+     ],
+     [
+      12.470676,
+      41.892424
+     ],
+     [
+      12.470685,
+      41.892372
+     ],
+     [
+      12.470804,
+      41.892284
+     ]
+    ],
+    [
+     [
+      12.471012,
+      41.892425
+     ],
+     [
+      12.471071,
+      41.892467
+     ],
+     [
+      12.47097,
+      41.892546
+     ],
+     [
+      12.4709,
+      41.892553
+     ],
+     [
+      12.470905,
+      41.892509
+     ],
+     [
+      12.471012,
+      41.892425
+     ]
+    ],
+    [
+     [
+      12.470564,
+      41.892109
+     ],
+     [
+      12.470618,
+      41.89215
+     ],
+     [
+      12.470507,
+      41.892232
+     ],
+     [
+      12.470445,
+      41.892247
+     ],
+     [
+      12.470447,
+      41.892196
+     ],
+     [
+      12.470564,
+      41.892109
+     ]
+    ],
+    [
+     [
+      12.475196,
+      41.883468
+     ],
+     [
+      12.47513,
+      41.883453
+     ],
+     [
+      12.474941,
+      41.883319
+     ],
+     [
+      12.474934,
+      41.883312
+     ],
+     [
+      12.474931,
+      41.883303
+     ],
+     [
+      12.474932,
+      41.883296
+     ],
+     [
+      12.474934,
+      41.88329
+     ],
+     [
+      12.474938,
+      41.883283
+     ],
+     [
+      12.474945,
+      41.883278
+     ],
+     [
+      12.474952,
+      41.883275
+     ],
+     [
+      12.474963,
+      41.883272
+     ],
+     [
+      12.474974,
+      41.883272
+     ],
+     [
+      12.474985,
+      41.883274
+     ],
+     [
+      12.475006,
+      41.883289
+     ],
+     [
+      12.475198,
+      41.88343
+     ],
+     [
+      12.475196,
+      41.883468
+     ]
+    ],
+    [
+     [
+      12.475495,
+      41.883241
+     ],
+     [
+      12.47543,
+      41.883226
+     ],
+     [
+      12.47524,
+      41.883093
+     ],
+     [
+      12.475234,
+      41.883085
+     ],
+     [
+      12.47523,
+      41.883077
+     ],
+     [
+      12.475231,
+      41.88307
+     ],
+     [
+      12.475233,
+      41.883063
+     ],
+     [
+      12.475238,
+      41.883057
+     ],
+     [
+      12.475244,
+      41.883052
+     ],
+     [
+      12.475252,
+      41.883048
+     ],
+     [
+      12.475263,
+      41.883046
+     ],
+     [
+      12.475274,
+      41.883046
+     ],
+     [
+      12.475284,
+      41.883048
+     ],
+     [
+      12.475291,
+      41.883052
+     ],
+     [
+      12.475297,
+      41.883056
+     ],
+     [
+      12.475498,
+      41.883203
+     ],
+     [
+      12.475495,
+      41.883241
+     ]
+    ]
+   ],
+   "certainty": "approximate",
+   "basis": "modern-geometry",
+   "style": "water",
+   "sources": [
+    "source:osm-tiber",
+    "source:wikipedia-tiber",
+    "source:pleiades-forum-boarium"
+   ],
+   "note": "Modern geometry. OpenStreetMap water outline of today's river, clipped to the scenario area and shown only as an approximation of where the ancient bank lay. The present embankments were begun in 1876, so this is not the ancient course."
+  },
+  {
+   "id": "forum-boarium",
+   "title": "Forum Boarium · approximate extent",
+   "kind": "polygon",
+   "coordinates": [
+    [
+     [
+      12.480976,
+      41.889494
+     ],
+     [
+      12.480636,
+      41.889408
+     ],
+     [
+      12.480603,
+      41.889383
+     ],
+     [
+      12.480563,
+      41.889347
+     ],
+     [
+      12.480526,
+      41.889313
+     ],
+     [
+      12.480495,
+      41.889273
+     ],
+     [
+      12.480477,
+      41.889225
+     ],
+     [
+      12.480473,
+      41.889198
+     ],
+     [
+      12.48047,
+      41.889169
+     ],
+     [
+      12.480473,
+      41.889113
+     ],
+     [
+      12.480478,
+      41.888981
+     ],
+     [
+      12.480505,
+      41.888738
+     ],
+     [
+      12.480521,
+      41.88867
+     ],
+     [
+      12.480542,
+      41.888637
+     ],
+     [
+      12.48057,
+      41.88861
+     ],
+     [
+      12.480596,
+      41.888595
+     ],
+     [
+      12.480638,
+      41.888577
+     ],
+     [
+      12.480684,
+      41.888566
+     ],
+     [
+      12.480739,
+      41.888559
+     ],
+     [
+      12.480802,
+      41.888556
+     ],
+     [
+      12.480972,
+      41.888275
+     ],
+     [
+      12.481028,
+      41.888222
+     ],
+     [
+      12.481133,
+      41.888212
+     ],
+     [
+      12.48121,
+      41.888308
+     ],
+     [
+      12.481241,
+      41.888358
+     ],
+     [
+      12.481272,
+      41.88842
+     ],
+     [
+      12.48128,
+      41.888445
+     ],
+     [
+      12.481296,
+      41.888471
+     ],
+     [
+      12.481315,
+      41.888512
+     ],
+     [
+      12.481317,
+      41.888554
+     ],
+     [
+      12.481312,
+      41.888572
+     ],
+     [
+      12.4813,
+      41.888647
+     ],
+     [
+      12.481289,
+      41.888716
+     ],
+     [
+      12.48128,
+      41.888747
+     ],
+     [
+      12.481271,
+      41.888783
+     ],
+     [
+      12.48124,
+      41.888859
+     ],
+     [
+      12.481206,
+      41.888941
+     ],
+     [
+      12.481163,
+      41.889046
+     ],
+     [
+      12.481078,
+      41.889251
+     ],
+     [
+      12.480976,
+      41.889494
+     ]
+    ]
+   ],
+   "certainty": "approximate",
+   "basis": "modern-geometry",
+   "style": "extent",
+   "time": {
+    "start": {
+     "year": -330
+    },
+    "end": {
+     "year": 2025
+    }
+   },
+   "sources": [
+    "source:osm-forum-boarium",
+    "source:pleiades-forum-boarium"
+   ],
+   "note": "Modern geometry. OpenStreetMap outline of the present-day archaeological site, recorded by Pleiades as its location. Not a surveyed boundary of the ancient market. Date range is the Pleiades record span."
+  },
+  {
+   "id": "hercules-victor-footprint",
+   "title": "Temple of Hercules Victor · footprint",
+   "kind": "polygon",
+   "coordinates": [
+    [
+     [
+      12.480693,
+      41.888805
+     ],
+     [
+      12.48071,
+      41.888814
+     ],
+     [
+      12.480728,
+      41.888819
+     ],
+     [
+      12.480748,
+      41.888823
+     ],
+     [
+      12.480767,
+      41.888823
+     ],
+     [
+      12.480787,
+      41.888821
+     ],
+     [
+      12.480806,
+      41.888816
+     ],
+     [
+      12.480824,
+      41.888809
+     ],
+     [
+      12.48084,
+      41.8888
+     ],
+     [
+      12.480852,
+      41.888789
+     ],
+     [
+      12.48086,
+      41.888779
+     ],
+     [
+      12.480864,
+      41.888773
+     ],
+     [
+      12.480869,
+      41.888775
+     ],
+     [
+      12.480875,
+      41.888777
+     ],
+     [
+      12.48088,
+      41.888768
+     ],
+     [
+      12.480885,
+      41.88875
+     ],
+     [
+      12.480885,
+      41.888734
+     ],
+     [
+      12.480882,
+      41.88872
+     ],
+     [
+      12.480875,
+      41.888703
+     ],
+     [
+      12.480868,
+      41.888694
+     ],
+     [
+      12.480863,
+      41.888697
+     ],
+     [
+      12.480858,
+      41.8887
+     ],
+     [
+      12.480853,
+      41.888694
+     ],
+     [
+      12.48084,
+      41.888682
+     ],
+     [
+      12.480823,
+      41.888671
+     ],
+     [
+      12.480804,
+      41.888664
+     ],
+     [
+      12.480784,
+      41.88866
+     ],
+     [
+      12.480772,
+      41.888659
+     ],
+     [
+      12.480755,
+      41.888658
+     ],
+     [
+      12.480738,
+      41.88866
+     ],
+     [
+      12.480718,
+      41.888665
+     ],
+     [
+      12.4807,
+      41.888672
+     ],
+     [
+      12.480684,
+      41.888682
+     ],
+     [
+      12.480671,
+      41.888694
+     ],
+     [
+      12.480661,
+      41.888706
+     ],
+     [
+      12.480655,
+      41.888719
+     ],
+     [
+      12.480651,
+      41.888745
+     ],
+     [
+      12.480654,
+      41.888759
+     ],
+     [
+      12.480661,
+      41.888775
+     ],
+     [
+      12.480674,
+      41.888791
+     ],
+     [
+      12.480693,
+      41.888805
+     ]
+    ]
+   ],
+   "certainty": "approximate",
+   "basis": "modern-geometry",
+   "style": "footprint",
+   "time": {
+    "start": {
+     "year": -143
+    },
+    "end": {
+     "year": 2025
+    }
+   },
+   "uncertaintyYears": 15,
+   "sources": [
+    "source:osm-hercules",
+    "source:pleiades-hercules-victor",
+    "source:wikipedia-hercules"
+   ],
+   "note": "Modern geometry. Outline of the standing building as mapped in OpenStreetMap (Pleiades location). The temple stands where it did; the outline may omit the base steps. Dated to the later 2nd century BC."
+  },
+  {
+   "id": "portunus-footprint",
+   "title": "Temple of Portunus · footprint",
+   "kind": "polygon",
+   "coordinates": [
+    [
+     [
+      12.481011,
+      41.889166
+     ],
+     [
+      12.480877,
+      41.889135
+     ],
+     [
+      12.480805,
+      41.889307
+     ],
+     [
+      12.48083,
+      41.889313
+     ],
+     [
+      12.480829,
+      41.889315
+     ],
+     [
+      12.480827,
+      41.889318
+     ],
+     [
+      12.480826,
+      41.889321
+     ],
+     [
+      12.480825,
+      41.889324
+     ],
+     [
+      12.480824,
+      41.889327
+     ],
+     [
+      12.480823,
+      41.889329
+     ],
+     [
+      12.480821,
+      41.889332
+     ],
+     [
+      12.48082,
+      41.889335
+     ],
+     [
+      12.480819,
+      41.889338
+     ],
+     [
+      12.480818,
+      41.889341
+     ],
+     [
+      12.480903,
+      41.889361
+     ],
+     [
+      12.480905,
+      41.889358
+     ],
+     [
+      12.480906,
+      41.889354
+     ],
+     [
+      12.480907,
+      41.889352
+     ],
+     [
+      12.480908,
+      41.889349
+     ],
+     [
+      12.480909,
+      41.889346
+     ],
+     [
+      12.480911,
+      41.889343
+     ],
+     [
+      12.480912,
+      41.88934
+     ],
+     [
+      12.480913,
+      41.889338
+     ],
+     [
+      12.480914,
+      41.889335
+     ],
+     [
+      12.480915,
+      41.889333
+     ],
+     [
+      12.480939,
+      41.889338
+     ],
+     [
+      12.481011,
+      41.889166
+     ]
+    ]
+   ],
+   "certainty": "approximate",
+   "basis": "modern-geometry",
+   "style": "footprint",
+   "time": {
+    "start": {
+     "year": -120
+    },
+    "end": {
+     "year": 2025
+    }
+   },
+   "uncertaintyYears": 30,
+   "sources": [
+    "source:osm-portunus",
+    "source:pleiades-portunus"
+   ],
+   "note": "Modern geometry. Outline of the standing building as mapped in OpenStreetMap (Pleiades location). Pleiades dates the temple to the late 2nd or early 1st century BC."
+  },
+  {
+   "id": "pons-aemilius",
+   "title": "Pons Aemilius · surviving fragment",
+   "kind": "polygon",
+   "coordinates": [
+    [
+     [
+      12.47945,
+      41.889395
+     ],
+     [
+      12.479522,
+      41.889407
+     ],
+     [
+      12.479548,
+      41.889322
+     ],
+     [
+      12.479457,
+      41.889307
+     ],
+     [
+      12.479346,
+      41.889288
+     ],
+     [
+      12.479224,
+      41.889267
+     ],
+     [
+      12.479198,
+      41.889353
+     ],
+     [
+      12.479322,
+      41.889374
+     ],
+     [
+      12.47945,
+      41.889395
+     ]
+    ]
+   ],
+   "certainty": "approximate",
+   "basis": "modern-geometry",
+   "style": "structure",
+   "time": {
+    "start": {
+     "year": -179
+    },
+    "end": {
+     "year": 2025
+    }
+   },
+   "uncertaintyYears": 28,
+   "sources": [
+    "source:osm-pons-aemilius",
+    "source:pleiades-pons-aemilius",
+    "source:wikipedia-pons-aemilius"
+   ],
+   "note": "Modern geometry. Only the remnant known as the Ponte Rotto is mapped, so this shows where the bridge stood, not its full span. Sources disagree on the first stone bridge: Pleiades says 241 BC, Wikipedia 179 BC begun and 151 BC complete; both precede AD 100."
+  },
+  {
+   "id": "arch-of-janus",
+   "title": "Arch of Janus",
+   "kind": "polygon",
+   "coordinates": [
+    [
+     [
+      12.482636,
+      41.889404
+     ],
+     [
+      12.482699,
+      41.889259
+     ],
+     [
+      12.4829,
+      41.889308
+     ],
+     [
+      12.48284,
+      41.889447
+     ],
+     [
+      12.482636,
+      41.889404
+     ]
+    ]
+   ],
+   "certainty": "approximate",
+   "basis": "modern-geometry",
+   "style": "structure",
+   "time": {
+    "start": {
+     "year": 300
+    },
+    "end": {
+     "year": 2025
+    }
+   },
+   "sources": [
+    "source:osm-arch-of-janus",
+    "source:pleiades-arch-of-janus"
+   ],
+   "note": "Modern geometry. Early fourth-century arch (Pleiades), so absent at AD 100. Kept in the data so the date filter can show it is left out."
+  },
+  {
+   "id": "santa-maria-in-cosmedin",
+   "title": "Santa Maria in Cosmedin",
+   "kind": "polygon",
+   "coordinates": [
+    [
+     [
+      12.481545,
+      41.888329
+     ],
+     [
+      12.482065,
+      41.888057
+     ],
+     [
+      12.481979,
+      41.887958
+     ],
+     [
+      12.481856,
+      41.88802
+     ],
+     [
+      12.481778,
+      41.887933
+     ],
+     [
+      12.48138,
+      41.888129
+     ],
+     [
+      12.481545,
+      41.888329
+     ]
+    ]
+   ],
+   "certainty": "approximate",
+   "basis": "modern-geometry",
+   "style": "structure",
+   "time": {
+    "start": {
+     "year": 501
+    },
+    "end": {
+     "year": 2025
+    }
+   },
+   "uncertaintyYears": 100,
+   "sources": [
+    "source:osm-santa-maria",
+    "source:pleiades-santa-maria-in-cosmedin"
+   ],
+   "note": "Modern geometry. Church founded, by tradition, in the sixth century (Pleiades) and rebuilt from the eighth, so absent at AD 100. Kept in the data so the date filter can show it is left out."
+  }
+ ]
+}

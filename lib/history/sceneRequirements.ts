@@ -40,7 +40,7 @@ export function resolveSceneRequirements(world: HistoricalWorldData, time: Histo
     const assets = new Set([...scene.assetIds, ...placedAssets]);
     result.assets = [...assets].map(id => {
       const reference = world.assets.find(a => a.id === id)!;
-      const binding = resolveHistoricalAsset(reference, scene.placeId, time, undefined, !!explicit);
+      const binding = resolveHistoricalAsset(reference, layout?.buildings.find(b => b.assetId === id)?.placeId ?? scene.placeId, time, undefined, !!explicit);
       const status = binding.status !== 'registered' ? binding.status : reference.evidence.certainty === 'unknown' ? 'unreviewed' : !['building', 'infrastructure'].includes(reference.category) ? 'unsupported' : !placedAssets.has(id) ? 'unplaced' : 'registered';
       if (status !== 'registered') issue(`asset-${status}`, status === 'catalogue-blocked' ? binding.reason! : status === 'unresolved' ? 'A requested building model is unavailable.' : status === 'category-mismatch' ? 'An assigned model has the wrong category.' : status === 'unreviewed' ? 'A model has no established historical interpretation.' : status === 'unplaced' ? 'A requested model has no building placement.' : 'This asset category has no historical scene placement support.', id);
       return { id, ...(binding.registryId ? { registryId: binding.registryId } : {}), status, ...(binding.catalogue ? { catalogue: binding.catalogue } : {}) };

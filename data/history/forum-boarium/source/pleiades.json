@@ -1,0 +1,1577 @@
+{
+ "accessed": "2026-10-30",
+ "licence": "CC BY 3.0 · Pleiades contributors",
+ "licenceUrl": "https://creativecommons.org/licenses/by/3.0/",
+ "places": {
+  "forum-boarium": {
+   "id": 207271756,
+   "uri": "https://pleiades.stoa.org/places/207271756",
+   "title": "Forum Boarium (at Rome)",
+   "description": "Rome's so-called \"cattle market\", the Forum Boarium is a key area of commercial and ritual activity on the east bank of the river Tiber. It is flanked by the Capitoline, Palatine, and Aventine hills.",
+   "reprPoint": [
+    12.480897208288818,
+    41.88886022041392
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Forum Boarium",
+     "provenance": "OpenStreetMap (Way 27350575, version 19, osm:changeset=133320530, 2023-03-05T11:08:43Z)",
+     "accuracy": 20,
+     "start": 1700,
+     "end": 2100,
+     "geometry": {
+      "type": "LineString",
+      "coordinates": [
+       [
+        12.4809758,
+        41.8894938
+       ],
+       [
+        12.4806357,
+        41.8894077
+       ],
+       [
+        12.480603,
+        41.8893828
+       ],
+       [
+        12.4805633,
+        41.8893473
+       ],
+       [
+        12.4805257,
+        41.8893134
+       ],
+       [
+        12.4804954,
+        41.8892726
+       ],
+       [
+        12.4804772,
+        41.889225
+       ],
+       [
+        12.4804704,
+        41.8891685
+       ],
+       [
+        12.4804725,
+        41.8891128
+       ],
+       [
+        12.4804784,
+        41.8889807
+       ],
+       [
+        12.4805053,
+        41.8887382
+       ],
+       [
+        12.4805208,
+        41.8886704
+       ],
+       [
+        12.4805421,
+        41.8886372
+       ],
+       [
+        12.48057,
+        41.8886096
+       ],
+       [
+        12.4805957,
+        41.8885946
+       ],
+       [
+        12.4806378,
+        41.8885771
+       ],
+       [
+        12.4806835,
+        41.8885658
+       ],
+       [
+        12.4807394,
+        41.8885587
+       ],
+       [
+        12.4808019,
+        41.8885561
+       ],
+       [
+        12.4809718,
+        41.8882747
+       ],
+       [
+        12.4810284,
+        41.8882221
+       ],
+       [
+        12.4811325,
+        41.8882118
+       ],
+       [
+        12.4812102,
+        41.8883078
+       ],
+       [
+        12.4812408,
+        41.8883584
+       ],
+       [
+        12.4812719,
+        41.8884201
+       ],
+       [
+        12.4812799,
+        41.8884447
+       ],
+       [
+        12.4812957,
+        41.8884705
+       ],
+       [
+        12.4813152,
+        41.8885121
+       ],
+       [
+        12.4813172,
+        41.8885536
+       ],
+       [
+        12.4813115,
+        41.8885715
+       ],
+       [
+        12.4813,
+        41.8886471
+       ],
+       [
+        12.4812891,
+        41.8887155
+       ],
+       [
+        12.4812802,
+        41.8887465
+       ],
+       [
+        12.4812705,
+        41.8887833
+       ],
+       [
+        12.4812395,
+        41.8888585
+       ],
+       [
+        12.4812247,
+        41.8888946
+       ],
+       [
+        12.4812057,
+        41.8889408
+       ],
+       [
+        12.4811626,
+        41.8890456
+       ],
+       [
+        12.4811543,
+        41.8890658
+       ],
+       [
+        12.4810783,
+        41.8892505
+       ],
+       [
+        12.4809758,
+        41.8894938
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  "ara-maxima": {
+   "id": 207271757,
+   "uri": "https://pleiades.stoa.org/places/207271757",
+   "title": "Ara Maxima Herculis",
+   "description": "An early cult center connected with Herakles located in Rome's Forum Boarium.",
+   "reprPoint": [
+    12.481298126974986,
+    41.88847168011437
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": []
+  },
+  "pons-aemilius": {
+   "id": 425068,
+   "uri": "https://pleiades.stoa.org/places/425068",
+   "title": "Pons Aemilius",
+   "description": "The Pons Aemilius was the first stone bridge built across the Tiber River at Rome (241 B.C.). Its remains are known today as the 'Ponte Rotto'.",
+   "reprPoint": [
+    12.479372767819696,
+    41.88933725410385
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Emilio Bridge",
+     "provenance": "OpenStreetMap (Relation 6384861, version 6, osm:changeset=135608965, 2023-05-02T10:09:18Z)",
+     "accuracy": 20,
+     "start": -330,
+     "end": 640,
+     "geometry": {
+      "type": "MultiLineString",
+      "coordinates": [
+       [
+        [
+         12.4793461,
+         41.889288
+        ],
+        [
+         12.479224,
+         41.8892673
+        ],
+        [
+         12.479198,
+         41.8893525
+        ],
+        [
+         12.479322,
+         41.8893735
+        ]
+       ],
+       [
+        [
+         12.4794573,
+         41.8893067
+        ],
+        [
+         12.4793461,
+         41.889288
+        ]
+       ],
+       [
+        [
+         12.4794504,
+         41.8893951
+        ],
+        [
+         12.4795216,
+         41.8894072
+        ],
+        [
+         12.4795475,
+         41.889322
+        ],
+        [
+         12.4794573,
+         41.8893067
+        ]
+       ],
+       [
+        [
+         12.479322,
+         41.8893735
+        ],
+        [
+         12.4794504,
+         41.8893951
+        ]
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  "hercules-victor": {
+   "id": 825969667,
+   "uri": "https://pleiades.stoa.org/places/825969667",
+   "title": "Temple of Hercules Victor",
+   "description": "A monopteros in the Forum Boarium at Rome built in the late second century BC, perhaps by L. Mummius Achaicus.",
+   "reprPoint": [
+    12.480769229632628,
+    41.88874023919556
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location: Temple of Hercules Victor",
+     "provenance": "OpenStreetMap (Way 251342364, version 25, osm:changeset=141515915, 2023-09-20T14:05:09Z)",
+     "accuracy": 20,
+     "start": -330,
+     "end": 300,
+     "geometry": {
+      "type": "LineString",
+      "coordinates": [
+       [
+        12.4806931,
+        41.8888054
+       ],
+       [
+        12.4807098,
+        41.8888135
+       ],
+       [
+        12.4807284,
+        41.8888193
+       ],
+       [
+        12.4807475,
+        41.8888225
+       ],
+       [
+        12.4807666,
+        41.8888232
+       ],
+       [
+        12.4807874,
+        41.8888211
+       ],
+       [
+        12.480806,
+        41.8888164
+       ],
+       [
+        12.4808242,
+        41.8888091
+       ],
+       [
+        12.4808395,
+        41.8887998
+       ],
+       [
+        12.4808516,
+        41.8887894
+       ],
+       [
+        12.4808602,
+        41.8887793
+       ],
+       [
+        12.4808637,
+        41.888773
+       ],
+       [
+        12.4808688,
+        41.8887747
+       ],
+       [
+        12.4808749,
+        41.8887768
+       ],
+       [
+        12.4808796,
+        41.8887684
+       ],
+       [
+        12.4808846,
+        41.8887502
+       ],
+       [
+        12.4808851,
+        41.8887344
+       ],
+       [
+        12.4808824,
+        41.8887197
+       ],
+       [
+        12.4808752,
+        41.8887027
+       ],
+       [
+        12.4808683,
+        41.888694
+       ],
+       [
+        12.4808629,
+        41.8886968
+       ],
+       [
+        12.4808577,
+        41.8886995
+       ],
+       [
+        12.4808534,
+        41.8886937
+       ],
+       [
+        12.4808403,
+        41.8886821
+       ],
+       [
+        12.4808226,
+        41.8886713
+       ],
+       [
+        12.480804,
+        41.8886642
+       ],
+       [
+        12.4807844,
+        41.8886597
+       ],
+       [
+        12.4807723,
+        41.8886585
+       ],
+       [
+        12.4807553,
+        41.8886582
+       ],
+       [
+        12.480738,
+        41.88866
+       ],
+       [
+        12.4807181,
+        41.8886648
+       ],
+       [
+        12.4807002,
+        41.888672
+       ],
+       [
+        12.4806844,
+        41.8886816
+       ],
+       [
+        12.4806711,
+        41.8886935
+       ],
+       [
+        12.4806614,
+        41.8887058
+       ],
+       [
+        12.4806548,
+        41.8887193
+       ],
+       [
+        12.4806512,
+        41.8887447
+       ],
+       [
+        12.4806539,
+        41.8887585
+       ],
+       [
+        12.4806609,
+        41.8887753
+       ],
+       [
+        12.4806743,
+        41.8887911
+       ],
+       [
+        12.4806931,
+        41.8888054
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  "portunus": {
+   "id": 494660670,
+   "uri": "https://pleiades.stoa.org/places/494660670",
+   "title": "Temple of Portunus",
+   "description": "A tetrastyle temple dedicated to the god Portunus and dating to the late second century or early first century BC.",
+   "reprPoint": [
+    12.480902720948372,
+    41.889248927464074
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Temple of Portunus",
+     "provenance": "OpenStreetMap (Way 251331418, version 28, osm:changeset=141515915, 2023-09-20T14:05:09Z)",
+     "accuracy": 20,
+     "start": -330,
+     "end": 1200,
+     "geometry": {
+      "type": "LineString",
+      "coordinates": [
+       [
+        12.4810106,
+        41.8891662
+       ],
+       [
+        12.4808772,
+        41.8891353
+       ],
+       [
+        12.480805,
+        41.8893068
+       ],
+       [
+        12.4808298,
+        41.8893125
+       ],
+       [
+        12.4808286,
+        41.8893154
+       ],
+       [
+        12.4808274,
+        41.8893181
+       ],
+       [
+        12.4808263,
+        41.8893208
+       ],
+       [
+        12.4808251,
+        41.8893235
+       ],
+       [
+        12.4808238,
+        41.8893265
+       ],
+       [
+        12.4808226,
+        41.8893292
+       ],
+       [
+        12.4808214,
+        41.889332
+       ],
+       [
+        12.4808202,
+        41.8893348
+       ],
+       [
+        12.4808188,
+        41.889338
+       ],
+       [
+        12.4808175,
+        41.889341
+       ],
+       [
+        12.4809032,
+        41.8893609
+       ],
+       [
+        12.4809046,
+        41.8893576
+       ],
+       [
+        12.4809059,
+        41.8893544
+       ],
+       [
+        12.4809071,
+        41.8893517
+       ],
+       [
+        12.4809083,
+        41.8893489
+       ],
+       [
+        12.4809094,
+        41.8893461
+       ],
+       [
+        12.4809107,
+        41.8893431
+       ],
+       [
+        12.4809118,
+        41.8893404
+       ],
+       [
+        12.4809129,
+        41.8893377
+       ],
+       [
+        12.480914,
+        41.8893352
+       ],
+       [
+        12.4809151,
+        41.8893325
+       ],
+       [
+        12.4809387,
+        41.889338
+       ],
+       [
+        12.4810106,
+        41.8891662
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  "cloaca-maxima": {
+   "id": 867802692,
+   "uri": "https://pleiades.stoa.org/places/867802692",
+   "title": "Cloaca Maxima",
+   "description": "The Cloaca Maxima drained the valley of the Forum Romanum. The sewer originates as a canalized drain in the late sixth century BCE. It would eventually be vaulted and interred. It drains into the Tiber River.",
+   "reprPoint": [
+    12.4802374,
+    41.8888344
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of mouth of the Cloaca Maxima",
+     "provenance": "OpenStreetMap (Node 4754734734, version 5, osm:changeset=141515915, 2023-09-20T14:05:07Z)",
+     "accuracy": 20,
+     "start": null,
+     "end": null,
+     "geometry": {
+      "type": "Point",
+      "coordinates": [
+       12.4802374,
+       41.8888344
+      ]
+     }
+    }
+   ]
+  },
+  "arch-of-janus": {
+   "id": 367835399,
+   "uri": "https://pleiades.stoa.org/places/367835399",
+   "title": "Ianus Quadrifons",
+   "description": "A quadrifrons triumphal arch at Rome that is located at a crossroads in the area of the Velabrum and the Forum Boarium. It dates to the early fourth century AD; its construction employed spolia, and it likely honored either Constantine I or Constantius II.",
+   "reprPoint": [
+    12.482759834912036,
+    41.88933964159221
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Arch of Janus",
+     "provenance": "OpenStreetMap (Way 52924046, version 29, osm:changeset=140198197, 2023-08-21T19:40:27Z)",
+     "accuracy": 20,
+     "start": 300,
+     "end": 640,
+     "geometry": {
+      "type": "LineString",
+      "coordinates": [
+       [
+        12.4826206,
+        41.8893924
+       ],
+       [
+        12.4826873,
+        41.8892384
+       ],
+       [
+        12.482901,
+        41.8892891
+       ],
+       [
+        12.4828297,
+        41.8894407
+       ],
+       [
+        12.4826206,
+        41.8893924
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  "santa-maria-in-cosmedin": {
+   "id": 934591702,
+   "uri": "https://pleiades.stoa.org/places/934591702",
+   "title": "Santa Maria in Cosmedin",
+   "description": "A minor basilica church in Rome, Italy. Tradition holds that the church was founded in the sixth century to serve the Greek community at Rome. The beginnings of the present edifice lie in the eighth century.",
+   "reprPoint": [
+    12.48171905749273,
+    41.88810923494745
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Santa Maria in Cosmedin",
+     "provenance": "OpenStreetMap (Way 120854225, version 31, osm:changeset=173754354, 2025-10-25T12:39:19Z)",
+     "accuracy": 20,
+     "start": 640,
+     "end": 2100,
+     "geometry": {
+      "type": "LineString",
+      "coordinates": [
+       [
+        12.4815445,
+        41.8883287
+       ],
+       [
+        12.4820649,
+        41.8880572
+       ],
+       [
+        12.4819789,
+        41.8879583
+       ],
+       [
+        12.4818555,
+        41.8880195
+       ],
+       [
+        12.481778,
+        41.8879327
+       ],
+       [
+        12.4813799,
+        41.8881293
+       ],
+       [
+        12.4815445,
+        41.8883287
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  "capitoline": {
+   "id": 347036492,
+   "uri": "https://pleiades.stoa.org/places/347036492",
+   "title": "Capitolinus Mons",
+   "description": "The smallest of Rome's hills and one of its most important, the Capitoline Hill served as the citadel (arx) of the city and as the site of its poliadic temple.",
+   "reprPoint": [
+    12.4822154,
+    41.8925778
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Capitolinus Mons",
+     "provenance": "OpenStreetMap (Node 365475964, version 13, osm:changeset=133818714, 2023-03-18T11:19:41Z)",
+     "accuracy": 20,
+     "start": 1700,
+     "end": 2100,
+     "geometry": {
+      "type": "Point",
+      "coordinates": [
+       12.4822154,
+       41.8925778
+      ]
+     }
+    }
+   ]
+  },
+  "palatine": {
+   "id": 971691208,
+   "uri": "https://pleiades.stoa.org/places/971691208",
+   "title": "Palatinus Mons",
+   "description": "The central hill of Rome, Italy. Legend held that Romulus founded the city of Rome on the Palatine Hill following an augural contest with Remus, his brother.",
+   "reprPoint": [
+    12.4871093,
+    41.8893064
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Palatine Hill",
+     "provenance": "OpenStreetMap (Node 365475871, version 37, osm:changeset=140198197, 2023-08-21T19:40:11Z)",
+     "accuracy": 20,
+     "start": 1700,
+     "end": 2100,
+     "geometry": {
+      "type": "Point",
+      "coordinates": [
+       12.4871093,
+       41.8893064
+      ]
+     }
+    }
+   ]
+  },
+  "aventine": {
+   "id": 865014139,
+   "uri": "https://pleiades.stoa.org/places/865014139",
+   "title": "Aventinus mons",
+   "description": "One of the seven hills of Rome. Until the reign of the emperor Claudius, the hill lay outside the pomerium of the city.",
+   "reprPoint": [
+    12.483333,
+    41.883333
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "GeoHack Location of Summit of Aventinus mons",
+     "provenance": "Pleiades",
+     "accuracy": 2000,
+     "start": 1700,
+     "end": 2100,
+     "geometry": {
+      "type": "Point",
+      "coordinates": [
+       12.483333,
+       41.883333
+      ]
+     }
+    }
+   ]
+  },
+  "tiber-island": {
+   "id": 771725842,
+   "uri": "https://pleiades.stoa.org/places/771725842",
+   "title": "Tiber Island",
+   "description": "An island in the Tiber River at the site of Rome.",
+   "reprPoint": [
+    12.47715206200927,
+    41.89073222633144
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "Imagery location of Tiber Island",
+     "provenance": "Pleiades",
+     "accuracy": 2000,
+     "start": 1700,
+     "end": 2100,
+     "geometry": {
+      "type": "Point",
+      "coordinates": [
+       12.477222,
+       41.890833
+      ]
+     }
+    },
+    {
+     "title": "OSM location of Tiber Island",
+     "provenance": "OpenStreetMap (Way 126146475, version 15, osm:changeset=165598533, 2025-04-29T15:44:44Z)",
+     "accuracy": 20,
+     "start": 1700,
+     "end": 2100,
+     "geometry": {
+      "type": "LineString",
+      "coordinates": [
+       [
+        12.4746577,
+        41.8909978
+       ],
+       [
+        12.4747368,
+        41.890978
+       ],
+       [
+        12.4747993,
+        41.8909735
+       ],
+       [
+        12.4748894,
+        41.8909667
+       ],
+       [
+        12.4749951,
+        41.8909516
+       ],
+       [
+        12.475135,
+        41.8909222
+       ],
+       [
+        12.4753057,
+        41.8908793
+       ],
+       [
+        12.4754573,
+        41.8908374
+       ],
+       [
+        12.4756355,
+        41.8907934
+       ],
+       [
+        12.475968,
+        41.8907042
+       ],
+       [
+        12.4762603,
+        41.8906228
+       ],
+       [
+        12.4766293,
+        41.8905124
+       ],
+       [
+        12.4768626,
+        41.8904367
+       ],
+       [
+        12.4769641,
+        41.8904072
+       ],
+       [
+        12.4770405,
+        41.890385
+       ],
+       [
+        12.4772305,
+        41.8903376
+       ],
+       [
+        12.477247,
+        41.890313
+       ],
+       [
+        12.477256,
+        41.8902894
+       ],
+       [
+        12.4772581,
+        41.8902664
+       ],
+       [
+        12.4772453,
+        41.8902206
+       ],
+       [
+        12.4772418,
+        41.8902012
+       ],
+       [
+        12.4772465,
+        41.8901845
+       ],
+       [
+        12.4772533,
+        41.8901745
+       ],
+       [
+        12.4772666,
+        41.8901672
+       ],
+       [
+        12.4773087,
+        41.8901542
+       ],
+       [
+        12.4773553,
+        41.8901409
+       ],
+       [
+        12.4773979,
+        41.8901291
+       ],
+       [
+        12.4774097,
+        41.8901259
+       ],
+       [
+        12.4774379,
+        41.8901273
+       ],
+       [
+        12.4774372,
+        41.8901401
+       ],
+       [
+        12.4774492,
+        41.8901504
+       ],
+       [
+        12.4774669,
+        41.890142
+       ],
+       [
+        12.4775011,
+        41.8902022
+       ],
+       [
+        12.4775651,
+        41.8902288
+       ],
+       [
+        12.4776549,
+        41.8901934
+       ],
+       [
+        12.4777389,
+        41.8901509
+       ],
+       [
+        12.4778486,
+        41.8900951
+       ],
+       [
+        12.4780455,
+        41.890019
+       ],
+       [
+        12.4780515,
+        41.8900104
+       ],
+       [
+        12.4780628,
+        41.8900017
+       ],
+       [
+        12.4781093,
+        41.8899819
+       ],
+       [
+        12.4782661,
+        41.88992
+       ],
+       [
+        12.478285,
+        41.8899247
+       ],
+       [
+        12.4783052,
+        41.8899561
+       ],
+       [
+        12.4785362,
+        41.8898664
+       ],
+       [
+        12.4785188,
+        41.8898404
+       ],
+       [
+        12.4785242,
+        41.8898286
+       ],
+       [
+        12.4785594,
+        41.8898139
+       ],
+       [
+        12.4789804,
+        41.8896271
+       ],
+       [
+        12.4790375,
+        41.8896062
+       ],
+       [
+        12.4790922,
+        41.8895913
+       ],
+       [
+        12.479137,
+        41.8895907
+       ],
+       [
+        12.4791807,
+        41.889598
+       ],
+       [
+        12.4792318,
+        41.8896185
+       ],
+       [
+        12.47927,
+        41.8896431
+       ],
+       [
+        12.4792965,
+        41.8896695
+       ],
+       [
+        12.4793145,
+        41.8896978
+       ],
+       [
+        12.4793217,
+        41.8897284
+       ],
+       [
+        12.4793242,
+        41.889753
+       ],
+       [
+        12.4793184,
+        41.8897818
+       ],
+       [
+        12.4793062,
+        41.8898085
+       ],
+       [
+        12.4792043,
+        41.8899687
+       ],
+       [
+        12.4791608,
+        41.8900279
+       ],
+       [
+        12.4790741,
+        41.8901648
+       ],
+       [
+        12.478981,
+        41.8902817
+       ],
+       [
+        12.478873,
+        41.8903891
+       ],
+       [
+        12.4787272,
+        41.8905035
+       ],
+       [
+        12.4786258,
+        41.8905858
+       ],
+       [
+        12.4785331,
+        41.8906479
+       ],
+       [
+        12.4784348,
+        41.8906994
+       ],
+       [
+        12.4783209,
+        41.890749
+       ],
+       [
+        12.4781957,
+        41.8907962
+       ],
+       [
+        12.4781352,
+        41.8908178
+       ],
+       [
+        12.4780788,
+        41.8908433
+       ],
+       [
+        12.4780535,
+        41.890861
+       ],
+       [
+        12.4779932,
+        41.8908923
+       ],
+       [
+        12.4779333,
+        41.8909246
+       ],
+       [
+        12.4778645,
+        41.8909674
+       ],
+       [
+        12.4777795,
+        41.8910268
+       ],
+       [
+        12.4777089,
+        41.8910755
+       ],
+       [
+        12.4776264,
+        41.8911205
+       ],
+       [
+        12.4775581,
+        41.8911497
+       ],
+       [
+        12.4774455,
+        41.8911892
+       ],
+       [
+        12.4773412,
+        41.8912195
+       ],
+       [
+        12.4772484,
+        41.8912444
+       ],
+       [
+        12.4771668,
+        41.8912639
+       ],
+       [
+        12.4770762,
+        41.8912813
+       ],
+       [
+        12.4769948,
+        41.8912964
+       ],
+       [
+        12.476871,
+        41.8913136
+       ],
+       [
+        12.4767709,
+        41.8913247
+       ],
+       [
+        12.4766972,
+        41.8913292
+       ],
+       [
+        12.4766083,
+        41.8913266
+       ],
+       [
+        12.4765043,
+        41.8913226
+       ],
+       [
+        12.4763499,
+        41.8913111
+       ],
+       [
+        12.4762012,
+        41.8912956
+       ],
+       [
+        12.4761212,
+        41.8912856
+       ],
+       [
+        12.4759676,
+        41.8912668
+       ],
+       [
+        12.4758147,
+        41.8912421
+       ],
+       [
+        12.4756622,
+        41.8912114
+       ],
+       [
+        12.475504,
+        41.8911774
+       ],
+       [
+        12.4754071,
+        41.8911503
+       ],
+       [
+        12.4753489,
+        41.8911378
+       ],
+       [
+        12.4752682,
+        41.8911257
+       ],
+       [
+        12.475188,
+        41.8911158
+       ],
+       [
+        12.4751101,
+        41.8911094
+       ],
+       [
+        12.4750243,
+        41.8911058
+       ],
+       [
+        12.4749475,
+        41.8911045
+       ],
+       [
+        12.474884,
+        41.8911063
+       ],
+       [
+        12.4747669,
+        41.8911119
+       ],
+       [
+        12.4746719,
+        41.8911317
+       ],
+       [
+        12.4746696,
+        41.8911113
+       ],
+       [
+        12.4746844,
+        41.8911119
+       ],
+       [
+        12.4746981,
+        41.8911077
+       ],
+       [
+        12.4747122,
+        41.8911004
+       ],
+       [
+        12.4747224,
+        41.8910879
+       ],
+       [
+        12.4747294,
+        41.8910731
+       ],
+       [
+        12.4747289,
+        41.8910577
+       ],
+       [
+        12.4747212,
+        41.8910446
+       ],
+       [
+        12.4747069,
+        41.8910313
+       ],
+       [
+        12.4746859,
+        41.8910212
+       ],
+       [
+        12.474659,
+        41.8910178
+       ],
+       [
+        12.4746577,
+        41.8909978
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  "aedes-fauni": {
+   "id": 455817200,
+   "uri": "https://pleiades.stoa.org/places/455817200",
+   "title": "Aedes Fauni",
+   "description": "A temple dedicated to Faunus located on Tiber Island, the Aedes Fauni was dedicated in 196 BCE by Gnaeus Domitius Ahenobarbus and Gaius Scribonius Libo.",
+   "reprPoint": [
+    12.477228803658631,
+    41.890610849064124
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": []
+  },
+  "circus-maximus": {
+   "id": 458808506,
+   "uri": "https://pleiades.stoa.org/places/458808506",
+   "title": "Circus Maximus",
+   "description": "An ancient chariot-racing venue at Rome and a major location for public entertainments (ludi), the Circus Maximus is located between the Aventine and Palatine hills.",
+   "reprPoint": [
+    12.485710952023673,
+    41.885929940253604
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location: Circus Maximus",
+     "provenance": "OpenStreetMap (Relation 11384819, version 4, osm:changeset=138533724, 2023-07-15T07:43:34Z)",
+     "accuracy": 20,
+     "start": -30,
+     "end": 300,
+     "geometry": {
+      "type": "MultiLineString",
+      "coordinates": [
+       [
+        [
+         12.4842675,
+         41.8859427
+        ],
+        [
+         12.4836219,
+         41.8863238
+        ],
+        [
+         12.4834001,
+         41.8864966
+        ],
+        [
+         12.4829832,
+         41.8868147
+        ],
+        [
+         12.4825249,
+         41.887187
+        ],
+        [
+         12.4834158,
+         41.8879661
+        ],
+        [
+         12.4875245,
+         41.8857152
+        ]
+       ],
+       [
+        [
+         12.4875245,
+         41.8857152
+        ],
+        [
+         12.4881326,
+         41.8853626
+        ],
+        [
+         12.4888007,
+         41.8849912
+        ],
+        [
+         12.4888307,
+         41.8850002
+        ],
+        [
+         12.4888704,
+         41.8849157
+        ],
+        [
+         12.4888834,
+         41.884833
+        ],
+        [
+         12.4888821,
+         41.8847527
+        ],
+        [
+         12.488867,
+         41.8846663
+        ],
+        [
+         12.4888451,
+         41.8846115
+        ],
+        [
+         12.4888341,
+         41.8845839
+        ],
+        [
+         12.4887832,
+         41.8844966
+        ],
+        [
+         12.4887077,
+         41.8843999
+        ],
+        [
+         12.4886368,
+         41.8843305
+        ],
+        [
+         12.4886277,
+         41.8843216
+        ],
+        [
+         12.4885427,
+         41.8842512
+        ],
+        [
+         12.4885267,
+         41.884238
+        ],
+        [
+         12.488429,
+         41.884174
+        ],
+        [
+         12.4883238,
+         41.8841168
+        ],
+        [
+         12.4881867,
+         41.8840796
+        ],
+        [
+         12.4880558,
+         41.8840536
+        ],
+        [
+         12.4878809,
+         41.8840383
+        ],
+        [
+         12.4877307,
+         41.8840468
+        ],
+        [
+         12.4876116,
+         41.884068
+        ],
+        [
+         12.4874864,
+         41.8841036
+        ],
+        [
+         12.4873825,
+         41.8841461
+        ],
+        [
+         12.4870717,
+         41.8843237
+        ]
+       ],
+       [
+        [
+         12.4870717,
+         41.8843237
+        ],
+        [
+         12.4870422,
+         41.8843406
+        ],
+        [
+         12.4864323,
+         41.8846466
+        ],
+        [
+         12.485291,
+         41.8853183
+        ]
+       ],
+       [
+        [
+         12.4842675,
+         41.8859427
+        ],
+        [
+         12.4843218,
+         41.8859931
+        ],
+        [
+         12.4844222,
+         41.8859332
+        ],
+        [
+         12.4844795,
+         41.8859865
+        ],
+        [
+         12.4849086,
+         41.8857305
+        ],
+        [
+         12.484964,
+         41.8856975
+        ],
+        [
+         12.4853026,
+         41.8854956
+        ],
+        [
+         12.4852415,
+         41.8854387
+        ],
+        [
+         12.4853506,
+         41.8853736
+        ],
+        [
+         12.485291,
+         41.8853183
+        ]
+       ]
+      ]
+     }
+    }
+   ]
+  }
+ }
+}

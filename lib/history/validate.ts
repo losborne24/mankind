@@ -100,7 +100,8 @@ export function validateHistoricalWorld(value: unknown): HistoricalWorldData {
     if (s.citation !== undefined) text(s.citation);
   }
   for (const p of indexes.places.values()) {
-    object(p, ['id', 'title', 'kind', 'parentId', 'period', 'position', 'radiusMeters', 'evidence']);
+    object(p, ['id', 'title', 'kind', 'marker', 'parentId', 'period', 'position', 'radiusMeters', 'evidence']);
+    if (p.marker !== undefined && typeof p.marker !== 'boolean') throw Error('Expected marker flag');
     text(p.title); oneOf(p.kind, ['settlement', 'landmark', 'region']); number(p.radiusMeters, 1, 20000000); evidence(p.evidence);
     const position = object(p.position, ['coordinate', 'uncertaintyMeters', 'evidence']); coordinate(position.coordinate); evidence(position.evidence);
     if (position.uncertaintyMeters !== undefined) number(position.uncertaintyMeters, 0, 20000000);
@@ -171,9 +172,10 @@ export function validateHistoricalWorld(value: unknown): HistoricalWorldData {
     const buildings = new Set<string>();
     const local = (point: unknown) => { coordinate(point, false); if ((point as number[]).some(v => Math.abs(v) > extent / 2)) throw Error('Layout point outside declared extent'); };
     for (const value of list(l.buildings)) {
-      const b = object(value, ['id', 'assetId', 'offset', 'headingRadians', 'evidence']), key = id(b.id);
+      const b = object(value, ['id', 'assetId', 'placeId', 'offset', 'headingRadians', 'evidence']), key = id(b.id);
       if (buildings.has(key)) throw Error('Duplicate building ID'); buildings.add(key);
       const asset = ref(b.assetId, 'assets');
+      if (b.placeId !== undefined) ref(b.placeId, 'places');
       if (!['building', 'infrastructure'].includes(asset.category as string)) throw Error('Building needs a structural asset');
       local(b.offset); evidence(b.evidence);
       if (b.headingRadians !== undefined) number(b.headingRadians, -Math.PI * 2, Math.PI * 2);

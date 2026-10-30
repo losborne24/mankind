@@ -1,6 +1,6 @@
 # Portunus demo scene — target spec (draft for review)
 
-**Status:** Agreed scope, 30 Oct 2026. Not yet built.
+**Status:** Agreed scope, 30 Oct 2026. Built (2D context layer, two temples, 7-beat journey); awaiting review.
 
 ## Why this exists
 
@@ -113,6 +113,16 @@ system leaves them out is a feature.
 | 30 Oct 2026 | Use Palladio's plan for the Hercules Victor column ring | His plan draws about 12 columns and a dome; the standing building has 20 columns and the original roof is lost | Counts and roofs must come from the standing building or a surviving-evidence source, never from a Renaissance reconstruction; use such drawings for ratios only |
 | 30 Oct 2026 | Cella diameter from Palladio's text (= column height, 10.65 m) | His own plan gives 9.55 m at 14.8 m overall; text and plan disagree | When two figures from one source conflict, record both and the one used |
 | 30 Oct 2026 | Luna-marble contrast on the 10 north columns | Needs a surveyed orientation the scene does not have, so a "north" side would be invented | Do not model a documented fact whose frame of reference the scene cannot supply |
+| 30 Oct 2026 | Place Hercules Victor at the rounded Wikipedia point (41.88861 N, 12.48083 E) | About 20 m from the OpenStreetMap outline recorded by Pleiades, and a rounded point is not a footprint | Prefer a location record that carries its own geometry and stated accuracy over a rounded encyclopedia coordinate; derive relative positions inside one dataset so errors cancel, and record the derivation |
+| 30 Oct 2026 | Show the Forum Boarium "extent" as sourced geometry | The only polygon is the present-day OSM site outline; no source gives the ancient boundary | A modern outline may be shown only as `approximate` + `modern-geometry`, never `documented`; the validator now rejects the combination |
+| 30 Oct 2026 | Treat the Tiber as an ancient bank using OSM water | The embankments were begun in 1876 (Wikipedia, Tiber); today's channel is not the ancient course | Modern river geometry carries an explicit "not the ancient course" note and the `approximate` level (check enforces the title and note) |
+| 30 Oct 2026 | Draw Portus Tiberinus as docks/quays with an extent | The only coordinate is a Wikidata point with about 1 km declared precision; Pleiades has no record | Point-only data stays a marker (`point-only` basis); the schema rejects a polygon or line with that basis |
+| 30 Oct 2026 | The docks fit AD 100 (spec decision 1) | Italian Wikipedia says the harbour stayed in use at least to the Flavian period (to AD 96), so AD 100 is possible, not documented | When a source gives a last-attested date, treat later dates as `possible` and say so; do not extend use to the viewing date |
+| 30 Oct 2026 | Pons Aemilius dated from Pleiades (first stone bridge 241 BC) | Wikipedia gives 179 BC begun, 151 BC complete; the sources disagree | Record both dates and the one used (179 BC, ±28 years); only the Ponte Rotto fragment is mapped, so the layer shows position, not span |
+| 30 Oct 2026 | Ara Maxima as a located altar from Pleiades | The Pleiades record has no location of its own; its representative point is derived, and the foundation identification is tentative | A derived representative point is a marker labelled approximate; carry the source's own hedge ("possibly beneath Santa Maria in Cosmedin") into the note |
+| 30 Oct 2026 | Use Pleiades location dates (e.g. 1700–2100 for Tiber Island, Forum Boarium) as feature dates | Those spans date the modern OSM location, not the ancient feature, and would hide the island at AD 100 | Take dates from the subject's own evidence (e.g. Aedes Fauni dedicated 196 BC for the island); never reuse a location-record date range as a feature's lifespan |
+| 30 Oct 2026 | Load two temple layouts at once | The streamer keeps one detailed layout active, so two layouts would swap as the camera moves | Compose reviewed buildings into one layout (one descriptor, two buildings, each keeping its own catalogue place) rather than assuming concurrent layouts |
+| 30 Oct 2026 | Orbit the temple pair 70° at zoom 18.6 | At bearings along the pair's axis the card covers a temple at 768 px (found by the framing check) | Check card clearance numerically per camera pose, not by eye at one width |
 
 ## Vision storyboard prompts
 
