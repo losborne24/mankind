@@ -26,6 +26,8 @@ export interface ContextInfo {
     /** Years either side of the date range within which presence is only possible. */
     uncertaintyYears?: number;
     note: string;
+    /** Map label. The full title stays in the inspector, where its caveats belong. */
+    short?: string;
 }
 export type CameraCommand = {
     type: 'flyTo';
@@ -265,6 +267,8 @@ export function validateScenario(value: unknown): ScenarioDefinition {
         if (!['water', 'ground', 'extent', 'footprint', 'structure', 'orientation'].includes(str(v.style)))
             throw Error('Unknown context style');
         str(v.note);
+        if (v.short !== undefined)
+            str(v.short);
         if (v.time !== undefined)
             time(v.time);
         if (v.uncertaintyYears !== undefined) {
@@ -324,8 +328,9 @@ export function validateScenario(value: unknown): ScenarioDefinition {
                 if (points.length < 4 || first[0] !== last[0] || first[1] !== last[1])
                     throw Error('Polygon ring must be closed with three distinct points');
             }
+            // Water is regional context that must run past the scenario area rather than end at its edge.
             for (const p of points as number[][])
-                if (p[0] < (bounds[0] as number) || p[0] > (bounds[2] as number) || p[1] < (bounds[1] as number) || p[1] > (bounds[3] as number))
+                if (v.style !== 'water' && (p[0] < (bounds[0] as number) || p[0] > (bounds[2] as number) || p[1] < (bounds[1] as number) || p[1] > (bounds[3] as number)))
                     throw Error('Geometry outside scenario bounds');
         }
     }

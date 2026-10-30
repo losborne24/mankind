@@ -28,7 +28,7 @@ export function ContextLayerList({ features, onInspect }: { features: ContextFea
   </details>;
 }
 export function ContextInspector({ feature, year, onClose }: { feature: ContextFeature; year: string; onClose(): void }) {
-  return <section aria-label="Map layer evidence" className="my-3 rounded-xl border border-panel-border bg-black/20 p-3 text-xs">
+  return <section aria-label="Map layer evidence" className="pointer-events-auto absolute inset-x-3 top-28 z-30 max-h-[calc(100dvh-292px)] overflow-y-auto rounded-2xl border border-panel-border bg-panel p-4 text-xs shadow-xl backdrop-blur-md sm:inset-x-auto sm:top-20 sm:max-h-[calc(100dvh-260px)] sm:w-[300px] sm:right-[calc(4rem+min(340px,calc(100vw-76px))+12px)]">
     <div className="flex items-start justify-between gap-2"><h2 className="text-sm font-medium leading-snug">{feature.title}</h2><button aria-label="Close layer evidence" className="text-white/60 hover:text-white" onClick={onClose}>✕</button></div>
     <div className="mt-2"><CertaintyChip certainty={feature.certainty} /></div>
     <dl className="mt-2 space-y-1 text-white/70">

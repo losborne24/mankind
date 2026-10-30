@@ -31,26 +31,6 @@ function rings(members) {
   }
   return out;
 }
-/** Sutherland–Hodgman against the scenario rectangle; the clipped river keeps real banks inside it. */
-function clip(ring) {
-  const edges = [[p => p[0] >= bounds[0], (a, b) => { const t = (bounds[0] - a[0]) / (b[0] - a[0]); return [bounds[0], a[1] + t * (b[1] - a[1])]; }],
-    [p => p[0] <= bounds[2], (a, b) => { const t = (bounds[2] - a[0]) / (b[0] - a[0]); return [bounds[2], a[1] + t * (b[1] - a[1])]; }],
-    [p => p[1] >= bounds[1], (a, b) => { const t = (bounds[1] - a[1]) / (b[1] - a[1]); return [a[0] + t * (b[0] - a[0]), bounds[1]]; }],
-    [p => p[1] <= bounds[3], (a, b) => { const t = (bounds[3] - a[1]) / (b[1] - a[1]); return [a[0] + t * (b[0] - a[0]), bounds[3]]; }]];
-  let points = ring.slice(0, -1);
-  for (const [inside, cut] of edges) {
-    const next = [];
-    points.forEach((cur, i) => {
-      const prev = points[(i + points.length - 1) % points.length];
-      if (inside(cur)) { if (!inside(prev)) next.push(cut(prev, cur)); next.push(cur); } else if (inside(prev)) next.push(cut(prev, cur));
-    });
-    points = next;
-    if (!points.length) return [];
-  }
-  const closed = points.map(round);
-  return closed.length < 3 ? [] : [...closed, closed[0]];
-}
-const inBounds = p => p[0] >= bounds[0] && p[0] <= bounds[2] && p[1] >= bounds[1] && p[1] <= bounds[3];
 const polygon = (type, id) => { const e = element(type, id); return [e.geometry.map(round)]; };
 
 const pl = key => pleiades.places[key];
@@ -73,13 +53,11 @@ const sources = [
   src('source:it-wikipedia-porto-tiberino', 'Wikipedia (it) · Porto tiberino (6th century BC; kept active at least to the Flavians)', 'https://it.wikipedia.org/wiki/Porto_tiberino', 'CC BY-SA 4.0 · text read for dates and setting'),
 ];
 
-// Tiber: modern OSM water polygon, clipped to the scenario rectangle. Outer rings minus Tiber Island.
+// Tiber: the whole modern OSM water polygon, deliberately not clipped, so the river runs past the ground tile and has no visible cut-off.
 const river = element('relation', 5071), outer = rings(river.members.filter(m => m.role === 'outer')), inner = rings(river.members.filter(m => m.role === 'inner'));
-const clippedOuter = outer.map(clip).filter(r => r.length);
-const holes = inner.filter(r => r.every(inBounds));
-const largest = clippedOuter.sort((a, b) => b.length - a.length)[0];
-if (!largest) throw Error('No Tiber outline inside the scenario bounds');
-const tiberRings = [largest, ...holes.filter(h => h.length > 4)];
+const largest = outer.sort((a, b) => b.length - a.length)[0];
+if (!largest) throw Error('No Tiber outline in the snapshot');
+const tiberRings = [largest, ...inner.filter(h => h.length > 4)];
 
 const modernNote = 'Modern geometry. ';
 const geometries = [
@@ -88,7 +66,7 @@ const geometries = [
     note: 'A neutral tone over the scenario area so no beat shows the modern vegetation plane. It carries no information about ancient terrain, paving or surfaces.' },
   { id: 'tiber', title: 'Tiber · modern channel, approximate ancient bank', kind: 'polygon', coordinates: tiberRings,
     certainty: 'approximate', basis: 'modern-geometry', style: 'water', sources: ['source:osm-tiber', 'source:wikipedia-tiber', 'source:pleiades-forum-boarium'],
-    note: `${modernNote}OpenStreetMap water outline of today's river, clipped to the scenario area and shown only as an approximation of where the ancient bank lay. The present embankments were begun in 1876, so this is not the ancient course.` },
+    note: `${modernNote}OpenStreetMap water outline of today's river, shown only as an approximation of where the ancient bank lay. The present embankments were begun in 1876, so this is not the ancient course.` },
   { id: 'forum-boarium', title: 'Forum Boarium · approximate extent', kind: 'polygon', coordinates: polygon('way', 27350575),
     certainty: 'approximate', basis: 'modern-geometry', style: 'extent', time: { start: { year: -330 }, end: { year: 2025 } }, sources: ['source:osm-forum-boarium', 'source:pleiades-forum-boarium'],
     note: `${modernNote}OpenStreetMap outline of the present-day archaeological site, recorded by Pleiades as its location. Not a surveyed boundary of the ancient market. Date range is the Pleiades record span.` },
@@ -125,6 +103,10 @@ const locations = [
   marker('tiber-island', 'Tiber Island', pl('tiber-island').reprPoint, ['source:pleiades-tiber-island', 'source:pleiades-aedes-fauni'], { certainty: 'illustrative', basis: 'point-only', style: 'orientation', time: { start: { year: -196 }, end: { year: 2025 } }, note: 'Orientation label. Pleiades records a temple of Faunus on the island dedicated in 196 BC, so the island was occupied by then.' }),
   marker('circus-maximus', 'Circus Maximus (direction)', pl('circus-maximus').reprPoint, ['source:pleiades-circus-maximus'], { certainty: 'illustrative', basis: 'point-only', style: 'orientation', time: { start: { year: -30 }, end: { year: 300 } }, note: 'Orientation label for the direction of the Circus Maximus, at the Pleiades representative point. Date range is the Pleiades location span.' }),
 ];
+// Map labels carry only the name; caveats live in the title and note shown in the inspector.
+const shortNames = { tiber: 'Tiber', 'forum-boarium': 'Forum Boarium', 'hercules-victor-footprint': 'Hercules Victor', 'portunus-footprint': 'Portunus', 'pons-aemilius': 'Pons Aemilius', 'arch-of-janus': 'Arch of Janus', 'santa-maria-in-cosmedin': 'Santa Maria in Cosmedin', 'portus-tiberinus': 'Portus Tiberinus', 'ara-maxima': 'Ara Maxima', 'cloaca-maxima-outlet': 'Cloaca Maxima', 'circus-maximus': 'Circus Maximus' };
+for (const g of geometries) if (shortNames[g.id]) g.short = shortNames[g.id];
+for (const l of locations) if (shortNames[l.id]) l.context.short = shortNames[l.id];
 const used = new Set([...geometries.flatMap(g => g.sources), ...locations.flatMap(l => l.sources)]);
 const out = { sources: sources.filter(s => used.has(s.id)), locations, geometries };
 await writeFile('lib/scenarios/fixtures/forum-boarium-context.json', JSON.stringify(out, null, 1) + '\n');

@@ -5,7 +5,7 @@ import { romanSilhouettes } from "@/lib/assets/romanSilhouettes";
 import { localToSettlement } from "@/map/settlements/settlementEnvironment";
 import type { SettlementDescriptor } from "@/map/settlements/settlementStreaming";
 
-/** Shared boxes and gables. No roof tiles, props, lights, textures or GLBs.
+/** Shared boxes and gables for Roman-kit buildings only. No roof tiles, props, lights, textures or GLBs.
  * Before first visit these are representative clusters; after generation use the actual
  * source-generated silhouette metadata, including the farmhouse's separate service wing.
  */
@@ -20,10 +20,10 @@ export class RegionalSettlement {
       this.plots = definition.buildings.flatMap(building => {
         const asset = assetRegistry[building.assetId];
         const key = "nodeName" in asset ? asset.nodeName! : asset.path.split("/").at(-1)!.replace(".glb", "");
-        const parts = romanSilhouettes[key as keyof typeof romanSilhouettes] ?? [{
-          offset: [0,0] as const, width: asset.dimensionsMeters[0], depth: asset.dimensionsMeters[2],
-          height: Math.max(2,asset.dimensionsMeters[1]-1), roofRise:1,
-        }];
+        // Catalogue reconstructions have no kit silhouette; a generic box would pass a guess off as the
+        // building's shape. They show only their map marker until local LOD loads the real model.
+        const parts = romanSilhouettes[key as keyof typeof romanSilhouettes];
+        if (!parts) return [];
         const heading = building.headingRadians ?? 0;
         return parts.map(part => ({...part,offset:localToSettlement(part.offset,building.offset,heading),heading}));
       });
