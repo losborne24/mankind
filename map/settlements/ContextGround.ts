@@ -169,23 +169,40 @@ export class ContextGround {
     const radius = spec.sizeMeters / 2;
     const ground = this.groundGeometry.getAttribute("position") as THREE.BufferAttribute;
     const water = this.waterGeometry.getAttribute("position") as THREE.BufferAttribute;
-    // The coarse rim sits higher so the terrain mesh cannot poke through between vertices.
-    for (let i = 0; i < heights.length; i++) ground.setY(i, heights[i] + 0.07 + Math.hypot(this.points[i][0], this.points[i][1]) / radius * 0.8);
-    ground.needsUpdate = true;
-    this.shadeRelief(heights);
-    this.groundGeometry.computeBoundingSphere();
-    // River level: high enough that the terrain only breaks the surface at the banks.
-    const wet: number[] = [];
-    const res = MASK_RESOLUTION;
+    // River mask coverage (0..1) per vertex; the mask is blurred, so it also describes the bank slope.
+    const res = MASK_RESOLUTION, cover: number[] = new Array(heights.length).fill(0), wet: number[] = [], bank: number[] = [];
     for (let i = 0; i < heights.length; i++) {
       const [x, z] = this.points[i];
       const u = Math.floor((x / spec.sizeMeters + 0.5) * res), v = Math.floor((z / spec.sizeMeters + 0.5) * res);
-      if (u >= 0 && v >= 0 && u < res && v < res && this.maskData[(v * res + u) * 4 + 1] > 128) wet.push(heights[i]);
+      if (u < 0 || v < 0 || u >= res || v >= res) continue;
+      const g = this.maskData[(v * res + u) * 4 + 1];
+      cover[i] = g / 255;
+      if (g > 128) wet.push(heights[i]); else if (g > 12) bank.push(heights[i]);
     }
     this.waterVisible = wet.length > 3;
+    let level = 0;
     if (this.waterVisible) {
       wet.sort((a, b) => a - b);
-      const level = wet[Math.floor(wet.length * 0.85)] + 0.15;
+      level = wet[Math.floor(wet.length * 0.85)] + 0.15;
+      // The surface cannot stand above the banks that hold it: that reads as a wall of water.
+      if (bank.length > 3) { bank.sort((a, b) => a - b); level = Math.min(level, bank[Math.floor(bank.length * 0.25)] - 0.3); }
+      level = Math.min(level, wet[wet.length - 1]);
+    }
+    // The coarse rim sits higher so the terrain mesh cannot poke through between vertices. Inside the river mask the
+    // bed is cut below the surface, so a flat water level never leaves ground showing through the channel.
+    for (let i = 0; i < heights.length; i++) {
+      const rim = 0.07 + Math.hypot(this.points[i][0], this.points[i][1]) / radius * 0.8;
+      let y = heights[i] + rim;
+      if (this.waterVisible) {
+        const t = Math.min(1, Math.max(0, (cover[i] - 0.1) / 0.5)), cut = level - 0.5 * t * t * (3 - 2 * t);
+        if (t > 0 && y > cut) y = y + (cut - y) * t * t * (3 - 2 * t);
+      }
+      ground.setY(i, y);
+    }
+    ground.needsUpdate = true;
+    this.shadeRelief(heights);
+    this.groundGeometry.computeBoundingSphere();
+    if (this.waterVisible) {
       for (let i = 0; i < heights.length; i++) water.setY(i, level);
       water.needsUpdate = true; this.waterGeometry.computeBoundingSphere();
       this.waterLevel = level;

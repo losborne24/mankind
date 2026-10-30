@@ -289,7 +289,8 @@ export class UrbanScene {
     walls.forEach(({ o, base, skirt }, i) => {
       const s = o.shape as { centre: LocalPoint; front: [number, number]; size: [number, number]; storeys: number; height: number; tone: number };
       const [fe, fs] = s.front, rise = Math.min(2.4, s.size[1] * 0.17);
-      m.makeBasis(new THREE.Vector3(-fs, 0, fe), new THREE.Vector3(0, 1, 0), new THREE.Vector3(fe, 0, fs));
+      // Right-handed (det +1): instanced meshes do not flip winding per instance, so a mirrored basis shows the inside of the walls.
+      m.makeBasis(new THREE.Vector3(fs, 0, -fe), new THREE.Vector3(0, 1, 0), new THREE.Vector3(fe, 0, fs));
       const wallMatrix = m.clone().scale(new THREE.Vector3(s.size[0], s.height + skirt, s.size[1])).setPosition(s.centre[0], base - skirt, s.centre[1]);
       wallMesh.setMatrixAt(i, wallMatrix);
       const roofMatrix = m.clone().scale(new THREE.Vector3(s.size[0] + 0.5, rise, s.size[1] + 0.5)).setPosition(s.centre[0], base + s.height, s.centre[1]);
