@@ -1,0 +1,34 @@
+{
+  "source": "Wikipedia (Loar 2017); WHE; Palladio 1570 Book IV p.91 plan ratios",
+  "metres": {
+    "colonnadeDiameter": 14.8,
+    "columnHeight": 10.65,
+    "columnBaseDiameter": 0.968,
+    "columnCentreRadius": 6.8,
+    "cellaOuterDiameter": 9.55,
+    "cellaWallThickness": 1.08,
+    "stepCount": 5,
+    "stepRise": 0.26,
+    "stepTread": 0.3,
+    "entablatureHeight": 2.13,
+    "roofRise": 3.2,
+    "doorWidth": 2.4,
+    "doorHeight": 5.0
+  },
+  "columns": 20,
+  "inferred": [
+    "Column base diameter (column height / 11, after Palladio)",
+    "Column centre radius and intercolumniation",
+    "Cella outer diameter and wall thickness (Palladio plan ratio)",
+    "Step rise and tread, door size and orientation",
+    "Entablature proportions and low conical tiled roof (original lost)",
+    "Capital detail (simplified Corinthian)"
+  ],
+  "omitted": [
+    "Interior fittings",
+    "Cult statue",
+    "Sculpture",
+    "Medieval windows and brick upper wall",
+    "Pentelic/Luna marble contrast on the 10 north columns"
+  ]
+}

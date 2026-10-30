@@ -48,6 +48,12 @@ export const assetRegistry = {
     grounding: { contacts: [{ offset: [0, -1.1755], width: 10.6, depth: 18.768 }, { offset: [0, 9.4925], width: 6.6, depth: 2.568 }], entrance: [0, 10.7765] },
     source: { author: "Mankind project", url: "scripts/reconstructions/portunus/generate.py", licence: "Project-authored interpretive model after a public-domain historic drawing; repository terms apply.", licenceFile: "reconstructions/portunus/PROVENANCE.md" },
   },
+  "hercules-victor-exterior-v1": {
+    id: "hercules-victor-exterior-v1", path: "reconstructions/hercules-victor/hercules-victor-v1.glb", category: "building",
+    scale: 1, dimensionsMeters: [17.8, 17.29, 17.8], groundOffsetMeters: 0,
+    grounding: { contacts: [{ offset: [0, 0], width: 17.8, depth: 17.8 }], entrance: [0, 8.9] },
+    source: { author: "Mankind project", url: "scripts/reconstructions/hercules-victor/generate.py", licence: "Project-authored interpretive model; plan ratios after a public-domain 1570 plate; repository terms apply.", licenceFile: "reconstructions/hercules-victor/PROVENANCE.md" },
+  },
   "roman-villager-01": {
     id: "roman-villager-01", path: "characters/roman-villager.glb", category: "character",
     scale: 1, dimensionsMeters: [0.67, 1.783, 0.35], groundOffsetMeters: 0,
