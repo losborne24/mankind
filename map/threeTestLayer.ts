@@ -287,7 +287,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
       } else this.settlement.updateAmbientLife(performance.now(),false);
     } else this.settlement?.updateAmbientLife(performance.now(),false);
     if (this.regional && this.regionalAnchor) {
-      this.regional.scene.visible = this.settlement?.timing.stage !== "ready";
+      this.regional.scene.visible = !this.historicalDetailFailed && this.settlement?.timing.stage !== "ready";
       if (this.regional.scene.visible) {
         this.regional.updateTerrain(coordinate => {
           const sample = queryTerrainSample(map,{lng:coordinate[0],lat:coordinate[1]});
@@ -400,10 +400,11 @@ export class ThreeTestLayer implements CustomLayerInterface {
     if(this.streamTimer)clearTimeout(this.streamTimer);this.streamTimer=undefined;this.localCandidate=undefined;
     this.procedural?.cancel();this.procedural=null;this.committedProcedural=undefined;
     this.settlementEnabled=false;this.activeDescriptor=undefined;
-    this.settlement?.dispose();this.settlement=null;this.settlementAnchor=null;
+    this.settlement?.dispose();this.settlement=null;this.settlementAnchor=null;this.historicalDetailFailed=false;
     this.onProceduralStatus?.(null);
   }
   /** Scenario travel shares the existing debounce and scene/cache ownership. No speculative asset loads. */
+  private historicalDetailFailed = false;
   private scenarioTravelling = false;
   setScenarioTravel(active: boolean): void { this.scenarioTravelling = active; this.map?.triggerRepaint(); }
   private updateStreaming(): void {
@@ -415,7 +416,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
       return {descriptor,distance:settlementDistance([eye.lng,eye.lat],altitude,descriptor),visible:Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.x>=-100&&p.y>=-100&&p.x<=canvas.clientWidth+100&&p.y<=canvas.clientHeight+100};
     }):[];
     const decision=this.lodController.update(observations),d=decision.descriptor;
-    const markerFilter=decision.lod === "global" ? "" : d?.id ?? "";
+    const markerFilter=decision.lod === "global" || this.historicalDetailFailed ? "" : d?.id ?? "";
     if(markerFilter!==this.markerFilter && map.getLayer("settlement-descriptors")) {
       this.markerFilter=markerFilter;
       map.setFilter("settlement-descriptors",["!=",["get","id"],markerFilter]);
@@ -437,7 +438,10 @@ export class ThreeTestLayer implements CustomLayerInterface {
           this.activeDescriptor=d;this.localCandidate=undefined;
           this.settlementEnabled=true;
           if(d.definition) {
-            this.settlement=new SettlementScene(d.definition,s=>this.onSettlementStatus?.(s),()=>this.map?.triggerRepaint());
+            this.settlement=new SettlementScene(d.definition,s=>{
+              this.historicalDetailFailed=d.definition!.ambientLife===false && s.loaded===0 && s.errors.length>0;
+              this.onSettlementStatus?.(s);
+            },()=>this.map?.triggerRepaint());
             this.updateSettlementAnchor();void this.settlement.load();
           } else {
             const config={...settlementProfileConfig(d.profile),...d.config,origin:d.origin,seed:d.seed};
@@ -448,7 +452,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
       } else if(decision.lod!=="local" && this.localCandidate) this.clearStreamingScene();
     }
     // Hide the proxy once terrain-attached detailed buildings are visible.
-    if(this.regional)this.regional.scene.visible=!(this.settlement && this.settlement.timing.stage==="ready");
+    if(this.regional)this.regional.scene.visible=!this.historicalDetailFailed && !(this.settlement && this.settlement.timing.stage==="ready");
   }
   private publishStreamingStatus(): void {
     const status=this.getStreamingStatus();

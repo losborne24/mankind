@@ -18,6 +18,8 @@ export interface PlayerPorts {
     };
     timeline(time: HistoricalTime): void;
     overlays(ids: string[], scenario: ScenarioDefinition): void;
+    scenes?(requirements: string[], scenario: ScenarioDefinition, time: HistoricalTime): { warning?: string };
+    releaseScenes?(): void;
     streaming?(intent: StreamingIntent | null): void;
     frame(callback: (now: number) => void): number;
     cancelFrame(id: number): void;
@@ -106,7 +108,7 @@ export class ScenarioPlayer {
             this.ports.timeline(this.snapshot.intendedTime);
         this.ports.overlays(action.overlays, scenario);
         const requirements = scenario.beats[this.snapshot.beat].sceneRequirements ?? [];
-        this.publish({ warning: requirements.length ? 'Requested scene unavailable; map and geographic overlays remain available.' : undefined });
+        this.publish({ warning: this.ports.scenes ? this.ports.scenes(requirements, scenario, this.snapshot.intendedTime!).warning : requirements.length ? 'Requested scene unavailable; map and geographic overlays remain available.' : undefined });
         this.sample = directCamera(camera, this.ports.camera.read(), scenario);
         const next = scenario.beats[this.snapshot.beat + 1]?.actions[0].camera;
         this.intent = { focus: this.ports.camera.read().center, destination: 'center' in camera ? camera.center : next && 'center' in next ? next.center : undefined, route: camera.type === 'followRoute' ? scenario.content.routes.find(r => r.id === camera.route)?.coordinates : undefined, arrivalInMs: camera.duration, detail: 'map', importance: 'narrative', travelling: camera.type !== 'hold' };
@@ -161,6 +163,7 @@ export class ScenarioPlayer {
             this.ports.streaming?.(this.intent ? { ...this.intent, travelling: true } : null);
             if (this.snapshot.intendedTime)
                 this.ports.timeline(this.snapshot.intendedTime);
+            if (this.ports.scenes) this.publish({ warning: this.ports.scenes(this.scenario!.beats[this.snapshot.beat].sceneRequirements ?? [], this.scenario!, this.snapshot.intendedTime!).warning });
             this.publish({ state: 'playing', suspendedForExploration: false, returning: true, owner: 'scenario', reason: undefined });
             this.schedule();
         }
@@ -185,9 +188,10 @@ export class ScenarioPlayer {
         this.cancel();
         this.saved = undefined;
         this.sample = undefined;
+        this.ports.releaseScenes?.();
         if (this.scenario)
             this.ports.overlays([], this.scenario);
-        this.publish({ state: 'idle', beat: 0, action: 0, elapsed: 0, totalElapsed: 0, progress: 0, returning: false, suspendedForExploration: false, owner: 'user', savedPose: undefined, intendedTime: undefined, command: undefined, reason: undefined });
+        this.publish({ state: 'idle', beat: 0, action: 0, elapsed: 0, totalElapsed: 0, progress: 0, returning: false, suspendedForExploration: false, owner: 'user', savedPose: undefined, intendedTime: undefined, command: undefined, reason: undefined, warning: undefined });
     }
     dispose() {
         if (this.destroyed)

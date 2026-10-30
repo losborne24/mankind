@@ -158,7 +158,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
     <>
       <div ref={containerRef} className="h-full w-full" aria-hidden />
       <MapReadout map={debugMap} />
-      {debugMap && <ScenarioPanel map={debugMap} layer={scenarioLayer} />}
+      {debugMap && <ScenarioPanel map={debugMap} layer={scenarioLayer} streamingStatus={streamingStatus} settlementStatus={settlementStatus} />}
       <DebugPanel
         historicalLayer={scenarioLayer}
         streamingStatus={streamingStatus}

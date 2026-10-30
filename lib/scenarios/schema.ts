@@ -60,6 +60,7 @@ export interface ScenarioDefinition {
     id: string;
     title: string;
     description: string;
+    historicalDataset?: string;
     scope: {
         bounds: [
             number,
@@ -95,6 +96,8 @@ export interface ScenarioDefinition {
             certainty: Certainty;
             sources: string[];
             required: boolean;
+            historicalSceneId?: string;
+            interpretationLayoutId?: string;
         }[];
         overlays: ScenarioOverlay[];
     };
@@ -196,6 +199,7 @@ export function validateScenario(value: unknown): ScenarioDefinition {
     if (s.version !== 1)
         throw Error('Unsupported scenario version');
     ['id', 'title', 'description'].forEach(k => str(s[k]));
+    if (s.historicalDataset !== undefined) str(s.historicalDataset);
     const scope = object(s.scope), bounds = list(scope.bounds);
     if (bounds.length !== 4)
         throw Error('Bounds need four numbers');
@@ -249,6 +253,8 @@ export function validateScenario(value: unknown): ScenarioDefinition {
     for (const x of list(c.scenes ?? [])) {
         const v = object(x);
         str(v.description);
+        if (v.historicalSceneId !== undefined) { str(v.historicalSceneId); if (!s.historicalDataset) throw Error('Historical scene needs a registered dataset'); }
+        if (v.interpretationLayoutId !== undefined) { str(v.interpretationLayoutId); if (!v.historicalSceneId) throw Error('Interpretation needs a historical scene'); }
         provenance(v);
         if (typeof v.required !== 'boolean')
             throw Error('Expected required flag');

@@ -12,7 +12,7 @@ import { useExplorationStore } from '@/state/explorationStore';
 import { historicalWorldOverlays } from '@/map/historicalWorldOverlays';
 
 export function HistoricalDatasetControls({ map, layer }: { map: Map; layer: ThreeTestLayer }) {
-  const [session, setSession] = useState<HistoricalDatasetSession | null>(null);
+  const { historicalSession: session, setHistoricalSession } = useScenarioController();
   useEffect(() => {
     const overlays = historicalWorldOverlays(map, id => controller.inspect({ kind: 'place', id }));
     const controller = new HistoricalDatasetSession({
@@ -24,12 +24,12 @@ export function HistoricalDatasetControls({ map, layer }: { map: Map; layer: Thr
     const fixtures = (event: Event) => { if ((event.target as Element | null)?.closest?.('[data-scenario-exit]')) controller.clear(); };
     document.addEventListener('click', fixtures, true); document.addEventListener('input', fixtures, true);
     const removed = () => controller.dispose(); map.on('remove', removed);
-    const timer = setTimeout(() => setSession(controller), 0);
+    const timer = setTimeout(() => setHistoricalSession(controller), 0);
     return () => {
-      clearTimeout(timer); controller.dispose(); overlays.dispose(); map.off('remove', removed);
+      clearTimeout(timer); setHistoricalSession(null); controller.dispose(); overlays.dispose(); map.off('remove', removed);
       document.removeEventListener('click', fixtures, true); document.removeEventListener('input', fixtures, true);
     };
-  }, [map, layer]);
+  }, [map, layer, setHistoricalSession]);
   return session ? <DatasetControls session={session} map={map} /> : null;
 }
 function DatasetControls({ session, map }: { session: HistoricalDatasetSession; map: Map }) {
@@ -43,28 +43,32 @@ function DatasetControls({ session, map }: { session: HistoricalDatasetSession; 
     map.flyTo({ center: target.center, zoom: target.zoom, pitch: target.pitch, bearing: target.bearing, duration: 2000 });
   };
   const [datasetId, setDatasetId] = useState<string>('london2012');
-  const dataset = HISTORICAL_DATASETS.find(item => item.id === datasetId) ?? HISTORICAL_DATASETS[0];
+  const activeDatasetId = snapshot.datasetId ?? datasetId;
+  const dataset = HISTORICAL_DATASETS.find(item => item.id === activeDatasetId) ?? HISTORICAL_DATASETS[0];
   const dateText = (value: { year: number; month?: number; day?: number }) => `${value.year}${value.month ? `-${String(value.month).padStart(2, '0')}` : ''}${value.day ? `-${String(value.day).padStart(2, '0')}` : ''}`;
-  const [date, setDate] = useState('2012-07-27');
+  const [dateDraft, setDateDraft] = useState<{ datasetId: string; timeKey: string; value: string }>();
+  const timeKey = JSON.stringify(snapshot.selection?.time ?? null);
+  const date = dateDraft?.datasetId === activeDatasetId && dateDraft.timeKey === timeKey ? dateDraft.value : dateText(snapshot.selection?.time.start ?? dataset.preview.date);
+  const setDate = (value: string) => setDateDraft({ datasetId: activeDatasetId, timeKey, value });
   const [error, setError] = useState('');
   const applyDate = () => {
     try {
       const parts = /^(-?\d{1,4})(?:-(\d{2})(?:-(\d{2}))?)?$/.exec(date.trim());
       if (!parts) throw Error('Use year, year-month or year-month-day. Year 0 means 1 BCE.');
       const value = { year: Number(parts[1]), ...(parts[2] ? { month: Number(parts[2]) } : {}), ...(parts[3] ? { day: Number(parts[3]) } : {}) };
-      validateHistoricalDate(value); useExplorationStore.getState().setHistoricalTime({ start: value }); setError('');
+      validateHistoricalDate(value); useExplorationStore.getState().setHistoricalTime({ start: value }); setDateDraft(undefined); setError('');
     } catch (e) { setError(e instanceof Error ? e.message : String(e)); }
   };
   return <><details className="mt-3 border-t border-panel-border pt-2">
     <summary className="cursor-pointer">Historical dataset</summary>
-    <label className="mt-2 block">Dataset<select aria-label="Historical dataset selection" className="mt-1 w-full rounded border border-panel-border bg-background p-1" value={datasetId} onChange={event => {
+    <label className="mt-2 block">Dataset<select data-scenario-exit aria-label="Historical dataset selection" className="mt-1 w-full rounded border border-panel-border bg-background p-1" value={activeDatasetId} onChange={event => {
       const next = HISTORICAL_DATASETS.find(item => item.id === event.target.value);
       if (!next) return;
       session.clear(); setDatasetId(next.id); setDate(dateText(next.preview.date)); setError('');
     }}>{HISTORICAL_DATASETS.map(item => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label>
     <p className="my-2 text-white/50">{dataset.description}</p>
-    <button className="underline" onClick={() => void session.load(dataset.id)}>{snapshot.status === 'loading' ? `Reload ${dataset.label} dataset` : `Load ${dataset.label} dataset`}</button>
-    {snapshot.status !== 'idle' && <button className="ml-2 underline" onClick={() => session.clear()}>Unload dataset</button>}
+    <button data-scenario-exit className="underline" onClick={() => void session.load(dataset.id)}>{snapshot.status === 'loading' ? `Reload ${dataset.label} dataset` : `Load ${dataset.label} dataset`}</button>
+    {snapshot.status !== 'idle' && <button data-scenario-exit className="ml-2 underline" onClick={() => session.clear()}>Unload dataset</button>}
     <label className="mt-2 block">Dataset date<input aria-label="Historical dataset date" className="mt-1 w-full rounded border border-panel-border bg-background p-1" value={date} onChange={e => setDate(e.target.value)} /></label>
     <button className="mt-2 underline" onClick={applyDate}>Apply dataset date</button>
     <button data-manual-camera className="mt-2 block underline" onClick={() => { setDate(dateText(dataset.preview.date)); setError(''); useExplorationStore.getState().setHistoricalTime({ start: { ...dataset.preview.date } }); map.flyTo({ center: [...dataset.preview.center], zoom: dataset.preview.zoom, pitch: 'pitch' in dataset.preview ? dataset.preview.pitch : 35, ...('bearing' in dataset.preview ? { bearing: dataset.preview.bearing } : {}) }); }}>{dataset.preview.label}</button>

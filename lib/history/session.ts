@@ -29,6 +29,7 @@ export class HistoricalDatasetSession {
   private disposed = false;
   private inspectionKey?: HistoricalInspectionKey;
   private previewLayoutId?: string;
+  private journeySceneIds?: string[];
   private readonly unsubscribeTime: () => void;
   constructor(private readonly ports: HistoricalDatasetPorts) { this.unsubscribeTime = ports.subscribeTime(() => { this.previewLayoutId = undefined; this.refresh(); }); }
   getSnapshot = () => this.snapshot;
@@ -37,7 +38,7 @@ export class HistoricalDatasetSession {
   async load(datasetId: string) {
     if (this.disposed) return;
     this.request?.abort(); const revision = ++this.revision, request = new AbortController();
-    this.request = request; this.world = undefined; this.inspectionKey = undefined; this.previewLayoutId = undefined;
+    this.request = request; this.world = undefined; this.inspectionKey = undefined; this.previewLayoutId = undefined; this.journeySceneIds = undefined;
     this.ports.apply(null);
     this.publish({ status: 'loading', datasetId });
     try {
@@ -51,10 +52,27 @@ export class HistoricalDatasetSession {
       this.publish({ status: 'error', datasetId, error: error instanceof Error ? error.message : String(error) });
     } finally { if (revision === this.revision) this.request = undefined; }
   }
+  /** A registered journey explicitly presents an interpretation; no camera or time writes. */
+  presentJourney(datasetId: string, value: unknown, layoutId?: string, sceneIds: string[] = []) {
+    if (this.disposed) return;
+    const world = validateHistoricalWorld(value);
+    this.request?.abort(); this.request = undefined; this.revision++;
+    if (this.world?.id !== world.id) this.inspectionKey = undefined;
+    this.world = world; this.previewLayoutId = layoutId; this.journeySceneIds = [...sceneIds];
+    this.snapshot = { ...this.snapshot, datasetId };
+    this.refresh();
+    return this.snapshot.selection;
+  }
   private refresh() {
     if (this.disposed || !this.world) return;
     try {
       const selection = selectHistoricalWorld(this.world, this.ports.time(), { explicitLayoutId: this.previewLayoutId });
+      if (this.journeySceneIds) {
+        const allowed = new Set(selection.scenes?.filter(r => this.journeySceneIds!.includes(r.scene.id) && r.status === 'ready').flatMap(r => r.descriptorIds));
+        selection.descriptors = selection.descriptors.filter(d => allowed.has(d.id));
+        if (!selection.descriptors.some(d => d.id === selection.interpretationLayoutId)) delete selection.interpretationLayoutId;
+        for (const row of selection.places) if (row.layoutStatus === 'ready' && !selection.descriptors.some(d => row.layoutIds.includes(d.id))) row.layoutStatus = 'none';
+      }
       this.ports.apply(selection);
       const inspection = this.inspectionKey ? inspectHistoricalRecord(this.world, selection, this.inspectionKey) : undefined;
       this.publish({ status: 'ready', datasetId: this.snapshot.datasetId, title: this.world.title, selection, ...(inspection ? { inspection } : {}) });
@@ -78,6 +96,7 @@ export class HistoricalDatasetSession {
   previewReconstruction(layoutId: string | null): boolean {
     if (this.disposed || this.snapshot.status !== 'ready') return false;
     if (layoutId !== null && !this.snapshot.inspection?.locations.some(location => location.reconstructionPreviews?.some(layout => layout.id === layoutId))) return false;
+    this.journeySceneIds = undefined;
     this.previewLayoutId = layoutId ?? undefined; this.refresh();
     return layoutId === null || this.snapshot.selection?.interpretationLayoutId === layoutId;
   }
@@ -89,7 +108,7 @@ export class HistoricalDatasetSession {
   }
   clear() {
     if (this.disposed || this.snapshot.status === 'idle') return;
-    this.request?.abort(); this.request = undefined; this.revision++; this.world = undefined; this.inspectionKey = undefined; this.previewLayoutId = undefined;
+    this.request?.abort(); this.request = undefined; this.revision++; this.world = undefined; this.inspectionKey = undefined; this.previewLayoutId = undefined; this.journeySceneIds = undefined;
     this.ports.release(); this.publish({ status: 'idle' });
   }
   dispose() { if (this.disposed) return; this.clear(); this.disposed = true; this.unsubscribeTime(); this.listeners.clear(); }

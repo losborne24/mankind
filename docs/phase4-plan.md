@@ -14,8 +14,8 @@ recommendation to build another guided journey immediately after scene resolutio
 | 6 | Scene requirement resolution and declared fallbacks | Implemented; explicit interpretation supported |
 | 7 | Minimal persistent asset catalogue | [Implemented](asset-catalogue.md); draft and usable versions |
 | 8 | First evidence-backed building through the catalogue | [Implemented](portunus-reconstruction.md): Portunus exterior interpretation |
-| 9 | One sourced journey using catalogue and scene plans | **Next**; retain interrupt/explore/resume and missing-content handling |
-| 10 | End-to-end acceptance and handoff | Planned; quality, performance, lifecycle and reuse |
+| 9 | One sourced journey using catalogue and scene plans | [Implemented](portunus-journey.md): Portunus evidence tour with interruption, exploration/resume and fallback |
+| 10 | End-to-end acceptance and handoff | **Next**; quality, performance, lifecycle and reuse |
 
 Steps 7 and 8 are one bounded catalogue-plus-building milestone. Keep the catalogue
 small enough to support the first building. Source suitability determines the site;

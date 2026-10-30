@@ -448,4 +448,15 @@ The specific exterior model is pinned to catalogue version 1, with source links,
 feature uncertainty and local provenance. AD 100 is an editorial preview context;
 showing it is an explicit choice that date changes revoke.
 [Evidence, modelling decisions and validation](docs/portunus-reconstruction.md).
-The next step is a sourced journey using the asset.
+The asset is reused by the sourced journey below.
+
+
+### Sourced Portunus journey (Phase 4 Step 9)
+
+Choose **Start Portunus interpretation** for a 35-second tour with source cards,
+the catalogue-pinned building and explicit uncertainty labels. Move the map to
+pause, inspect the building evidence, explore freely, then Resume. Missing content
+keeps geographic context and sources available, with a retry for model failures.
+The idle journey selector also retains London 2012.
+[Scene ownership, lifecycle, fallbacks and validation](docs/portunus-journey.md).
+Step 10 is end-to-end acceptance and handoff.
