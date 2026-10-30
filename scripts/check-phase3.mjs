@@ -6,7 +6,7 @@ const reports = ['docs/previews/ambient-life-node-performance.json', 'docs/previ
 const originals = new Map(reports.map(path => [path, readFileSync(path)]));
 const checks = readdirSync('scripts').filter(name => /^check-.*\.mjs$/.test(name) && name !== 'check-phase3.mjs').sort();
 const commands = checks.map(name => [process.execPath, [`scripts/${name}`]]);
-commands.push(['pnpm', ['typecheck']], ['pnpm', ['lint']], ['pnpm', ['exec', 'next', 'build', '--webpack']]);
+commands.push(['pnpm', ['typecheck']], ['pnpm', ['lint']], ['pnpm', ['build']], [process.execPath, ['scripts/verify-production-styles.mjs']]);
 const results = [];
 const reportDirectory = process.argv[2] ?? 'docs/previews/phase3-final';
 mkdirSync(reportDirectory, { recursive: true });

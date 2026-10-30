@@ -93,7 +93,7 @@ export function DebugPanel({ historicalLayer, streamingStatus, onStreamingFixtur
     <details open className="absolute top-16 left-4 z-20 max-h-[calc(100%-12rem)] w-56 overflow-y-auto rounded-lg border border-panel-border bg-panel p-3 text-xs text-white/70 backdrop-blur-md sm:left-6">
       <summary className="cursor-pointer tracking-wide">Debug tools</summary>
       <ScenarioDiagnostics />
-      {map && historicalLayer && <HistoricalDatasetControls map={map} layer={historicalLayer} />}
+      {map && historicalLayer && <HistoricalDatasetControls map={map} />}
       <fieldset data-scenario-exit className="mt-4 border-t border-panel-border pt-3">
         <legend className="text-white/40">Settlement streaming · fictional fixtures</legend>
         <button className="mt-2 block underline" onClick={onStreamingFixtures}>Enable three streaming fixtures</button>

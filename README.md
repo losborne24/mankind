@@ -313,7 +313,9 @@ Final validation: `pnpm typecheck`, `pnpm lint`,
 An earlier `pnpm build` passed; a subsequent Turbopack rebuild failed on local
 CSS worker port binding permissions (including an escalated retry), so the
 final production build was verified with Webpack. No bundler configuration
-was changed.
+was changed at that milestone. Phase 4 acceptance later replaced the custom
+Tailwind loader with the shared PostCSS integration; both production builds now
+pass with compiled styles. See [the current handoff](docs/phase4-completion.md).
 
 ## Natural biomes
 
@@ -459,4 +461,20 @@ pause, inspect the building evidence, explore freely, then Resume. Missing conte
 keeps geographic context and sources available, with a retry for model failures.
 The idle journey selector also retains London 2012.
 [Scene ownership, lifecycle, fallbacks and validation](docs/portunus-journey.md).
-Step 10 is end-to-end acceptance and handoff.
+Step 10 acceptance and handoff is recorded below.
+
+
+### Phase 4 acceptance and handoff (Step 10)
+
+The bounded Portunus pilot is accepted with documented source/accuracy limits.
+The shared historical session and inspector now work in production, and both
+build pipelines compile Tailwind through the shared PostCSS setup. The integration
+gate runs the default production build and checks its emitted styles.
+[Acceptance, measured performance, remaining limits and Phase 5 handoff](docs/phase4-completion.md).
+
+```sh
+node scripts/check-phase3.mjs docs/previews/phase4-final
+node scripts/check-phase4-acceptance.mjs docs/previews/phase4-final
+pnpm build
+pnpm start
+```

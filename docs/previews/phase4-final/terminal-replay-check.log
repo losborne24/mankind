@@ -1,0 +1,1 @@
+Phase 4 acceptance: real pipeline, 10 repeated visits/date restores, stable cross-beat reuse, three full near/far terminal replays, bounded warm caches, stale dataset/model races, failed proxy suppression, retry and complete teardown pass.

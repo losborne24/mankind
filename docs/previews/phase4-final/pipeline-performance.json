@@ -1,0 +1,442 @@
+{
+  "recordedAt": "2026-10-30T12:50:16.799Z",
+  "environment": {
+    "node": "v24.13.1",
+    "platform": "darwin",
+    "arch": "arm64"
+  },
+  "note": "Node CPU, actual player/session/streamer/cache/GLB. Simulated map, confirmed flat DEM, no network/GPU. Settle wall includes 230 ms dwell; scene readyWall starts at construction. Five cold and five warm cycles; not device-wide performance guarantees.",
+  "model": {
+    "bytes": 3261376,
+    "sha256": "b45e24935e14af4227b6561b221f92a70312900accc251f008db5e537b547f35"
+  },
+  "rows": [
+    {
+      "cycle": 0,
+      "cache": "cold",
+      "settleWallMs": 488.03649999999993,
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 4.054791000000023,
+          "buildingAssembly": 1.8809579999999642,
+          "assetWallIncludingAssembly": 11.381999999999834,
+          "cpuTextures": 177.2366199999983,
+          "textureWall": 228.00095800000008,
+          "batchAssembly": 0.058417000000190455,
+          "terrainPlacement": 3.833708999999999,
+          "readyWall": 247.54612499999985
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "buildingAssembly": 1,
+          "assetWallIncludingAssembly": 1,
+          "textureWall": 1,
+          "batchAssembly": 1,
+          "terrainPlacement": 1
+        }
+      },
+      "sourceRequests": 1,
+      "sourceCache": {
+        "entries": 1,
+        "users": 1,
+        "idle": 0,
+        "bytes": 3255652,
+        "requests": 1,
+        "hits": 0,
+        "decodeWallMs": 7.847291000000041,
+        "cloneMs": 0.9270839999999225
+      },
+      "surfaceCache": {
+        "entries": 1,
+        "bytes": 2883584
+      }
+    },
+    {
+      "cycle": 1,
+      "cache": "cold",
+      "settleWallMs": 457.64300000000003,
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 2.1037499999997635,
+          "buildingAssembly": 0.4804589999998825,
+          "assetWallIncludingAssembly": 4.9499580000001515,
+          "cpuTextures": 162.41812600000048,
+          "textureWall": 216.0645830000003,
+          "batchAssembly": 0.007124999999632564,
+          "terrainPlacement": 1.7879170000001068,
+          "readyWall": 224.96770800000013
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "buildingAssembly": 1,
+          "assetWallIncludingAssembly": 1,
+          "textureWall": 1,
+          "batchAssembly": 1,
+          "terrainPlacement": 1
+        }
+      },
+      "sourceRequests": 1,
+      "sourceCache": {
+        "entries": 1,
+        "users": 1,
+        "idle": 0,
+        "bytes": 3255652,
+        "requests": 2,
+        "hits": 1,
+        "decodeWallMs": 12.053832000000057,
+        "cloneMs": 1.601083999999446
+      },
+      "surfaceCache": {
+        "entries": 1,
+        "bytes": 2883584
+      }
+    },
+    {
+      "cycle": 2,
+      "cache": "cold",
+      "settleWallMs": 457.3866250000001,
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 2.7747920000001614,
+          "buildingAssembly": 0.39095799999995506,
+          "assetWallIncludingAssembly": 3.104624999999942,
+          "cpuTextures": 160.4340400000001,
+          "textureWall": 211.83341700000028,
+          "batchAssembly": 0.006124999999883585,
+          "terrainPlacement": 1.3584589999995842,
+          "readyWall": 219.13570800000025
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "buildingAssembly": 1,
+          "assetWallIncludingAssembly": 1,
+          "textureWall": 1,
+          "batchAssembly": 1,
+          "terrainPlacement": 1
+        }
+      },
+      "sourceRequests": 1,
+      "sourceCache": {
+        "entries": 1,
+        "users": 1,
+        "idle": 0,
+        "bytes": 3255652,
+        "requests": 3,
+        "hits": 2,
+        "decodeWallMs": 14.529749000000265,
+        "cloneMs": 2.007583999999497
+      },
+      "surfaceCache": {
+        "entries": 1,
+        "bytes": 2883584
+      }
+    },
+    {
+      "cycle": 3,
+      "cache": "cold",
+      "settleWallMs": 447.567,
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 2.106666000000132,
+          "buildingAssembly": 0.7449580000002243,
+          "assetWallIncludingAssembly": 4.997624999999971,
+          "cpuTextures": 153.00499899999886,
+          "textureWall": 206.36170900000025,
+          "batchAssembly": 0.017666999999164545,
+          "terrainPlacement": 1.1632079999999405,
+          "readyWall": 214.73066700000027
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "buildingAssembly": 1,
+          "assetWallIncludingAssembly": 1,
+          "textureWall": 1,
+          "batchAssembly": 1,
+          "terrainPlacement": 1
+        }
+      },
+      "sourceRequests": 1,
+      "sourceCache": {
+        "entries": 1,
+        "users": 1,
+        "idle": 0,
+        "bytes": 3255652,
+        "requests": 4,
+        "hits": 3,
+        "decodeWallMs": 18.375874000000294,
+        "cloneMs": 2.8937089999994896
+      },
+      "surfaceCache": {
+        "entries": 1,
+        "bytes": 2883584
+      }
+    },
+    {
+      "cycle": 4,
+      "cache": "cold",
+      "settleWallMs": 442.9974170000005,
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 3.1305840000004537,
+          "buildingAssembly": 0.39737499999955617,
+          "assetWallIncludingAssembly": 3.890292000000045,
+          "cpuTextures": 150.8335840000036,
+          "textureWall": 201.05324999999993,
+          "batchAssembly": 0.00483299999996234,
+          "terrainPlacement": 1.1576670000004015,
+          "readyWall": 209.30795799999942
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "buildingAssembly": 1,
+          "assetWallIncludingAssembly": 1,
+          "textureWall": 1,
+          "batchAssembly": 1,
+          "terrainPlacement": 1
+        }
+      },
+      "sourceRequests": 1,
+      "sourceCache": {
+        "entries": 1,
+        "users": 1,
+        "idle": 0,
+        "bytes": 3255652,
+        "requests": 5,
+        "hits": 4,
+        "decodeWallMs": 21.611832000000504,
+        "cloneMs": 3.1109169999995174
+      },
+      "surfaceCache": {
+        "entries": 1,
+        "bytes": 2883584
+      }
+    },
+    {
+      "cycle": 5,
+      "cache": "warm",
+      "settleWallMs": 237.47741600000063,
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 1.776375000000371,
+          "buildingAssembly": 0.5985839999993914,
+          "assetWallIncludingAssembly": 0.8231249999998909,
+          "cpuTextures": 0,
+          "textureWall": 0.0402090000006865,
+          "batchAssembly": 0.0045419999996738625,
+          "terrainPlacement": 2.285584000000199,
+          "readyWall": 4.954584000000068
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "buildingAssembly": 1,
+          "assetWallIncludingAssembly": 1,
+          "textureWall": 1,
+          "batchAssembly": 1,
+          "terrainPlacement": 1
+        }
+      },
+      "sourceRequests": 0,
+      "sourceCache": {
+        "entries": 1,
+        "users": 1,
+        "idle": 0,
+        "bytes": 3255652,
+        "requests": 5,
+        "hits": 6,
+        "decodeWallMs": 21.611832000000504,
+        "cloneMs": 3.365000999998756
+      },
+      "surfaceCache": {
+        "entries": 1,
+        "bytes": 2883584
+      }
+    },
+    {
+      "cycle": 6,
+      "cache": "warm",
+      "settleWallMs": 239.11829099999977,
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 2.3367499999994834,
+          "buildingAssembly": 1.4075419999999212,
+          "assetWallIncludingAssembly": 3.35608400000001,
+          "cpuTextures": 0,
+          "textureWall": 0.04500000000007276,
+          "batchAssembly": 0.005957999999736785,
+          "terrainPlacement": 1.6487919999999576,
+          "readyWall": 7.424750000000131
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "buildingAssembly": 1,
+          "assetWallIncludingAssembly": 1,
+          "textureWall": 1,
+          "batchAssembly": 1,
+          "terrainPlacement": 1
+        }
+      },
+      "sourceRequests": 0,
+      "sourceCache": {
+        "entries": 1,
+        "users": 1,
+        "idle": 0,
+        "bytes": 3255652,
+        "requests": 5,
+        "hits": 8,
+        "decodeWallMs": 21.611832000000504,
+        "cloneMs": 5.452208999998675
+      },
+      "surfaceCache": {
+        "entries": 1,
+        "bytes": 2883584
+      }
+    },
+    {
+      "cycle": 7,
+      "cache": "warm",
+      "settleWallMs": 239.41945900000064,
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 0.9275420000003578,
+          "buildingAssembly": 0.3975000000000364,
+          "assetWallIncludingAssembly": 0.5657079999991765,
+          "cpuTextures": 0,
+          "textureWall": 0.032541999999921245,
+          "batchAssembly": 0.0038749999994251993,
+          "terrainPlacement": 1.1645410000000993,
+          "readyWall": 2.709208999999646
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "buildingAssembly": 1,
+          "assetWallIncludingAssembly": 1,
+          "textureWall": 1,
+          "batchAssembly": 1,
+          "terrainPlacement": 1
+        }
+      },
+      "sourceRequests": 0,
+      "sourceCache": {
+        "entries": 1,
+        "users": 1,
+        "idle": 0,
+        "bytes": 3255652,
+        "requests": 5,
+        "hits": 10,
+        "decodeWallMs": 21.611832000000504,
+        "cloneMs": 5.860541999998986
+      },
+      "surfaceCache": {
+        "entries": 1,
+        "bytes": 2883584
+      }
+    },
+    {
+      "cycle": 8,
+      "cache": "warm",
+      "settleWallMs": 239.08504099999936,
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 2.255000000000109,
+          "buildingAssembly": 0.8253750000003492,
+          "assetWallIncludingAssembly": 1.2312910000000556,
+          "cpuTextures": 0,
+          "textureWall": 0.1031249999996362,
+          "batchAssembly": 0.014624999999796273,
+          "terrainPlacement": 2.218334000000141,
+          "readyWall": 5.8579170000002705
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "buildingAssembly": 1,
+          "assetWallIncludingAssembly": 1,
+          "textureWall": 1,
+          "batchAssembly": 1,
+          "terrainPlacement": 1
+        }
+      },
+      "sourceRequests": 0,
+      "sourceCache": {
+        "entries": 1,
+        "users": 1,
+        "idle": 0,
+        "bytes": 3255652,
+        "requests": 5,
+        "hits": 12,
+        "decodeWallMs": 21.611832000000504,
+        "cloneMs": 6.472291999999015
+      },
+      "surfaceCache": {
+        "entries": 1,
+        "bytes": 2883584
+      }
+    },
+    {
+      "cycle": 9,
+      "cache": "warm",
+      "settleWallMs": 240.4275829999997,
+      "scene": {
+        "stage": "ready",
+        "ms": {
+          "surfaceAndShadowSetup": 3.1028749999995853,
+          "buildingAssembly": 1.1537499999994907,
+          "assetWallIncludingAssembly": 1.5675419999997757,
+          "cpuTextures": 0,
+          "textureWall": 0.07841599999937898,
+          "batchAssembly": 0.011959000000388187,
+          "terrainPlacement": 2.2930829999995694,
+          "readyWall": 7.0914169999996375
+        },
+        "counts": {
+          "surfaceAndShadowSetup": 1,
+          "buildingAssembly": 1,
+          "assetWallIncludingAssembly": 1,
+          "textureWall": 1,
+          "batchAssembly": 1,
+          "terrainPlacement": 1
+        }
+      },
+      "sourceRequests": 0,
+      "sourceCache": {
+        "entries": 1,
+        "users": 1,
+        "idle": 0,
+        "bytes": 3255652,
+        "requests": 5,
+        "hits": 14,
+        "decodeWallMs": 21.611832000000504,
+        "cloneMs": 7.0276259999986905
+      },
+      "surfaceCache": {
+        "entries": 1,
+        "bytes": 2883584
+      }
+    }
+  ],
+  "final": {
+    "sourceCache": {
+      "entries": 0,
+      "users": 0,
+      "idle": 0,
+      "bytes": 0,
+      "requests": 8,
+      "hits": 15,
+      "decodeWallMs": 26.615998999998737,
+      "cloneMs": 7.4682519999983015
+    },
+    "surfaceCache": {
+      "entries": 0,
+      "bytes": 0
+    },
+    "frames": 0
+  }
+}

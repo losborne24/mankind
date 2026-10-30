@@ -31,6 +31,7 @@ import { ThreeTestLayer, type StreamingStatus, type RomanTestStatus } from "@/ma
 import type { SettlementStatus } from "@/map/settlements/SettlementScene";
 import type { GenerationResult } from "@/map/settlements/proceduralSettlement";
 import { ROMAN_SETTLEMENT } from "@/map/settlements/romanSettlement";
+import { HistoricalWorldSession } from "@/components/HistoricalDatasetControls";
 import { ScenarioPanel } from "@/components/ScenarioPanel";
 import { DebugPanel } from "@/components/DebugPanel";
 import { MapReadout } from "@/components/MapReadout";
@@ -158,6 +159,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
     <>
       <div ref={containerRef} className="h-full w-full" aria-hidden />
       <MapReadout map={debugMap} />
+      {debugMap && scenarioLayer && <HistoricalWorldSession map={debugMap} layer={scenarioLayer} />}
       {debugMap && <ScenarioPanel map={debugMap} layer={scenarioLayer} streamingStatus={streamingStatus} settlementStatus={settlementStatus} />}
       <DebugPanel
         historicalLayer={scenarioLayer}

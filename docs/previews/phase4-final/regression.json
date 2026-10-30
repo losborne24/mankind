@@ -1,0 +1,215 @@
+{
+  "recordedAt": "2026-10-30T13:35:07.013Z",
+  "results": [
+    {
+      "command": "node scripts/check-ambient-life.mjs",
+      "exit": 0,
+      "ms": 2569.285208,
+      "stdout": "portunus-exterior-v1: 11.427 × 16.093 × 21.553 m\nroman-villager-01: 0.670 × 1.783 × 0.350 m\nroman-cottage-lime: 5.310 × 4.040 × 5.520 m\nroman-cottage-ochre: 5.420 × 4.010 × 5.420 m\nroman-porch-merchant: 5.900 × 4.360 × 6.062 m\nroman-porch-lime: 5.890 × 4.430 × 6.132 m\nroman-upper-weavers: 5.910 × 6.480 × 5.540 m\nroman-upper-ochre: 5.920 × 6.350 × 5.550 m\nroman-taberna-linen: 5.498 × 3.820 × 5.865 m\nroman-taberna-tiled: 5.638 × 4.040 × 6.011 m\nroman-workshop-open: 5.038 × 3.920 × 5.830 m\nroman-workshop-portico: 5.858 × 3.880 × 5.961 m\nroman-farm-veranda: 8.192 × 4.890 × 7.395 m\nroman-farm-yard: 8.190 × 4.850 × 7.350 m\nroman-taberna-01: 6.039 × 4.160 × 6.425 m\nroman-farmhouse-01: 8.191 × 4.750 × 7.395 m\nroman-villa-01: 5.989 × 4.330 × 6.352 m\nroman-temple-01: 7.480 × 5.610 × 7.600 m\nroman-aqueduct-01: 8.130 × 8.793 × 1.720 m\nenvironment-olive-tree-01: 6.547 × 5.872 × 6.407 m\nenvironment-italian-cypress-01: 2.416 × 8.025 × 2.409 m\nenvironment-mediterranean-shrub-01: 1.642 × 0.907 × 1.566 m\nenvironment-limestone-rock-01: 1.879 × 0.861 × 1.218 m\nenvironment-dry-grass-tuft-01: 0.430 × 0.475 × 0.433 m\nenvironment-low-stone-boundary-01: 1.799 × 0.538 × 0.471 m\nenvironment-wooden-crate-01: 0.900 × 0.700 × 0.805 m\nenvironment-garden-plant-01: 0.753 × 0.533 × 0.559 m\nenvironment-grain-clump-01: 0.627 × 1.066 × 0.527 m\nroman-wine-barrel-01: 0.900 × 0.800 × 0.897 m\nroman-market-awning-01: 2.600 × 2.180 × 1.818 m\nroman-amphora-01: 0.663 × 1.000 × 0.550 m\nroman-stone-bench-01: 1.800 × 0.580 × 0.500 m\nRoman assets: 19,805,988 bytes; dimensions, placement frame, cache sharing, cleanup and retry pass.\nAmbient life: three seeds, routes, disconnected graph, building clearance, 30/60 fps determinism, articulated GLB, shared resources, zero/provisional/missing DEM, smooth heights, exaggeration, relocation, disabled/distant pause, count bounds, reload, pending replacement and disposal pass.\n{\n  nodeViewMsPerFrame: 0.11908583333333354,\n  assetBytes: 182604,\n  trianglesPerVillager: 1772,\n  drawsPerVillager: 5,\n  sharedGeometries: 5\n}\n",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/check-asset-catalogue.mjs",
+      "exit": 0,
+      "ms": 863.2034159999998,
+      "stdout": "Asset catalogue: persistent/cold-process reads, immutable content versions, append-only reviews, locks/atomic failures, rights/evidence/hash gates, exact phase/place pins, retirement, no draft model loading and inspector integration pass.\n",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/check-biomes.mjs",
+      "exit": 0,
+      "ms": 307.5926669999999,
+      "stdout": "Real manifest, globe style, biome/hillshade/ocean ordering, dark-atlas restoration and offline fallback validated.\n",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/check-geography.mjs",
+      "exit": 0,
+      "ms": 1445.7354999999998,
+      "stdout": "physical-land: 1420 valid physical features\nphysical-lakes: 360 valid physical features\nphysical-rivers: 359 valid physical features\nStyle valid; 30° grid valid; geography 2464879 bytes (850265 gzip bytes).\n256 regional tiles valid: 2937114 bytes (1688194 gzip); France-area vertices: 15700.\nCoastline loading gate, zoom fade and lifecycle valid.\n",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/check-hillshade.mjs",
+      "exit": 0,
+      "ms": 2085.774208,
+      "stdout": "Hillshade ordering, global relief, opaque-mask handover, loading and cleanup valid.\nSpain / Biscay: ocean mask covers sea and leaves land exposed for hillshade.\nCorsica: ocean mask covers sea and leaves land exposed for hillshade.\nGreece / Crete: ocean mask covers sea and leaves land exposed for hillshade.\n85 global mask tiles decode; four ranges, islands, oceans, dateline and polar samples valid.\nInstalled MapLibre overzoom + triangulation preserves Germany, Alps and ocean coverage at z5.\n",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/check-historical-footprints.mjs",
+      "exit": 0,
+      "ms": 628.4318330000006,
+      "stdout": "Historical footprints: pinned P-LOD vertices, phase provenance/uncertainty, property semantics, API/catalog, inspector, source attribution, date selection, validation, session and overlay cleanup pass; no implicit 3D assets.\n",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/check-historical-inspection.mjs",
+      "exit": 0,
+      "ms": 609.1393340000004,
+      "stdout": "Historical inspection: evidence/source separation, multiple locations, approximate/unavailable/ambiguous geography, stale-date visit guards, no inspection scene churn, dataset teardown, marker activation/listener cleanup, safe accessible rendered controls pass.\n",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/check-historical-loading.mjs",
+      "exit": 0,
+      "ms": 622.0448329999999,
+      "stdout": "Historical loading: exact/coarse/interval/BCE/uncertain dates, overlapping layouts, missing assets, stale/aborted requests, latest-date commit, store/scenario integration, teardown, map-only markers, bounded local fetch and failures pass.\n",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/check-historical-scenes.mjs",
+      "exit": 0,
+      "ms": 613.6144999999997,
+      "stdout": "Historical scene requirements: real map fallbacks, explicit synthetic 3D projection, unresolved/unplaced/category/evidence/date guards, mandatory blocking, standalone layouts, pure planning, inspector and session lifecycle pass.\n",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/check-historical-world.mjs",
+      "exit": 0,
+      "ms": 1052.5676669999993,
+      "stdout": "Historical world v1: plain JSON, conventions, bounded validation, citations, reference integrity, precision/BCE/uncertainty, multi-location events, temporal binding, player integration, explicit layouts/roads, profile-free descriptors and missing-asset safety pass.\n",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/check-housesteads-data.mjs",
+      "exit": 0,
+      "ms": 512.336292,
+      "stdout": "Housesteads curation: primary citations/claim ledger, reproducible anchors, source-qualified chronology, circa date handling, phase boundaries/gaps, unavailable geometry, map-only visits, no Roman substitution, local API/catalog and unchanged source records pass.\n",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/check-phase4-acceptance.mjs",
+      "exit": 0,
+      "ms": 8099.280125000001,
+      "stdout": "Phase 4 acceptance: real pipeline, 10 repeated visits/date restores, stable cross-beat reuse, bounded warm caches, stale dataset/model races, failed proxy suppression, retry and complete teardown pass.\n",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/check-portunus-journey.mjs",
+      "exit": 0,
+      "ms": 1091.7317909999983,
+      "stdout": "Portunus journey: sourced scenario, exact catalogue reuse, overview/detail scope, interrupt/explore/date/restore, jump/restart/completion/exit/switch/dispose, missing/required/outside guards and runtime status pass.\n",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/check-portunus-reconstruction.mjs",
+      "exit": 0,
+      "ms": 1050.570375000003,
+      "stdout": "Portunus reconstruction: 5 meshes, 84294 triangles, pinned bytes and drawing; strict default/explicit preview, evidence/status/date guards, session revocation, authored materials, real scene terrain placement and lease cleanup pass.\n",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/check-procedural-settlement.mjs",
+      "exit": 0,
+      "ms": 1551.969083,
+      "stdout": "portunus-exterior-v1: 11.427 × 16.093 × 21.553 m\nroman-villager-01: 0.670 × 1.783 × 0.350 m\nroman-cottage-lime: 5.310 × 4.040 × 5.520 m\nroman-cottage-ochre: 5.420 × 4.010 × 5.420 m\nroman-porch-merchant: 5.900 × 4.360 × 6.062 m\nroman-porch-lime: 5.890 × 4.430 × 6.132 m\nroman-upper-weavers: 5.910 × 6.480 × 5.540 m\nroman-upper-ochre: 5.920 × 6.350 × 5.550 m\nroman-taberna-linen: 5.498 × 3.820 × 5.865 m\nroman-taberna-tiled: 5.638 × 4.040 × 6.011 m\nroman-workshop-open: 5.038 × 3.920 × 5.830 m\nroman-workshop-portico: 5.858 × 3.880 × 5.961 m\nroman-farm-veranda: 8.192 × 4.890 × 7.395 m\nroman-farm-yard: 8.190 × 4.850 × 7.350 m\nroman-taberna-01: 6.039 × 4.160 × 6.425 m\nroman-farmhouse-01: 8.191 × 4.750 × 7.395 m\nroman-villa-01: 5.989 × 4.330 × 6.352 m\nroman-temple-01: 7.480 × 5.610 × 7.600 m\nroman-aqueduct-01: 8.130 × 8.793 × 1.720 m\nenvironment-olive-tree-01: 6.547 × 5.872 × 6.407 m\nenvironment-italian-cypress-01: 2.416 × 8.025 × 2.409 m\nenvironment-mediterranean-shrub-01: 1.642 × 0.907 × 1.566 m\nenvironment-limestone-rock-01: 1.879 × 0.861 × 1.218 m\nenvironment-dry-grass-tuft-01: 0.430 × 0.475 × 0.433 m\nenvironment-low-stone-boundary-01: 1.799 × 0.538 × 0.471 m\nenvironment-wooden-crate-01: 0.900 × 0.700 × 0.805 m\nenvironment-garden-plant-01: 0.753 × 0.533 × 0.559 m\nenvironment-grain-clump-01: 0.627 × 1.066 × 0.527 m\nroman-wine-barrel-01: 0.900 × 0.800 × 0.897 m\nroman-market-awning-01: 2.600 × 2.180 × 1.818 m\nroman-amphora-01: 0.663 × 1.000 × 0.550 m\nroman-stone-bench-01: 1.800 × 0.580 × 0.500 m\nRoman assets: 19,805,988 bytes; dimensions, placement frame, cache sharing, cleanup and retry pass.\nProcedural settlement: determinism, 8 seeds, relocation, contacts, road/plot clearance, environment, navigation, pending/zero DEM, partial capacity, slopes and cancellation pass (172 ms).\nProcedural assembler: regeneration during GLB loads, shared cache leases, retained DEM, reset, unload/reload and owned-resource disposal pass.\n",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/check-reference-geometry.mjs",
+      "exit": 0,
+      "ms": 514.5137499999983,
+      "stdout": "Reference geometry: archived source hash, polygon validation, phase separation, attribution, date visibility, no scene descriptors and overlay cleanup pass.\n",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/check-roman-assets.mjs",
+      "exit": 0,
+      "ms": 555.1285839999982,
+      "stdout": "portunus-exterior-v1: 11.427 × 16.093 × 21.553 m\nroman-villager-01: 0.670 × 1.783 × 0.350 m\nroman-cottage-lime: 5.310 × 4.040 × 5.520 m\nroman-cottage-ochre: 5.420 × 4.010 × 5.420 m\nroman-porch-merchant: 5.900 × 4.360 × 6.062 m\nroman-porch-lime: 5.890 × 4.430 × 6.132 m\nroman-upper-weavers: 5.910 × 6.480 × 5.540 m\nroman-upper-ochre: 5.920 × 6.350 × 5.550 m\nroman-taberna-linen: 5.498 × 3.820 × 5.865 m\nroman-taberna-tiled: 5.638 × 4.040 × 6.011 m\nroman-workshop-open: 5.038 × 3.920 × 5.830 m\nroman-workshop-portico: 5.858 × 3.880 × 5.961 m\nroman-farm-veranda: 8.192 × 4.890 × 7.395 m\nroman-farm-yard: 8.190 × 4.850 × 7.350 m\nroman-taberna-01: 6.039 × 4.160 × 6.425 m\nroman-farmhouse-01: 8.191 × 4.750 × 7.395 m\nroman-villa-01: 5.989 × 4.330 × 6.352 m\nroman-temple-01: 7.480 × 5.610 × 7.600 m\nroman-aqueduct-01: 8.130 × 8.793 × 1.720 m\nenvironment-olive-tree-01: 6.547 × 5.872 × 6.407 m\nenvironment-italian-cypress-01: 2.416 × 8.025 × 2.409 m\nenvironment-mediterranean-shrub-01: 1.642 × 0.907 × 1.566 m\nenvironment-limestone-rock-01: 1.879 × 0.861 × 1.218 m\nenvironment-dry-grass-tuft-01: 0.430 × 0.475 × 0.433 m\nenvironment-low-stone-boundary-01: 1.799 × 0.538 × 0.471 m\nenvironment-wooden-crate-01: 0.900 × 0.700 × 0.805 m\nenvironment-garden-plant-01: 0.753 × 0.533 × 0.559 m\nenvironment-grain-clump-01: 0.627 × 1.066 × 0.527 m\nroman-wine-barrel-01: 0.900 × 0.800 × 0.897 m\nroman-market-awning-01: 2.600 × 2.180 × 1.818 m\nroman-amphora-01: 0.663 × 1.000 × 0.550 m\nroman-stone-bench-01: 1.800 × 0.580 × 0.500 m\nRoman assets: 19,805,988 bytes; dimensions, placement frame, cache sharing, cleanup and retry pass.\n",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/check-roman-kit.mjs",
+      "exit": 0,
+      "ms": 734.9046670000025,
+      "stdout": "portunus-exterior-v1: 11.427 × 16.093 × 21.553 m\nroman-villager-01: 0.670 × 1.783 × 0.350 m\nroman-cottage-lime: 5.310 × 4.040 × 5.520 m\nroman-cottage-ochre: 5.420 × 4.010 × 5.420 m\nroman-porch-merchant: 5.900 × 4.360 × 6.062 m\nroman-porch-lime: 5.890 × 4.430 × 6.132 m\nroman-upper-weavers: 5.910 × 6.480 × 5.540 m\nroman-upper-ochre: 5.920 × 6.350 × 5.550 m\nroman-taberna-linen: 5.498 × 3.820 × 5.865 m\nroman-taberna-tiled: 5.638 × 4.040 × 6.011 m\nroman-workshop-open: 5.038 × 3.920 × 5.830 m\nroman-workshop-portico: 5.858 × 3.880 × 5.961 m\nroman-farm-veranda: 8.192 × 4.890 × 7.395 m\nroman-farm-yard: 8.190 × 4.850 × 7.350 m\nroman-taberna-01: 6.039 × 4.160 × 6.425 m\nroman-farmhouse-01: 8.191 × 4.750 × 7.395 m\nroman-villa-01: 5.989 × 4.330 × 6.352 m\nroman-temple-01: 7.480 × 5.610 × 7.600 m\nroman-aqueduct-01: 8.130 × 8.793 × 1.720 m\nenvironment-olive-tree-01: 6.547 × 5.872 × 6.407 m\nenvironment-italian-cypress-01: 2.416 × 8.025 × 2.409 m\nenvironment-mediterranean-shrub-01: 1.642 × 0.907 × 1.566 m\nenvironment-limestone-rock-01: 1.879 × 0.861 × 1.218 m\nenvironment-dry-grass-tuft-01: 0.430 × 0.475 × 0.433 m\nenvironment-low-stone-boundary-01: 1.799 × 0.538 × 0.471 m\nenvironment-wooden-crate-01: 0.900 × 0.700 × 0.805 m\nenvironment-garden-plant-01: 0.753 × 0.533 × 0.559 m\nenvironment-grain-clump-01: 0.627 × 1.066 × 0.527 m\nroman-wine-barrel-01: 0.900 × 0.800 × 0.897 m\nroman-market-awning-01: 2.600 × 2.180 × 1.818 m\nroman-amphora-01: 0.663 × 1.000 × 0.550 m\nroman-stone-bench-01: 1.800 × 0.580 × 0.500 m\nRoman assets: 19,805,988 bytes; dimensions, placement frame, cache sharing, cleanup and retry pass.\nRoman kit: 9 runtime assets, 12 authoring modules, 5,956,528 runtime bytes, 1 draw/model, embedded PNGs, bounds, UVs, source isolation and unchanged environment pass.\n",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/check-roman-variations.mjs",
+      "exit": 0,
+      "ms": 1234.7086249999993,
+      "stdout": "portunus-exterior-v1: 11.427 × 16.093 × 21.553 m\nroman-villager-01: 0.670 × 1.783 × 0.350 m\nroman-cottage-lime: 5.310 × 4.040 × 5.520 m\nroman-cottage-ochre: 5.420 × 4.010 × 5.420 m\nroman-porch-merchant: 5.900 × 4.360 × 6.062 m\nroman-porch-lime: 5.890 × 4.430 × 6.132 m\nroman-upper-weavers: 5.910 × 6.480 × 5.540 m\nroman-upper-ochre: 5.920 × 6.350 × 5.550 m\nroman-taberna-linen: 5.498 × 3.820 × 5.865 m\nroman-taberna-tiled: 5.638 × 4.040 × 6.011 m\nroman-workshop-open: 5.038 × 3.920 × 5.830 m\nroman-workshop-portico: 5.858 × 3.880 × 5.961 m\nroman-farm-veranda: 8.192 × 4.890 × 7.395 m\nroman-farm-yard: 8.190 × 4.850 × 7.350 m\nroman-taberna-01: 6.039 × 4.160 × 6.425 m\nroman-farmhouse-01: 8.191 × 4.750 × 7.395 m\nroman-villa-01: 5.989 × 4.330 × 6.352 m\nroman-temple-01: 7.480 × 5.610 × 7.600 m\nroman-aqueduct-01: 8.130 × 8.793 × 1.720 m\nenvironment-olive-tree-01: 6.547 × 5.872 × 6.407 m\nenvironment-italian-cypress-01: 2.416 × 8.025 × 2.409 m\nenvironment-mediterranean-shrub-01: 1.642 × 0.907 × 1.566 m\nenvironment-limestone-rock-01: 1.879 × 0.861 × 1.218 m\nenvironment-dry-grass-tuft-01: 0.430 × 0.475 × 0.433 m\nenvironment-low-stone-boundary-01: 1.799 × 0.538 × 0.471 m\nenvironment-wooden-crate-01: 0.900 × 0.700 × 0.805 m\nenvironment-garden-plant-01: 0.753 × 0.533 × 0.559 m\nenvironment-grain-clump-01: 0.627 × 1.066 × 0.527 m\nroman-wine-barrel-01: 0.900 × 0.800 × 0.897 m\nroman-market-awning-01: 2.600 × 2.180 × 1.818 m\nroman-amphora-01: 0.663 × 1.000 × 0.550 m\nroman-stone-bench-01: 1.800 × 0.580 × 0.500 m\nRoman assets: 19,805,988 bytes; dimensions, placement frame, cache sharing, cleanup and retry pass.\nRoman variants: 12 prebuilt meshes, 8,012,236 bytes, one material/atlas, seeded selection, one library request, repeated batching, terrain/relocation/unload and original hashes pass.\n",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/check-scenarios.mjs",
+      "exit": 0,
+      "ms": 396.34799999999814,
+      "stdout": "Scenario: schema bounds/references/JSON, great-circle interpolation, route distance, orbit stability, sequential actions, pause/free exploration, repeated resume interruption, skip/restart/stop/disposal, one scheduler and input detection passed.\nTimeline: one store authority, exact date, intervals, BCE and manual year clearing passed.\nContext timeline: duration markers, preparation/playing/pause/completion, gesture presentation, suspended exploration, independent BCE date changes, resume restoration, beat temporal context, replay, exit and single RAF passed.\nTimeline render: no idle historical controls, preparing/playing/paused/completed labels, duration-derived progress, named keyboard buttons, read-only continuous progress and completion actions passed.\nIntegration: inert diagnostics, fixture ownership release, timeline interruption, 30 idempotent pause/resume cycles, return cancellation, control listener disposal and bounded director JSON passed.\nLondon continuity: all five beat boundaries enter at the current pose, finite camera samples and final stadium position passed.\n",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/check-settlement-density.mjs",
+      "exit": 0,
+      "ms": 4820.248542000001,
+      "stdout": "portunus-exterior-v1: 11.427 × 16.093 × 21.553 m\nroman-villager-01: 0.670 × 1.783 × 0.350 m\nroman-cottage-lime: 5.310 × 4.040 × 5.520 m\nroman-cottage-ochre: 5.420 × 4.010 × 5.420 m\nroman-porch-merchant: 5.900 × 4.360 × 6.062 m\nroman-porch-lime: 5.890 × 4.430 × 6.132 m\nroman-upper-weavers: 5.910 × 6.480 × 5.540 m\nroman-upper-ochre: 5.920 × 6.350 × 5.550 m\nroman-taberna-linen: 5.498 × 3.820 × 5.865 m\nroman-taberna-tiled: 5.638 × 4.040 × 6.011 m\nroman-workshop-open: 5.038 × 3.920 × 5.830 m\nroman-workshop-portico: 5.858 × 3.880 × 5.961 m\nroman-farm-veranda: 8.192 × 4.890 × 7.395 m\nroman-farm-yard: 8.190 × 4.850 × 7.350 m\nroman-taberna-01: 6.039 × 4.160 × 6.425 m\nroman-farmhouse-01: 8.191 × 4.750 × 7.395 m\nroman-villa-01: 5.989 × 4.330 × 6.352 m\nroman-temple-01: 7.480 × 5.610 × 7.600 m\nroman-aqueduct-01: 8.130 × 8.793 × 1.720 m\nenvironment-olive-tree-01: 6.547 × 5.872 × 6.407 m\nenvironment-italian-cypress-01: 2.416 × 8.025 × 2.409 m\nenvironment-mediterranean-shrub-01: 1.642 × 0.907 × 1.566 m\nenvironment-limestone-rock-01: 1.879 × 0.861 × 1.218 m\nenvironment-dry-grass-tuft-01: 0.430 × 0.475 × 0.433 m\nenvironment-low-stone-boundary-01: 1.799 × 0.538 × 0.471 m\nenvironment-wooden-crate-01: 0.900 × 0.700 × 0.805 m\nenvironment-garden-plant-01: 0.753 × 0.533 × 0.559 m\nenvironment-grain-clump-01: 0.627 × 1.066 × 0.527 m\nroman-wine-barrel-01: 0.900 × 0.800 × 0.897 m\nroman-market-awning-01: 2.600 × 2.180 × 1.818 m\nroman-amphora-01: 0.663 × 1.000 × 0.550 m\nroman-stone-bench-01: 1.800 × 0.580 × 0.500 m\nRoman assets: 19,805,988 bytes; dimensions, placement frame, cache sharing, cleanup and retry pass.\nDensity: 27 profile/seed/capacity cases, terrain states, collision/road/court clearance, connected junctions, villager traversal, scenery clearance and bounded search pass.\nDensity lifecycle: profile switching during real GLB loading, shared leases, treatment UV coverage, terrain reset/retention, reload and owned disposal pass.\n",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/check-settlement-environment.mjs",
+      "exit": 0,
+      "ms": 1666.4384999999966,
+      "stdout": "portunus-exterior-v1: 11.427 × 16.093 × 21.553 m\nroman-villager-01: 0.670 × 1.783 × 0.350 m\nroman-cottage-lime: 5.310 × 4.040 × 5.520 m\nroman-cottage-ochre: 5.420 × 4.010 × 5.420 m\nroman-porch-merchant: 5.900 × 4.360 × 6.062 m\nroman-porch-lime: 5.890 × 4.430 × 6.132 m\nroman-upper-weavers: 5.910 × 6.480 × 5.540 m\nroman-upper-ochre: 5.920 × 6.350 × 5.550 m\nroman-taberna-linen: 5.498 × 3.820 × 5.865 m\nroman-taberna-tiled: 5.638 × 4.040 × 6.011 m\nroman-workshop-open: 5.038 × 3.920 × 5.830 m\nroman-workshop-portico: 5.858 × 3.880 × 5.961 m\nroman-farm-veranda: 8.192 × 4.890 × 7.395 m\nroman-farm-yard: 8.190 × 4.850 × 7.350 m\nroman-taberna-01: 6.039 × 4.160 × 6.425 m\nroman-farmhouse-01: 8.191 × 4.750 × 7.395 m\nroman-villa-01: 5.989 × 4.330 × 6.352 m\nroman-temple-01: 7.480 × 5.610 × 7.600 m\nroman-aqueduct-01: 8.130 × 8.793 × 1.720 m\nenvironment-olive-tree-01: 6.547 × 5.872 × 6.407 m\nenvironment-italian-cypress-01: 2.416 × 8.025 × 2.409 m\nenvironment-mediterranean-shrub-01: 1.642 × 0.907 × 1.566 m\nenvironment-limestone-rock-01: 1.879 × 0.861 × 1.218 m\nenvironment-dry-grass-tuft-01: 0.430 × 0.475 × 0.433 m\nenvironment-low-stone-boundary-01: 1.799 × 0.538 × 0.471 m\nenvironment-wooden-crate-01: 0.900 × 0.700 × 0.805 m\nenvironment-garden-plant-01: 0.753 × 0.533 × 0.559 m\nenvironment-grain-clump-01: 0.627 × 1.066 × 0.527 m\nroman-wine-barrel-01: 0.900 × 0.800 × 0.897 m\nroman-market-awning-01: 2.600 × 2.180 × 1.818 m\nroman-amphora-01: 0.663 × 1.000 × 0.550 m\nroman-stone-bench-01: 1.800 × 0.580 × 0.500 m\nRoman assets: 19,805,988 bytes; dimensions, placement frame, cache sharing, cleanup and retry pass.\nEnvironment: deterministic seed/relocation, byte-identical maps, separate pier feet, canopy clearance, traffic thinning, bounded wall plants, preserved crops and feathered roads pass.\n",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/check-settlement-streaming.mjs",
+      "exit": 0,
+      "ms": 6304.5794160000005,
+      "stdout": "portunus-exterior-v1: 11.427 × 16.093 × 21.553 m\nroman-villager-01: 0.670 × 1.783 × 0.350 m\nroman-cottage-lime: 5.310 × 4.040 × 5.520 m\nroman-cottage-ochre: 5.420 × 4.010 × 5.420 m\nroman-porch-merchant: 5.900 × 4.360 × 6.062 m\nroman-porch-lime: 5.890 × 4.430 × 6.132 m\nroman-upper-weavers: 5.910 × 6.480 × 5.540 m\nroman-upper-ochre: 5.920 × 6.350 × 5.550 m\nroman-taberna-linen: 5.498 × 3.820 × 5.865 m\nroman-taberna-tiled: 5.638 × 4.040 × 6.011 m\nroman-workshop-open: 5.038 × 3.920 × 5.830 m\nroman-workshop-portico: 5.858 × 3.880 × 5.961 m\nroman-farm-veranda: 8.192 × 4.890 × 7.395 m\nroman-farm-yard: 8.190 × 4.850 × 7.350 m\nroman-taberna-01: 6.039 × 4.160 × 6.425 m\nroman-farmhouse-01: 8.191 × 4.750 × 7.395 m\nroman-villa-01: 5.989 × 4.330 × 6.352 m\nroman-temple-01: 7.480 × 5.610 × 7.600 m\nroman-aqueduct-01: 8.130 × 8.793 × 1.720 m\nenvironment-olive-tree-01: 6.547 × 5.872 × 6.407 m\nenvironment-italian-cypress-01: 2.416 × 8.025 × 2.409 m\nenvironment-mediterranean-shrub-01: 1.642 × 0.907 × 1.566 m\nenvironment-limestone-rock-01: 1.879 × 0.861 × 1.218 m\nenvironment-dry-grass-tuft-01: 0.430 × 0.475 × 0.433 m\nenvironment-low-stone-boundary-01: 1.799 × 0.538 × 0.471 m\nenvironment-wooden-crate-01: 0.900 × 0.700 × 0.805 m\nenvironment-garden-plant-01: 0.753 × 0.533 × 0.559 m\nenvironment-grain-clump-01: 0.627 × 1.066 × 0.527 m\nroman-wine-barrel-01: 0.900 × 0.800 × 0.897 m\nroman-market-awning-01: 2.600 × 2.180 × 1.818 m\nroman-amphora-01: 0.663 × 1.000 × 0.550 m\nroman-stone-bench-01: 1.800 × 0.580 × 0.500 m\nRoman assets: 19,805,988 bytes; dimensions, placement frame, cache sharing, cleanup and retry pass.\nStreaming: LOD hysteresis, latitude/pitch/date line, nearest priority, rapid movement, no distant GLBs, travel debounce, bounded one-slot switching, warm visits, stale loads, texture cancellation, cache budgets, footprint silhouettes, pause/resume and disposal pass.\n",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/check-settlement.mjs",
+      "exit": 0,
+      "ms": 2326.386166999997,
+      "stdout": "portunus-exterior-v1: 11.427 × 16.093 × 21.553 m\nroman-villager-01: 0.670 × 1.783 × 0.350 m\nroman-cottage-lime: 5.310 × 4.040 × 5.520 m\nroman-cottage-ochre: 5.420 × 4.010 × 5.420 m\nroman-porch-merchant: 5.900 × 4.360 × 6.062 m\nroman-porch-lime: 5.890 × 4.430 × 6.132 m\nroman-upper-weavers: 5.910 × 6.480 × 5.540 m\nroman-upper-ochre: 5.920 × 6.350 × 5.550 m\nroman-taberna-linen: 5.498 × 3.820 × 5.865 m\nroman-taberna-tiled: 5.638 × 4.040 × 6.011 m\nroman-workshop-open: 5.038 × 3.920 × 5.830 m\nroman-workshop-portico: 5.858 × 3.880 × 5.961 m\nroman-farm-veranda: 8.192 × 4.890 × 7.395 m\nroman-farm-yard: 8.190 × 4.850 × 7.350 m\nroman-taberna-01: 6.039 × 4.160 × 6.425 m\nroman-farmhouse-01: 8.191 × 4.750 × 7.395 m\nroman-villa-01: 5.989 × 4.330 × 6.352 m\nroman-temple-01: 7.480 × 5.610 × 7.600 m\nroman-aqueduct-01: 8.130 × 8.793 × 1.720 m\nenvironment-olive-tree-01: 6.547 × 5.872 × 6.407 m\nenvironment-italian-cypress-01: 2.416 × 8.025 × 2.409 m\nenvironment-mediterranean-shrub-01: 1.642 × 0.907 × 1.566 m\nenvironment-limestone-rock-01: 1.879 × 0.861 × 1.218 m\nenvironment-dry-grass-tuft-01: 0.430 × 0.475 × 0.433 m\nenvironment-low-stone-boundary-01: 1.799 × 0.538 × 0.471 m\nenvironment-wooden-crate-01: 0.900 × 0.700 × 0.805 m\nenvironment-garden-plant-01: 0.753 × 0.533 × 0.559 m\nenvironment-grain-clump-01: 0.627 × 1.066 × 0.527 m\nroman-wine-barrel-01: 0.900 × 0.800 × 0.897 m\nroman-market-awning-01: 2.600 × 2.180 × 1.818 m\nroman-amphora-01: 0.663 × 1.000 × 0.550 m\nroman-stone-bench-01: 1.800 × 0.580 × 0.500 m\nRoman assets: 19,805,988 bytes; dimensions, placement frame, cache sharing, cleanup and retry pass.\nEnvironment: 522 placements in 16 instanced component batches.\nSettlement: seven buildings, joined roads, entrance ramps, instanced scenery, shadows, zero/uncertain DEM, retained heights, relocation, slope limits, cleanup, pending cancellation and retry pass.\n",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/check-streaming-materials.mjs",
+      "exit": 0,
+      "ms": 2163.6279170000053,
+      "stdout": "portunus-exterior-v1: 11.427 × 16.093 × 21.553 m\nroman-villager-01: 0.670 × 1.783 × 0.350 m\nroman-cottage-lime: 5.310 × 4.040 × 5.520 m\nroman-cottage-ochre: 5.420 × 4.010 × 5.420 m\nroman-porch-merchant: 5.900 × 4.360 × 6.062 m\nroman-porch-lime: 5.890 × 4.430 × 6.132 m\nroman-upper-weavers: 5.910 × 6.480 × 5.540 m\nroman-upper-ochre: 5.920 × 6.350 × 5.550 m\nroman-taberna-linen: 5.498 × 3.820 × 5.865 m\nroman-taberna-tiled: 5.638 × 4.040 × 6.011 m\nroman-workshop-open: 5.038 × 3.920 × 5.830 m\nroman-workshop-portico: 5.858 × 3.880 × 5.961 m\nroman-farm-veranda: 8.192 × 4.890 × 7.395 m\nroman-farm-yard: 8.190 × 4.850 × 7.350 m\nroman-taberna-01: 6.039 × 4.160 × 6.425 m\nroman-farmhouse-01: 8.191 × 4.750 × 7.395 m\nroman-villa-01: 5.989 × 4.330 × 6.352 m\nroman-temple-01: 7.480 × 5.610 × 7.600 m\nroman-aqueduct-01: 8.130 × 8.793 × 1.720 m\nenvironment-olive-tree-01: 6.547 × 5.872 × 6.407 m\nenvironment-italian-cypress-01: 2.416 × 8.025 × 2.409 m\nenvironment-mediterranean-shrub-01: 1.642 × 0.907 × 1.566 m\nenvironment-limestone-rock-01: 1.879 × 0.861 × 1.218 m\nenvironment-dry-grass-tuft-01: 0.430 × 0.475 × 0.433 m\nenvironment-low-stone-boundary-01: 1.799 × 0.538 × 0.471 m\nenvironment-wooden-crate-01: 0.900 × 0.700 × 0.805 m\nenvironment-garden-plant-01: 0.753 × 0.533 × 0.559 m\nenvironment-grain-clump-01: 0.627 × 1.066 × 0.527 m\nroman-wine-barrel-01: 0.900 × 0.800 × 0.897 m\nroman-market-awning-01: 2.600 × 2.180 × 1.818 m\nroman-amphora-01: 0.663 × 1.000 × 0.550 m\nroman-stone-bench-01: 1.800 × 0.580 × 0.500 m\nRoman assets: 19,805,988 bytes; dimensions, placement frame, cache sharing, cleanup and retry pass.\nGround/road optimization preserves every RGBA byte across all three profiles.\n",
+      "stderr": ""
+    },
+    {
+      "command": "node scripts/check-terrain-textures.mjs",
+      "exit": 0,
+      "ms": 306.916416,
+      "stdout": "Terrain textures: installed MapLibre close-zoom failure reproduced; finite fractional projections, exact crop corners, unchanged valid matrices, wrap/ranges and manager lifecycle pass.\n",
+      "stderr": ""
+    },
+    {
+      "command": "pnpm typecheck",
+      "exit": 0,
+      "ms": 1561.6817910000027,
+      "stdout": "",
+      "stderr": "$ tsc --noEmit\n"
+    },
+    {
+      "command": "pnpm lint",
+      "exit": 0,
+      "ms": 4505.145417,
+      "stdout": "\n/Users/leith/Documents/mankind/lib/scenarios/historicalScenes.ts\n  8:65  warning  '_time' is defined but never used  @typescript-eslint/no-unused-vars\n\n/Users/leith/Documents/mankind/postcss.config.mjs\n  1:1  warning  Assign object to a variable before exporting as module default  import/no-anonymous-default-export\n\n✖ 2 problems (0 errors, 2 warnings)\n\n",
+      "stderr": "$ eslint\n"
+    },
+    {
+      "command": "pnpm build",
+      "exit": 0,
+      "ms": 4204.974958999999,
+      "stdout": "▲ Next.js 16.4.3 (Turbopack)\n- Environments: .env.local\n✓ Running next.config.ts took 17ms\n- Cache Components enabled\n- Partial Prefetching enabled\n\n  Creating an optimized production build ...\n✓ Compiled successfully in 974ms\n  Running TypeScript ...\n  Finished TypeScript in 1302ms ...\n  Collecting page data using 9 workers ...\n  Generating static pages using 9 workers (0/8) ...\n  Generating static pages using 9 workers (2/8) \r\n  Generating static pages using 9 workers (4/8) \r\n  Generating static pages using 9 workers (6/8) \r\n✓ Generating static pages using 9 workers (8/8) in 314ms\n  Finalizing page optimization ...\n\nRoute (app)\n┌ ○ /\n├ ○ /_not-found\n├ ○ /api/historical-world/housesteads\n├ ○ /api/historical-world/london2012\n├ ○ /api/historical-world/menander\n└ ○ /api/historical-world/portunus\n\n\n○  (Static)  prerendered as static content\n\n",
+      "stderr": "$ next build\n"
+    },
+    {
+      "command": "node scripts/verify-production-styles.mjs",
+      "exit": 0,
+      "ms": 37.96337499999936,
+      "stdout": "Production styles: 1 page-linked stylesheets; compiled map layout, panels and Tailwind directives pass.\n",
+      "stderr": ""
+    }
+  ]
+}

@@ -11,7 +11,7 @@ import { validateHistoricalDate } from '@/lib/history/time';
 import { useExplorationStore } from '@/state/explorationStore';
 import { historicalWorldOverlays } from '@/map/historicalWorldOverlays';
 
-export function HistoricalDatasetControls({ map, layer }: { map: Map; layer: ThreeTestLayer }) {
+export function HistoricalWorldSession({ map, layer }: { map: Map; layer: ThreeTestLayer }) {
   const { historicalSession: session, setHistoricalSession } = useScenarioController();
   useEffect(() => {
     const overlays = historicalWorldOverlays(map, id => controller.inspect({ kind: 'place', id }));
@@ -30,18 +30,14 @@ export function HistoricalDatasetControls({ map, layer }: { map: Map; layer: Thr
       document.removeEventListener('click', fixtures, true); document.removeEventListener('input', fixtures, true);
     };
   }, [map, layer, setHistoricalSession]);
-  return session ? <DatasetControls session={session} map={map} /> : null;
+  return session ? <HistoricalRecordView session={session} map={map} /> : null;
+}
+export function HistoricalDatasetControls({ map }: { map: Map }) {
+  const { historicalSession } = useScenarioController();
+  return historicalSession ? <DatasetControls session={historicalSession} map={map} /> : null;
 }
 function DatasetControls({ session, map }: { session: HistoricalDatasetSession; map: Map }) {
   const snapshot = useSyncExternalStore(session.subscribe, session.getSnapshot, session.getSnapshot);
-  const { player } = useScenarioController();
-  const visit = (placeId: string) => {
-    const target = session.getVisitTarget(placeId);
-    if (!target) return;
-    player?.pause('Visiting historical place');
-    useExplorationStore.getState().setSelected(target.center);
-    map.flyTo({ center: target.center, zoom: target.zoom, pitch: target.pitch, bearing: target.bearing, duration: 2000 });
-  };
   const [datasetId, setDatasetId] = useState<string>('london2012');
   const activeDatasetId = snapshot.datasetId ?? datasetId;
   const dataset = HISTORICAL_DATASETS.find(item => item.id === activeDatasetId) ?? HISTORICAL_DATASETS[0];
@@ -82,5 +78,19 @@ function DatasetControls({ session, map }: { session: HistoricalDatasetSession; 
       {!snapshot.selection?.places.some(row => ['within', 'possible'].includes(row.presence)) && !snapshot.selection?.events.length && <p className="mt-2 text-white/50">No records in this dataset match this date.</p>}
     </section>}
     <pre aria-label="Historical dataset diagnostics" className="mt-2 whitespace-pre-wrap text-[10px]">{JSON.stringify({ status: snapshot.status, dataset: snapshot.datasetId, time: snapshot.selection?.time, places: snapshot.selection?.places.map(row => ({ id: row.place.id, presence: row.presence, basis: row.basis, layout: row.layoutStatus, candidates: row.layoutIds, warnings: row.warnings })), events: snapshot.selection?.events.map(row => ({ id: row.event.id, match: row.match })), scenes: snapshot.selection?.scenes?.map(r => ({ id: r.scene.id, status: r.status, match: r.match, issues: r.issues, assets: r.assets, descriptorIds: r.descriptorIds, footprintIds: r.footprintIds })), detailedLayouts: snapshot.selection?.descriptors.length }, null, 2)}</pre>
-  </details>{snapshot.inspection && createPortal(<HistoricalInspector inspection={snapshot.inspection} onClose={() => session.closeInspection()} onVisit={visit} onInspectPlace={id => session.inspect({ kind: 'place', id })} onPreviewReconstruction={(id, placeId) => { player?.pause('Viewing reconstruction interpretation'); if (session.previewReconstruction(id) && id) visit(placeId); }} />, document.body)}</>;
+  </details></>;
+}
+
+/** Inspector remains available in production through the guided journey. */
+function HistoricalRecordView({ session, map }: { session: HistoricalDatasetSession; map: Map }) {
+  const snapshot = useSyncExternalStore(session.subscribe, session.getSnapshot, session.getSnapshot);
+  const { player } = useScenarioController();
+  const visit = (placeId: string) => {
+    const target = session.getVisitTarget(placeId);
+    if (!target) return;
+    player?.pause('Visiting historical place');
+    useExplorationStore.getState().setSelected(target.center);
+    map.flyTo({ center: target.center, zoom: target.zoom, pitch: target.pitch, bearing: target.bearing, duration: 2000 });
+  };
+  return snapshot.inspection && createPortal(<HistoricalInspector inspection={snapshot.inspection} onClose={() => session.closeInspection()} onVisit={visit} onInspectPlace={id => session.inspect({ kind: 'place', id })} onPreviewReconstruction={(id, placeId) => { player?.pause('Viewing reconstruction interpretation'); if (session.previewReconstruction(id) && id) visit(placeId); }} />, document.body) || null;
 }

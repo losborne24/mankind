@@ -15,7 +15,7 @@ recommendation to build another guided journey immediately after scene resolutio
 | 7 | Minimal persistent asset catalogue | [Implemented](asset-catalogue.md); draft and usable versions |
 | 8 | First evidence-backed building through the catalogue | [Implemented](portunus-reconstruction.md): Portunus exterior interpretation |
 | 9 | One sourced journey using catalogue and scene plans | [Implemented](portunus-journey.md): Portunus evidence tour with interruption, exploration/resume and fallback |
-| 10 | End-to-end acceptance and handoff | **Next**; quality, performance, lifecycle and reuse |
+| 10 | End-to-end acceptance and handoff | [Accepted for the bounded pilot](phase4-completion.md): production fixes, 30-command gate, lifecycle/performance and handoff |
 
 Steps 7 and 8 are one bounded catalogue-plus-building milestone. Keep the catalogue
 small enough to support the first building. Source suitability determines the site;
@@ -28,3 +28,8 @@ with reliable rendering and interaction. A property extent alone is insufficient
 Phase 5 adds AI research, automatic acquisition and scenario planning to the
 working process established here. No AI research service or automatic model
 acquisition has been implemented by the Phase 4 catalogue milestone.
+
+The Phase 4 pilot is accepted within the [handoff boundaries](phase4-completion.md).
+General wall-plan ingestion, arbitrary historical road navigation and wider content
+coverage remain outstanding. The next recommended Phase 5 slice is structured
+scenario requests and catalogue/content-gap planning before automated research.

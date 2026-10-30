@@ -1,0 +1,177 @@
+{
+  "note": "Visible development DOM diagnostics, rounded; CPU active intervals omit gaps >=250 ms and exclude MapLibre draw counts. Responsive desktop Chrome, not physical touch.",
+  "observations": [
+    {
+      "label": "fresh-idle",
+      "recordedAt": "2026-10-30T12:53:45.685Z",
+      "diagnostics": {
+        "lod": "global",
+        "override": "auto",
+        "detailedScenes": 0,
+        "descriptors": 3,
+        "distanceMeters": 20896728,
+        "stage": "global",
+        "cache": {
+          "entries": 0,
+          "users": 0,
+          "idle": 0,
+          "bytes": 0,
+          "requests": 0,
+          "hits": 0,
+          "decodeWallMs": 0,
+          "cloneMs": 0
+        },
+        "surfaceCache": {
+          "entries": 0,
+          "bytes": 0
+        },
+        "rendering": {
+          "frames": 1,
+          "samples": 0,
+          "medianMs": null,
+          "p95Ms": null,
+          "calls": 2,
+          "triangles": 104,
+          "geometries": 2,
+          "textures": 1,
+          "canvas": [
+            3456,
+            1674
+          ]
+        }
+      }
+    },
+    {
+      "label": "uninterrupted-journey",
+      "recordedAt": "2026-10-30T12:54:02.450Z",
+      "diagnostics": {
+        "lod": "local",
+        "override": "auto",
+        "activeId": "layout:portunus-classical",
+        "detailedScenes": 1,
+        "descriptors": 1,
+        "distanceMeters": 95,
+        "stage": "ready",
+        "cache": {
+          "entries": 1,
+          "users": 1,
+          "idle": 0,
+          "bytes": 3255652,
+          "requests": 1,
+          "hits": 0,
+          "decodeWallMs": 47,
+          "cloneMs": 0
+        },
+        "surfaceCache": {
+          "entries": 1,
+          "bytes": 2883584
+        },
+        "scene": {
+          "stage": "ready",
+          "ms": {
+            "surfaceAndShadowSetup": 2,
+            "terrainPlacement": 428,
+            "ambientUpdate": 1,
+            "buildingAssembly": 1,
+            "assetWallIncludingAssembly": 48,
+            "cpuTextures": 144,
+            "textureWall": 496,
+            "batchAssembly": 0,
+            "readyWall": 550,
+            "renderWithShadowCpu": 1977
+          },
+          "counts": {
+            "surfaceAndShadowSetup": 1,
+            "terrainPlacement": 508,
+            "ambientUpdate": 508,
+            "buildingAssembly": 1,
+            "assetWallIncludingAssembly": 1,
+            "textureWall": 1,
+            "batchAssembly": 1,
+            "renderWithShadowCpu": 447
+          }
+        },
+        "rendering": {
+          "frames": 1701,
+          "samples": 240,
+          "medianMs": 10,
+          "p95Ms": 11,
+          "calls": 15,
+          "triangles": 171536,
+          "geometries": 13,
+          "textures": 5,
+          "canvas": [
+            3456,
+            1674
+          ]
+        }
+      }
+    },
+    {
+      "label": "uninterrupted-local",
+      "recordedAt": "2026-10-30T12:54:26.890Z",
+      "diagnostics": {
+        "lod": "local",
+        "override": "auto",
+        "activeId": "layout:portunus-classical",
+        "detailedScenes": 1,
+        "descriptors": 1,
+        "distanceMeters": 95,
+        "stage": "ready",
+        "cache": {
+          "entries": 1,
+          "users": 1,
+          "idle": 0,
+          "bytes": 3255652,
+          "requests": 1,
+          "hits": 0,
+          "decodeWallMs": 47,
+          "cloneMs": 0
+        },
+        "surfaceCache": {
+          "entries": 1,
+          "bytes": 2883584
+        },
+        "scene": {
+          "stage": "ready",
+          "ms": {
+            "surfaceAndShadowSetup": 2,
+            "terrainPlacement": 1934,
+            "ambientUpdate": 4,
+            "buildingAssembly": 1,
+            "assetWallIncludingAssembly": 48,
+            "cpuTextures": 144,
+            "textureWall": 496,
+            "batchAssembly": 0,
+            "readyWall": 550,
+            "renderWithShadowCpu": 10097
+          },
+          "counts": {
+            "surfaceAndShadowSetup": 1,
+            "terrainPlacement": 2204,
+            "ambientUpdate": 2204,
+            "buildingAssembly": 1,
+            "assetWallIncludingAssembly": 1,
+            "textureWall": 1,
+            "batchAssembly": 1,
+            "renderWithShadowCpu": 2143
+          }
+        },
+        "rendering": {
+          "frames": 3397,
+          "samples": 240,
+          "medianMs": 10,
+          "p95Ms": 13,
+          "calls": 15,
+          "triangles": 171536,
+          "geometries": 13,
+          "textures": 5,
+          "canvas": [
+            3456,
+            1674
+          ]
+        }
+      }
+    }
+  ]
+}

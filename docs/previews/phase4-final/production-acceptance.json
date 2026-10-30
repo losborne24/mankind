@@ -1,0 +1,42 @@
+{
+  "checks": [
+    "Production journey starts with Debug panel absent",
+    "Specific model rendered with compiled layout and editorial date labels",
+    "Inspector contains pinned usable catalogue, source and model-rights links",
+    "390x844 viewport has bounded inspector and no horizontal document overflow",
+    "Closing inspector returns focus to Inspect building evidence",
+    "Final styled production journey runs uninterrupted from Start to Completed with model retained",
+    "Repeated full replay ends at zoom 19.10 with Reconstruction visible and Completed"
+  ],
+  "phoneProbe": {
+    "closeButtonPresent": true,
+    "debugToolsPresent": false,
+    "horizontalOverflow": false,
+    "inspector": {
+      "bottom": 663,
+      "height": 599,
+      "left": 12,
+      "right": 378,
+      "top": 64,
+      "width": 366,
+      "x": 12,
+      "y": 64
+    },
+    "map": {
+      "bottom": 844,
+      "height": 844,
+      "left": 0,
+      "right": 390,
+      "top": 0,
+      "width": 390,
+      "x": 0,
+      "y": 0
+    },
+    "viewport": [
+      390,
+      844
+    ]
+  },
+  "finalState": "- main:\n  - region\n  - button\n  - button\n  - button\n  - link:\n    - /url: https://mapterhorn.com/attribution\n    - text: © Mapterhorn\n  - text: \"| Made with\"\n  - link:\n    - /url: https://www.naturalearthdata.com/\n    - text: Natural Earth\n  - text: (public domain)\n  - generic: Zoom 19.10 · Coast LOD Regional · Biome – · Hillshade z12↑ · Mesh z12↑\n  - region \"Historical scenario\":\n    - generic: A guided historical journey\n    - heading \"Portunus — reading a reconstruction\" [level=1]\n    - paragraph: Interpretation · AD 100 editorial preview · inferred details\n    - heading \"Where the evidence ends\" [level=2]\n    - paragraph: The drawing supplies a dimensional scaffold. Roof tiles, stair divisions, capital detail, finishes and the model pose involve inference. Interior furnishings and original paint are omitted. AD 100 is an editorial viewing context, not a verified appearance in that year.\n    - link \"Fletcher 1921, p.105 · Portunus plan and elevations\":\n      - /url: https://www.flickr.com/photos/psulibscollections/5832798550/\n    - status: Reconstruction visible · inferred exterior interpretation.\n    - button \"Inspect building evidence\" [active]\n  - generic: MANKIND\n  - generic: a living historical world\n  - searchbox \"Search a place (coming soon)\" [disabled]\n  - region \"Scenario timeline\":\n    - button \"Resume\"\n    - paragraph: Portunus — reading a reconstruction\n    - paragraph: Evidence and inference\n    - status: Paused\n    - paragraph: 100 CE\n    - progressbar \"Journey progress\"\n    - 'button \"Go to beat 1: Locate the temple\"'\n    - 'button \"Go to beat 2: Read the exterior\"'\n    - 'button \"Go to beat 3: Evidence and inference\"'\n    - 'button \"Go to beat 4: Inspect and explore\"'\n    - button \"Previous beat\": ← Previous\n    - button \"Next beat\": Next →\n    - generic: 63%\n    - paragraph: Moving the map pauses the journey\n    - generic \"Journey options\"\n- alert",
+  "completedState": "- main:\n  - region\n  - button\n  - button\n  - button\n  - link:\n    - /url: https://mapterhorn.com/attribution\n    - text: © Mapterhorn\n  - text: \"| Made with\"\n  - link:\n    - /url: https://www.naturalearthdata.com/\n    - text: Natural Earth\n  - text: (public domain)\n  - generic: Zoom 19.10 · Coast LOD Regional · Biome – · Hillshade z12↑ · Mesh z12↑\n  - region \"Historical scenario\":\n    - generic: A guided historical journey\n    - heading \"Portunus — reading a reconstruction\" [level=1]\n    - paragraph: Interpretation · AD 100 editorial preview · inferred details\n    - heading \"Inspect and explore\" [level=2]\n    - paragraph: Open the building evidence to inspect the pinned catalogue version, sources and limitations. Move the map to explore; Resume returns you to the journey. No ancient neighbourhood or population is supplied.\n    - status: Reconstruction visible · inferred exterior interpretation.\n    - button \"Inspect building evidence\"\n  - generic: MANKIND\n  - generic: a living historical world\n  - searchbox \"Search a place (coming soon)\" [disabled]\n  - region \"Scenario timeline\":\n    - button \"Replay journey\" [active]\n    - paragraph: Portunus — reading a reconstruction\n    - paragraph: Inspect and explore\n    - status: Completed\n    - paragraph: 100 CE\n    - progressbar \"Journey progress\"\n    - 'button \"Go to beat 1: Locate the temple\"'\n    - 'button \"Go to beat 2: Read the exterior\"'\n    - 'button \"Go to beat 3: Evidence and inference\"'\n    - 'button \"Go to beat 4: Inspect and explore\"'\n    - button \"Previous beat\": ← Previous\n    - button \"Next beat\" [disabled]: Next →\n    - generic: 100%\n    - paragraph: Moving the map pauses the journey\n    - generic \"Journey options\"\n    - button \"Continue exploring\"\n- alert"
+}
