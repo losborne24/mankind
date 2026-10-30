@@ -1,6 +1,7 @@
 import type { ScenarioDefinition, ScenarioOverlay, Coordinate } from '@/lib/scenarios/schema';
 import world from '@/lib/history/fixtures/forum-boarium.json';
 import context from '@/lib/scenarios/fixtures/forum-boarium-context.json';
+import reconstruction from '@/lib/scenarios/fixtures/forum-boarium-reconstruction.json';
 // Camera targets reuse coordinates already in the sourced data; none are invented for the journey.
 const place = (id: string): Coordinate => world.places.find(p => p.id === id)!.position.coordinate as Coordinate;
 const marker = (id: string): Coordinate => context.locations.find(l => l.id === id)!.coordinate as Coordinate;
@@ -11,7 +12,7 @@ const centreOf = (id: string): Coordinate => {
 const portunus = place('place:temple-of-portunus'), pair = place('place:forum-boarium-temples');
 const island = marker('tiber-island'), bridge = centreOf('pons-aemilius'), forum = centreOf('forum-boarium');
 const sourceIds = new Set<string>();
-const sources = [...context.sources, ...world.sources].filter(s => !sourceIds.has(s.id) && sourceIds.add(s.id)).map(({ id, title, url, ...rest }) => ({ id, title, url, ...('licence' in rest && rest.licence ? { licence: rest.licence as string } : {}) }));
+const sources = [...context.sources, ...world.sources, ...reconstruction.sources.filter(s => s.id === 'source:platner-1929')].filter(s => !sourceIds.has(s.id) && sourceIds.add(s.id)).map(({ id, title, url, ...rest }) => ({ id, title, url, ...('licence' in rest && rest.licence ? { licence: rest.licence as string } : {}) }));
 const layer = (id: string) => ({ id: `layer:${id}`, type: context.geometries.find(g => g.id === id)!.kind as 'polygon' | 'line', geometry: id });
 const point = (id: string) => ({ id: `layer:${id}`, type: 'point' as const, location: id });
 const base = ['layer:ground', 'layer:tiber'];
@@ -32,12 +33,12 @@ export const portunusJourney: ScenarioDefinition = {
       ...context.geometries.map(g => layer(g.id)),
       ...context.locations.map(l => point(l.id)),
       { id: 'rome', type: 'card', title: 'Rome, around AD 100', text: 'You are above the Tiber, beside the Capitoline, Palatine and Aventine hills. Hill labels, the pale ground and the river outline are orientation only: the river shown is today\'s channel, not the ancient bank.', sources: ['source:pleiades-forum-boarium', 'source:osm-tiber', 'source:wikipedia-tiber'] },
-      { id: 'crossing', type: 'card', title: 'The river crossing', text: 'Pons Aemilius, Rome\'s first stone bridge, crossed the Tiber here. Nearby lay the Portus Tiberinus, the city\'s first commercial harbour, possibly still in use by AD 100. The bridge shows its surviving fragment; the harbour is one approximate point.', sources: ['source:wikipedia-pons-aemilius', 'source:pleiades-pons-aemilius', 'source:it-wikipedia-porto-tiberino'] },
-      { id: 'market', type: 'card', title: 'The cattle market', text: 'The Forum Boarium was a centre of trade and ritual on the Tiber\'s east bank. Its outline here is the modern site boundary. The Ara Maxima, an altar of Hercules, is marked approximately; its foundations may lie under Santa Maria in Cosmedin.', sources: ['source:pleiades-forum-boarium', 'source:osm-forum-boarium', 'source:wikipedia-great-altar'] },
+      { id: 'crossing', type: 'card', title: 'The river crossing', text: 'Pons Aemilius, Rome\'s first stone bridge, crossed the Tiber here, beside the Portus Tiberinus, the city\'s first commercial harbour. The surviving arch and the bank are sourced; the other spans, quays, landing stages and barges are best guesses.', sources: ['source:wikipedia-pons-aemilius', 'source:pleiades-pons-aemilius', 'source:it-wikipedia-porto-tiberino', 'source:platner-1929'] },
+      { id: 'market', type: 'card', title: 'The cattle market', text: 'The Forum Boarium was a centre of trade and ritual on the Tiber\'s east bank. The square, stalls, pens, streets and buildings around it are best-guess reconstructions. The Ara Maxima, an altar of Hercules, is placed approximately, perhaps under Santa Maria in Cosmedin.', sources: ['source:pleiades-forum-boarium', 'source:osm-forum-boarium', 'source:wikipedia-great-altar', 'source:platner-1929'] },
       { id: 'temples', type: 'card', title: 'Two temples, side by side', text: 'Round Hercules Victor, with a ring of 20 Corinthian columns, stood beside rectangular, four-column Ionic Portunus. Both models are interpretations, placed from modern map outlines accurate to about 20 metres.', sources: ['source:wikipedia-hercules', 'source:whe-hercules', 'source:rome-heritage', 'source:osm-hercules'] },
       { id: 'structure', type: 'card', title: 'Read the exterior', text: 'Portunus has a high podium, entrance steps and a four-column Ionic front. The model follows a historic plan and elevations, simplified. It is an interpretation, not a survey.', sources: ['source:rome-tourism', 'source:rome-heritage', 'source:psu-fletcher'] },
       { id: 'inference', type: 'card', title: 'Where the evidence ends', text: 'Portunus roof tiles, steps and capitals are inferred. Hercules Victor\'s original roof is lost, so its cone is a plain guess; Palladio\'s dome and column count were rejected. AD 100 is an editorial date, not verified.', sources: ['source:psu-fletcher', 'source:palladio-1570', 'source:wikipedia-hercules'] },
-      { id: 'explore', type: 'caption', title: 'Inspect and explore', text: 'Tap any layer on the map for its dates, certainty and sources. Move the map freely; Resume returns you to the journey. Nothing else is reconstructed.', sources: ['source:rome-heritage'] },
+      { id: 'explore', type: 'caption', title: 'Inspect and explore', text: 'Tap any building, bridge or layer for its dates, certainty and sources. Tint objects by certainty, or hide the best guesses. Move freely; Resume returns you to the journey.', sources: ['source:rome-heritage'] },
     ] as ScenarioOverlay[],
   },
   beats: [
@@ -46,7 +47,9 @@ export const portunusJourney: ScenarioDefinition = {
       { camera: { type: 'hold', duration: 5000 }, overlays: ['rome', ...base, ...hills, 'layer:forum-boarium'] } ] },
     { id: 'crossing', title: 'The river crossing', sceneRequirements: ['temples'], actions: [
       { camera: { type: 'flyTo', center: island, zoom: 15.8, pitch: 52, bearing: 150, duration: 6000 }, overlays: ['crossing', ...base, 'layer:tiber-island', 'layer:pons-aemilius', 'layer:portus-tiberinus'] },
-      { camera: { type: 'flyTo', center: bridge, zoom: 16.5, pitch: 55, bearing: 115, duration: 8000 }, overlays: ['crossing', ...base, 'layer:tiber-island', 'layer:pons-aemilius', 'layer:portus-tiberinus', 'layer:cloaca-maxima-outlet'] } ] },
+      { camera: { type: 'flyTo', center: bridge, zoom: 17.1, pitch: 55, bearing: 115, duration: 5000 }, overlays: ['crossing', ...base, 'layer:tiber-island', 'layer:pons-aemilius', 'layer:portus-tiberinus', 'layer:cloaca-maxima-outlet'] },
+      // A slow orbit is not travel, so the local scene (bridge, quays, docks) can stream in while the camera circles it.
+      { camera: { type: 'orbit', center: bridge, zoom: 17.1, pitch: 55, degrees: 30, duration: 6000 }, overlays: ['crossing', ...base, 'layer:tiber-island', 'layer:pons-aemilius', 'layer:portus-tiberinus', 'layer:cloaca-maxima-outlet'] } ] },
     { id: 'market', title: 'The cattle market', sceneRequirements: ['temples'], actions: [
       { camera: { type: 'flyTo', center: forum, zoom: 17.2, pitch: 58, bearing: 70, duration: 7000 }, overlays: ['market', ...base, 'layer:forum-boarium', 'layer:ara-maxima', 'layer:cloaca-maxima-outlet', 'layer:portus-tiberinus', ...left] },
       { camera: { type: 'orbit', center: forum, zoom: 17.2, pitch: 58, degrees: 35, duration: 7000 }, overlays: ['market', ...base, 'layer:forum-boarium', 'layer:ara-maxima', 'layer:cloaca-maxima-outlet', 'layer:portus-tiberinus', ...left] } ] },

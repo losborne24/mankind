@@ -320,6 +320,24 @@ export class ThreeTestLayer implements CustomLayerInterface {
     }
   }
 
+  private guessVisible = true;
+  /** Shows or hides every best-guess object in the local scene (the neighbourhood and its guessed ground). */
+  setBestGuessVisible(visible: boolean): void { this.guessVisible = visible; this.settlement?.setGuessVisible(visible); this.map?.triggerRepaint(); }
+
+  /** The reconstructed object under a screen point (CSS pixels): raised objects by ray, from the last settlement frame. */
+  pickReconstruction(point: { x: number; y: number }): string | undefined {
+    const map = this.map, urban = this.settlement?.urban;
+    if (!map || !urban || !this.settlementAnchor) return undefined;
+    const canvas = map.getCanvas(), x = point.x / canvas.clientWidth * 2 - 1, y = 1 - point.y / canvas.clientHeight * 2;
+    const near = new THREE.Vector4(x, y, -1, 1).applyMatrix4(this.settlementInverseProjection), far = new THREE.Vector4(x, y, 1, 1).applyMatrix4(this.settlementInverseProjection);
+    const a = new THREE.Vector3(near.x / near.w, near.y / near.w, near.z / near.w), b = new THREE.Vector3(far.x / far.w, far.y / far.w, far.z / far.w);
+    return urban.pick(a, b.sub(a).normalize());
+  }
+
+  private tint = false;
+  /** Colours reconstructed objects by certainty in the 3D scene. */
+  setReconstructionTint(on: boolean): void { this.tint = on; this.settlement?.setReconstructionTint(on); this.map?.triggerRepaint(); }
+
   /** Turns distance haze and depth of field on for guided beats; bloom stays with the local scene. */
   setAtmosphere(options: AtmosphereOptions): void {
     if (options.haze === this.atmosphere.haze && options.dof === this.atmosphere.dof) return;
@@ -508,6 +526,7 @@ if(!this.scenarioTravelling && !map.isMoving() && now-this.candidateSince>=200) 
               this.historicalDetailFailed=d.definition!.ambientLife===false && s.loaded===0 && s.errors.length>0;
               this.onSettlementStatus?.(s);
             },()=>this.map?.triggerRepaint());
+            this.settlement.setGuessVisible(this.guessVisible); this.settlement.setReconstructionTint(this.tint);
             this.updateSettlementAnchor();void this.settlement.load();
           } else {
             const config={...settlementProfileConfig(d.profile),...d.config,origin:d.origin,seed:d.seed};

@@ -12,6 +12,10 @@ export interface ContextGroundSpec {
   paving: readonly (readonly LocalPoint[])[];
   /** River surface (closed rings, outer boundaries). */
   water: readonly (readonly LocalPoint[])[];
+  /** Guessed surfaces (switchable): cobbled streets, the widened square and the built-up footprint. */
+  streets?: readonly { width: number; points: readonly LocalPoint[] }[];
+  squares?: readonly (readonly LocalPoint[])[];
+  built?: readonly ContactRect[];
 }
 /** A rotated rectangle that touches the ground; darkens the ground beside it. */
 export interface ContactRect { offset: LocalPoint; width: number; depth: number; heading: number }
@@ -83,5 +87,24 @@ export function buildGroundMask(spec: ContextGroundSpec, contacts: readonly Cont
   for (let pass = 0; pass < 2; pass++) blur(data, res, 3, Math.round(2.4 / texel));
   blur(data, res, 0, 1);
   blur(data, res, 1, Math.max(1, Math.round(2 / texel)));
+  return data;
+}
+
+/** Thick line as overlapping rectangles, one per segment, with round-ish joints from the end padding. */
+function fillLines(out: Uint8Array, res: number, size: number, lines: readonly { width: number; points: readonly LocalPoint[] }[], channel: number) {
+  for (const line of lines) for (let i = 0; i < line.points.length - 1; i++) {
+    const [ax, az] = line.points[i], [bx, bz] = line.points[i + 1], length = Math.hypot(bx - ax, bz - az);
+    if (length < 0.01) continue;
+    fillRects(out, res, size, [{ offset: [(ax + bx) / 2, (az + bz) / 2], width: length + line.width * 0.6, depth: line.width, heading: -Math.atan2(bz - az, bx - ax) }], channel, 0);
+  }
+}
+/** Second mask: R streets, G widened square, B built-up footprint (packed yards), A reserved. Everything here is a guess, so it is its own texture. */
+export function buildSurfaceMask(spec: ContextGroundSpec, res = MASK_RESOLUTION): Uint8Array {
+  const data = new Uint8Array(res * res * 4), texel = spec.sizeMeters / res;
+  fillLines(data, res, spec.sizeMeters, spec.streets ?? [], 0);
+  fillRings(data, res, spec.sizeMeters, spec.squares ?? [], 1);
+  fillRects(data, res, spec.sizeMeters, spec.built ?? [], 2, 2.5);
+  blur(data, res, 0, 1); blur(data, res, 1, 1);
+  for (let pass = 0; pass < 2; pass++) blur(data, res, 2, Math.max(1, Math.round(3 / texel)));
   return data;
 }

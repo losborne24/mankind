@@ -2,6 +2,7 @@ import { selectRomanVariants, romanVariantIds } from "@/map/settlements/romanVar
 import type { AssetId } from "@/lib/assets/registry";
 import { GLOBE_RADIUS_METERS } from "@/lib/geo";
 import type { ContextGroundSpec } from "@/map/settlements/groundMask";
+import type { ReconstructionSpec } from "@/map/settlements/reconstructionSpec";
 
 export type Coordinate = readonly [longitude: number, latitude: number];
 /** Local X east, Z south, in metres, matching geographicAnchor. */
@@ -44,6 +45,8 @@ export interface SettlementDefinition {
   groundAreas?: readonly GroundArea[];
   /** Lit, textured local ground and river surface in place of the translucent settlement treatment. */
   contextGround?: ContextGroundSpec;
+  /** Best-guess neighbourhood: attached buildings, quays, bridge, docks and market furniture, each with certainty and sources. */
+  reconstruction?: ReconstructionSpec;
   /** Shared orthogonal road union frame; roads remain in settlement metre coordinates. */
   roadFrameHeadingRadians?: number;
   maxFoundationRiseMeters: number;

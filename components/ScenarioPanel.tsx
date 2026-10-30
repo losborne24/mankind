@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import type { Map } from 'maplibre-gl';
 import type { ThreeTestLayer } from '@/map/threeTestLayer';
 import { useExplorationStore } from '@/state/explorationStore';
@@ -14,6 +14,7 @@ import { london2012 } from '@/lib/scenarios/london2012';
 import { scenarioOverlays } from '@/map/scenarioOverlays';
 import { framePadding as paddingFor } from '@/lib/scenarios/framing';
 import { contextFeatures } from '@/lib/scenarios/contextLayers';
+import { ReconstructionControls, ReconstructionInspector } from '@/components/ReconstructionControls';
 import { ContextInspector, ContextLayerList, LeftOut } from '@/components/ContextLayers';
 import { formatHistoricalYear } from '@/lib/historicalDate';
 import type { HistoricalTime, ScenarioDefinition } from '@/lib/scenarios/schema';
@@ -27,12 +28,13 @@ export function ScenarioPanel({ map, layer, streamingStatus, settlementStatus }:
 }) {
     const { player, setPlayer, historicalSession } = useScenarioController();
     const [inspectedId, setInspectedId] = useState<string | null>(null);
+    const [reconId, setReconId] = useState<string | null>(null);
     useEffect(() => {
         if (!historicalSession) return;
         const historical = new HistoricalJourneyScenes(historicalSession, { 'forum-boarium': validateHistoricalWorld(forumWorld) });
         const currentTime = (): HistoricalTime => { const { historicalTime, year } = useExplorationStore.getState(); return historicalTime ?? { start: { year } }; };
         let shown: { ids: string[]; scenario: ScenarioDefinition } | null = null;
-        const overlays = scenarioOverlays(map, id => { controller.pause('Inspecting a map layer'); setInspectedId(id); });
+        const overlays = scenarioOverlays(map, id => { controller.pause('Inspecting a map layer'); setReconId(null); setInspectedId(id); });
         let intent: StreamingIntent | null = null;
         const controller = new ScenarioPlayer({
             camera: { read: () => ({ center: [map.getCenter().lng, map.getCenter().lat], zoom: map.getZoom(), pitch: map.getPitch(), bearing: map.getBearing() }), write: pose => map.jumpTo({ ...pose, center: pose.center }, { scenario: true }), stop: () => map.stop() },
@@ -105,9 +107,13 @@ export function ScenarioPanel({ map, layer, streamingStatus, settlementStatus }:
                 }).__scenario;
         };
     }, [map, layer, setPlayer, historicalSession]);
-    return player ? <Playback player={player} streamingStatus={streamingStatus} settlementStatus={settlementStatus} inspectedId={inspectedId} onInspect={id => { player.pause('Inspecting a map layer'); setInspectedId(id); }} onCloseInspect={() => setInspectedId(null)}/> : null;
+    return player ? <Playback map={map} layer={layer} reconId={reconId} onReconInspect={setReconId} player={player} streamingStatus={streamingStatus} settlementStatus={settlementStatus} inspectedId={inspectedId} onInspect={id => { player.pause('Inspecting a map layer'); setInspectedId(id); }} onCloseInspect={() => setInspectedId(null)}/> : null;
 }
-function Playback({ player, streamingStatus, settlementStatus, inspectedId, onInspect, onCloseInspect }: {
+function Playback({ map, layer, reconId, onReconInspect, player, streamingStatus, settlementStatus, inspectedId, onInspect, onCloseInspect }: {
+    map: Map;
+    layer: ThreeTestLayer | null;
+    reconId: string | null;
+    onReconInspect(id: string | null): void;
     player: ScenarioPlayer;
     inspectedId: string | null;
     onInspect(id: string): void;
@@ -122,6 +128,9 @@ function Playback({ player, streamingStatus, settlementStatus, inspectedId, onIn
     const viewTime: HistoricalTime = storeTime ?? { start: { year: storeYear } };
     const features = useMemo(() => scenario && snapshot.state !== 'idle' ? contextFeatures(scenario, scenario.beats[snapshot.beat].actions[snapshot.action].overlays, viewTime) : [], [scenario, snapshot.state, snapshot.beat, snapshot.action, storeYear, storeTime]); // eslint-disable-line react-hooks/exhaustive-deps
     const yearLabel = formatHistoricalYear(viewTime.start.year);
+    // An object of the reconstructed neighbourhood is inspected in its own panel; it replaces the map-layer panel and the reverse.
+    const inspectRecon = useCallback((id: string) => { player.pause('Inspecting a reconstructed object'); onReconInspect(id); onCloseInspect(); }, [player, onReconInspect, onCloseInspect]);
+    const inspectContext = (id: string) => { onReconInspect(null); onInspect(id); };
     const inspected = features.find(f => f.id === inspectedId && f.match !== 'outside');
     if (!scenario)
         return <section role="alert" className="absolute right-12 top-20 z-20 max-w-xs rounded-2xl border border-panel-border bg-panel p-4 text-sm"><p>{snapshot.error}</p><button className="mt-3 rounded-full bg-accent px-4 py-2 text-black" onClick={() => player.load(london2012)}>Load London demo</button></section>;
@@ -134,7 +143,7 @@ function Playback({ player, streamingStatus, settlementStatus, inspectedId, onIn
     const local = streamingStatus?.activeId === 'layout:forum-boarium-temples' && streamingStatus.lod === 'local';
     const rendering = historical && requesting && !snapshot.warning ? historicalModelStatus(hasDescriptor, local, settlementStatus.state, settlementStatus.errors) : undefined;
 
-    return <>{inspected && <ContextInspector feature={inspected} year={yearLabel} onClose={onCloseInspect}/>}<section aria-label="Historical scenario" className="pointer-events-auto absolute right-12 top-28 z-20 max-h-[calc(100dvh-292px)] sm:top-20 sm:max-h-[calc(100dvh-260px)] overflow-y-auto w-[min(340px,calc(100vw-76px))] rounded-2xl border border-panel-border bg-panel p-4 pb-8 shadow-xl backdrop-blur-md sm:right-16">
+    return <>{reconId && <ReconstructionInspector id={reconId} at={viewTime} onClose={() => onReconInspect(null)}/>}{inspected && !reconId && <ContextInspector feature={inspected} year={yearLabel} onClose={onCloseInspect}/>}<section aria-label="Historical scenario" className="pointer-events-auto absolute right-12 top-28 z-20 max-h-[calc(100dvh-292px)] sm:top-20 sm:max-h-[calc(100dvh-260px)] overflow-y-auto w-[min(340px,calc(100vw-76px))] rounded-2xl border border-panel-border bg-panel p-4 pb-8 shadow-xl backdrop-blur-md sm:right-16">
     <div className="text-[10px] uppercase tracking-[.22em] text-accent">A guided historical journey</div>
     <h1 className="mt-2 text-base font-medium leading-snug">{scenario.title}</h1>
     {idle && <label className="mt-3 block text-xs text-white/65">Journey<select aria-label="Journey selection" className="mt-1 w-full rounded border border-panel-border bg-background p-1" value={scenario.id} onChange={event => player.load(event.target.value === portunusJourney.id ? portunusJourney : london2012)}><option value={portunusJourney.id}>Portunus · evidence and reconstruction</option><option value={london2012.id}>London 2012 · geographic journey</option></select></label>}
@@ -145,7 +154,8 @@ function Playback({ player, streamingStatus, settlementStatus, inspectedId, onIn
             return <a key={id} href={source.url} target="_blank" rel="noreferrer" className="mt-2 block text-[10px] text-accent underline">{source.title}</a>;
         })}</div>)}
       <LeftOut features={features} year={yearLabel}/>
-      <ContextLayerList features={features} onInspect={onInspect}/>
+      {historical && <ReconstructionControls map={map} layer={layer} at={viewTime} inspectedId={reconId} onInspect={inspectRecon} onClose={() => onReconInspect(null)}/>}
+      <ContextLayerList features={features} onInspect={inspectContext}/>
       {snapshot.warning && <p className="mt-2 text-xs text-white/60">{snapshot.warning}</p>}
     </>}
     {rendering && <p role="status" className="my-3 text-xs text-white/65">{rendering}</p>}

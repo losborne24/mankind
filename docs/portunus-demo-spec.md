@@ -130,6 +130,10 @@ system leaves them out is a feature.
 | 30 Oct 2026 | Use Pleiades location dates (e.g. 1700–2100 for Tiber Island, Forum Boarium) as feature dates | Those spans date the modern OSM location, not the ancient feature, and would hide the island at AD 100 | Take dates from the subject's own evidence (e.g. Aedes Fauni dedicated 196 BC for the island); never reuse a location-record date range as a feature's lifespan |
 | 30 Oct 2026 | Load two temple layouts at once | The streamer keeps one detailed layout active, so two layouts would swap as the camera moves | Compose reviewed buildings into one layout (one descriptor, two buildings, each keeping its own catalogue place) rather than assuming concurrent layouts |
 | 30 Oct 2026 | Orbit the temple pair 70° at zoom 18.6 | At bearings along the pair's axis the card covers a temple at 768 px (found by the framing check) | Check card clearance numerically per camera pose, not by eye at one width |
+| 30 Oct 2026 | Take Pons Aemilius's 12 BC Augustan repair as a date for the quay and bridge | The Wikipedia page gives Augustus's repair no date; "12 BC" was assumed | Never fill a missing date from memory; record "undated" and leave it out of the evidence |
+| 30 Oct 2026 | Use the Stanford Digital Forma Urbis Romae and *Mapping Augustan Rome* for street and building geometry | The Stanford notice allows research and personal use only; the book is copyrighted with no open data licence | Verify the licence before using any geometry; a source that cannot be redistributed is reference only and stays out of shipped data |
+| 30 Oct 2026 | Run the Pons Aemilius axis straight east from the Ponte Rotto | It passes through the Temple of Portunus outline (modern georeferences differ by up to 20 m) | When two sourced positions conflict, keep both and bend the guessed element (the road) around them |
+| 30 Oct 2026 | Build the neighbourhood from heights sampled while the DEM was still loading | The first samples were 40 m too high, so buildings floated; terrain refines after first load | Placement must be re-checked against the terrain whenever it refines, not computed once |
 
 ## Vision storyboard prompts
 

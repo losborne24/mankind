@@ -14,6 +14,7 @@ import { settlementEnvironmentConfig } from "@/map/settlements/environmentConfig
 import { configureTerrainShadowCaster } from "@/map/settlements/terrainShadows";
 import { InstancedScenery, type GroundResult } from "@/map/settlements/InstancedScenery";
 import { ContextGround } from "@/map/settlements/ContextGround";
+import { UrbanScene } from "@/map/settlements/UrbanScene";
 import { GROUND_BOUNCE_COLOUR, SKY_COLOUR, SUN_COLOUR, SUN_DIRECTION } from "@/map/settlements/lighting";
 
 
@@ -53,6 +54,9 @@ export class SettlementScene {
   private environment: ReturnType<typeof createSettlementEnvironment> | undefined;
   private sun: THREE.DirectionalLight | null = null;
   contextGround: ContextGround | null = null;
+  urban: UrbanScene | null = null;
+  private guessVisible = true;
+  private shadowReach = 0;
   /** Mean floor height of the visible buildings, settlement frame; the ground the camera is looking at. */
   centreHeight = 0;
   private shadowDirty = true;
@@ -102,7 +106,10 @@ export class SettlementScene {
     this.sun = new THREE.DirectionalLight(SUN_COLOUR, 2.9);
     this.sun.castShadow = true;
     this.sun.shadow.mapSize.set(2048, 2048);
-    Object.assign(this.sun.shadow.camera, { left: -Math.max(68,width/2+12), right: Math.max(68,width/2+12), top: Math.max(78,depth/2+12), bottom: -Math.max(78,depth/2+12), near: 1, far: Math.max(180,depth+60) });
+    // A neighbourhood needs shadows well beyond the 120 m temple pair, so its shadow box is wider.
+    this.shadowReach = this.definition.reconstruction ? 170 : 0;
+    const halfX = Math.max(68, width / 2 + 12, this.shadowReach), halfZ = Math.max(78, depth / 2 + 12, this.shadowReach);
+    Object.assign(this.sun.shadow.camera, { left: -halfX, right: halfX, top: halfZ, bottom: -halfZ, near: 1, far: Math.max(180, depth + 60, this.shadowReach * 3.4) });
     this.sun.shadow.camera.updateProjectionMatrix();
     this.sun.shadow.radius = 3;
     this.sun.shadow.bias = -0.00015;
@@ -140,8 +147,14 @@ export class SettlementScene {
     const groundLoad = contextSpec ? new Promise<void>(resolve => setTimeout(resolve, 0)).then(() => {
       if (!this.active || generation !== this.generation) return;
       const started = performance.now();
-      this.contextGround = new ContextGround(contextSpec, this.definition.buildings.flatMap(buildingContacts));
+      this.contextGround = new ContextGround(contextSpec, [...this.definition.buildings.flatMap(buildingContacts), ...(contextSpec.built ?? [])]);
       this.root.add(this.contextGround.group); this.resources.push(this.contextGround);
+      this.contextGround.setGuessVisible(this.guessVisible);
+      if (this.definition.reconstruction) {
+        this.urban = new UrbanScene(this.definition.reconstruction);
+        this.urban.setGuessVisible(this.guessVisible); this.urban.setTint(this.tint);
+        this.root.add(this.urban.group); this.resources.push(this.urban);
+      }
       this.timing.add("contextGround", started);
       this.dirty = this.shadowDirty = true; this.repaint();
     }) : Promise.resolve();
@@ -240,6 +253,7 @@ export class SettlementScene {
   invalidateTerrain(reset = false): void {
     this.dirty = true;
     if (reset) {
+      this.urban?.invalidate();
       this.ambientLife.invalidateTerrain();
       this.knownHeights.clear();
       for (const batch of this.buildingBatches) batch.mesh.visible = false;
@@ -318,6 +332,7 @@ export class SettlementScene {
       if (entry.model) { entry.model.position.y = top!; entry.model.visible = true; }
     }
     if (this.contextGround && this.definition.contextGround && !this.contextGround.update(resolve, this.definition.contextGround)) this.terrainPending++;
+    if (this.urban && this.contextGround && !this.urban.update(point => resolve(point).height, this.contextGround.waterLevel)) this.terrainPending++;
     const sceneryGround = this.scenery.updateTerrain(resolve);
     this.terrainPending += sceneryGround.pending;
     this.terrainRetained += sceneryGround.retained;
@@ -328,7 +343,7 @@ export class SettlementScene {
     if (this.sun && center.height !== undefined) {
       const lightScale = Math.max(1, (this.definition.groundSizeMeters ?? GROUND_DEPTH) / GROUND_DEPTH);
       this.sun.target.position.set(0, center.height, 0);
-      this.sun.position.copy(SUN_DIRECTION).multiplyScalar(95 * lightScale).add(this.sun.target.position);
+      this.sun.position.copy(SUN_DIRECTION).multiplyScalar(Math.max(95 * lightScale, this.shadowReach * 1.5)).add(this.sun.target.position);
     }
     this.updateAccessPaths();
     this.syncBuildingBatches();
@@ -345,7 +360,7 @@ export class SettlementScene {
     this.ambientLife.unload();
     this.environment = undefined;
     this.sun = null;
-    this.contextGround = null;
+    this.contextGround = null; this.urban = null;
     for (const entry of this.entries) entry.lease?.release();
     for (const resource of this.resources) resource.dispose();
     this.root.clear();
@@ -361,6 +376,16 @@ export class SettlementScene {
     this.publish();
     this.repaint();
   }
+
+  /** Shows or hides everything marked best guess: the neighbourhood and its guessed ground surfaces. */
+  setGuessVisible(visible: boolean): void {
+    this.guessVisible = visible;
+    this.urban?.setGuessVisible(visible); this.contextGround?.setGuessVisible(visible);
+    this.shadowDirty = true; this.repaint();
+  }
+
+  setReconstructionTint(on: boolean): void { this.tint = on; this.urban?.setTint(on); this.dirty = true; this.repaint(); }
+  private tint = false;
 
   configureAmbientLife(options: AmbientLifeOptions): void {
     this.ambientLife.configure(this.definition.ambientLife === false ? { enabled: false, count: 0, paths: false } : options); this.publish(); this.repaint();

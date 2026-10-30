@@ -89,3 +89,24 @@ export function pavingTexture() {
     return [c[0] * k, c[1] * k, c[2] * k];
   });
 }
+
+/** Dark irregular street paving (polygonal stone blocks) with mortar lines. 5 m tile. */
+export function cobbleTexture() {
+  const n = 12, points: [number, number][] = [];
+  for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) points.push([(i + 0.15 + hash(i, j, 61) * 0.7) / n, (j + 0.15 + hash(i, j, 62) * 0.7) / n]);
+  return tile(512, (u, v) => {
+    let d1 = 9, d2 = 9, id = 0;
+    const ci = Math.floor(u * n), cj = Math.floor(v * n);
+    for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) {
+      const ii = ((ci + di) % n + n) % n, jj = ((cj + dj) % n + n) % n, p = points[jj * n + ii];
+      const dx = p[0] + Math.floor((ci + di) / n) - u, dy = p[1] + Math.floor((cj + dj) / n) - v, d = Math.hypot(dx, dy);
+      if (d < d1) { d2 = d1; d1 = d; id = jj * n + ii; } else if (d < d2) d2 = d;
+    }
+    const edge = Math.min(1, (d2 - d1) * n * 5), tone = hash(id, 3, 63), wear = fbm(u, v, 8, 3, 64);
+    let c = mix([92, 88, 82], [124, 118, 108], tone);
+    c = mix(c, [78, 66, 52], Math.max(0, wear - 0.55) * 1.2);
+    c = mix([48, 42, 36], c, Math.min(1, edge * 1.4));
+    const k = 0.92 + hash(Math.floor(u * 400), Math.floor(v * 400), 65) * 0.1;
+    return [c[0] * k, c[1] * k, c[2] * k];
+  });
+}

@@ -1,6 +1,6 @@
 import * as THREE from "three";
-import { buildGroundMask, MASK_RESOLUTION, type ContactRect, type ContextGroundSpec } from "@/map/settlements/groundMask";
-import { earthTexture, pavingTexture, scrubTexture } from "@/map/settlements/groundTextures";
+import { buildGroundMask, buildSurfaceMask, MASK_RESOLUTION, type ContactRect, type ContextGroundSpec } from "@/map/settlements/groundMask";
+import { cobbleTexture, earthTexture, pavingTexture, scrubTexture } from "@/map/settlements/groundTextures";
 import { SUN_COLOUR, SUN_DIRECTION } from "@/map/settlements/lighting";
 import type { LocalPoint } from "@/map/settlements/romanSettlement";
 
@@ -48,6 +48,9 @@ export class ContextGround {
   private heights: number[] | undefined;
   private shownSince = 0;
   waterVisible = false;
+  /** Height of the river surface in the settlement frame; undefined without water. */
+  waterLevel: number | undefined;
+  private readonly guess = { value: 1 };
 
   constructor(spec: ContextGroundSpec, contacts: readonly ContactRect[], sunDirection = SUN_DIRECTION) {
     const radius = spec.sizeMeters / 2;
@@ -57,8 +60,10 @@ export class ContextGround {
     const mask = new THREE.DataTexture(this.maskData, MASK_RESOLUTION, MASK_RESOLUTION, THREE.RGBAFormat);
     mask.magFilter = THREE.LinearFilter; mask.minFilter = THREE.LinearMipmapLinearFilter; mask.generateMipmaps = true;
     mask.wrapS = mask.wrapT = THREE.ClampToEdgeWrapping; mask.needsUpdate = true;
-    const earth = earthTexture(), scrub = scrubTexture(), paving = pavingTexture();
-    this.textures.push(mask, earth, scrub, paving);
+    const surface = new THREE.DataTexture(buildSurfaceMask(spec), MASK_RESOLUTION, MASK_RESOLUTION, THREE.RGBAFormat);
+    surface.magFilter = THREE.LinearFilter; surface.minFilter = THREE.LinearMipmapLinearFilter; surface.generateMipmaps = true; surface.needsUpdate = true;
+    const earth = earthTexture(), scrub = scrubTexture(), paving = pavingTexture(), cobbles = cobbleTexture();
+    this.textures.push(mask, surface, earth, scrub, paving, cobbles);
     for (const geometry of [this.groundGeometry, this.waterGeometry]) {
       geometry.setAttribute("position", new THREE.Float32BufferAttribute(grid.points.flatMap(([x, z]) => [x, 0, z]), 3));
       geometry.setIndex(grid.indices);
@@ -68,13 +73,13 @@ export class ContextGround {
 
     const shared = { tMask: { value: mask }, uSize: { value: spec.sizeMeters }, uFade: { value: 0 } };
     this.groundMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, metalness: 0, transparent: true, depthWrite: false });
-    const groundUniforms = { ...shared, tEarth: { value: earth }, tScrub: { value: scrub }, tPaving: { value: paving } };
+    const groundUniforms = { ...shared, tEarth: { value: earth }, tScrub: { value: scrub }, tPaving: { value: paving }, tCobble: { value: cobbles }, tSurface: { value: surface }, uGuess: this.guess };
     this.groundMaterial.onBeforeCompile = shader => {
       Object.assign(shader.uniforms, groundUniforms);
       shader.vertexShader = shader.vertexShader.replace("#include <common>", "#include <common>\nvarying vec2 vGround;")
         .replace("#include <begin_vertex>", "#include <begin_vertex>\nvGround = position.xz;");
       shader.fragmentShader = shader.fragmentShader.replace("#include <common>", `#include <common>
-        varying vec2 vGround; uniform sampler2D tMask, tEarth, tScrub, tPaving; uniform float uSize, uFade;
+        varying vec2 vGround; uniform sampler2D tMask, tEarth, tScrub, tPaving, tCobble, tSurface; uniform float uSize, uFade, uGuess;
         ${noiseGlsl}`).replace("#include <map_fragment>", `
         vec2 muv = vGround / uSize + 0.5;
         vec4 m = texture2D(tMask, muv);
@@ -85,11 +90,15 @@ export class ContextGround {
         vec3 earth = texture2D(tEarth, warp / 8.0).rgb * 0.5 + texture2D(tEarth, spin / 2.9 + 0.31).rgb * 0.3 + texture2D(tEarth, spin / 23.0).rgb * 0.2;
         vec3 scrub = texture2D(tScrub, warp / 10.0).rgb * 0.5 + texture2D(tScrub, spin / 3.3 + 0.17).rgb * 0.3 + texture2D(tScrub, spin / 31.0).rgb * 0.2;
         vec3 pave = texture2D(tPaving, vGround / 6.0).rgb;
-        float trodden = smoothstep(0.04, 0.7, m.b);
+        vec4 m2 = texture2D(tSurface, muv);
+        float trodden = max(smoothstep(0.04, 0.7, m.b), smoothstep(0.1, 0.6, m2.b) * uGuess);
         float bare = smoothstep(0.45, 0.85, mid * 0.5 + broad * 0.6);
         vec3 ground = mix(scrub, earth, clamp(trodden + bare * 0.5, 0.0, 1.0));
         float paved = smoothstep(0.38, 0.62, m.r + (mid - 0.5) * 0.22);
-        vec3 col = mix(ground, pave, paved);
+        float square = smoothstep(0.4, 0.6, m2.g + (mid - 0.5) * 0.2) * uGuess;
+        vec3 col = mix(ground, pave, max(paved, square));
+        vec3 cobble = texture2D(tCobble, vGround / 5.0).rgb * 0.7 + texture2D(tCobble, spin / 2.3).rgb * 0.3;
+        col = mix(col, cobble, smoothstep(0.3, 0.7, m2.r) * uGuess);
         col *= 1.0 - 0.5 * m.a;                       // baked contact shadow beside walls
         float bank = smoothstep(0.0, 0.5, m.g);
         col = mix(col, col * vec3(0.6, 0.56, 0.48), bank * (1.0 - smoothstep(0.5, 0.9, m.g)));
@@ -98,7 +107,7 @@ export class ContextGround {
         diffuseColor.a *= rim * uFade * (1.0 - smoothstep(0.5, 0.85, m.g));
       `);
     };
-    this.groundMaterial.customProgramCacheKey = () => "context-ground-v1";
+    this.groundMaterial.customProgramCacheKey = () => "context-ground-v2";
     this.ground = new THREE.Mesh(this.groundGeometry, this.groundMaterial);
     this.ground.receiveShadow = true; this.ground.renderOrder = 1; this.ground.visible = false; this.ground.frustumCulled = false;
 
@@ -127,7 +136,7 @@ export class ContextGround {
           float up = clamp(r.y, 0.0, 1.0);
           vec3 sky = mix(uSkyLow, uSkyHigh, pow(up, 0.55));
           float fres = clamp(0.03 + 0.97 * pow(1.0 - max(dot(n, view), 0.0), 5.0), 0.0, 0.85);
-          float sunGlint = pow(max(dot(r, uSunDir), 0.0), 380.0) * 6.0 + pow(max(dot(r, uSunDir), 0.0), 36.0) * 0.35;
+          float sunGlint = pow(max(dot(r, uSunDir), 0.0), 380.0) * 3.5 + pow(max(dot(r, uSunDir), 0.0), 36.0) * 0.18;
           vec3 body = mix(uShallow, uDeep, smoothstep(0.1, 0.9, inner));
           body *= 0.55 + 0.45 * max(dot(n, uSunDir), 0.0);
           vec3 col = mix(body, sky, fres) + uSunColour * sunGlint;
@@ -176,11 +185,15 @@ export class ContextGround {
       const level = wet[Math.floor(wet.length * 0.85)] + 0.15;
       for (let i = 0; i < heights.length; i++) water.setY(i, level);
       water.needsUpdate = true; this.waterGeometry.computeBoundingSphere();
-    }
+      this.waterLevel = level;
+    } else this.waterLevel = undefined;
     if (!this.shownSince) this.shownSince = performance.now();
     this.ground.visible = true; this.water.visible = this.waterVisible;
     return true;
   }
+
+  /** Fades the guessed surfaces (streets, widened square, yards) in or out with the best-guess switch. */
+  setGuessVisible(visible: boolean) { this.guess.value = visible ? 1 : 0; }
 
   /** Advances water motion and the fade-in; true while it still needs frames. */
   tick(now: number, camera: THREE.Vector3, animateWater: boolean): boolean {
