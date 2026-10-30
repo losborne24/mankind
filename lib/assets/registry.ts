@@ -42,6 +42,12 @@ const variantAssets = Object.fromEntries(Object.entries(romanVariants).map(([nam
 ])) as unknown as { [K in keyof typeof romanVariants as `roman-${K}`]: AssetDefinition & { dimensionsMeters: readonly [number, number, number] } };
 
 export const assetRegistry = {
+  "portunus-exterior-v1": {
+    id: "portunus-exterior-v1", path: "reconstructions/portunus/portunus-v1.glb", category: "building",
+    scale: 1, dimensionsMeters: [11.426936, 16.093063, 21.553], groundOffsetMeters: 0,
+    grounding: { contacts: [{ offset: [0, -1.1755], width: 10.6, depth: 18.768 }, { offset: [0, 9.4925], width: 6.6, depth: 2.568 }], entrance: [0, 10.7765] },
+    source: { author: "Mankind project", url: "scripts/reconstructions/portunus/generate.py", licence: "Project-authored interpretive model after a public-domain historic drawing; repository terms apply.", licenceFile: "reconstructions/portunus/PROVENANCE.md" },
+  },
   "roman-villager-01": {
     id: "roman-villager-01", path: "characters/roman-villager.glb", category: "character",
     scale: 1, dimensionsMeters: [0.67, 1.783, 0.35], groundOffsetMeters: 0,

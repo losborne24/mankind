@@ -8,7 +8,7 @@ export interface CatalogueVersion {
   sources: HistoricalSource[];
   features: { title: string; certainty: 'documented' | 'inferred' | 'unknown'; sourceIds: string[]; note: string }[];
   limitations: string[];
-  rights: { status: 'unresolved' | 'cleared'; title: string; url?: string; attribution?: string; note: string };
+  rights: { status: 'unresolved' | 'cleared'; title: string; url?: string; provenancePath?: string; attribution?: string; note: string };
   rendering?: { registryId: string; sha256: string };
 }
 export interface CatalogueReview { id: string; version: number; status: 'draft' | 'usable' | 'retired'; at: string; reviewer: string; note: string }
@@ -72,7 +72,8 @@ export function validateAssetCatalogue(value: unknown): AssetCatalogue {
       if (f.certainty !== 'unknown' && !refs.length) throw Error('Catalogue feature needs evidence');
     }
     list(e.limitations).forEach(text);
-    const rights = record(e.rights, ['status', 'title', 'url', 'attribution', 'note']); one(rights.status, ['unresolved', 'cleared']); text(rights.title); text(rights.note);
+    const rights = record(e.rights, ['status', 'title', 'url', 'provenancePath', 'attribution', 'note']); one(rights.status, ['unresolved', 'cleared']); text(rights.title); text(rights.note);
+    if (rights.provenancePath !== undefined && (!/^[a-zA-Z0-9][a-zA-Z0-9_./-]*\.md$/.test(text(rights.provenancePath)) || text(rights.provenancePath).split('/').some(part => part === '..' || part === '.'))) throw Error('Invalid local model provenance path');
     if (rights.url !== undefined) url(rights.url); if (rights.attribution !== undefined) text(rights.attribution);
     if (e.rendering !== undefined) { const r = record(e.rendering, ['registryId', 'sha256']); id(r.registryId); if (!/^[a-f0-9]{64}$/.test(text(r.sha256))) throw Error('Invalid model SHA-256'); }
     entries.set(key, item as CatalogueVersion);
@@ -83,7 +84,7 @@ export function validateAssetCatalogue(value: unknown): AssetCatalogue {
     const key = catalogueKey(r as unknown as CatalogueReview), entry = entries.get(key), prior = previous.get(key);
     if (!entry) throw Error('Review refers to missing catalogue version');
     if (prior?.status === 'retired' || prior && (r.at as string) < prior.at) throw Error('Retired version or nonchronological review');
-    if (r.status === 'usable' && (!entry.rendering || entry.rights.status !== 'cleared' || !entry.rights.url || !entry.rights.attribution || !entry.features.length || entry.features.some(f => f.certainty === 'unknown'))) throw Error('Usable asset needs a model, cleared rights and interpreted features');
+    if (r.status === 'usable' && (!entry.rendering || entry.rights.status !== 'cleared' || !(entry.rights.url || entry.rights.provenancePath) || !entry.rights.attribution || !entry.features.length || entry.features.some(f => f.certainty === 'unknown'))) throw Error('Usable asset needs a model, cleared rights and interpreted features');
     previous.set(key, item as CatalogueReview);
   }
   return JSON.parse(JSON.stringify(value)) as AssetCatalogue;

@@ -1,0 +1,152 @@
+{
+  "version": 1,
+  "id": "world:portunus-exterior-v1",
+  "title": "Temple of Portunus · classical exterior interpretation",
+  "coordinateSystem": "WGS84",
+  "calendar": "proleptic-gregorian",
+  "sources": [
+    {
+      "id": "source:psu-fletcher",
+      "title": "Fletcher 1921, p.105 · Portunus plan and elevations",
+      "publisher": "Penn State University Libraries · courtesy Allan Kohl",
+      "url": "https://www.flickr.com/photos/psulibscollections/5832798550/",
+      "accessed": "2026-10-30",
+      "citation": "WB2007-0510. Historic illustration visually reviewed at linked larger resolution. Holder declares public-domain use; reconstruction drawings are interpretive. No image pixels used in model materials."
+    },
+    {
+      "id": "source:rome-heritage",
+      "title": "Tempio di Portunus · heritage authority",
+      "publisher": "Soprintendenza Speciale Archeologia Belle Arti e Paesaggio di Roma",
+      "url": "https://soprintendenzaspecialeroma.it/luoghi/tempio-di-portunus/",
+      "accessed": "2026-10-30",
+      "citation": "Direct text review: identity, Ionic order, frontal columns, structural materials and Republican rebuilding context. No images copied."
+    },
+    {
+      "id": "source:rome-tourism",
+      "title": "Temple of Portunus · city location and description",
+      "publisher": "Roma Capitale · Turismo Roma",
+      "url": "https://www.turismoroma.it/en/places/temple-portunus",
+      "accessed": "2026-10-30",
+      "citation": "Direct text review: geographic POINT, high podium, steps and side-column description. Point is a visitor location, not a surveyed model anchor."
+    }
+  ],
+  "places": [
+    {
+      "id": "place:temple-of-portunus",
+      "title": "Temple of Portunus",
+      "kind": "landmark",
+      "radiusMeters": 35,
+      "position": {
+        "coordinate": [
+          12.480893167165,
+          41.889289401004
+        ],
+        "evidence": {
+          "certainty": "inferred",
+          "sources": [
+            "source:rome-tourism"
+          ],
+          "note": "City visitor point adopted as a model discovery anchor, with unquantified positional accuracy. Not a surveyed footprint."
+        }
+      },
+      "evidence": {
+        "certainty": "documented",
+        "sources": [
+          "source:rome-heritage"
+        ],
+        "note": "Named Roman temple. No full lifespan or unchanged appearance is encoded."
+      }
+    }
+  ],
+  "assets": [
+    {
+      "id": "asset:portunus-exterior",
+      "category": "building",
+      "catalogueRef": {
+        "id": "catalogue:portunus-exterior",
+        "version": 1
+      },
+      "evidence": {
+        "certainty": "inferred",
+        "sources": [
+          "source:psu-fletcher",
+          "source:rome-heritage"
+        ],
+        "note": "Specific exterior model derived from historic illustration and official structural descriptions. Inferred detail is documented in the pinned catalogue version."
+      }
+    }
+  ],
+  "layouts": [
+    {
+      "id": "layout:portunus-classical",
+      "title": "Classical exterior interpretation · editorial AD 100 preview",
+      "placeId": "place:temple-of-portunus",
+      "period": {
+        "start": {
+          "year": 100
+        },
+        "approximate": true
+      },
+      "frame": "local-east-south-metres",
+      "extentMeters": 50,
+      "maxFoundationRiseMeters": 4,
+      "buildings": [
+        {
+          "id": "building:portunus",
+          "assetId": "asset:portunus-exterior",
+          "offset": [
+            0,
+            0
+          ],
+          "headingRadians": 3.141592653589793,
+          "evidence": {
+            "certainty": "inferred",
+            "sources": [
+              "source:rome-tourism",
+              "source:psu-fletcher"
+            ],
+            "note": "One temple at visitor anchor. North-facing pose is approximate; no georeferenced wall survey was supplied."
+          }
+        }
+      ],
+      "evidence": {
+        "certainty": "inferred",
+        "sources": [
+          "source:psu-fletcher",
+          "source:rome-heritage"
+        ],
+        "note": "User-selectable classical interpretation. Preview date is editorial, not a precise historical state. Extent/foundation rise are renderer limits, not archaeological dimensions."
+      }
+    }
+  ],
+  "scenes": [
+    {
+      "id": "scene:portunus-exterior",
+      "title": "Portunus exterior interpretation",
+      "description": "An explicitly selected, evidence-labelled exterior model. No reconstructed neighbourhood or population.",
+      "placeId": "place:temple-of-portunus",
+      "period": {
+        "start": {
+          "year": 100
+        },
+        "approximate": true
+      },
+      "layoutIds": [
+        "layout:portunus-classical"
+      ],
+      "assetIds": [
+        "asset:portunus-exterior"
+      ],
+      "required": false,
+      "fallback": "map-only",
+      "evidence": {
+        "certainty": "illustrative",
+        "sources": [],
+        "note": "Presentation requirement. A usable model does not make inferred dates or features exact."
+      }
+    }
+  ],
+  "roadNetworks": [],
+  "events": [],
+  "routes": []
+}

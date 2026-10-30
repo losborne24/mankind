@@ -6,9 +6,9 @@ and connects usable versions to the existing renderer registry. Load Menander an
 expand **Asset catalogue · version 1 · draft** in its inspector to review the
 initial draft's evidence, phase, rights and missing architecture.
 
-This milestone supplies the catalogue and ingest workflow. It does not supply a
-new reconstruction model. [Step 8 in the revised plan](phase4-plan.md) is the first
-visible evidence-backed building.
+Step 7 supplied the catalogue and ingest workflow. [Step 8](portunus-reconstruction.md)
+now adds the first visible building: a usable, explicitly selected Portunus exterior
+interpretation. Menander remains a metadata-only draft.
 
 ## Persistent records
 
@@ -31,7 +31,7 @@ Each content version records:
 The registry still owns path, units/scale, dimensions, orientation, grounding and
 entrance metadata. The catalogue does not duplicate or replace that rendering
 contract. A new model must be registered explicitly before it can be ingested
-with a rendering binding. Step 8 should use versioned binary paths and keep older
+with a rendering binding. Models use versioned binary paths and keep older
 versions available while referenced.
 
 The local ingest command will not replace an existing content version. A new
@@ -68,6 +68,9 @@ directory. Failed validation leaves the original store untouched. An existing lo
 stops another writer; a crash can leave a stale lock for the operator to inspect.
 The command never downloads content, generates geometry or edits model binaries.
 
+Rights may use a public terms URL or a safe relative `provenancePath` to a Markdown
+declaration under `public/assets`; ingestion checks that the local file exists.
+
 Usable status requires a rendering binding, cleared rights with terms and credit,
 and interpreted features with source references. The command checks file presence,
 category and hash. These checks validate records and integrity; they do not certify
@@ -80,8 +83,9 @@ direct `registryId`. The shared binding resolver checks exact existence, current
 review status, canonical place, category and the complete selected date interval.
 No latest-version, name, proximity or nearest-era fallback is used.
 
-Draft, retired, missing, wrong-place, wrong-category and uncertain/outside-phase
-versions cannot supply a model. Both the settlement adapter and scene-requirement
+Draft, retired, missing, wrong-place, wrong-category and outside-phase versions
+cannot supply a model. Uncertain phases are blocked by default; Step 8 adds an
+explicit interpretation choice that retains the uncertainty labels. Both the settlement adapter and scene-requirement
 resolver use this check. A resolved entry uses the existing registry/cache/streamer;
 no new model-loader ownership or animation loop was introduced.
 

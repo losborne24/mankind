@@ -154,7 +154,8 @@ export class SettlementScene {
               if (!variants) { variants = new Map(); this.materialOverrides.set(material, variants); }
               let copy = variants.get(variant);
               if (!copy) {
-                copy = weatheredMaterial(material, variant);
+                copy = this.definition.ambientLife === false ? material.clone() : weatheredMaterial(material, variant);
+                if (this.definition.ambientLife === false) copy.shadowSide = THREE.BackSide;
                 variants.set(variant, copy); this.resources.push(copy);
               }
               return copy;

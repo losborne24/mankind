@@ -12,7 +12,7 @@ export interface HistoricalAssetBinding {
   catalogue?: { entry: CatalogueVersion; status: 'draft' | 'usable' | 'retired'; review?: CatalogueReview };
 }
 /** Validated records/snapshot only. No search, fetching, nearest-era match or floating latest version. */
-export function resolveHistoricalAsset(reference: HistoricalAsset, placeId: string, time: HistoricalTime, catalogue?: AssetCatalogue): HistoricalAssetBinding {
+export function resolveHistoricalAsset(reference: HistoricalAsset, placeId: string, time: HistoricalTime, catalogue?: AssetCatalogue, explicitInterpretation = false): HistoricalAssetBinding {
   let registryId = reference.registryId, metadata: HistoricalAssetBinding['catalogue'];
   if (reference.catalogueRef) {
     const snapshot = catalogue ?? readAssetCatalogue();
@@ -24,7 +24,8 @@ export function resolveHistoricalAsset(reference: HistoricalAsset, placeId: stri
     if (status !== 'usable') return blocked(`Catalogue version is ${status}; no model will be selected.`);
     if (entry.placeId !== placeId) return blocked('Catalogue version belongs to another historical place.');
     if (entry.category !== reference.category) return blocked('Catalogue version has a different asset category.');
-    if (matchHistoricalTime(entry.period, time) !== 'within') return blocked('Catalogue phase does not securely cover the selected date.');
+    const phase = matchHistoricalTime(entry.period, time);
+    if (phase === 'outside' || phase === 'possible' && !explicitInterpretation) return blocked('Catalogue phase does not securely cover the selected date.');
     if (!entry.rendering || entry.rights.status !== 'cleared') return blocked('Catalogue model or reuse rights are unavailable.');
     registryId = entry.rendering.registryId;
   }

@@ -1,0 +1,108 @@
+{
+  "id": "catalogue:portunus-exterior",
+  "version": 1,
+  "title": "Temple of Portunus · Fletcher-based exterior interpretation",
+  "placeId": "place:temple-of-portunus",
+  "category": "building",
+  "period": {
+    "start": {
+      "year": 100
+    },
+    "approximate": true
+  },
+  "sources": [
+    {
+      "id": "source:psu-fletcher",
+      "title": "Fletcher 1921, p.105 · Portunus plan and elevations",
+      "publisher": "Penn State University Libraries · courtesy Allan Kohl",
+      "url": "https://www.flickr.com/photos/psulibscollections/5832798550/",
+      "accessed": "2026-10-30",
+      "citation": "WB2007-0510. Historic illustration visually reviewed at linked larger resolution. Holder declares public-domain use; reconstruction drawings are interpretive. No image pixels used in model materials."
+    },
+    {
+      "id": "source:rome-heritage",
+      "title": "Tempio di Portunus · heritage authority",
+      "publisher": "Soprintendenza Speciale Archeologia Belle Arti e Paesaggio di Roma",
+      "url": "https://soprintendenzaspecialeroma.it/luoghi/tempio-di-portunus/",
+      "accessed": "2026-10-30",
+      "citation": "Direct text review: identity, Ionic order, frontal columns, structural materials and Republican rebuilding context. No images copied."
+    },
+    {
+      "id": "source:rome-tourism",
+      "title": "Temple of Portunus · city location and description",
+      "publisher": "Roma Capitale · Turismo Roma",
+      "url": "https://www.turismoroma.it/en/places/temple-portunus",
+      "accessed": "2026-10-30",
+      "citation": "Direct text review: geographic POINT, high podium, steps and side-column description. Point is a visitor location, not a surveyed model anchor."
+    }
+  ],
+  "features": [
+    {
+      "title": "Ionic exterior and four-column front",
+      "certainty": "documented",
+      "sourceIds": [
+        "source:rome-heritage",
+        "source:rome-tourism"
+      ],
+      "note": "Building-specific structural arrangement; simplified capital geometry is interpretive."
+    },
+    {
+      "title": "Dimensional scaffold",
+      "certainty": "inferred",
+      "sourceIds": [
+        "source:psu-fletcher"
+      ],
+      "note": "Transcribed printed feet converted to metres; diagram-derived width/depth breakdown and proportions are not modern survey measurements."
+    },
+    {
+      "title": "Podium, cella, engaged columns and pediments",
+      "certainty": "inferred",
+      "sourceIds": [
+        "source:psu-fletcher",
+        "source:rome-heritage"
+      ],
+      "note": "Authored from the historic plan/elevations; wall thickness, spacing and mouldings are simplified approximations."
+    },
+    {
+      "title": "Roof, stairs, capitals and finishes",
+      "certainty": "inferred",
+      "sourceIds": [
+        "source:psu-fletcher"
+      ],
+      "note": "Roof form follows the drawing. Tile pattern, step count, volutes and neutral/terracotta colours are modelling conventions, not verified ancient details."
+    },
+    {
+      "title": "Location, orientation and grounding",
+      "certainty": "inferred",
+      "sourceIds": [
+        "source:rome-tourism"
+      ],
+      "note": "City visitor point used for discovery. Approximate north-facing pose and terrain contacts are display inferences, not surveyed alignment."
+    },
+    {
+      "title": "Classical preview context",
+      "certainty": "inferred",
+      "sourceIds": [
+        "source:psu-fletcher",
+        "source:rome-heritage"
+      ],
+      "note": "AD 100 is an editorial preview year, not a construction date or an exact source-attested snapshot. Temporal uncertainty is retained and explicit interpretation selection is required."
+    }
+  ],
+  "limitations": [
+    "Exterior interpretation from a historic reconstruction drawing, not certified archaeological restitution.",
+    "Interior, cult furnishings, sculpture and original polychromy are omitted.",
+    "Grounding, roof covering and ornamental detail remain inferred."
+  ],
+  "rights": {
+    "status": "cleared",
+    "title": "Project-authored model; repository terms apply",
+    "provenancePath": "reconstructions/portunus/PROVENANCE.md",
+    "attribution": "Mankind geometry; reference: Banister Fletcher (1921), p.105, via Penn State University Libraries / Allan Kohl.",
+    "note": "No imported mesh or image textures. Historic drawing is designated public domain by its holder. This record does not grant a new public licence for the project."
+  },
+  "rendering": {
+    "registryId": "portunus-exterior-v1",
+    "sha256": "b45e24935e14af4227b6561b221f92a70312900accc251f008db5e537b547f35"
+  }
+}

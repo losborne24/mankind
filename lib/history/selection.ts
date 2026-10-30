@@ -24,9 +24,10 @@ export interface HistoricalSelection {
   referenceAreas?: HistoricalReferenceArea[];
   footprints?: { footprint: HistoricalFootprint; match: Exclude<Match, 'outside'> }[];
   scenes?: HistoricalSceneResolution[];
+  interpretationLayoutId?: string;
 }
 /** Input must be a validated dataset. No camera/date mutations or asset requests. */
-export function selectHistoricalWorld(world: HistoricalWorldData, time: HistoricalTime): HistoricalSelection {
+export function selectHistoricalWorld(world: HistoricalWorldData, time: HistoricalTime, options: { explicitLayoutId?: string } = {}): HistoricalSelection {
   periodBounds(time);
   const match = (period: HistoricalPeriod) => matchHistoricalTime(period, time);
   const events: HistoricalSelection['events'] = [], routes: HistoricalSelection['routes'] = [];
@@ -50,19 +51,21 @@ export function selectHistoricalWorld(world: HistoricalWorldData, time: Historic
       row.warnings.push((world.footprints ?? []).some(f => f.placeId === place.id && match(f.period) !== 'outside') ? '2D footprint context only; no reconstructed building layout supplied.' : 'Geographic context only; no dated layout supplied.');
       return row;
     }
-    const candidate = candidates[0];
+    const explicit = candidates.find(candidate => candidate.id === options.explicitLayoutId);
+    const candidate = explicit ?? candidates[0];
     const network = world.roadNetworks.find(n => n.id === candidate.roadNetworkId);
     if (network && match(network.period) === 'outside') {
       row.layoutStatus = 'unavailable'; row.warnings.push('The layout road network is outside the selected date.'); return row;
     }
-    if (presence !== 'within' || candidates.length !== 1 || match(candidate.period) !== 'within' || (network && match(network.period) !== 'within')) {
+    if (!explicit && (presence !== 'within' || candidates.length !== 1 || match(candidate.period) !== 'within' || (network && match(network.period) !== 'within'))) {
       row.layoutStatus = 'ambiguous'; row.warnings.push('Date precision or overlapping layouts prevent automatic selection.');
       if (candidates.some(layout => !layout.buildings.length)) row.warnings.push('Candidate phase records contain no building positions or reconstructed geometry.');
       return row;
     }
-    const result = resolveValidatedSettlement(world, candidate.id, time.start, time);
+    const result = resolveValidatedSettlement(world, candidate.id, time.start, time, !!explicit);
     row.warnings = result.warnings;
     row.layoutStatus = result.status === 'ready' ? 'ready' : result.status === 'uncertain-period' ? 'ambiguous' : 'unavailable';
+    if (explicit && result.status === 'ready') row.warnings.push('User-selected reconstruction interpretation; source dates and inferred features remain uncertain.');
     if (result.descriptor) descriptors.push(result.descriptor);
     return row;
   });
@@ -72,7 +75,7 @@ export function selectHistoricalWorld(world: HistoricalWorldData, time: Historic
     const m = match(footprint.period);
     if (m !== 'outside' && visible.has(footprint.placeId)) footprints.push({ footprint, match: m });
   }
-  const scenes = resolveSceneRequirements(world, time, places, descriptors, footprints);
+  const scenes = resolveSceneRequirements(world, time, places, descriptors, footprints, options.explicitLayoutId);
   const allowed = descriptors.filter(descriptor => {
     const placeId = world.layouts.find(layout => layout.id === descriptor.id)!.placeId;
     const active = scenes.filter(scene => scene.scene.placeId === placeId && scene.status !== 'outside-period' && (scene.scene.required || scene.scene.layoutIds.includes(descriptor.id)));
@@ -81,7 +84,7 @@ export function selectHistoricalWorld(world: HistoricalWorldData, time: Historic
   for (const row of places) if (row.layoutStatus === 'ready' && !allowed.some(d => row.layoutIds.includes(d.id))) {
     row.layoutStatus = 'unavailable'; row.warnings.push('Scene requirements are not satisfied; geographic context only.');
   }
-  return { time: structuredClone(time), places, events, routes, descriptors: allowed, scenes, footprints, referenceAreas: (world.referenceAreas ?? []).filter(area => visible.has(area.placeId)) };
+  return { time: structuredClone(time), places, events, routes, descriptors: allowed, scenes, footprints, ...(allowed.some(d => d.id === options.explicitLayoutId) ? { interpretationLayoutId: options.explicitLayoutId } : {}), referenceAreas: (world.referenceAreas ?? []).filter(area => visible.has(area.placeId)) };
 }
 /** Validating public entry point for requirement planning without applying a scene. */
 export function resolveHistoricalScenes(value: unknown, time: HistoricalTime): HistoricalSceneResolution[] {

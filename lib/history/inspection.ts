@@ -1,6 +1,6 @@
 import type { Evidence, HistoricalPeriod, HistoricalSource, HistoricalWorldData, HistoricalFootprint } from '@/lib/history/schema';
 import type { HistoricalTime } from '@/lib/scenarios/schema';
-import type { HistoricalSelection, HistoricalPlaceSelection } from '@/lib/history/selection';
+import { selectHistoricalWorld, type HistoricalSelection, type HistoricalPlaceSelection } from '@/lib/history/selection';
 import { matchHistoricalTime } from '@/lib/history/time';
 import type { HistoricalSceneResolution } from '@/lib/history/sceneRequirements';
 import { resolveHistoricalAsset, type HistoricalAssetBinding } from '@/lib/history/assetResolution';
@@ -36,6 +36,8 @@ export interface HistoricalInspection {
     footprints?: { title: string; phaseTitle: string; period: HistoricalPeriod; match: 'within' | 'possible' | 'outside'; representation: HistoricalFootprint['representation']; licence: HistoricalFootprint['licence'] }[];
     scenes?: HistoricalSceneResolution[];
     catalogueModels?: NonNullable<HistoricalAssetBinding['catalogue']>[];
+    reconstructionPreviews?: { id: string; title: string }[];
+    activeInterpretation?: boolean;
     target?: HistoricalVisitTarget;
     unavailableReason?: string;
   }[];
@@ -57,6 +59,9 @@ export function inspectHistoricalRecord(world: HistoricalWorldData, selection: H
     const supported = Math.abs(p.position.coordinate[1]) <= 85;
     const detailed = selected.layoutStatus === 'ready';
     const layouts = selected.layoutIds.map(id => world.layouts.find(layout => layout.id === id)!);
+    const activeInterpretation = layouts.some(l => l.id === selection.interpretationLayoutId);
+    const interpretationHeading = layouts.find(l => l.id === selection.interpretationLayoutId)?.buildings[0]?.headingRadians ?? 0;
+    const reconstructionPreviews = !activeInterpretation && selected.layoutStatus !== 'ready' ? layouts.filter(layout => selectHistoricalWorld(world, selection.time, { explicitLayoutId: layout.id }).descriptors.some(d => d.id === layout.id)).map(layout => ({ id: layout.id, title: layout.title })) : [];
     const areas = (world.referenceAreas ?? []).filter(area => area.placeId === p.id);
     const footprints = (world.footprints ?? []).filter(footprint => footprint.placeId === p.id);
     const scenes = (selection.scenes ?? []).filter(resolution => resolution.scene.placeId === p.id);
@@ -91,9 +96,10 @@ export function inspectHistoricalRecord(world: HistoricalWorldData, selection: H
       warnings: [...new Set(warnings)],
       referenceAreas: areas.map(area => ({ title: area.title, licence: area.licence })),
       scenes,
+      reconstructionPreviews, activeInterpretation,
       catalogueModels,
       footprints: footprints.map(f => ({ title: f.title, phaseTitle: f.phaseTitle, period: f.period, representation: f.representation, licence: f.licence, match: matchHistoricalTime(f.period, selection.time) })),
-      ...(eligible && supported ? { target: { placeId: p.id, center: [...p.position.coordinate] as [number, number], zoom: detailed ? 18.4 : footprints.some(f => matchHistoricalTime(f.period, selection.time) !== 'outside') ? 18 : p.kind === 'region' ? 11 : 14, pitch: detailed ? 55 : 35, bearing: detailed ? -25 : 0 } } : { unavailableReason: supported ? 'This record is not dated for the current selection.' : 'This location is outside the current map navigation range.' }),
+      ...(eligible && supported ? { target: { placeId: p.id, center: [...p.position.coordinate] as [number, number], zoom: detailed ? activeInterpretation ? 19.1 : 18.4 : footprints.some(f => matchHistoricalTime(f.period, selection.time) !== 'outside') ? 18 : p.kind === 'region' ? 11 : 14, pitch: detailed ? 55 : 35, bearing: activeInterpretation ? -interpretationHeading * 180 / Math.PI - 15 : detailed ? -25 : 0 } } : { unavailableReason: supported ? 'This record is not dated for the current selection.' : 'This location is outside the current map navigation range.' }),
     };
   });
   const sourceIds = new Set(evidence.flatMap(group => group.value.sources));

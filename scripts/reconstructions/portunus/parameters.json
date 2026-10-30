@@ -1,0 +1,30 @@
+{
+  "source": "Fletcher 1921 p.105, PSU WB2007-0510",
+  "printedFeet": {
+    "planLength": 70,
+    "cellaWidth": 30.333333333333332,
+    "columnHeight": 27,
+    "podiumHeight": 9.916666666666666,
+    "eaveHeight": 43.583333333333336,
+    "roofRise": 8.583333333333334
+  },
+  "metres": {
+    "podiumWidth": 10.6,
+    "overallDepth": 21.336,
+    "podiumHeight": 3.0226,
+    "columnHeight": 8.2296,
+    "eaveHeight": 13.2842,
+    "roofRise": 2.6162
+  },
+  "inferred": [
+    "Podium width and wall thickness",
+    "Spacing/depth breakdown read from diagram",
+    "Door size, stair count, fluting, capital detail, roof tiles and neutral finishes",
+    "Geographic orientation and terrain placement"
+  ],
+  "omitted": [
+    "Interior fittings",
+    "Sculpture",
+    "Original painted decoration"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "drawingURL": "https://live.staticflickr.com/5301/5832798550_2dcb27e276_b.jpg",
+  "drawingSHA256": "437068b56c212bef61c3a2015f74ee38f515d6926f3723d37c7f722725f1b255",
+  "holderRecord": "https://www.flickr.com/photos/psulibscollections/5832798550/",
+  "modelSHA256": "b45e24935e14af4227b6561b221f92a70312900accc251f008db5e537b547f35",
+  "bytes": 3261376,
+  "dimensionsMeters": [
+    11.426936149597168,
+    16.09306251257658,
+    21.553000450134277
+  ],
+  "meshes": 5,
+  "triangles": 84294,
+  "accessed": "2026-10-30",
+  "method": "Project-authored Blender exterior after historic interpretation; no mesh/pixel imports."
+}

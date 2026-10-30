@@ -3,16 +3,17 @@
 A web-based historical exploration experience: a beautiful, stylized 3D globe
 you can rotate, zoom, and move through time on, from **3000 BCE to the present**.
 
-This repository contains the Phase 1 rendering foundation and **Phase 2, Step 1**
-local Natural Earth physical geography. The rendering foundation combines:
+This repository contains the rendering foundation, physical geography, guided
+scenarios and the Phase 4 sourced-data/reconstruction pipeline. It combines:
 
 1. An interactive **MapLibre globe** with real geographic context.
 2. A **historical timeline** using a correct BCE/CE calendar model.
 3. **Three.js geometry anchored to real coordinates**, rendered inside
    MapLibre's own WebGL pipeline and staying aligned as the globe moves.
 
-There is no backend, database, AI, or historical dataset yet — those are later
-phases. The timeline changes application state only.
+There is no database or AI service yet — those are later
+phases. Date selection controls the loaded historical dataset; guided scenarios
+provide playback and navigation.
 
 ![The globe with a geo-anchored 3D marker at Giza](docs/screenshot.png)
 
@@ -435,5 +436,16 @@ projections use the existing streamer; no new historical reconstruction is suppl
 Historical assets can now pin a reviewed catalogue version with phase, provenance,
 rights and model-integrity metadata. The initial Menander entry remains a draft.
 [Catalogue workflow and validation](docs/asset-catalogue.md).
-[Revised Phase 4 roadmap](docs/phase4-plan.md): the next deliverable is the first
+[Revised Phase 4 roadmap](docs/phase4-plan.md): Step 8 supplies the first
 visible evidence-backed building.
+
+
+### Portunus reconstruction interpretation (Phase 4 Step 8)
+
+Select and load **Temple of Portunus · reconstruction interpretation**, choose
+**View Portunus context**, inspect the place, then **Show reconstruction interpretation**.
+The specific exterior model is pinned to catalogue version 1, with source links,
+feature uncertainty and local provenance. AD 100 is an editorial preview context;
+showing it is an explicit choice that date changes revoke.
+[Evidence, modelling decisions and validation](docs/portunus-reconstruction.md).
+The next step is a sourced journey using the asset.

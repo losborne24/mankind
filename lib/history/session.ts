@@ -28,15 +28,16 @@ export class HistoricalDatasetSession {
   private revision = 0;
   private disposed = false;
   private inspectionKey?: HistoricalInspectionKey;
+  private previewLayoutId?: string;
   private readonly unsubscribeTime: () => void;
-  constructor(private readonly ports: HistoricalDatasetPorts) { this.unsubscribeTime = ports.subscribeTime(() => this.refresh()); }
+  constructor(private readonly ports: HistoricalDatasetPorts) { this.unsubscribeTime = ports.subscribeTime(() => { this.previewLayoutId = undefined; this.refresh(); }); }
   getSnapshot = () => this.snapshot;
   subscribe = (listener: () => void) => { this.listeners.add(listener); return () => { this.listeners.delete(listener); }; };
   private publish(snapshot: HistoricalDatasetSnapshot) { this.snapshot = snapshot; for (const listener of this.listeners) listener(); }
   async load(datasetId: string) {
     if (this.disposed) return;
     this.request?.abort(); const revision = ++this.revision, request = new AbortController();
-    this.request = request; this.world = undefined; this.inspectionKey = undefined;
+    this.request = request; this.world = undefined; this.inspectionKey = undefined; this.previewLayoutId = undefined;
     this.ports.apply(null);
     this.publish({ status: 'loading', datasetId });
     try {
@@ -53,7 +54,7 @@ export class HistoricalDatasetSession {
   private refresh() {
     if (this.disposed || !this.world) return;
     try {
-      const selection = selectHistoricalWorld(this.world, this.ports.time());
+      const selection = selectHistoricalWorld(this.world, this.ports.time(), { explicitLayoutId: this.previewLayoutId });
       this.ports.apply(selection);
       const inspection = this.inspectionKey ? inspectHistoricalRecord(this.world, selection, this.inspectionKey) : undefined;
       this.publish({ status: 'ready', datasetId: this.snapshot.datasetId, title: this.world.title, selection, ...(inspection ? { inspection } : {}) });
@@ -73,6 +74,13 @@ export class HistoricalDatasetSession {
     this.inspectionKey = undefined;
     this.publish({ ...this.snapshot, inspection: undefined });
   }
+  /** Explicit user choice of an evidenced interpretation; date changes revoke it. */
+  previewReconstruction(layoutId: string | null): boolean {
+    if (this.disposed || this.snapshot.status !== 'ready') return false;
+    if (layoutId !== null && !this.snapshot.inspection?.locations.some(location => location.reconstructionPreviews?.some(layout => layout.id === layoutId))) return false;
+    this.previewLayoutId = layoutId ?? undefined; this.refresh();
+    return layoutId === null || this.snapshot.selection?.interpretationLayoutId === layoutId;
+  }
   /** Recheck the latest date/record at activation, rather than navigating from stale UI props. */
   getVisitTarget(placeId: string) {
     if (this.disposed || this.snapshot.status !== 'ready') return;
@@ -81,7 +89,7 @@ export class HistoricalDatasetSession {
   }
   clear() {
     if (this.disposed || this.snapshot.status === 'idle') return;
-    this.request?.abort(); this.request = undefined; this.revision++; this.world = undefined; this.inspectionKey = undefined;
+    this.request?.abort(); this.request = undefined; this.revision++; this.world = undefined; this.inspectionKey = undefined; this.previewLayoutId = undefined;
     this.ports.release(); this.publish({ status: 'idle' });
   }
   dispose() { if (this.disposed) return; this.clear(); this.disposed = true; this.unsubscribeTime(); this.listeners.clear(); }

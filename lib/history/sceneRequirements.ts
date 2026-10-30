@@ -16,7 +16,7 @@ export interface HistoricalSceneResolution {
   footprintIds: string[];
 }
 /** Already validated data and date projections. No fetching, model substitution or camera writes. */
-export function resolveSceneRequirements(world: HistoricalWorldData, time: HistoricalTime, places: HistoricalPlaceSelection[], descriptors: SettlementDescriptor[], footprints: { footprint: { id: string; placeId: string } }[]): HistoricalSceneResolution[] {
+export function resolveSceneRequirements(world: HistoricalWorldData, time: HistoricalTime, places: HistoricalPlaceSelection[], descriptors: SettlementDescriptor[], footprints: { footprint: { id: string; placeId: string } }[], explicitLayoutId?: string): HistoricalSceneResolution[] {
   const results = world.scenes.map(scene => {
     const match = matchHistoricalTime(scene.period, time);
     const result: HistoricalSceneResolution = { scene, match, status: 'outside-period', issues: [], assets: [], descriptorIds: [], footprintIds: [] };
@@ -24,11 +24,12 @@ export function resolveSceneRequirements(world: HistoricalWorldData, time: Histo
     const issue = (code: string, message: string, assetId?: string) => { result.issues.push({ code, message, ...(assetId ? { assetId } : {}) }); };
     const row = places.find(p => p.place.id === scene.placeId)!;
     result.footprintIds = footprints.filter(f => f.footprint.placeId === scene.placeId).map(f => f.footprint.id);
-    if (match === 'possible' || row.presence !== 'within') issue('uncertain-date', 'Date uncertainty prevents automatic 3D scene selection.');
+    const explicit = explicitLayoutId && scene.layoutIds.includes(explicitLayoutId) && row.layoutIds.includes(explicitLayoutId);
+    if (!explicit && (match === 'possible' || row.presence !== 'within')) issue('uncertain-date', 'Date uncertainty prevents automatic 3D scene selection.');
     const locationSupported = Math.abs(row.place.position.coordinate[1]) <= 85;
     if (!locationSupported) issue('unsupported-location', 'This location is outside the supported display range.');
     if (row.place.position.evidence.certainty === 'unknown') issue('unreviewed-location', 'The geographic placement has no established interpretation.');
-    const candidates = scene.layoutIds.filter(id => row.layoutIds.includes(id));
+    const candidates = scene.layoutIds.filter(id => row.layoutIds.includes(id) && (!explicit || id === explicitLayoutId));
     if (!scene.layoutIds.length) issue('missing-layout', 'No reconstructed building layout has been supplied.');
     else if (candidates.length !== 1 || row.layoutStatus === 'ambiguous') issue('ambiguous-layout', 'No single dated layout can be selected for this requirement.');
     const descriptor = candidates.length === 1 && row.layoutStatus === 'ready' ? descriptors.find(d => d.id === candidates[0]) : undefined;
@@ -39,7 +40,7 @@ export function resolveSceneRequirements(world: HistoricalWorldData, time: Histo
     const assets = new Set([...scene.assetIds, ...placedAssets]);
     result.assets = [...assets].map(id => {
       const reference = world.assets.find(a => a.id === id)!;
-      const binding = resolveHistoricalAsset(reference, scene.placeId, time);
+      const binding = resolveHistoricalAsset(reference, scene.placeId, time, undefined, !!explicit);
       const status = binding.status !== 'registered' ? binding.status : reference.evidence.certainty === 'unknown' ? 'unreviewed' : !['building', 'infrastructure'].includes(reference.category) ? 'unsupported' : !placedAssets.has(id) ? 'unplaced' : 'registered';
       if (status !== 'registered') issue(`asset-${status}`, status === 'catalogue-blocked' ? binding.reason! : status === 'unresolved' ? 'A requested building model is unavailable.' : status === 'category-mismatch' ? 'An assigned model has the wrong category.' : status === 'unreviewed' ? 'A model has no established historical interpretation.' : status === 'unplaced' ? 'A requested model has no building placement.' : 'This asset category has no historical scene placement support.', id);
       return { id, ...(binding.registryId ? { registryId: binding.registryId } : {}), status, ...(binding.catalogue ? { catalogue: binding.catalogue } : {}) };

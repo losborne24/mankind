@@ -8,6 +8,10 @@ const { assetRegistry } = await import(await loadTypescript('lib/assets/registry
 const read = async path => { const bytes = await readFile(path); if (bytes.length > 2 * 1024 * 1024) throw Error('Catalogue file exceeds 2 MiB'); return JSON.parse(bytes.toString('utf8')); };
 export async function checkCatalogueFiles(catalogue) {
   const base = resolve('public/assets');
+  for (const e of catalogue.entries) if (e.rights.provenancePath) {
+    const path = resolve(base, e.rights.provenancePath); if (!path.startsWith(base + sep)) throw Error('Provenance outside asset directory');
+    await readFile(path, 'utf8');
+  }
   for (const e of catalogue.entries) if (e.rendering) {
     const asset = Object.hasOwn(assetRegistry, e.rendering.registryId) ? assetRegistry[e.rendering.registryId] : undefined;
     if (!asset || asset.category !== e.category) throw Error('Catalogue rendering binding is missing or has the wrong category');

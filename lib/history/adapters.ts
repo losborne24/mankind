@@ -66,7 +66,7 @@ export function resolveHistoricalSettlement(value: unknown, layoutId: string, at
   return resolveValidatedSettlement(validateHistoricalWorld(value), layoutId, at);
 }
 /** Internal projection for an already validated session snapshot; avoids revalidating per place/date. */
-export function resolveValidatedSettlement(world: import('@/lib/history/schema').HistoricalWorldData, layoutId: string, at: HistoricalDate, selectedTime?: HistoricalTime): SettlementResolution {
+export function resolveValidatedSettlement(world: import('@/lib/history/schema').HistoricalWorldData, layoutId: string, at: HistoricalDate, selectedTime?: HistoricalTime, explicitInterpretation = false): SettlementResolution {
   const layout = world.layouts.find(l => l.id === layoutId);
   if (!layout) throw Error(`Unknown historical layout ${layoutId}`);
   const place = world.places.find(p => p.id === layout.placeId)!;
@@ -74,7 +74,7 @@ export function resolveValidatedSettlement(world: import('@/lib/history/schema')
   const periods = [layout.period, ...(place.period ? [place.period] : []), ...(network ? [network.period] : [])];
   const matches = periods.map(period => matchHistoricalPeriod(period, at));
   if (matches.includes('outside')) return { status: 'outside-period', warnings: ['Layout, place or roads are outside the selected date.'] };
-  if (matches.includes('possible')) return { status: 'uncertain-period', warnings: ['Date or record is too imprecise to choose this layout automatically.'] };
+  if (matches.includes('possible') && !explicitInterpretation) return { status: 'uncertain-period', warnings: ['Date or record is too imprecise to choose this layout automatically.'] };
   const warnings: string[] = [];
   if (layout.extentMeters > 1000 || Math.abs(place.position.coordinate[1]) > 85) warnings.push('Layout exceeds the current compact-scene renderer boundary.');
   if (layout.buildings.length > 100 || (network?.roads.reduce((count, road) => count + road.points.length - 1, 0) ?? 0) > 256) warnings.push('Layout exceeds the current scene assembly budget.');
@@ -83,7 +83,7 @@ export function resolveValidatedSettlement(world: import('@/lib/history/schema')
   const buildings: SettlementDefinition['buildings'][number][] = [];
   for (const building of layout.buildings) {
     const reference = world.assets.find(asset => asset.id === building.assetId)!;
-    const binding = resolveHistoricalAsset(reference, place.id, selectedTime ?? { start: at });
+    const binding = resolveHistoricalAsset(reference, place.id, selectedTime ?? { start: at }, undefined, explicitInterpretation);
     if (binding.status === 'catalogue-blocked') { warnings.push(binding.reason!); continue; }
     if (binding.status === 'unresolved') { warnings.push(`Unresolved historical asset ${reference.id}; no substitute selected.`); continue; }
     if (binding.status === 'category-mismatch') { warnings.push(`Asset category mismatch for ${reference.id}.`); continue; }
