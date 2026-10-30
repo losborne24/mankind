@@ -36,7 +36,9 @@ assert.equal(world.footprints[0].geometry.coordinates[0].length, 40);
 assert.equal(world.footprints[0].representation, 'property-extent');
 assert.equal(world.footprints[0].phaseEvidence.certainty, 'inferred');
 assert.equal(world.footprints[0].period.approximate, true);
-assert.equal(world.assets.length + world.layouts.length + world.roadNetworks.length + world.routes.length + world.scenes.length, 0);
+assert.equal(world.layouts.length + world.roadNetworks.length + world.routes.length, 0);
+assert.equal(world.assets.length, 1); assert.ok(world.assets.every(a => !a.registryId));
+assert.equal(world.scenes.length, 1); assert.equal(world.scenes[0].fallback, 'map-only'); assert.equal(world.scenes[0].required, false);
 assert.deepEqual(await (await GET()).json(), raw);
 for (const year of [1, 50, 78, 80, 200, 2025]) { assert.equal(at(year).footprints.length, 0); assert.equal(at(year).descriptors.length, 0); }
 assert.equal(at(79).footprints.length, 1); assert.equal(at(79).footprints[0].match, 'possible');

@@ -1,5 +1,8 @@
 # Historical World Data Schema v1 — Phase 4 Step 1
 
+Step 6 now resolves scene requirements during dataset selection and gates their
+3D projections. [Scene resolution contract](historical-scene-resolution.md).
+
 Step 5b adds optional `footprints` with separate geometry/phase evidence, date
 uncertainty, representation and attribution. These dated 2D extents do not create
 3D settlement descriptors. [Footprint ingestion pilot](historical-footprint-ingestion.md).

@@ -270,10 +270,44 @@
       }
     }
   ],
-  "assets": [],
+  "assets": [
+    {
+      "id": "asset:menander-architecture",
+      "category": "building",
+      "evidence": {
+        "certainty": "unknown",
+        "sources": [],
+        "note": "No source-grounded Menander reconstruction model has an approved registry binding. The property extent does not supply a building model."
+      }
+    }
+  ],
   "roadNetworks": [],
   "layouts": [],
   "events": [],
   "routes": [],
-  "scenes": []
+  "scenes": [
+    {
+      "id": "scene:menander-final-context",
+      "title": "Menander final-phase scene requirements",
+      "description": "Show the sourced property extent and evidence. Reconstructed walls, heights and architecture are unavailable.",
+      "placeId": "place:house-of-menander",
+      "period": {
+        "start": {
+          "year": 79
+        },
+        "approximate": true
+      },
+      "layoutIds": [],
+      "assetIds": [
+        "asset:menander-architecture"
+      ],
+      "required": false,
+      "fallback": "map-only",
+      "evidence": {
+        "certainty": "illustrative",
+        "sources": [],
+        "note": "Presentation requirement only. The documented extent and inferred phase remain separate evidence; no reconstructed scene is claimed."
+      }
+    }
+  ]
 }

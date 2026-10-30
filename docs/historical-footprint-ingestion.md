@@ -98,6 +98,8 @@ is claimed.
 
 ## Next step
 
+Step 6 now implements the [scene-resolution and assembly gate](historical-scene-resolution.md). The fixture adds an optional reconstruction request and unbound logical model reference; it still supplies no reconstructed architecture.
+
 Step 6 should resolve historical scene requirements against available, evidenced
 geometry and assets, preserving map-only results when architecture is missing.
 For Menander, individual walls, openings, heights and appearance still need review

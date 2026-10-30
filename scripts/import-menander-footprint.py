@@ -33,7 +33,11 @@ world = dict(version=1, id='world:menander-footprint-v1', title='House of Menand
     footprints=[dict(id='footprint:menander-property-ad79', title='Menander property extent', placeId='place:house-of-menander', representation='property-extent',
         period=dict(start=dict(year=79), approximate=True), phaseTitle='Final AD 79 context', phaseEvidence=phase_evidence,
         geometry=dict(type='Polygon', coordinates=[xy]), licence=licence, evidence=geometry_evidence)],
-    assets=[], roadNetworks=[], layouts=[], events=[], routes=[], scenes=[])
+    assets=[dict(id='asset:menander-architecture', category='building', evidence=evidence('unknown', [], 'No source-grounded Menander reconstruction model has an approved registry binding. The property extent does not supply a building model.'))],
+    roadNetworks=[], layouts=[], events=[], routes=[],
+    scenes=[dict(id='scene:menander-final-context', title='Menander final-phase scene requirements', description='Show the sourced property extent and evidence. Reconstructed walls, heights and architecture are unavailable.',
+        placeId='place:house-of-menander', period=dict(start=dict(year=79), approximate=True), layoutIds=[], assetIds=['asset:menander-architecture'], required=False, fallback='map-only',
+        evidence=evidence('illustrative', [], 'Presentation requirement only. The documented extent and inferred phase remain separate evidence; no reconstructed scene is claimed.'))])
 Path('lib/history/fixtures/menander.json').write_text(json.dumps(world, ensure_ascii=False, indent=2)+'\n')
 ledger = dict(datasetId=world['id'], reviewed='2026-10-30',
     claims=[dict(recordId='footprint:menander-property-ad79', field='geometry', status='documented', sourceIds=['source:plod-menander']),

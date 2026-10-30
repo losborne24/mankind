@@ -3,6 +3,8 @@ import type { HistoricalTime } from '@/lib/scenarios/schema';
 import type { SettlementDescriptor } from '@/map/settlements/settlementStreaming';
 import { matchHistoricalTime, periodBounds } from '@/lib/history/time';
 import { resolveValidatedSettlement } from '@/lib/history/adapters';
+import { resolveSceneRequirements, type HistoricalSceneResolution } from '@/lib/history/sceneRequirements';
+import { validateHistoricalWorld } from '@/lib/history/validate';
 
 type Match = 'within' | 'possible' | 'outside';
 export interface HistoricalPlaceSelection {
@@ -21,6 +23,7 @@ export interface HistoricalSelection {
   descriptors: SettlementDescriptor[];
   referenceAreas?: HistoricalReferenceArea[];
   footprints?: { footprint: HistoricalFootprint; match: Exclude<Match, 'outside'> }[];
+  scenes?: HistoricalSceneResolution[];
 }
 /** Input must be a validated dataset. No camera/date mutations or asset requests. */
 export function selectHistoricalWorld(world: HistoricalWorldData, time: HistoricalTime): HistoricalSelection {
@@ -69,5 +72,18 @@ export function selectHistoricalWorld(world: HistoricalWorldData, time: Historic
     const m = match(footprint.period);
     if (m !== 'outside' && visible.has(footprint.placeId)) footprints.push({ footprint, match: m });
   }
-  return { time: structuredClone(time), places, events, routes, descriptors, footprints, referenceAreas: (world.referenceAreas ?? []).filter(area => visible.has(area.placeId)) };
+  const scenes = resolveSceneRequirements(world, time, places, descriptors, footprints);
+  const allowed = descriptors.filter(descriptor => {
+    const placeId = world.layouts.find(layout => layout.id === descriptor.id)!.placeId;
+    const active = scenes.filter(scene => scene.scene.placeId === placeId && scene.status !== 'outside-period' && (scene.scene.required || scene.scene.layoutIds.includes(descriptor.id)));
+    return !active.length || active.some(scene => scene.status === 'ready' && scene.descriptorIds.includes(descriptor.id));
+  });
+  for (const row of places) if (row.layoutStatus === 'ready' && !allowed.some(d => row.layoutIds.includes(d.id))) {
+    row.layoutStatus = 'unavailable'; row.warnings.push('Scene requirements are not satisfied; geographic context only.');
+  }
+  return { time: structuredClone(time), places, events, routes, descriptors: allowed, scenes, footprints, referenceAreas: (world.referenceAreas ?? []).filter(area => visible.has(area.placeId)) };
+}
+/** Validating public entry point for requirement planning without applying a scene. */
+export function resolveHistoricalScenes(value: unknown, time: HistoricalTime): HistoricalSceneResolution[] {
+  return selectHistoricalWorld(validateHistoricalWorld(value), time).scenes!;
 }

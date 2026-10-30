@@ -422,3 +422,10 @@ Choose **House of Menander · AD 79 property extent** in the historical dataset
 controls to review a sourced property polygon with an inferred final-phase date.
 It remains 2D; open spaces are not treated as buildings.
 [Source review, data contract and validation](docs/historical-footprint-ingestion.md).
+
+### Historical scene requirements (Phase 4 Step 6)
+
+Scene requests now resolve against dates, layouts, registered models and placements.
+The inspector explains map-only fallbacks and unavailable requirements. Ready
+projections use the existing streamer; no new historical reconstruction is supplied.
+[Resolution, assembly rules and validation](docs/historical-scene-resolution.md).
