@@ -101,7 +101,7 @@ export default function GlobeView({ onStatus }: GlobeViewProps) {
       // inspect the live map, e.g. project coordinates during integration tests.
       if (process.env.NODE_ENV === "development") {
         (window as unknown as { __globe?: unknown }).__globe = {
-          map, queryTerrainHeights: (location: maplibregl.LngLatLike) => queryTerrainHeights(map, location),
+          map, layer, queryTerrainHeights: (location: maplibregl.LngLatLike) => queryTerrainHeights(map, location),
         };
       }
     });

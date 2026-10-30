@@ -23,7 +23,8 @@ player.play(); assert.equal(time.start.year, 100); assert.equal(applied.descript
 session.inspect({ kind: 'place', id: 'place:forum-boarium-temples' });
 player.pause(); assert.equal(session.previewReconstruction(world.layouts[0].id), true, 'Explicit inspection can show the interpretation during overview exploration');
 player.resume(); assert.equal(applied.descriptors.length, 0, 'Resume restores the overview scene plan');
-player.jump(2); assert.equal(applied.descriptors.length, 0, 'The market beat shows map layers only');
+player.jump(1); assert.equal(applied.descriptors.length, 1, 'The crossing requests the local scene');
+player.jump(2); assert.equal(applied.descriptors.length, 1, 'The market beat shows the local scene');
 player.jump(3); assert.equal(applied.descriptors.length, 1); assert.equal(player.snapshot.warning, undefined);
 assert.deepEqual(applied.scenes[0].assets.map(a => a.catalogue.entry.id).sort(), ['catalogue:hercules-victor-exterior', 'catalogue:portunus-exterior'], 'Both temples resolve through pinned catalogue versions');
 assert.equal(applied.descriptors[0].definition.buildings.length, 2, 'One descriptor carries both temples');

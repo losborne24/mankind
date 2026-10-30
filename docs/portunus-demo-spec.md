@@ -61,7 +61,14 @@ system leaves them out is a feature.
 - **Modern ≠ ancient:** the present Tiber embankments are 19th–20th century. Modern
   river geometry (e.g. OpenStreetMap) may be used only as a labelled approximation
   of the ancient bank, never as the ancient course.
-- No generated buildings to "fill" the square. Empty with labels beats invented.
+- **Best-guess reconstruction is allowed and expected** (decision, 30 Oct 2026):
+  the goal is to show what the place probably looked like in AD 100. Where evidence
+  is incomplete, build the best guess and attach a note. Every object carries one of:
+  - **documented**: survives or is directly recorded (e.g. both temples);
+  - **evidence-based**: placed or shaped from a source (plan fragment, excavation, historic map);
+  - **best guess**: plausible for the period and place, with a one-line note on what it is based on.
+  Best-guess objects are inspectable like everything else, and a legend or toggle
+  can show how much of the view is a guess.
 - Point locations are not footprints. Where only a point exists, show a marker.
 
 ## Quality bar (acceptance)
@@ -79,7 +86,7 @@ system leaves them out is a feature.
 ## Out of scope
 
 - Narration audio (planned later as a toggle; see Decisions).
-- Population, animals, ships, sound, interiors.
+- Interiors and sound (people, animals and river boats may be added later as best guess).
 - Any AI calls at runtime.
 - Other sites.
 

@@ -4,6 +4,7 @@ import type { SettlementDefinition } from '@/map/settlements/romanSettlement';
 import type { SettlementDescriptor } from '@/map/settlements/settlementStreaming';
 import type { Evidence, HistoricalPeriod } from '@/lib/history/schema';
 import { validateHistoricalWorld } from '@/lib/history/validate';
+import { contextGroundFor } from '@/lib/history/localContext';
 import { matchHistoricalPeriod, periodBounds, toHistoricalTime } from '@/lib/history/time';
 
 const certainty = (e: Evidence): Certainty => e.certainty === 'documented' ? 'established' : e.certainty === 'unknown' ? 'unverified' : 'illustrative';
@@ -96,6 +97,8 @@ export function resolveValidatedSettlement(world: import('@/lib/history/schema')
     maxFoundationRiseMeters: layout.maxFoundationRiseMeters, buildings, ambientLife: false,
     roads: network?.roads.map(road => ({ id: road.id, widthMeters: road.widthMeters, points: road.points.map(p => [...p] as [number, number]), ...(road.accessTo ? { accessTo: road.accessTo } : {}) })) ?? [],
   };
+  const contextGround = contextGroundFor(layoutId, definition.origin);
+  if (contextGround) definition.contextGround = contextGround;
   // The descriptor carries an explicit definition: no procedural profile, seed or generation fallback.
   const descriptor: SettlementDescriptor = { id: layout.id, origin: definition.origin,
     radiusMeters: Math.max(place.radiusMeters, layout.extentMeters / Math.SQRT2), definition,

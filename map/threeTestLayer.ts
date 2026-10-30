@@ -1,6 +1,12 @@
 import { clearSurfaceMapCache, surfaceMapCacheInfo } from "@/map/settlements/surfaceMaterials";
 import { DEVELOPMENT_SETTLEMENTS, SettlementLODController, settlementDistance, type SettlementDescriptor, type SettlementLOD } from "@/map/settlements/settlementStreaming";
 import { RegionalSettlement } from "@/map/settlements/RegionalSettlement";
+import { PostEffects } from "@/map/settlements/PostEffects";
+import { EXPOSURE } from "@/map/settlements/lighting";
+
+/** MapLibre global-state key: 0 while the flat 2D ground/river fills show, 1 once the lit 3D ground has faded in. */
+export const LOCAL_GROUND_STATE = "local-ground";
+export interface AtmosphereOptions { haze: boolean; dof: boolean }
 
 /**
  * Three.js ⇄ MapLibre integration (Phase 1 proof).
@@ -82,7 +88,7 @@ export interface StreamingStatus {
   scene?: ReturnType<SettlementScene["timing"]["snapshot"]>;
   layout?: ReturnType<ProceduralSettlementSession["timing"]["snapshot"]>;
   rendering?: {
-    frames: number; samples: number; medianMs: number | null; p95Ms: number | null;
+    frames: number; samples: number; medianMs: number | null; p95Ms: number | null; cpuMedianMs: number | null;
     calls: number; triangles: number; geometries: number; textures: number;
     canvas: number[];
   };
@@ -127,6 +133,12 @@ export class ThreeTestLayer implements CustomLayerInterface {
   private markerFilter = "";
   private historicalSignature?: string;
   private measuredFrames = 0;
+  private readonly cpuIntervals: number[] = [];
+  private post?: PostEffects;
+  private atmosphere: AtmosphereOptions = { haze: false, dof: false };
+  private groundFadeShown = 0;
+  private lastWaterFrame = 0;
+  private readonly reducedMotion = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
   private lastMeasuredFrame = 0;
   private readonly frameIntervals: number[] = [];
   private onStreamingStatus?: (status: StreamingStatus) => void;
@@ -195,6 +207,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
     this.renderer.autoClear = false;
     // Count all anchored scenes and shadow passes in this shared map frame.
     this.renderer.info.autoReset = false;
+    // PCFSoftShadowMap was removed in Three 0.186: PCFShadowMap is already filtered, and light.shadow.radius widens it.
     this.renderer.shadowMap.type = THREE.PCFShadowMap;
     this.renderer.shadowMap.autoUpdate = false;
 
@@ -219,6 +232,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
     this.map?.off("terrain", this.onSettlementTerrain);
     this.map?.off("sourcedata", this.onSettlementSource);
     this.clearStreamingScene();
+    this.post?.dispose(); this.post = undefined;
     this.regional?.dispose();this.regional=undefined;
     this.removeSettlementMarkers();
     this.settlement?.dispose();
@@ -243,6 +257,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
   render(gl: WebGL2RenderingContext, args: CustomRenderMethodInput): void {
     const { renderer, scene, camera, map } = this;
     if (!renderer || !scene || !camera || !map) return;
+    const cpuStarted = performance.now();
     renderer.info.reset();
     if (process.env.NODE_ENV === "development") {
       const now = performance.now(), interval = now - this.lastMeasuredFrame;
@@ -283,7 +298,9 @@ export class ThreeTestLayer implements CustomLayerInterface {
         queryTerrainSample(map, { lng: coordinate[0], lat: coordinate[1] }));
       if (this.settlement.timing.stage === "ready") {
         this.updateAmbientFrame(center.lng, center.lat);
+        this.tickLocalGround(performance.now());
         this.drawAnchored(this.settlementAnchor, args, false);
+        this.applyPostEffects(gl);
       } else this.settlement.updateAmbientLife(performance.now(),false);
     } else this.settlement?.updateAmbientLife(performance.now(),false);
     if (this.regional && this.regionalAnchor) {
@@ -297,7 +314,54 @@ export class ThreeTestLayer implements CustomLayerInterface {
       }
     }
     this.publishStreamingStatus();
+    if (process.env.NODE_ENV === "development") {
+      this.cpuIntervals.push(performance.now() - cpuStarted);
+      if (this.cpuIntervals.length > 240) this.cpuIntervals.shift();
+    }
+  }
 
+  /** Turns distance haze and depth of field on for guided beats; bloom stays with the local scene. */
+  setAtmosphere(options: AtmosphereOptions): void {
+    if (options.haze === this.atmosphere.haze && options.dof === this.atmosphere.dof) return;
+    this.atmosphere = { ...options };
+    this.map?.triggerRepaint();
+  }
+
+  /** Camera position in the settlement frame (+x east, +y up, +z south), metres. */
+  private cameraInSettlementFrame(target: THREE.Vector3): THREE.Vector3 {
+    const map = this.map!, origin = this.settlement!.origin, eye = map._camera.transform.getCameraLngLat();
+    const metresPerDegree = Math.PI / 180 * 6371008.8;
+    return target.set((eye.lng - origin[0]) * Math.cos(origin[1] * Math.PI / 180) * metresPerDegree,
+      map._camera.transform.getCameraAltitude(), -(eye.lat - origin[1]) * metresPerDegree);
+  }
+  /** Dev inspection only. */
+  get debugSettlement() { return this.settlement; }
+  private readonly eyeScratch = new THREE.Vector3();
+  private readonly eyeTranslation = new THREE.Matrix4();
+  private readonly settlementInverseProjection = new THREE.Matrix4();
+  private readonly centreScratch = new THREE.Vector3();
+
+  /** Animates the lit ground and river, and hands the flat 2D fills over to it as it fades in. */
+  private tickLocalGround(now: number): void {
+    const map = this.map!, ground = this.settlement?.contextGround;
+    const eye = this.cameraInSettlementFrame(this.eyeScratch);
+    const needsFrames = ground?.tick(now, eye, !this.reducedMotion && !document.hidden) ?? false;
+    const fade = ground ? Math.round(ground.groundFade * 50) / 50 : 0;
+    if (fade !== this.groundFadeShown) { this.groundFadeShown = fade; map.setGlobalStateProperty(LOCAL_GROUND_STATE, fade); }
+    if (needsFrames && now - this.lastWaterFrame > 32) { this.lastWaterFrame = now; map.triggerRepaint(); }
+  }
+
+  /** Bloom, haze and depth of field over the frame drawn so far (see PostEffects). */
+  private applyPostEffects(gl: WebGL2RenderingContext): void {
+    const { renderer, camera, map, settlement } = this;
+    if (!renderer || !camera || !map || !settlement) return;
+    const { haze, dof } = this.atmosphere;
+    this.post ??= new PostEffects();
+    const eye = this.cameraInSettlementFrame(this.eyeScratch), c = map.getCenter(), origin = settlement.origin;
+    const metresPerDegree = Math.PI / 180 * 6371008.8, groundY = settlement.centreHeight;
+    const centre = this.centreScratch.set((c.lng - origin[0]) * Math.cos(origin[1] * Math.PI / 180) * metresPerDegree, groundY, -(c.lat - origin[1]) * metresPerDegree);
+    this.post.apply(renderer, gl, { bloom: 0.2, haze: haze ? 1 : 0, dof: dof ? 0.7 : 0, inverseProjection: this.settlementInverseProjection,
+      eye, groundY, focusMeters: Math.max(40, eye.distanceTo(centre)) });
   }
 
   private updateAmbientFrame(lng: number, lat: number): void {
@@ -388,6 +452,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
     const rendering = process.env.NODE_ENV === "development" && this.renderer ? {
       frames: this.measuredFrames, samples: intervals.length,
       medianMs: intervals.length ? intervals[Math.floor(intervals.length*.5)] : null,
+      cpuMedianMs: this.cpuIntervals.length ? [...this.cpuIntervals].sort((a,b)=>a-b)[Math.floor(this.cpuIntervals.length*.5)] : null,
       p95Ms: intervals.length ? intervals[Math.min(intervals.length-1,Math.floor(intervals.length*.95))] : null,
       calls: this.renderer.info.render.calls, triangles: this.renderer.info.render.triangles,
       geometries: this.renderer.info.memory.geometries, textures: this.renderer.info.memory.textures,
@@ -401,6 +466,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
     this.procedural?.cancel();this.procedural=null;this.committedProcedural=undefined;
     this.settlementEnabled=false;this.activeDescriptor=undefined;
     this.settlement?.dispose();this.settlement=null;this.settlementAnchor=null;this.historicalDetailFailed=false;
+    if (this.groundFadeShown) { this.groundFadeShown = 0; this.map?.setGlobalStateProperty(LOCAL_GROUND_STATE, 0); }
     this.onProceduralStatus?.(null);
   }
   /** Scenario travel shares the existing debounce and scene/cache ownership. No speculative asset loads. */
@@ -434,7 +500,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
       if (decision.lod==="local" && !this.activeDescriptor) {
         const now=performance.now();
         if(this.localCandidate!==d.id) {this.localCandidate=d.id;this.candidateSince=now;}
-        if(!this.scenarioTravelling && !map.isMoving() && now-this.candidateSince>=200) {
+if(!this.scenarioTravelling && !map.isMoving() && now-this.candidateSince>=200) {
           this.activeDescriptor=d;this.localCandidate=undefined;
           this.settlementEnabled=true;
           if(d.definition) {
@@ -570,8 +636,19 @@ export class ThreeTestLayer implements CustomLayerInterface {
     }
     camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
     const settlement = entry.scene === this.settlement?.scene ? this.settlement : null;
+    // Lighting needs the real eye position (specular, reflections). The projection above maps settlement metres
+    // straight to clip space, so seat the camera at the eye and fold the inverse translation into the projection.
+    if (settlement) {
+      this.settlementInverseProjection.copy(camera.projectionMatrixInverse);
+      this.cameraInSettlementFrame(camera.position);
+      camera.projectionMatrix.multiply(this.eyeTranslation.makeTranslation(camera.position.x, camera.position.y, camera.position.z));
+    } else camera.position.set(0, 0, 0);
+    camera.updateMatrixWorld(true);
     const renderStarted = performance.now();
     const shadows = settlement?.shadowsEnabled && settlement.consumeShadowUpdate();
+    // Filmic tone mapping applies to the lit local scene only; the globe-scale markers keep their original look.
+    renderer.toneMapping = settlement ? THREE.ACESFilmicToneMapping : THREE.NoToneMapping;
+    renderer.toneMappingExposure = EXPOSURE;
     renderer.shadowMap.enabled = settlement?.shadowsEnabled ?? false;
     if (settlement) renderer.shadowMap.needsUpdate = Boolean(shadows);
     renderer.render(entry.scene, camera);

@@ -34,8 +34,8 @@ journey.beats.forEach(beat => {
   assert.ok([...shown].some(id => text.some(t => t.id === id)), `${beat.id} has narration`);
   assert.ok(shown.has('layer:ground') || beat.id === 'explore' || shown.has('layer:tiber'), `${beat.id}: never a featureless plane`);
 });
-// Two temples are loaded as one scene from beat 4 on, and not before (no model in the context beats).
-assert.deepEqual(journey.beats.map(b => b.sceneRequirements?.length ?? 0), [0, 0, 0, 1, 1, 1, 1]);
+// The local scene (lit ground, river, the two temples) is requested from the crossing on; the opening overview stays map-only.
+assert.deepEqual(journey.beats.map(b => b.sceneRequirements?.length ?? 0), [0, 1, 1, 1, 1, 1, 1]);
 const scene = world.scenes.find(s => s.id === journey.content.scenes[0].historicalSceneId);
 assert.equal(scene.assetIds.length, 2); assert.equal(world.layouts.find(l => l.id === scene.layoutIds[0]).buildings.length, 2);
 // Evidence labels: the journey never presents date-filtered or approximate layers as unlabelled fact.

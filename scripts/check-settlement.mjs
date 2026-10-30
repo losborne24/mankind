@@ -208,7 +208,7 @@ try {
   }
   assert.ok(assembler.scene.getObjectByName("terrain-shadow-receiver").receiveShadow);
   const sun = assembler.scene.children[0].children.find((object) => object.isDirectionalLight);
-  assert.ok(sun.castShadow && sun.shadow.mapSize.x === 1024);
+  assert.ok(sun.castShadow && sun.shadow.mapSize.x === 2048);
   const floorHeights = ROMAN_SETTLEMENT.buildings.map((building) => assembler.scene.getObjectByName(building.id).position.y);
   assert.ok(Math.abs(sun.target.position.y - floorHeights.reduce((sum, height) => sum + height, 0) / floorHeights.length) < 0.001);
   console.log(`Environment: ${status.sceneryLoaded} placements in ${instanceMeshes.length} instanced component batches.`);

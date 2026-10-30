@@ -13,6 +13,8 @@ import { buildingContacts, createSettlementEnvironment } from "@/map/settlements
 import { settlementEnvironmentConfig } from "@/map/settlements/environmentConfig";
 import { configureTerrainShadowCaster } from "@/map/settlements/terrainShadows";
 import { InstancedScenery, type GroundResult } from "@/map/settlements/InstancedScenery";
+import { ContextGround } from "@/map/settlements/ContextGround";
+import { GROUND_BOUNCE_COLOUR, SKY_COLOUR, SUN_COLOUR, SUN_DIRECTION } from "@/map/settlements/lighting";
 
 
 export interface SettlementStatus {
@@ -50,6 +52,9 @@ export class SettlementScene {
   private readonly scenery = new InstancedScenery();
   private environment: ReturnType<typeof createSettlementEnvironment> | undefined;
   private sun: THREE.DirectionalLight | null = null;
+  contextGround: ContextGround | null = null;
+  /** Mean floor height of the visible buildings, settlement frame; the ground the camera is looking at. */
+  centreHeight = 0;
   private shadowDirty = true;
   shadowsEnabled = true;
   private entries: SurfaceEntry[] = [];
@@ -93,13 +98,13 @@ export class SettlementScene {
     const generation = this.generation;
     const width = this.definition.groundSizeMeters ?? GROUND_WIDTH, depth = this.definition.groundSizeMeters ?? GROUND_DEPTH;
     this.environment = createSettlementEnvironment(this.definition);
-    const sky = new THREE.HemisphereLight(0xd3dce0, 0x85765e, 1.65);
-    this.sun = new THREE.DirectionalLight(0xffeed4, 2.15);
+    const sky = new THREE.HemisphereLight(SKY_COLOUR, GROUND_BOUNCE_COLOUR, 1.4);
+    this.sun = new THREE.DirectionalLight(SUN_COLOUR, 2.9);
     this.sun.castShadow = true;
-    this.sun.shadow.mapSize.set(1024, 1024);
+    this.sun.shadow.mapSize.set(2048, 2048);
     Object.assign(this.sun.shadow.camera, { left: -Math.max(68,width/2+12), right: Math.max(68,width/2+12), top: Math.max(78,depth/2+12), bottom: -Math.max(78,depth/2+12), near: 1, far: Math.max(180,depth+60) });
     this.sun.shadow.camera.updateProjectionMatrix();
-    this.sun.shadow.radius = 2;
+    this.sun.shadow.radius = 3;
     this.sun.shadow.bias = -0.00015;
     this.sun.shadow.normalBias = 0.035;
     this.root.add(sky, this.sun, this.sun.target);
@@ -117,21 +122,33 @@ export class SettlementScene {
     const footprints: GroundFootprint[] = [];
     const groundMaterial = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide, forceSinglePass: true });
     this.resources.push(groundMaterial);
-    const treatment = this.addSurface(groundSurface(width, depth, 2), groundMaterial, "settlement-ground");
-    treatment.mesh.renderOrder = 1;
-    const catcher = new THREE.ShadowMaterial({ opacity: 0.27, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1 });
-    this.resources.push(catcher);
-    const ground = this.addSurface(groundSurface(width, depth, 2), catcher, "terrain-shadow-receiver");
-    ground.shadowReceiver = true;
-    ground.mesh.renderOrder = 2;
+    const contextSpec = this.definition.contextGround;
+    // A context ground is lit and shadowed itself, so it replaces both the translucent treatment and the shadow catcher.
+    if (!contextSpec) {
+      const treatment = this.addSurface(groundSurface(width, depth, 2), groundMaterial, "settlement-ground");
+      treatment.mesh.renderOrder = 1;
+      const catcher = new THREE.ShadowMaterial({ opacity: 0.27, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1 });
+      this.resources.push(catcher);
+      const ground = this.addSurface(groundSurface(width, depth, 2), catcher, "terrain-shadow-receiver");
+      ground.shadowReceiver = true;
+      ground.mesh.renderOrder = 2;
+    }
     this.entries[0].mesh.renderOrder = 3;
     const sceneryLoad = this.scenery.load(this.environment.scenery, this.cache, () => {
       this.dirty = this.shadowDirty = true; this.publish(); this.repaint();
     });
+    const groundLoad = contextSpec ? new Promise<void>(resolve => setTimeout(resolve, 0)).then(() => {
+      if (!this.active || generation !== this.generation) return;
+      const started = performance.now();
+      this.contextGround = new ContextGround(contextSpec, this.definition.buildings.flatMap(buildingContacts));
+      this.root.add(this.contextGround.group); this.resources.push(this.contextGround);
+      this.timing.add("contextGround", started);
+      this.dirty = this.shadowDirty = true; this.repaint();
+    }) : Promise.resolve();
     this.timing.add("surfaceAndShadowSetup", preparationStarted);
     const assetsStarted = performance.now();
     this.timing.stage = "assets";
-    this.loading = Promise.all([this.definition.ambientLife === false ? Promise.resolve() : this.ambientLife.load(this.cache), sceneryLoad, ...this.definition.buildings.map(async (building) => {
+    this.loading = Promise.all([this.definition.ambientLife === false ? Promise.resolve() : this.ambientLife.load(this.cache), sceneryLoad, groundLoad, ...this.definition.buildings.map(async (building) => {
       let lease: ModelLease | undefined;
       try {
         const asset = assetRegistry[building.assetId];
@@ -300,16 +317,18 @@ export class SettlementScene {
       entry.mesh.visible = true;
       if (entry.model) { entry.model.position.y = top!; entry.model.visible = true; }
     }
+    if (this.contextGround && this.definition.contextGround && !this.contextGround.update(resolve, this.definition.contextGround)) this.terrainPending++;
     const sceneryGround = this.scenery.updateTerrain(resolve);
     this.terrainPending += sceneryGround.pending;
     this.terrainRetained += sceneryGround.retained;
     this.scenerySteep = sceneryGround.steep;
     const stableFloors = this.entries.filter((entry) => entry.model?.visible).map((entry) => entry.model!.position.y);
     const center = stableFloors.length ? { height: stableFloors.reduce((sum, value) => sum + value, 0) / stableFloors.length } : resolve([0, 0]);
+    if (center.height !== undefined) this.centreHeight = center.height;
     if (this.sun && center.height !== undefined) {
       const lightScale = Math.max(1, (this.definition.groundSizeMeters ?? GROUND_DEPTH) / GROUND_DEPTH);
-      this.sun.position.set(-40 * lightScale, center.height + 65 * lightScale, -40 * lightScale);
       this.sun.target.position.set(0, center.height, 0);
+      this.sun.position.copy(SUN_DIRECTION).multiplyScalar(95 * lightScale).add(this.sun.target.position);
     }
     this.updateAccessPaths();
     this.syncBuildingBatches();
@@ -326,6 +345,7 @@ export class SettlementScene {
     this.ambientLife.unload();
     this.environment = undefined;
     this.sun = null;
+    this.contextGround = null;
     for (const entry of this.entries) entry.lease?.release();
     for (const resource of this.resources) resource.dispose();
     this.root.clear();

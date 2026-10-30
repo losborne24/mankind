@@ -111,7 +111,8 @@ export class ScenarioPlayer {
         this.publish({ warning: this.ports.scenes ? this.ports.scenes(requirements, scenario, this.snapshot.intendedTime!).warning : requirements.length ? 'Requested scene unavailable; map and geographic overlays remain available.' : undefined });
         this.sample = directCamera(camera, this.ports.camera.read(), scenario);
         const next = scenario.beats[this.snapshot.beat + 1]?.actions[0].camera;
-        this.intent = { focus: this.ports.camera.read().center, destination: 'center' in camera ? camera.center : next && 'center' in next ? next.center : undefined, route: camera.type === 'followRoute' ? scenario.content.routes.find(r => r.id === camera.route)?.coordinates : undefined, arrivalInMs: camera.duration, detail: 'map', importance: 'narrative', travelling: camera.type !== 'hold' };
+        this.intent = { focus: this.ports.camera.read().center, destination: 'center' in camera ? camera.center : next && 'center' in next ? next.center : undefined, route: camera.type === 'followRoute' ? scenario.content.routes.find(r => r.id === camera.route)?.coordinates : undefined, arrivalInMs: camera.duration, detail: 'map', importance: 'narrative', // An orbit stays put around its subject, so detail may stream in during it; only a flight or route is travel.
+        travelling: camera.type === 'flyTo' || camera.type === 'followRoute' };
         this.ports.streaming?.(this.intent);
         this.publish({ owner: 'scenario', command: camera.type });
     }

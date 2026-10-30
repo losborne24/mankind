@@ -44,10 +44,10 @@ export const portunusJourney: ScenarioDefinition = {
     { id: 'rome', title: 'Rome from above', actions: [
       { camera: { type: 'flyTo', transition: 'zoomPanZoom', center: forum, zoom: 14.7, pitch: 40, bearing: 200, duration: 11000 }, overlays: ['rome', ...base, ...hills, 'layer:forum-boarium'] },
       { camera: { type: 'hold', duration: 5000 }, overlays: ['rome', ...base, ...hills, 'layer:forum-boarium'] } ] },
-    { id: 'crossing', title: 'The river crossing', actions: [
+    { id: 'crossing', title: 'The river crossing', sceneRequirements: ['temples'], actions: [
       { camera: { type: 'flyTo', center: island, zoom: 15.8, pitch: 52, bearing: 150, duration: 6000 }, overlays: ['crossing', ...base, 'layer:tiber-island', 'layer:pons-aemilius', 'layer:portus-tiberinus'] },
       { camera: { type: 'flyTo', center: bridge, zoom: 16.5, pitch: 55, bearing: 115, duration: 8000 }, overlays: ['crossing', ...base, 'layer:tiber-island', 'layer:pons-aemilius', 'layer:portus-tiberinus', 'layer:cloaca-maxima-outlet'] } ] },
-    { id: 'market', title: 'The cattle market', actions: [
+    { id: 'market', title: 'The cattle market', sceneRequirements: ['temples'], actions: [
       { camera: { type: 'flyTo', center: forum, zoom: 17.2, pitch: 58, bearing: 70, duration: 7000 }, overlays: ['market', ...base, 'layer:forum-boarium', 'layer:ara-maxima', 'layer:cloaca-maxima-outlet', 'layer:portus-tiberinus', ...left] },
       { camera: { type: 'orbit', center: forum, zoom: 17.2, pitch: 58, degrees: 35, duration: 7000 }, overlays: ['market', ...base, 'layer:forum-boarium', 'layer:ara-maxima', 'layer:cloaca-maxima-outlet', 'layer:portus-tiberinus', ...left] } ] },
     { id: 'temples', title: 'Two temples', sceneRequirements: ['temples'], actions: [

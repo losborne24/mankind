@@ -54,6 +54,9 @@ export function ScenarioPanel({ map, layer, streamingStatus, settlementStatus }:
         framePadding();
         window.addEventListener('resize', framePadding);
         controller.load(portunusJourney);
+        // Haze and depth of field belong to guided beats only; any pause, exploration or idle turns them off.
+        const guided = () => { const state = controller.getSnapshot().state, on = state === 'playing' || state === 'preparing'; layer?.setAtmosphere({ haze: on, dof: on }); };
+        const unsubAtmosphere = controller.subscribe(guided);
         const detach = attachScenarioInput(map.getContainer(), reason => controller.pause(reason));
         const detachControls = attachScenarioControls(document, controller);
         const unsub = useExplorationStore.subscribe((state, previous) => {
@@ -85,6 +88,8 @@ export function ScenarioPanel({ map, layer, streamingStatus, settlementStatus }:
             clearTimeout(timer);
             setPlayer(null);
             detach();
+            unsubAtmosphere();
+            layer?.setAtmosphere({ haze: false, dof: false });
             unsub();
             detachControls();
             map.off('movestart', movement);
