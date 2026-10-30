@@ -170,42 +170,42 @@ export class ContextGround {
     const ground = this.groundGeometry.getAttribute("position") as THREE.BufferAttribute;
     const water = this.waterGeometry.getAttribute("position") as THREE.BufferAttribute;
     // River mask coverage (0..1) per vertex; the mask is blurred, so it also describes the bank slope.
-    const res = MASK_RESOLUTION, cover: number[] = new Array(heights.length).fill(0), wet: number[] = [], bank: number[] = [];
+    const res = MASK_RESOLUTION, cover: number[] = new Array(heights.length).fill(0), wet: number[] = [];
     for (let i = 0; i < heights.length; i++) {
       const [x, z] = this.points[i];
       const u = Math.floor((x / spec.sizeMeters + 0.5) * res), v = Math.floor((z / spec.sizeMeters + 0.5) * res);
       if (u < 0 || v < 0 || u >= res || v >= res) continue;
       const g = this.maskData[(v * res + u) * 4 + 1];
       cover[i] = g / 255;
-      if (g > 128) wet.push(heights[i]); else if (g > 12) bank.push(heights[i]);
+      if (g > 128) wet.push(heights[i]);
     }
     this.waterVisible = wet.length > 3;
-    let level = 0;
+    const surface: number[] = new Array(heights.length);
     if (this.waterVisible) {
-      wet.sort((a, b) => a - b);
-      level = wet[Math.floor(wet.length * 0.85)] + 0.15;
-      // The surface cannot stand above the banks that hold it: that reads as a wall of water.
-      if (bank.length > 3) { bank.sort((a, b) => a - b); level = Math.min(level, bank[Math.floor(bank.length * 0.25)] - 0.3); }
-      level = Math.min(level, wet[wet.length - 1]);
+      // The surface follows the river instead of standing at one height: over the channel, take the highest bed within
+      // a few rings (so bumps in the coarse terrain stay covered), then smooth it so it reads as flowing water.
+      const inSet = cover.map(c => c > 0.05), neighbours = (i: number) => {
+        const ring = Math.floor(i / SEGMENTS), k = i % SEGMENTS, out = [ring * SEGMENTS + (k + 1) % SEGMENTS, ring * SEGMENTS + (k + SEGMENTS - 1) % SEGMENTS];
+        if (ring > 0) out.push(i - SEGMENTS);
+        if (ring < RINGS) out.push(i + SEGMENTS);
+        return out.filter(n => inSet[n]);
+      };
+      let w = heights.slice();
+      for (let pass = 0; pass < 3; pass++) w = w.map((h, i) => inSet[i] ? Math.max(h, ...neighbours(i).map(n => w[n])) : h);
+      for (let pass = 0; pass < 14; pass++) w = w.map((h, i) => { if (!inSet[i]) return h; const n = neighbours(i); return (h + n.reduce((sum, j) => sum + w[j], 0)) / (n.length + 1); });
+      for (let i = 0; i < heights.length; i++) surface[i] = Math.max(w[i], inSet[i] ? heights[i] : -Infinity) + 0.25;
     }
-    // The coarse rim sits higher so the terrain mesh cannot poke through between vertices. Inside the river mask the
-    // bed is cut below the surface, so a flat water level never leaves ground showing through the channel.
-    for (let i = 0; i < heights.length; i++) {
-      const rim = 0.07 + Math.hypot(this.points[i][0], this.points[i][1]) / radius * 0.8;
-      let y = heights[i] + rim;
-      if (this.waterVisible) {
-        const t = Math.min(1, Math.max(0, (cover[i] - 0.1) / 0.5)), cut = level - 0.5 * t * t * (3 - 2 * t);
-        if (t > 0 && y > cut) y = y + (cut - y) * t * t * (3 - 2 * t);
-      }
-      ground.setY(i, y);
-    }
+    // The coarse rim sits higher so the terrain mesh cannot poke through between vertices.
+    for (let i = 0; i < heights.length; i++) ground.setY(i, heights[i] + 0.07 + Math.hypot(this.points[i][0], this.points[i][1]) / radius * 0.8);
     ground.needsUpdate = true;
     this.shadeRelief(heights);
     this.groundGeometry.computeBoundingSphere();
     if (this.waterVisible) {
-      for (let i = 0; i < heights.length; i++) water.setY(i, level);
+      for (let i = 0; i < heights.length; i++) water.setY(i, surface[i]);
       water.needsUpdate = true; this.waterGeometry.computeBoundingSphere();
-      this.waterLevel = level;
+      // One reference height for the bridge, quays and barges: the median over the open channel.
+      const open = surface.filter((_, i) => cover[i] > 0.5).sort((a, b) => a - b);
+      this.waterLevel = open[Math.floor(open.length / 2)];
     } else this.waterLevel = undefined;
     if (!this.shownSince) this.shownSince = performance.now();
     this.ground.visible = true; this.water.visible = this.waterVisible;
