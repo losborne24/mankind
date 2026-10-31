@@ -40,6 +40,14 @@ export class GlbCache {
     }
   }
 
+  /** Start fetching and decoding a model nobody holds yet, so a later acquire finds it ready. */
+  prefetch(url: string) {
+    if (this.entries.has(url)) return;
+    const entry: Entry = { promise: this.loader.loadAsync(url), users: 0, lastUsed: performance.now(), bytes: 0, epoch: this.epoch };
+    this.entries.set(url, entry);
+    entry.promise.then(gltf => { if (!entry.gltf) { entry.gltf = gltf; entry.bytes = sourceBytes(gltf); } }, () => { if (this.entries.get(url) === entry) this.entries.delete(url); });
+  }
+
   async acquire(url: string, nodeName?: string): Promise<ModelLease> {
     let entry = this.entries.get(url);
     if (!entry) {

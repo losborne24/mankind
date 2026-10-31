@@ -1,5 +1,5 @@
 import { clearSurfaceMapCache, surfaceMapCacheInfo } from "@/map/settlements/surfaceMaterials";
-import { DEVELOPMENT_SETTLEMENTS, SettlementLODController, settlementDistance, type SettlementDescriptor, type SettlementLOD } from "@/map/settlements/settlementStreaming";
+import { DEVELOPMENT_SETTLEMENTS, LOD_DISTANCES, SettlementLODController, settlementDistance, type SettlementDescriptor, type SettlementLOD } from "@/map/settlements/settlementStreaming";
 import { RegionalSettlement } from "@/map/settlements/RegionalSettlement";
 import { PostEffects } from "@/map/settlements/PostEffects";
 import { EXPOSURE } from "@/map/settlements/lighting";
@@ -40,7 +40,6 @@ export interface AtmosphereOptions { haze: boolean; dof: boolean }
  * materials/camera.
  */
 
-import { travelTo } from "@/map/cameraTravel";
 import * as THREE from "three";
 import { DEFAULT_AMBIENT_LIFE, type AmbientLifeOptions } from "@/map/settlements/AmbientLifeView";
 import type { CustomLayerInterface, CustomRenderMethodInput, Map as MapLibreMap, MapSourceDataEvent } from "maplibre-gl";
@@ -304,9 +303,15 @@ export class ThreeTestLayer implements CustomLayerInterface {
         this.drawAnchored(this.settlementAnchor, args, false);
         this.applyPostEffects(gl);
       } else this.settlement.updateAmbientLife(performance.now(),false);
+    } else if (this.settlementEnabled && this.settlement && this.settlementAnchor) {
+      // Prepared but not yet shown: fit it to the terrain now, so it is ready to draw on arrival.
+      const exaggeration = map.getTerrain()?.exaggeration;
+      this.settlement.updateTerrain((coordinate) =>
+        queryTerrainSample(map, { lng: coordinate[0], lat: coordinate[1] }), typeof exaggeration === "number" && exaggeration > 0 ? exaggeration : 1);
+      this.settlement.updateAmbientLife(performance.now(),false);
     } else this.settlement?.updateAmbientLife(performance.now(),false);
     if (this.regional && this.regionalAnchor) {
-      this.regional.scene.visible = !this.historicalDetailFailed && this.settlement?.timing.stage !== "ready";
+      this.regional.scene.visible = !this.historicalDetailFailed && !(this.settlement?.timing.stage === "ready" && this.lodController.current.lod === "local");
       if (this.regional.scene.visible) {
         this.regional.updateTerrain(coordinate => {
           const sample = queryTerrainSample(map,{lng:coordinate[0],lat:coordinate[1]});
@@ -329,7 +334,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
   /** The reconstructed object under a screen point (CSS pixels): raised objects by ray, from the last settlement frame. */
   pickReconstruction(point: { x: number; y: number }): string | undefined {
     const map = this.map, urban = this.settlement?.urban;
-    if (!map || !urban || !this.settlementAnchor) return undefined;
+    if (!map || !urban || !this.settlementAnchor || this.lodController.current.lod !== "local") return undefined;
     const canvas = map.getCanvas(), x = point.x / canvas.clientWidth * 2 - 1, y = 1 - point.y / canvas.clientHeight * 2;
     const near = new THREE.Vector4(x, y, -1, 1).applyMatrix4(this.settlementInverseProjection), far = new THREE.Vector4(x, y, 1, 1).applyMatrix4(this.settlementInverseProjection);
     const a = new THREE.Vector3(near.x / near.w, near.y / near.w, near.z / near.w), b = new THREE.Vector3(far.x / far.w, far.y / far.w, far.z / far.w);
@@ -423,7 +428,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
   }
   private visitDefinition(definition: import("@/map/settlements/romanSettlement").SettlementDefinition, origin: Coordinate=definition.origin): void {
     this.setDebugDescriptor({id:definition.id,origin,radiusMeters:(definition.groundSizeMeters??140)/2,profile:"village",seed:definition.seed??7,definition:{...definition,origin}});
-    if(this.map)travelTo(this.map,{center:[...origin],zoom:18.4,pitch:55,bearing:-25});
+    this.map?.flyTo({center:[...origin],zoom:18.4,pitch:55,bearing:-25});
   }
   visitSettlement(origin?: Coordinate): void {
     this.visitDefinition(ROMAN_SETTLEMENT,origin??ROMAN_SETTLEMENT.origin);
@@ -431,7 +436,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
   visitProceduralSettlement(seed = 7, origin: Coordinate = DEFAULT_PROCEDURAL_CONFIG.origin, overrides?: Partial<ProceduralSettlementConfig>): void {
     const config={...(overrides?.profile ? settlementProfileConfig(overrides.profile) : DEFAULT_PROCEDURAL_CONFIG),...overrides,seed,origin};
     this.setDebugDescriptor({id:"debug-procedural",origin,radiusMeters:config.extentMeters+25,profile:config.profile??"village",seed,config});
-    if(this.map)travelTo(this.map,{center:[...origin],zoom:18.4,pitch:55,bearing:-25});
+    this.map?.flyTo({center:[...origin],zoom:18.4,pitch:55,bearing:-25});
   }
   private setDebugDescriptor(descriptor: SettlementDescriptor): void {
     this.historicalSignature = undefined;
@@ -449,7 +454,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
   }
   visitStreamingSettlement(id: string): void {
     this.useDevelopmentSettlements();const d=this.descriptors.find(d=>d.id===id);
-    if(d&&this.map)travelTo(this.map,{center:[...d.origin],zoom:18.4,pitch:55,bearing:-25});
+    if(d)this.map?.flyTo({center:[...d.origin],zoom:18.4,pitch:55,bearing:-25});
   }
   /** Dataset selection supplies explicit definitions; an empty set never falls back to fixtures. */
   setHistoricalSettlements(descriptors: readonly SettlementDescriptor[]): void {
@@ -464,6 +469,9 @@ export class ThreeTestLayer implements CustomLayerInterface {
     this.layouts.clear(); this.descriptors = descriptors; this.streamingEnabled = true;
     this.lodController.override = 'auto'; this.lodController.current = { lod: 'global', distance: Infinity };
     this.installSettlementMarkers(); this.map?.triggerRepaint();
+    // Models for every journey scene download now, not when the camera arrives.
+    const ids = new Set(descriptors.flatMap(d => [...d.definition!.buildings, ...(d.definition!.scenery ?? [])].map(item => item.assetId)));
+    for (const id of ids) glbCache.prefetch(assetUrl(assetRegistry[id].path));
   }
   setSettlementLOD(override: SettlementLOD | "auto"): void {this.lodController.override=override;this.map?.triggerRepaint();}
   getStreamingStatus(): StreamingStatus {
@@ -492,7 +500,9 @@ export class ThreeTestLayer implements CustomLayerInterface {
   /** Scenario travel shares the existing debounce and scene/cache ownership. No speculative asset loads. */
   private historicalDetailFailed = false;
   private scenarioTravelling = false;
-  setScenarioTravel(active: boolean): void { this.scenarioTravelling = active; this.map?.triggerRepaint(); }
+  /** Parked: a scenario is holding the camera still on purpose, so detail can start without the usual settle delay. */
+  private scenarioParked = false;
+  setScenarioTravel(active: boolean, parked = false): void { this.scenarioTravelling = active; this.scenarioParked = parked; this.map?.triggerRepaint(); }
   private updateStreaming(): void {
     const map=this.map;if(!map)return;
     // MapLibre 6.15 exposes its projection-aware camera via _camera; keep this adapter here.
@@ -512,7 +522,9 @@ export class ThreeTestLayer implements CustomLayerInterface {
       this.markerFilter=markerFilter;
       map.setFilter("settlement-descriptors",["!=",["get","id"],markerFilter]);
     }
-    if (this.activeDescriptor && (decision.lod!=="local" || this.activeDescriptor.id!==d?.id)) this.clearStreamingScene();
+    // Within preparing distance the local scene is built but stays hidden until the decision turns local.
+    const near=!!d && (decision.lod==="local" || decision.lod==="regional" && decision.distance<=(this.activeDescriptor?.id===d.id || this.localCandidate===d.id ? LOD_DISTANCES.prepareExit : LOD_DISTANCES.prepareEnter));
+    if (this.activeDescriptor && (!near || this.activeDescriptor.id!==d?.id)) this.clearStreamingScene();
     if (decision.lod==="global" || !d) {
       if(this.localCandidate)this.clearStreamingScene();
       this.regional?.dispose();this.regional=undefined;this.regionalAnchor=undefined;
@@ -522,10 +534,10 @@ export class ThreeTestLayer implements CustomLayerInterface {
         this.regionalAnchor={scene:this.regional.scene,lngLat:d.origin,altitude:0,anchor:geographicAnchor(d.origin,0)};
       }
       // Remain on the cheap silhouette while travelling or waiting for DEM/assets.
-      if (decision.lod==="local" && !this.activeDescriptor) {
+      if (near && !this.activeDescriptor) {
         const now=performance.now();
         if(this.localCandidate!==d.id) {this.localCandidate=d.id;this.candidateSince=now;}
-if(!this.scenarioTravelling && !map.isMoving() && now-this.candidateSince>=200) {
+if(!this.scenarioTravelling && !map.isMoving() && now-this.candidateSince>=(this.scenarioParked?0:200)) {
           this.activeDescriptor=d;this.localCandidate=undefined;
           this.settlementEnabled=true;
           if(d.definition) {
@@ -540,11 +552,11 @@ if(!this.scenarioTravelling && !map.isMoving() && now-this.candidateSince>=200) 
             this.ambientLifeOptions.count=config.profile ? SETTLEMENT_PROFILES[config.profile].villagers : DEFAULT_AMBIENT_LIFE.count;
             this.procedural=new ProceduralSettlementSession(config);this.procedural.start();
           }
-        } else if(!this.streamTimer) this.streamTimer=setTimeout(()=>{this.streamTimer=undefined;this.map?.triggerRepaint();},220);
-      } else if(decision.lod!=="local" && this.localCandidate) this.clearStreamingScene();
+        } else if(!this.streamTimer) this.streamTimer=setTimeout(()=>{this.streamTimer=undefined;this.map?.triggerRepaint();},this.scenarioParked?16:220);
+      } else if(!near && this.localCandidate) this.clearStreamingScene();
     }
     // Hide the proxy once terrain-attached detailed buildings are visible.
-    if(this.regional)this.regional.scene.visible=!this.historicalDetailFailed && !(this.settlement && this.settlement.timing.stage==="ready");
+    if(this.regional)this.regional.scene.visible=!this.historicalDetailFailed && !(this.settlement && this.settlement.timing.stage==="ready" && decision.lod==="local");
   }
   private publishStreamingStatus(): void {
     const status=this.getStreamingStatus();

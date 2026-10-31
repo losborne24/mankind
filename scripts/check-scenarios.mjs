@@ -17,9 +17,8 @@ const start={center:[-.1,51.5],zoom:12,pitch:30,bearing:170};
 const orbit=directCamera({type:'orbit',center:[0,51.5],zoom:15,pitch:50,degrees:180,duration:1000},start,demo);
 for(let i=20;i<=100;i++)assert.deepEqual(orbit(i/100).center,[0,51.5]);assert.deepEqual(orbit(0),start);
 const fly=directCamera({type:'flyTo',center:[0,52],zoom:15,pitch:50,bearing:-170,duration:1000},start,demo);assert.deepEqual(fly(0),start);
-const cinematic=directCamera({type:'flyTo',center:[0,52],zoom:15,duration:1000,transition:'cinematic'},start,demo);// Default flights pan before they zoom in: no zoom gain until the pan has finished.
-for(let i=0;i<=60;i++)assert.ok(fly(i/100).zoom<=start.zoom+1e-9);assert.ok(Math.abs(fly(1).zoom-15)<1e-9);
-assert.ok(cinematic(.5).zoom<start.zoom+(15-start.zoom)*.5);
+const cinematic=directCamera({type:'flyTo',center:[0,52],zoom:15,duration:1000,transition:'cinematic'},start,demo);assert.ok(cinematic(.5).zoom<fly(.5).zoom);
+assert.ok(Math.abs(fly(.5).bearing-180)<1e-6);
 // Zoom out at the origin, pan at a fixed scale, then zoom in at the destination.
 const approachStart={center:[30,25],zoom:2.1,pitch:0,bearing:0};
 const approachCommand=demo.beats[0].actions[0].camera;
@@ -52,7 +51,7 @@ const tick=(ms=100)=>{now+=ms;const callbacks=[...frames.values()];frames.clear(
 const run=ms=>{for(let i=0;i<ms/100;i++)tick();};
 const transitions=[];const unsubscribe=player.subscribe(()=>transitions.push(player.snapshot.state));
 player.load(demo);assert.equal(player.snapshot.state,'idle');player.play();assert.equal(time.start.month,7);assert.equal(travel.detail,'map');run(1000);const elapsed=player.snapshot.elapsed,saved=structuredClone(pose);player.pause('Mouse navigation');assert.equal(player.snapshot.state,'paused');assert.equal(frames.size,0);pose.center=[10,10];const free=structuredClone(pose);run(1000);assert.deepEqual(pose,free);
-player.resume();run(500);player.pause('Scroll zoom');assert.equal(player.snapshot.elapsed,elapsed);assert.deepEqual(player.snapshot.savedPose,saved);pose.center=[20,20];player.resume();run(1900);assert.equal(player.snapshot.returning,false);assert.ok(distance(pose.center,saved.center)<.01);run(200);assert.ok(player.snapshot.elapsed>elapsed);
+player.resume();run(500);player.pause('Scroll zoom');assert.equal(player.snapshot.elapsed,elapsed);assert.deepEqual(player.snapshot.savedPose,saved);pose.center=[20,20];player.resume();run(4300);assert.equal(player.snapshot.returning,false);assert.ok(distance(pose.center,saved.center)<.01);run(200);assert.ok(player.snapshot.elapsed>elapsed);
 player.skip();assert.equal(player.snapshot.beat,1);player.jump(3);assert.equal(time.start.day,27);player.restart();assert.equal(player.snapshot.beat,0);assert.equal(time.start.day,undefined);player.stop();assert.equal(frames.size,0);assert.deepEqual(overlay,[]);const count=writes;run(1000);assert.equal(writes,count);
 // Full sequencing including multiple timed actions, cleanup, map-port failure.
 const short=structuredClone(demo);short.beats.forEach(b=>b.actions.forEach(a=>a.camera.duration=100));short.beats[0].actions.push({...short.beats[0].actions[0]});player.load(short);player.play();run(1000);assert.equal(player.snapshot.state,'completed');assert.equal(player.snapshot.progress,1);assert.equal(travel,null);assert.ok(transitions.includes('preparing'));assert.ok(transitions.includes('paused'));assert.ok(transitions.includes('completed'));unsubscribe();

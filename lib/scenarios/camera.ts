@@ -56,14 +56,21 @@ function bearing(a: Coordinate, b: Coordinate): number {
     const d = angleDelta(a[0], b[0]) * rad;
     return Math.atan2(Math.sin(d) * Math.cos(b[1] * rad), Math.cos(a[1] * rad) * Math.sin(b[1] * rad) - Math.sin(a[1] * rad) * Math.cos(b[1] * rad) * Math.cos(d)) / rad;
 }
+/** Return to the scene after the user has wandered: pull back, pan, then descend, never zooming in while still travelling. */
+export function returnCamera(start: CameraPose, end: CameraPose): { duration: number; sample: (t: number) => CameraPose } {
+    const d = distance(start.center, end.center), zoom = Math.max(0, Math.min(start.zoom, end.zoom, Math.log2(40075000 / Math.max(1000, d * 4))));
+    const departure = { ...start, zoom }, arrival = { ...departure, center: end.center, bearing: end.bearing };
+    // Further away, the pull-back, pan and descent all get more time.
+    return { duration: 1800 + 600 * Math.min(4, Math.log2(1 + d / 1000)), sample: t => t < .25 ? mixPose(start, departure, smooth(t / .25)) : t < .7 ? mixPose(departure, arrival, smooth((t - .25) / .45)) : mixPose(arrival, end, smooth((t - .7) / .3)) };
+}
 /** Compile once per command; elapsed time, rather than engine animation state, is authoritative. */
 export function directCamera(command: CameraCommand, start: CameraPose, scenario: ScenarioDefinition): (t: number) => CameraPose {
     if (command.type === 'hold')
         return () => start;
     if (command.type === 'flyTo') {
         const end = { ...start, ...command, center: command.center };
-        if (command.transition !== 'cinematic') {
-            // Default: pull back at the origin, pan at a distance-aware scale, then descend; never zoom in while still travelling.
+        if (command.transition === 'zoomPanZoom') {
+            // Pull back at the origin, pan at a distance-aware scale, then descend.
             const span = Math.max(1000, distance(start.center, command.center) * 4);
             const zoom = Math.max(0, Math.min(start.zoom - 1, end.zoom - 1, Math.log2(40075000 / span)));
             const departure = { ...start, zoom, pitch: 0 };

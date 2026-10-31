@@ -20,7 +20,8 @@ export const DEVELOPMENT_SETTLEMENTS: readonly SettlementDescriptor[] = [
   {id:"fictional-village",origin:[12.57,41.85],radiusMeters:130,profile:"village",seed:42},
   {id:"fictional-town",origin:[12.59,41.85],radiusMeters:190,profile:"small-town",seed:2026},
 ];
-export const LOD_DISTANCES = {localEnter:550,localExit:850,regionalEnter:8000,regionalExit:12000} as const;
+/** prepareEnter/Exit: the local scene is built hidden this close, so it can show the moment the camera reaches localEnter. */
+export const LOD_DISTANCES = {localEnter:550,localExit:850,prepareEnter:1500,prepareExit:2000,regionalEnter:8000,regionalExit:12000} as const;
 export interface SettlementObservation { descriptor: SettlementDescriptor; distance: number; visible: boolean }
 export interface StreamingDecision { lod: SettlementLOD; descriptor?: SettlementDescriptor; distance: number }
 /** Metres from the camera to the settlement's approximate extent, including altitude.

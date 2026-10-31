@@ -32,6 +32,8 @@ export function ScenarioPanel({ map, layer, streamingStatus, settlementStatus }:
     const { player, setPlayer, historicalSession } = useScenarioController();
     const [inspectedId, setInspectedId] = useState<string | null>(null);
     const [reconId, setReconId] = useState<string | null>(null);
+    const live = useRef({ streaming: streamingStatus, settlement: settlementStatus });
+    useEffect(() => { live.current = { streaming: streamingStatus, settlement: settlementStatus }; });
     useEffect(() => {
         if (!historicalSession) return;
         const historical = new HistoricalJourneyScenes(historicalSession, { 'forum-boarium': validateHistoricalWorld(forumWorld) });
@@ -44,10 +46,18 @@ export function ScenarioPanel({ map, layer, streamingStatus, settlementStatus }:
             timeline: time => useExplorationStore.getState().setHistoricalTime(time),
             overlays: (ids, scenario) => { shown = { ids, scenario }; setInspectedId(null); overlays.update(ids, scenario, currentTime()); },
             scenes: (ids, scenario, time) => historical.resolve(ids, scenario, time),
+            ready: (requirements, sceneOnly) => {
+                if (!sceneOnly && !map.loaded()) return false;
+                if (!requirements.length || !historicalSession.getSnapshot().selection?.descriptors.some(d => d.id === 'layout:forum-boarium-temples')) return true;
+                const { streaming, settlement } = live.current;
+                // Only views close enough for local detail stream the scene; from further out (the island, the city) there is nothing to wait for.
+                if (streaming?.activeId !== 'layout:forum-boarium-temples' || streaming.lod !== 'local') return true;
+                return settlement.errors.length > 0 || settlement.state === 'ready' || (settlement.state === 'partial' && settlement.loaded >= settlement.total && settlement.sceneryLoaded >= settlement.sceneryTotal && settlement.terrainPending === 0);
+            },
             releaseScenes: () => historical.release(),
             streaming: value => {
                 intent = value;
-                layer?.setScenarioTravel(value?.travelling ?? false);
+                layer?.setScenarioTravel(value?.travelling ?? false, !!value && !value.travelling);
             },
             frame: callback => requestAnimationFrame(callback), cancelFrame: id => cancelAnimationFrame(id),
         });

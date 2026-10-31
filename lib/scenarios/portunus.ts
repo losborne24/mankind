@@ -47,9 +47,9 @@ export const portunusJourney: ScenarioDefinition = {
       { camera: { type: 'hold', duration: 5000 }, overlays: ['rome', ...base, ...hills, 'layer:forum-boarium'] } ] },
     { id: 'crossing', title: 'The river crossing', sceneRequirements: ['temples'], actions: [
       { camera: { type: 'flyTo', center: island, zoom: 15.8, pitch: 52, bearing: 150, duration: 6000 }, overlays: ['crossing', ...base, 'layer:tiber-island', 'layer:pons-aemilius', 'layer:portus-tiberinus'] },
-      { camera: { type: 'flyTo', center: bridge, zoom: 17.1, pitch: 55, bearing: 115, duration: 5000 }, overlays: ['crossing', ...base, 'layer:tiber-island', 'layer:pons-aemilius', 'layer:portus-tiberinus', 'layer:cloaca-maxima-outlet'] },
+      { camera: { type: 'flyTo', center: bridge, zoom: 17.6, pitch: 55, bearing: 115, duration: 5000 }, overlays: ['crossing', ...base, 'layer:tiber-island', 'layer:pons-aemilius', 'layer:portus-tiberinus', 'layer:cloaca-maxima-outlet'] },
       // A slow orbit is not travel, so the local scene (bridge, quays, docks) can stream in while the camera circles it.
-      { camera: { type: 'orbit', center: bridge, zoom: 17.1, pitch: 55, degrees: 30, duration: 6000 }, overlays: ['crossing', ...base, 'layer:tiber-island', 'layer:pons-aemilius', 'layer:portus-tiberinus', 'layer:cloaca-maxima-outlet'] } ] },
+      { camera: { type: 'orbit', center: bridge, zoom: 17.6, pitch: 55, degrees: 30, duration: 6000 }, overlays: ['crossing', ...base, 'layer:tiber-island', 'layer:pons-aemilius', 'layer:portus-tiberinus', 'layer:cloaca-maxima-outlet'] } ] },
     { id: 'market', title: 'The cattle market', sceneRequirements: ['temples'], actions: [
       { camera: { type: 'flyTo', center: forum, zoom: 17.2, pitch: 58, bearing: 70, duration: 7000 }, overlays: ['market', ...base, 'layer:forum-boarium', 'layer:ara-maxima', 'layer:cloaca-maxima-outlet', 'layer:portus-tiberinus', ...left] },
       { camera: { type: 'orbit', center: forum, zoom: 17.2, pitch: 58, degrees: 35, duration: 7000 }, overlays: ['market', ...base, 'layer:forum-boarium', 'layer:ara-maxima', 'layer:cloaca-maxima-outlet', 'layer:portus-tiberinus', ...left] } ] },
