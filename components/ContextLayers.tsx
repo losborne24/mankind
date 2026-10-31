@@ -19,12 +19,17 @@ export function LeftOut({ features, year }: { features: ContextFeature[]; year: 
   if (!out.length) return null;
   return <p role="note" className="mt-2 text-[11px] leading-relaxed text-white/55">Not shown at {year}: {out.map(f => `${f.title} (${f.time ? `from ${formatHistoricalDate(f.time.start)}` : 'undated'})`).join('; ')}.</p>;
 }
-export function ContextLayerList({ features, onInspect }: { features: ContextFeature[]; onInspect(id: string): void }) {
-  const shown = features.filter(f => f.match !== 'outside');
-  if (!shown.length) return null;
+/** A switchable group of map layers (the AD 100 land-use zoning), listed with the others when it is on. */
+export interface LayerGroup { title: string; on: boolean; onChange(on: boolean): void; features: ContextFeature[] }
+export function ContextLayerList({ features, onInspect, group }: { features: ContextFeature[]; onInspect(id: string): void; group?: LayerGroup }) {
+  const shown = features.filter(f => f.match !== 'outside'), grouped = group?.on ? group.features.filter(f => f.match !== 'outside') : [];
+  if (!shown.length && !group) return null;
+  const item = (f: ContextFeature) => <li key={f.id}><button className="flex w-full items-center justify-between gap-2 text-left underline-offset-2 hover:underline" onClick={() => onInspect(f.id)}><span>{f.title}</span><CertaintyChip certainty={f.certainty} /></button></li>;
   return <details className="mt-3 text-[11px] text-white/65">
-    <summary className="cursor-pointer text-accent">Map layers ({shown.length}) · solid outline documented, dashed approximate, pale illustrative</summary>
-    <ul className="mt-2 space-y-1">{shown.map(f => <li key={f.id}><button className="flex w-full items-center justify-between gap-2 text-left underline-offset-2 hover:underline" onClick={() => onInspect(f.id)}><span>{f.title}</span><CertaintyChip certainty={f.certainty} /></button></li>)}</ul>
+    <summary className="cursor-pointer text-accent">Map layers ({shown.length + grouped.length}) · solid outline documented, dashed approximate, pale illustrative</summary>
+    {group && <label className="mt-2 flex items-center gap-1.5 text-white/80"><input type="checkbox" checked={group.on} onChange={e => group.onChange(e.target.checked)} />{group.title}</label>}
+    {grouped.length > 0 && <ul aria-label={group!.title} className="mt-1 space-y-1 border-l border-white/10 pl-2">{grouped.map(item)}</ul>}
+    <ul className="mt-2 space-y-1">{shown.map(item)}</ul>
   </details>;
 }
 export function ContextInspector({ feature, year, onClose }: { feature: ContextFeature; year: string; onClose(): void }) {

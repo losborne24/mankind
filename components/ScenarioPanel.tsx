@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import type { Map } from 'maplibre-gl';
 import type { ThreeTestLayer } from '@/map/threeTestLayer';
 import { useExplorationStore } from '@/state/explorationStore';
@@ -16,6 +16,8 @@ import { framePadding as paddingFor } from '@/lib/scenarios/framing';
 import { contextFeatures } from '@/lib/scenarios/contextLayers';
 import { ReconstructionControls, ReconstructionInspector } from '@/components/ReconstructionControls';
 import { ContextInspector, ContextLayerList, LeftOut } from '@/components/ContextLayers';
+import { zoningFeatures } from '@/lib/scenarios/zoning';
+import { zoningOverlay } from '@/map/zoningOverlay';
 import { formatHistoricalYear } from '@/lib/historicalDate';
 import type { HistoricalTime, ScenarioDefinition } from '@/lib/scenarios/schema';
 import { useScenarioController, useHistoricalDataset } from '@/components/ScenarioContext';
@@ -130,10 +132,22 @@ function Playback({ map, layer, reconId, onReconInspect, player, streamingStatus
     const viewTime: HistoricalTime = storeTime ?? { start: { year: storeYear } };
     const features = useMemo(() => scenario && snapshot.state !== 'idle' ? contextFeatures(scenario, scenario.beats[snapshot.beat].actions[snapshot.action].overlays, viewTime) : [], [scenario, snapshot.state, snapshot.beat, snapshot.action, storeYear, storeTime]); // eslint-disable-line react-hooks/exhaustive-deps
     const yearLabel = formatHistoricalYear(viewTime.start.year);
+    // The AD 100 land-use zoning: a 2D map layer for the Forum Boarium journey, off until switched on under Map layers.
+    const [zoning, setZoning] = useState(false), zoningLayer = useRef<ReturnType<typeof zoningOverlay> | null>(null), inspectZone = useRef(onInspect), zoningState = useRef({ zoning, viewTime });
+    useEffect(() => { inspectZone.current = onInspect; zoningState.current = { zoning, viewTime }; });
+    const zones = useMemo(() => zoningFeatures(viewTime), [storeYear, storeTime]); // eslint-disable-line react-hooks/exhaustive-deps
+    const historicalJourney = scenario?.historicalDataset === 'forum-boarium';
+    useEffect(() => {
+        if (!historicalJourney) return;
+        zoningLayer.current = zoningOverlay(map, id => { onReconInspect(null); inspectZone.current(id); });
+        zoningLayer.current.update(zoningState.current.zoning, zoningState.current.viewTime);
+        return () => { zoningLayer.current?.dispose(); zoningLayer.current = null; };
+    }, [map, historicalJourney, onReconInspect]);
+    useEffect(() => { zoningLayer.current?.update(zoning, viewTime); }, [zoning, storeYear, storeTime, historicalJourney]); // eslint-disable-line react-hooks/exhaustive-deps
     // An object of the reconstructed neighbourhood is inspected in its own panel; it replaces the map-layer panel and the reverse.
     const inspectRecon = useCallback((id: string) => { player.pause('Inspecting a reconstructed object'); onReconInspect(id); onCloseInspect(); }, [player, onReconInspect, onCloseInspect]);
     const inspectContext = (id: string) => { onReconInspect(null); onInspect(id); };
-    const inspected = features.find(f => f.id === inspectedId && f.match !== 'outside');
+    const inspected = [...features, ...(zoning ? zones : [])].find(f => f.id === inspectedId && f.match !== 'outside');
     if (!scenario)
         return <section role="alert" className="absolute right-12 top-20 z-20 max-w-xs rounded-2xl border border-panel-border bg-panel p-4 text-sm"><p>{snapshot.error}</p><button className="mt-3 rounded-full bg-accent px-4 py-2 text-black" onClick={() => player.load(london2012)}>Load London demo</button></section>;
     const beat = scenario.beats[snapshot.beat], active = beat.actions[snapshot.action];
@@ -159,7 +173,7 @@ function Playback({ map, layer, reconId, onReconInspect, player, streamingStatus
         })}</div>)}
       <LeftOut features={features} year={yearLabel}/>
       {historical && <ReconstructionControls map={map} layer={layer} at={viewTime} inspectedId={reconId} onInspect={inspectRecon} onClose={() => onReconInspect(null)}/>}
-      <ContextLayerList features={features} onInspect={inspectContext}/>
+      <ContextLayerList features={features} onInspect={inspectContext} group={historical ? { title: 'Land use c. AD 100 (zoning)', on: zoning, onChange: setZoning, features: zones } : undefined}/>
       {snapshot.warning && <p className="mt-2 text-xs text-white/60">{snapshot.warning}</p>}
     </>}
     {rendering && <p role="status" className="my-3 text-xs text-white/65">{rendering}</p>}
