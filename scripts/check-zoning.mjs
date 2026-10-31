@@ -48,11 +48,16 @@ assert.deepEqual(later.map(z => z.id).sort(), ['zone:baths-of-trajan', 'zone:for
 for (const z of later) assert.ok(z.time.start.year > 100, `${z.id} starts after AD 100`);
 
 for (const use of ['residential', 'monumental', 'horti', 'port', 'open', 'open-river']) assert.ok(now.some(z => z.use === use), `${use} is zoned`);
-for (const cls of ['dense', 'elite', 'roadside']) assert.ok(now.some(z => z.housing === cls), `${cls} housing is zoned`);
+for (const cls of ['dense', 'mixed', 'elite', 'roadside']) assert.ok(now.some(z => z.housing === cls), `${cls} housing is zoned`);
 const z = id => data.zones.find(q => q.id === id);
 assert.ok(z('zone:residential-elite').density < z('zone:residential-dense').density && z('zone:residential-trastevere').density < z('zone:residential-dense').density, 'elite and Trastevere housing are looser than the dense core');
 assert.match(z('zone:residential-elite').sources.join(), /aventine.*caelian/, 'elite housing is sourced');
 assert.match(z('zone:residential-dense').sources.join(), /subura/, 'dense housing is sourced');
+assert.equal(z('zone:residential-hills').certainty, 'illustrative', 'hill housing is illustrative');
+assert.ok(z('zone:residential-hills').density < z('zone:residential-dense').density && z('zone:residential-hills').density > z('zone:residential-elite').density, 'hill housing sits between dense and elite');
+// The river is filled along the whole map, well beyond the city.
+const riverSpan = z('zone:tiber').multipolygon.flat(2).map(p => p[1]);
+assert.ok(Math.min(...riverSpan) < 41.86 && Math.max(...riverSpan) > 41.925, 'the Tiber zone runs the length of the map');
 
 // Temples: both anchors lie in the monumental Forum Boarium zone.
 for (const id of ['place:temple-of-portunus', 'place:temple-of-hercules-victor']) {
@@ -66,8 +71,10 @@ const extent = [[data.extent.ring]];
 let union = [];
 for (const q of now) {
   assert.ok(area(polygonClipping.intersection(union, q.multipolygon)) < 50, `${q.id} overlaps no other zone`);
-  assert.ok(area(polygonClipping.difference(q.multipolygon, extent)) < 50, `${q.id} stays inside the extent`);
-  union = polygonClipping.union(union, q.multipolygon);
+  // The river runs the length of the map; every other zone stays inside the continuous city.
+  const shape = q.use === 'open-river' ? polygonClipping.intersection(q.multipolygon, extent) : q.multipolygon;
+  if (q.use !== 'open-river') assert.ok(area(polygonClipping.difference(q.multipolygon, extent)) < 50, `${q.id} stays inside the extent`);
+  union = polygonClipping.union(union, shape);
 }
 const covered = area(union) / area(extent);
 assert.ok(covered > 0.99, `zones cover the extent (${(covered * 100).toFixed(1)}%)`);
@@ -82,6 +89,7 @@ for (const m of data.markers) { dated(m, 40); assert.ok(inside(m.coordinate, ext
 for (const n of ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x', 'xi', 'xii', 'xiii', 'xiv']) assert.ok(markers.has(`marker:regio-${n}`), `Regio ${n.toUpperCase()} has a marker`);
 assert.ok(inside(markers.get('marker:regio-xiv').coordinate, z('zone:residential-trastevere').multipolygon), 'Regio XIV is in Trastevere');
 assert.ok(inside(markers.get('marker:horti-luculliani').coordinate, z('zone:collis-hortorum').multipolygon), 'Horti Luculliani is in its zone');
-for (const id of ['marker:horti-maecenatis', 'marker:horti-lamiani']) assert.ok(inside(markers.get(id).coordinate, z('zone:esquiline-horti').multipolygon), `${id} is in its zone`);
+assert.ok(!markers.has('marker:horti-maecenatis'), 'the Horti Maecenatis zone is not duplicated by a marker');
+for (const id of ['marker:horti-lamiani']) assert.ok(inside(markers.get(id).coordinate, z('zone:esquiline-horti').multipolygon), `${id} is in its zone`);
 for (const id of ['marker:emporium', 'marker:porticus-aemilia']) assert.ok(inside(markers.get(id).coordinate, z('zone:emporium').multipolygon), `${id} is in the port zone`);
 console.log(`zoning ok: ${data.zones.length} zones (${later.length} after AD 100), ${data.markers.length} markers, ${(data.extent.area / 1e6).toFixed(2)} km², ${(covered * 100).toFixed(1)}% covered`);

@@ -12,6 +12,7 @@ import polygonClipping from 'polygon-clipping';
 const json = async path => JSON.parse(await readFile(path, 'utf8'));
 const pleiades = await json('data/history/rome/source/pleiades-zoning.json');
 const context = await json('lib/scenarios/fixtures/forum-boarium-context.json');
+const tiberSnapshot = await json('data/history/rome/source/osm-tiber.json');
 const r6 = v => Math.round(v * 1e6) / 1e6, round = p => [r6(p[0]), r6(p[1])];
 const LAT = 41.892, KX = Math.cos(LAT * Math.PI / 180) * 111320, KY = 110950;   // metres per degree at Rome
 const pl = key => pleiades.places[key] ?? (() => { throw Error(`Missing Pleiades ${key}`); })();
@@ -30,6 +31,35 @@ function bank(from, to) {
   const arc = arcs.sort((a, b) => span(a) - span(b))[0];
   return Math.sign(arc.at(-1)[1] - arc[0][1]) === Math.sign(to[1] - from[1]) ? arc : arc.slice().reverse();
 }
+/** Join ways end to end into closed rings (as in the Forum Boarium context builder). */
+function joinRings(ways) {
+  ways = ways.map(w => w.slice()); const key = p => p.join(','), out = [];
+  while (ways.length) {
+    let ring = ways.shift();
+    for (let progress = true; progress && key(ring[0]) !== key(ring.at(-1));) {
+      progress = false;
+      for (let n = 0; n < ways.length; n++) {
+        const w = ways[n];
+        if (key(w[0]) === key(ring.at(-1))) ring = ring.concat(w.slice(1));
+        else if (key(w.at(-1)) === key(ring.at(-1))) ring = ring.concat(w.slice(0, -1).reverse());
+        else if (key(w.at(-1)) === key(ring[0])) ring = w.concat(ring.slice(1));
+        else if (key(w[0]) === key(ring[0])) ring = w.slice(1).reverse().concat(ring);
+        else continue;
+        ways.splice(n, 1); progress = true; break;
+      }
+    }
+    out.push(ring);
+  }
+  return out;
+}
+// The whole Tiber across the map, from the OpenStreetMap pieces (the urban relation and the polygons up- and downstream), for the
+// river zone. The 3D water and the banks that close the extent keep using the context layer's urban stretch.
+const VIEW = [[12.44, 41.85], [12.53, 41.85], [12.53, 41.935], [12.44, 41.935], [12.44, 41.85]];
+const fullRiver = polygonClipping.intersection(polygonClipping.union(...tiberSnapshot.elements.map(e => {
+  if (e.type === 'way') return [e.geometry];
+  const outer = joinRings(e.members.filter(m => m.role === 'outer').map(m => m.geometry)), inner = joinRings(e.members.filter(m => m.role === 'inner').map(m => m.geometry));
+  return polygonClipping.difference(outer.map(r => [r]), ...inner.map(r => [[r]]));
+})), [VIEW]);
 const closed = ring => [[...ring.map(round), round(ring[0])]];
 // East bank: up today's bank from the Emporium to the Mausoleum, then clockwise round the Pincian gardens, the Castra Praetoria,
 // the Esquiline plateau, the Caelian and the Aventine back to the river below the Emporium.
@@ -45,7 +75,7 @@ const riverBetween = polygonClipping.intersection([[river]],   // outer outline 
 const core = polygonClipping.union(eastCore, westCore, riverBetween);
 // Ribbons: 120 m wide along each road axis, from inside the core outwards.
 const roads = {
-  'via-flaminia': [[12.4790, 41.9080], [12.4765, 41.9112], [12.4745, 41.9165]],
+  'via-flaminia': [[12.4792, 41.9040], [12.4782, 41.9080], [12.4765, 41.9112], [12.4745, 41.9165]],
   'via-salaria': [[12.4985, 41.9095], [12.5005, 41.9140], [12.5030, 41.9190]],
   'via-nomentana': [[12.5030, 41.9075], [12.5075, 41.9115], [12.5125, 41.9150]],
   'via-tiburtina': [[12.5110, 41.8990], [12.5160, 41.9005], [12.5210, 41.9020]],
@@ -55,10 +85,14 @@ const roads = {
   'via-portuensis': [[12.4700, 41.8770], [12.4688, 41.8730], [12.4665, 41.8690]],
   'via-aurelia': [[12.4665, 41.8878], [12.4630, 41.8857], [12.4595, 41.8840]],
 };
-const RIBBON = 60;   // half-width, metres
-const segment = (a, b) => { const dx = (b[0] - a[0]) * KX, dy = (b[1] - a[1]) * KY, l = Math.hypot(dx, dy), nx = -dy / l * RIBBON / KX, ny = dx / l * RIBBON / KY, ex = dx / l * RIBBON / KX, ey = dy / l * RIBBON / KY;
-  return closed([[a[0] + nx - ex, a[1] + ny - ey], [b[0] + nx + ex, b[1] + ny + ey], [b[0] - nx + ex, b[1] - ny + ey], [a[0] - nx - ex, a[1] - ny - ey]]); };
-const ribbons = polygonClipping.union(...Object.values(roads).flatMap(line => line.slice(1).map((b, n) => segment(line[n], b))));
+// Half-width tapers from 70 m where the road leaves the city to 25 m at the ribbon's end: roadside building thinned with distance.
+const RIBBON = [70, 25];
+const segment = (a, b, wa, wb) => { const dx = (b[0] - a[0]) * KX, dy = (b[1] - a[1]) * KY, l = Math.hypot(dx, dy), ux = dx / l, uy = dy / l;
+  const side = (p, w, s, along) => [p[0] + (-uy * w * s + ux * along) / KX, p[1] + (ux * w * s + uy * along) / KY];
+  return closed([side(a, wa, 1, -wa / 2), side(b, wb, 1, wb / 2), side(b, wb, -1, wb / 2), side(a, wa, -1, -wa / 2)]); };
+const taper = line => { const lengths = line.slice(1).map((b, n) => Math.hypot((b[0] - line[n][0]) * KX, (b[1] - line[n][1]) * KY)), total = lengths.reduce((x, y) => x + y, 0);
+  let run = 0; return lengths.map((len, n) => { const w = t => RIBBON[0] + (RIBBON[1] - RIBBON[0]) * t, piece = segment(line[n], line[n + 1], w(run / total), w((run + len) / total)); run += len; return piece; }); };
+const ribbons = polygonClipping.union(...Object.values(roads).flatMap(taper));
 const extent = polygonClipping.union(core, ribbons);
 if (extent.length !== 1) throw Error(`extent has ${extent.length} pieces`);
 const ribbonOnly = polygonClipping.difference(ribbons, core);
@@ -69,6 +103,9 @@ const P = key => `source:pleiades-${key}`;
 const sources = [
   ...Object.entries(pleiades.places).map(([k, p]) => src(P(k), `Pleiades · ${p.title}`, p.uri, pleiades.licence)),
   src('source:osm-tiber', 'OpenStreetMap · Tiber water polygon (relation 5071)', 'https://www.openstreetmap.org/relation/5071', 'ODbL 1.0 · © OpenStreetMap contributors'),
+  src('source:osm-tiber-reaches', 'OpenStreetMap · Tiber water polygons upstream and downstream of the city (relations 15909049, 17258409 and 14 ways)', 'https://www.openstreetmap.org/relation/17258409', tiberSnapshot.licence),
+  src('source:wikipedia-quirinal', 'Wikipedia · Quirinal Hill (temples of Quirinus, Sancus and others)', 'https://en.wikipedia.org/wiki/Quirinal_Hill', 'CC BY-SA 4.0 · text read'),
+  src('source:wikipedia-esquiline', 'Wikipedia · Esquiline Hill (favoured by the aristocracy for their houses)', 'https://en.wikipedia.org/wiki/Esquiline_Hill', 'CC BY-SA 4.0 · text read'),
   src('source:wikipedia-regions', 'Wikipedia · Fourteen regions of Augustan Rome', 'https://en.wikipedia.org/wiki/Fourteen_regions_of_Augustan_Rome', 'CC BY-SA 4.0 · text read for the regions and their contents'),
   src('source:wikipedia-subura', 'Wikipedia · Subura ("a vast and populous neighborhood")', 'https://en.wikipedia.org/wiki/Subura', 'CC BY-SA 4.0 · text read'),
   src('source:wikipedia-aventine', 'Wikipedia · Aventine Hill (imperial era: aristocratic residences, Trajan\'s private house)', 'https://en.wikipedia.org/wiki/Aventine_Hill', 'CC BY-SA 4.0 · text read'),
@@ -174,29 +211,28 @@ const drawn = [
     [[12.4690, 41.8950], [12.4711, 41.8960], [12.4716, 41.9006], [12.4740, 41.9030], [12.4725, 41.9045], [12.4650, 41.9022], [12.4618, 41.8990], [12.4645, 41.8950]],
     `The open ground inside the river bend: the Trigarium exercise ground and the Tarentum, where the altar of Dis and Proserpina was used for the Secular Games (17 BC, AD 88), with the Euripus canal from Agrippa's lake. From Sulla on, insulae and villas encroached on the Campus (Wikipedia), so some building stood here too; the extent and the share left open are approximate. ${GUESS}`,
     [P('campus-martius'), P('regio-ix'), 'source:wikipedia-campus-martius', 'source:wikipedia-baths-of-agrippa', 'source:platner-1929']),
-  zone('zone:campus-open', 'open', 'Northern Campus Martius: open ground towards the Via Flaminia', 'illustrative', [0, 200],
-    [[12.4700, 41.9030], [12.4748, 41.9044], [12.4748, 41.9076], [12.4778, 41.9076], [12.4790, 41.9122], [12.4700, 41.9125]],
-    'North and west of the Mausoleum, towards where the Via Flaminia left the city. Strabo describes the Campus as open ground for exercise and games; by AD 100 building had spread north along the Via Lata, so how much stayed open here is a guess.',
-    [P('campus-martius'), 'source:platner-1929']),
 ];
 // Low-density elite housing: drawn on the two hills the sources describe that way; the rest of the housing is dense.
 const elite = {
   aventine: closed([[12.4790, 41.8862], [12.4815, 41.8862], [12.4860, 41.8840], [12.4878, 41.8810], [12.4880, 41.8785], [12.4840, 41.8770], [12.4800, 41.8768], [12.4778, 41.8795], [12.4775, 41.8830]]),
   caelian: closed([[12.4912, 41.8890], [12.4990, 41.8897], [12.4997, 41.8845], [12.4950, 41.8828], [12.4912, 41.8843]]),
 };
+// Mixed hill housing: the Quirinal, Viminal, upper Esquiline and the Pincian slope, between the dense valleys and the gardens.
+const hills = closed([[12.4838, 41.8995], [12.4870, 41.8985], [12.4935, 41.8990], [12.4965, 41.8962], [12.5000, 41.8945], [12.5040, 41.8990], [12.5030, 41.9040],
+  [12.4990, 41.9048], [12.4930, 41.9050], [12.4880, 41.9062], [12.4825, 41.9058], [12.4815, 41.9030], [12.4825, 41.9000]]);
 
 // ---- Resolve: river first, then each zone in priority order, every one cut by everything above it; housing is what is left.
 const priority = ['open-river', 'monumental', 'port', 'horti', 'open', 'residential'];
 const areaOf = mp => mp.reduce((sum, poly) => sum + poly.reduce((s, ring, k) => { let a = 0; for (let n = 0; n < ring.length - 1; n++) a += ring[n][0] * ring[n + 1][1] - ring[n + 1][0] * ring[n][1]; return s + (k ? -1 : 1) * Math.abs(a / 2) * KX * KY; }, 0), 0);
-const water = polygonClipping.intersection(extent, [tiberRings]);
+const water = fullRiver;
 let taken = water;
 const resolved = [];
 const keep = mp => mp.filter(poly => areaOf([poly]) > 400);   // drop slivers left by the cuts
 resolved.push({ id: 'zone:tiber', use: 'open-river', title: 'Tiber', certainty: 'approximate', time: { start: { year: -753 }, end: { year: 2025 } }, multipolygon: water,
-  note: 'Today\'s channel (OpenStreetMap), standing in for the ancient river, which was wider and had no embankments (begun 1876). Inside the city only.', sources: ['source:osm-tiber'] });
+  note: 'Today\'s channel (OpenStreetMap), standing in for the ancient river, which was wider and had no embankments (begun 1876). Drawn along the whole map, inside and outside the city; the 3D water uses the urban stretch only.', sources: ['source:osm-tiber', 'source:osm-tiber-reaches'] });
 for (const use of priority.slice(1, -1)) for (const z of drawn.filter(z => z.use === use)) {
   const outline = [[[...z.outline, z.outline[0]]]];
-  const shape = keep(polygonClipping.difference(polygonClipping.intersection(extent, outline), z.later ? water : taken));
+  const shape = keep(polygonClipping.difference(polygonClipping.intersection(extent, outline), z.later ? water : taken, ...(z.use === 'open' ? [ribbons] : [])));
   if (!z.later) taken = polygonClipping.union(taken, shape);
   const { outline: _o, later: _l, ...rest } = z; void _o; void _l;
   resolved.push({ ...rest, multipolygon: shape });
@@ -207,10 +243,14 @@ const rest = keep(polygonClipping.difference(extent, taken));
 const roadside = keep(polygonClipping.intersection(rest, ribbonOnly)), inCore = polygonClipping.difference(rest, ribbonOnly);
 const eliteShape = keep(polygonClipping.intersection(inCore, elite.aventine, ...[]).concat(polygonClipping.intersection(inCore, elite.caelian)));
 const notElite = polygonClipping.difference(inCore, elite.aventine, elite.caelian);
+const hillShape = keep(polygonClipping.intersection(notElite, hills)), valleys = polygonClipping.difference(notElite, hills);
 const residential = [
-  { id: 'zone:residential-dense', cls: 'dense', title: 'Dense housing: the east bank (Subura, Argiletum, Via Lata, Quirinal, Viminal, Esquiline slopes)', shape: keep(polygonClipping.difference(notElite, westCore)), density: 1, certainty: 'approximate',
-    note: 'Blocks of flats over shops, packed close. The Subura was "a vast and populous neighborhood" (Wikipedia) below the Esquiline, Viminal and Quirinal; the same dense fabric is attested along the Via Lata. The zone is what the others leave on the east bank, so its edges are theirs: approximate.',
+  { id: 'zone:residential-dense', cls: 'dense', title: 'Dense housing: the valleys of the east bank (Subura, Argiletum, Via Lata, the Circus Maximus side)', shape: keep(polygonClipping.difference(valleys, westCore)), density: 1, certainty: 'approximate',
+    note: 'Blocks of flats over shops, packed close. The Subura was "a vast and populous neighborhood" (Wikipedia) in the valley below the Esquiline, Viminal and Quirinal; the same dense fabric is attested along the Via Lata. The zone is what the others leave in the valleys, so its edges are theirs: approximate.',
     sources: [...regions.filter(id => !/regio-(ii|xiii|xiv)$/.test(id)), 'source:wikipedia-subura', 'source:wikipedia-regions', 'source:platner-1929'] },
+  { id: 'zone:residential-hills', cls: 'mixed', title: 'Mixed housing on the hills: Quirinal, Viminal, upper Esquiline, Pincian slope', shape: keep(polygonClipping.difference(hillShape, westCore)), density: 0.6, certainty: 'illustrative',
+    note: 'Between the dense valleys and the gardens: temples (Quirinus, Sancus and others on the Quirinal), houses of the well-off (the Esquiline was favoured by the aristocracy for their houses) and blocks of flats. Wikipedia supports the mix but not its share or extent; the outline of the hills is drawn by hand and is a guess.',
+    sources: [P('regio-vi'), P('regio-v'), P('regio-iv'), 'source:wikipedia-quirinal', 'source:wikipedia-esquiline'] },
   { id: 'zone:residential-elite', cls: 'elite', title: 'Low-density elite housing: Aventine and Caelian', shape: eliteShape, density: 0.35, certainty: 'approximate',
     note: 'Large houses (domus) with gardens and fewer blocks of flats. In the imperial era the Aventine became the seat of aristocratic residences, among them Trajan\'s own house before he became emperor; the Caelian was a fashionable residential district of the wealthy (Wikipedia). The hill outlines are drawn by hand; their edges are a guess.',
     sources: [P('regio-xiii'), P('regio-ii'), 'source:wikipedia-aventine', 'source:wikipedia-caelian'] },
@@ -237,10 +277,10 @@ function labelPoint(poly) {
   return round(best);
 }
 const shortNames = { 'zone:tiber': 'Tiber', 'zone:forum-palatine': 'Fora · Palatine', 'zone:forum-boarium': 'Forum Boarium', 'zone:oppian': 'Oppian', 'zone:claudianum': 'Claudianum',
-  'zone:circus-flaminius': 'Circus Flaminius', 'zone:campus-centre': 'Campus Martius', 'zone:campus-north': 'Mausoleum', 'zone:castra-praetoria': 'Castra Praetoria', 'zone:tiber-island': 'Insula',
+  'zone:circus-flaminius': 'Circus Flaminius', 'zone:campus-centre': 'Campus Martius', 'zone:campus-north': 'Mausoleum', 'zone:castra-praetoria': 'Castra Praetoria', 'zone:tiber-island': 'Tiber Island',
   'zone:baths-of-trajan': 'Baths of Trajan', 'zone:forum-of-trajan': "Trajan's Forum", 'zone:emporium': 'Emporium', 'zone:trastevere-river': 'Riverfront',
-  'zone:collis-hortorum': 'Collis Hortorum', 'zone:esquiline-horti': 'Horti Maecenatis', 'zone:esquiline-plateau': 'Esquiline gardens', 'zone:caelian-east': 'Caelian houses',
-  'zone:campus-river': 'Trigarium', 'zone:campus-open': 'Campus (open)', 'zone:residential-dense': 'Dense housing', 'zone:residential-elite': 'Elite houses',
+  'zone:collis-hortorum': 'Collis Hortorum', 'zone:esquiline-horti': 'Esquiline horti', 'zone:esquiline-plateau': 'Esquiline gardens', 'zone:caelian-east': 'Caelian houses',
+  'zone:campus-river': 'Trigarium', 'zone:residential-dense': 'Dense housing', 'zone:residential-hills': 'Hill housing', 'zone:residential-elite': 'Elite houses',
   'zone:residential-trastevere': 'Trastevere', 'zone:residential-roadside': 'Roadside' };
 for (const z of resolved) if (!z.multipolygon.length) throw Error(`${z.id} is empty after the cuts`);
 const zones = resolved.sort((a, b) => priority.indexOf(a.use) - priority.indexOf(b.use)).map(z => ({
@@ -263,12 +303,12 @@ const markers = [
       note: `One of the fourteen regions into which Augustus divided the city in 7 BC. ${why ?? 'Placed at the Pleiades representative point, derived from the places Pleiades links to the region.'}`, sources: [P(`regio-${k}`), 'source:wikipedia-regions'] };
   }),
   ...[['horti-luculliani', -60, [12.4835, 41.9078], 'The Pleiades point lies about 700 m north, beyond the gardens; moved by hand onto the Pincian slope above the Campus, inside the Collis Hortorum zone.'],
-    ['horti-sallustiani', -40], ['horti-maecenatis', -30], ['horti-lamiani', 0], ['emporium', -193], ['porticus-aemilia', -193]].map(([key, from, at, why]) => ({
+    ['horti-sallustiani', -40], ['horti-lamiani', 0], ['emporium', -193], ['porticus-aemilia', -193]].map(([key, from, at, why]) => ({
     id: `marker:${key}`, kind: 'anchor', title: pl(key).title, coordinate: round(at ?? pl(key).reprPoint), certainty: at ? 'illustrative' : 'approximate', time: { start: { year: from }, end: { year: 300 } },
     note: why ?? 'Placed at the Pleiades representative point; the zone around it is drawn from it.', sources: [P(key), 'source:platner-1929'] })),
 ];
 
-const used = new Set([...zones.flatMap(z => z.sources), ...markers.flatMap(m => m.sources), 'source:osm-tiber', 'source:lanciani-fur', 'source:atlas-ancient-rome', 'source:severan-plan']);
+const used = new Set([...zones.flatMap(z => z.sources), ...markers.flatMap(m => m.sources), 'source:osm-tiber', 'source:osm-tiber-reaches', 'source:lanciani-fur', 'source:atlas-ancient-rome', 'source:severan-plan']);
 const out = {
   title: 'Land use, Rome c. AD 100', date: { year: 100 }, generator: 'scripts/context/rome/build-zoning.mjs',
   extent: { id: 'zone:extent', title: 'Continuous city c. AD 100 · approximate extent', certainty: 'approximate', time: { start: { year: 64 }, end: { year: 200 } },

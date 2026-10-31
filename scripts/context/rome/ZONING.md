@@ -9,10 +9,10 @@ Pipeline position: the land-use part of the 2D plan (map first). Landmarks and t
 
 A 2D map layer, off by default, switched on under **Map layers → Land use c. AD 100 (zoning)** in the Forum Boarium journey. It draws:
 
-* **The continuous city** as a dashed outline (approximate): 13.0 km², with short ribbons out along nine roads.
+* **The continuous city** as a dashed outline (approximate): 12.7 km², with short tapering ribbons out along nine roads.
 * **24 zones** (22 at AD 100), each with a use, an evidence tier, an existence interval and a note. Fill and outline take the zone's colour; outlines
   are solid for documented, dashed for approximate, dotted and pale for illustrative.
-* **20 markers**: the fourteen Augustan regions and six anchors (four horti, the Emporium, the Porticus Aemilia).
+* **19 markers**: the fourteen Augustan regions and five anchors (three horti, the Emporium, the Porticus Aemilia).
 
 Everything is date-filtered. The Baths of Trajan (from AD 104) and Trajan's Forum (from c. 106) are in the data and are named under
 "Not shown at 100 CE". Like the flat ground, the layer gives way to the lit 3D ground close in.
@@ -46,6 +46,24 @@ No zone is **documented**: every boundary is drawn by hand.
 * **Oppian.** The Baths of Titus stay. The Baths of Trajan were built after the fire of AD 104 and dedicated in 109, so they are kept as a dated zone that the filter leaves out at AD 100. Their notes and the Oppian note say so.
 * **Campus Martius.** The monumental zone now reaches the Horologium and Mausoleum (Agrippa's baths and lake, porticoes). A new open zone in the river bend covers the Trigarium and Tarentum, with the caveat that insulae encroached on the Campus from Sulla on.
 * **Housing classes.** Dense: the Subura is "a vast and populous neighborhood" (Wikipedia). Low-density elite: aristocratic residences on the Aventine in the imperial era, Trajan's own among them, and the Caelian as "a fashionable residential district" (Wikipedia). Roadside ribbons are illustrative.
+
+## Revision (v5.17.1), after review of the plan image
+
+* **River.** The Tiber zone now runs the length of the map (41.85–41.935): the OpenStreetMap urban relation 5071 stops at 41.911, so the
+  polygons up- and downstream (relations 15909049, 17258409 and 14 ways) are fetched too and joined. It is not clipped to the city.
+  The 3D water still uses the urban stretch from the context layer, unchanged.
+* **Markers.** "Gardens of Maecenas" was the same place as the Horti Maecenatis zone and is gone; the zone label is now "Esquiline horti".
+  "Insula" is now "Tiber Island". 19 markers.
+* **Ribbons** taper from 140 m wide where the road leaves the city to 50 m at the end, and take precedence over open ground, so the
+  Via Flaminia ribbon runs from inside the city along the Via Lata. The northern Campus "open" zone was left as a 9,000 m² sliver between that
+  ribbon and the river and was dropped. The fill should still taper by distance, not follow the polygon (next stage).
+* **Housing** now has four classes: dense valleys (Subura, Argiletum, Via Lata; density 1), **mixed hill housing** on the Quirinal, Viminal,
+  upper Esquiline and Pincian slope (0.6, illustrative: Wikipedia names Quirinal temples and the Esquiline as favoured by the aristocracy
+  for houses, but not the share), elite Aventine and Caelian (0.35), Trastevere (0.6) and roadside ribbons (0.45).
+* **Review plan.** `node scripts/context/rome/plot-zoning.mjs` draws `docs/previews/rome-zoning/zoning-ad100.{svg,png}`: a square frame from
+  12.42 to 12.55 E, the filled river, features dated after AD 100 hatched and labelled "not shown", markers, a legend, and labels placed so
+  they do not overlap (a label that finds no free place is left out: Horti Lamiani's, beside Regio V).
+* **Not yet built:** the suburbium (consular roads, Vatican plain, aqueducts, Campagna). Nothing is off-frame; that is the next stage.
 
 ## Sources
 

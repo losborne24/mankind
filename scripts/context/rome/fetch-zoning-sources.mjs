@@ -3,6 +3,8 @@
 //
 // * Pleiades (CC BY 3.0): the fourteen Augustan regions, the main horti, the river port and the monuments the zones are drawn
 //   around. Pleiades gives a representative point and, for regions, a bounding box derived from the places it links to.
+// * OpenStreetMap (ODbL) via Overpass: the Tiber water polygons from about 4 km downstream to 5 km upstream of the city, so the
+//   river zone runs the whole length of the map, not only the stretch in the Forum Boarium context layer.
 // Nothing from the Aurelian Walls (AD 271-275) or their gates is fetched: they post-date the scene.
 import { mkdir, writeFile } from 'node:fs/promises';
 const agent = { 'user-agent': 'mankind-research/0.1 (osborneleith@gmail.com)' };
@@ -31,4 +33,18 @@ for (const [key, id] of Object.entries(ids)) {
 }
 await writeFile(`${out}/pleiades-zoning.json`, JSON.stringify({ accessed, licence: 'CC BY 3.0 · Pleiades contributors', licenceUrl: 'https://creativecommons.org/licenses/by/3.0/', places }, null, 1) + '\n');
 
-console.log('saved', Object.keys(places).length, 'Pleiades places');
+// The river is mapped in pieces: relation 5071 is the urban stretch only (41.860-41.911), the rest are the polygons upstream and downstream.
+const riverRelations = [5071, 15909049, 17258409], riverWays = [22747533, 22797948, 23353973, 23353974, 23354406, 23354527, 23354547, 23354970, 23354973, 23356029, 184762449, 184762450, 216887342, 216888510];
+const query = `[out:json][timeout:90];(${riverRelations.map(r => `rel(${r});`).join('')}${riverWays.map(w => `way(${w});`).join('')});out geom;`;
+let o;
+for (let attempt = 0; attempt < 5; attempt++) {   // the public Overpass servers answer 502/504 under load
+  o = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', headers: { ...agent, accept: 'application/json', 'content-type': 'application/x-www-form-urlencoded' }, body: 'data=' + encodeURIComponent(query) });
+  if (o.ok) break;
+  await new Promise(resolve => setTimeout(resolve, 4000 * (attempt + 1)));
+}
+if (!o.ok) throw Error(`Overpass: ${o.status}`);
+const osm = await o.json();
+const ll = g => g.map(p => [Math.round(p.lon * 1e6) / 1e6, Math.round(p.lat * 1e6) / 1e6]);
+await writeFile(`${out}/osm-tiber.json`, JSON.stringify({ accessed, baseTimestamp: osm.osm3s.timestamp_osm_base, licence: 'ODbL 1.0 · © OpenStreetMap contributors', licenceUrl: 'https://www.openstreetmap.org/copyright',
+  elements: osm.elements.map(e => ({ type: e.type, id: e.id, ...(e.geometry ? { geometry: ll(e.geometry) } : {}), ...(e.members ? { members: e.members.filter(m => m.geometry).map(m => ({ role: m.role, geometry: ll(m.geometry) })) } : {}) })) }) + '\n');
+console.log('saved', Object.keys(places).length, 'Pleiades places and', osm.elements.length, 'Tiber polygons');

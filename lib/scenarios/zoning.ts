@@ -4,11 +4,11 @@ import type { ContextCertainty, HistoricalTime } from '@/lib/scenarios/schema';
 
 /** Land use in the AD 100 zoning (scripts/context/rome/build-zoning.mjs). Zones of one date never overlap; housing is what the others leave. */
 export type ZoneUse = 'residential' | 'monumental' | 'horti' | 'port' | 'open' | 'open-river';
-export type HousingClass = 'dense' | 'elite' | 'roadside';
+export type HousingClass = 'dense' | 'mixed' | 'elite' | 'roadside';
 interface Dated { id: string; title: string; certainty: ContextCertainty; time: HistoricalTime; note: string; sources: string[] }
 export interface Zone extends Dated {
   use: ZoneUse;
-  /** Residential zones only: dense blocks, low-density elite houses, or ribbons along the roads. */
+  /** Residential zones only: dense blocks, mixed hill housing, low-density elite houses, or ribbons along the roads. */
   housing?: HousingClass;
   short: string;
   /** Relative housing density for the fill (1 = the east-bank core). Residential zones only. */
@@ -29,7 +29,7 @@ export const romeZoning = zoning as unknown as {
 
 export const zoneUseLabel: Record<ZoneUse, string> = { residential: 'Housing', monumental: 'Monumental and public', horti: 'Horti (estate gardens)', port: 'Port and warehouses', open: 'Open ground', 'open-river': 'River' };
 export const zoneColour: Record<ZoneUse, string> = { residential: '#c46a4a', monumental: '#f4ecd6', horti: '#b5e07a', port: '#b08a4e', open: '#d8c76a', 'open-river': '#5f8ea3' };
-const housingColour: Record<HousingClass, string> = { dense: '#c46a4a', elite: '#e8ac8a', roadside: '#9a5a40' };
+const housingColour: Record<HousingClass, string> = { dense: '#c46a4a', mixed: '#d98d66', elite: '#ebb596', roadside: '#9a5a40' };
 export const colourOf = (z: Zone) => z.housing ? housingColour[z.housing] : zoneColour[z.use];
 
 /** The zones, the extent and the markers as inspectable map layers, with their date match. Pure. */
