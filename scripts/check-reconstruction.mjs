@@ -99,7 +99,7 @@ assert.ok(attached / buildings.length > 0.7, `party walls: ${Math.round(100 * at
 
 // Buildings never overlap each other, the temples, the square or the landmarks (separating-axis test on the rectangles; footprints are rounded to 10 cm, so party walls may touch).
 const insidePolygon = (p, poly) => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) if ((poly[i][1] > p[1]) !== (poly[j][1] > p[1]) && p[0] < (poly[j][0] - poly[i][0]) * (p[1] - poly[i][1]) / (poly[j][1] - poly[i][1]) + poly[i][0]) c = !c; return c; };
-const solid = data.objects.filter(o => o.kind === 'temple' || o.kind === 'circus' || o.kind === 'palace' || o.kind === 'square');
+const solid = data.objects.filter(o => o.kind === 'temple' || o.kind === 'circus' || o.kind === 'palace' || o.kind === 'theatre' || o.kind === 'colonnade' || o.kind === 'square');
 for (const b of buildings) {
   for (const o of near(b)) if (o !== b) assert.ok(!overlap(b.footprint, o.footprint, 0.35), `${b.id} and ${o.id} do not overlap`);
   for (const t of solid) { if (t.kind === 'square') { assert.ok(!b.footprint.some(p => insidePolygon(p, t.footprint)), `${b.id} stays out of the square`); continue; } assert.ok(!overlap(b.footprint, t.footprint, 0.05), `${b.id} stays off ${t.id}`); }
@@ -119,6 +119,13 @@ assert.equal(piersE.length, 8, 'eight piers, seven spans'); assert.ok(Math.abs(p
 assert.ok(data.waterExtra?.[0]?.length > 20, 'the strip of river the embankments took is carried as water');
 // The ancient east bank lies east of today's: every point of the strip's east edge is further east than its west edge.
 { const ring = data.waterExtra[0], half = ring.length / 2, east = ring.slice(0, half), west = ring.slice(half).reverse(); assert.ok(east.every((p, i) => p[0] > west[i][0] + 1), 'the ancient bank is east of the modern one'); }
+// The north of the market: the theatre, three temples and the pier hall, from the plate, evidence-based, with a date note where the date is not secure.
+const theatre = data.objects.find(o => o.id === 'theatre-marcellus');
+assert.ok(theatre?.certainty === 'evidence-based' && theatre.sources.includes('source:lanciani-fur-28') && theatre.shape.radius > 55 && theatre.shape.radius < 66, 'the theatre is placed and sized from the plate');
+assert.ok(Math.abs(theatre.shape.centre[0] + 115) < 10 && Math.abs(theatre.shape.centre[1] + 269) < 10, 'the theatre lies about 270 m north-west of the temples, where the plate puts it');
+for (const id of ['temple-janus', 'temple-juno-sospita', 'temple-spes']) { const t = data.objects.find(o => o.id === id); assert.equal(t.certainty, 'evidence-based', `${id} is evidence-based`); assert.ok(t.snap.length > 40 && t.sources.includes('source:wikipedia-forum-holitorium'), `${id} cites Wikipedia and says why it stood in AD 100`); assert.equal(t.shape.type, 'temple'); }
+const hall = data.objects.find(o => o.id === 'porticus-minucia');
+assert.ok(hall.certainty === 'evidence-based' && hall.shape.columns.length > 20 && /identification/.test(hall.note + hall.snap), 'the pier hall is marked as Lanciani\'s identification');
 // No building stands in the ancient river.
 for (const b of buildings) assert.ok(!insidePolygon(b.shape.centre, data.waterExtra[0]), `${b.id} is not in the ancient river`);
 

@@ -38,7 +38,7 @@ const eastBank = s => Math.max(...crossings(s)), westBank = s => Math.min(...cro
 // The ancient east bank. Today's embankments (from 1876) narrowed the channel, so the OpenStreetMap bank is 10 to 30 m west of
 // the bank Lanciani surveyed before they were built. Anchors are [south, east] read by hand off plate 28 (within about 3-5 m):
 // the pre-embankment shore, and from S 0 to S 123 the excavated riverfront wall he marks "RIPA". Beyond them the shift fades out.
-const BANK_ANCHORS = [[-200, -146.8], [-190, -138.8], [-180, -130], [-170, -121], [-160, -115], [-150, -111.2], [-140, -107.5], [-130, -100.8], [-120, -96], [-110, -90.2], [-100, -84.5], [-90, -78.8], [-80, -73.2], [-70, -67.2], [-50, -57.5], [-40, -48.2], [-30, -44.2], [-20, -37.5],
+const BANK_ANCHORS = [[-260, -199], [-255, -194], [-230, -168.2], [-205, -143.2], [-200, -146.8], [-190, -138.8], [-180, -130], [-170, -121], [-160, -115], [-150, -111.2], [-140, -107.5], [-130, -100.8], [-120, -96], [-110, -90.2], [-100, -84.5], [-90, -78.8], [-80, -73.2], [-70, -67.2], [-50, -57.5], [-40, -48.2], [-30, -44.2], [-20, -37.5],
   [-10, -31.6], [0, -32.6], [20, -34.1], [44, -36.7], [71, -40.1], [99, -42.6], [122, -44.1], [130, -43.2], [140, -49.8], [150, -53.8], [160, -56.2]];
 const WALL = [-10, 123];
 const anchorShift = BANK_ANCHORS.map(([s, x]) => [s, x - eastBank(s)]);
@@ -129,6 +129,9 @@ const sources = [
   { id: 'source:osm-valley-streets', title: 'OpenStreetMap · Via di San Teodoro, Via del Velabro, Via della Consolazione, Via dei Cerchi (ways 366796445, 52938659, 123817468, 82201173 and neighbours)', url: 'https://www.openstreetmap.org/way/366796445', licence: 'ODbL · modern streets in the same valleys, used only as the guide for the lines of guessed streets' },
   // Pass D: a period survey.
   { id: 'source:lanciani-fur-28', title: 'Lanciani, Forma Urbis Romae (1893-1901), plate 28 (Isola Tiberina): Forum Boarium, Pons Aemilius, Cloaca Maxima, Tiber banks', url: 'https://commons.wikimedia.org/wiki/File:Rodolfo_Lanciani_-_Forma_Urbis_Romae_-_Tavola_28.jpg', licence: 'Public domain (published 1901; Lanciani died 1929) · positions read by hand against the two temples and the Ponte Rotto, good to about 3-5 m; the scan itself is not shipped' },
+  { id: 'source:wikipedia-theatre-marcellus', title: 'Wikipedia · Theatre of Marcellus: completed 13 BC, inaugurated 12 BC by Augustus; 11,000 to 20,000 spectators; the top tier removed in the Middle Ages', url: 'https://en.wikipedia.org/wiki/Theatre_of_Marcellus', licence: 'CC BY-SA 4.0 · text read for dates and capacity' },
+  { id: 'source:wikipedia-forum-holitorium', title: 'Wikipedia · Forum Holitorium: temples of Janus (restored AD 17), Juno Sospita (rebuilt 90 BC) and Spes (rebuilt after 213 BC, restored AD 17); columns survive in San Nicola in Carcere', url: 'https://en.wikipedia.org/wiki/Forum_Holitorium', licence: 'CC BY-SA 4.0 · text read for the temples, their dates and dimensions' },
+  { id: 'source:osm-foro-olitorio', title: 'OpenStreetMap · Foro Olitorio site (way 111671157) and Chiesa di San Nicola in Carcere (way 52919045)', url: 'https://www.openstreetmap.org/way/111671157', licence: 'ODbL · used only to check the plate against modern outlines (within a few metres)' },
   { id: 'source:project-rules', title: 'Mankind project rules for the best-guess neighbourhood (scripts/context/forum-boarium/build-reconstruction.mjs)', url: 'scripts/context/forum-boarium/RECONSTRUCTION.md', licence: 'Project-authored; seed 100; see RECONSTRUCTION.md' },
 ];
 const GUESS = 'best-guess', BASED = 'evidence-based', DOCUMENTED = 'documented';
@@ -195,6 +198,41 @@ street('street-circus', 'Road from the market to the Circus Maximus', GUESS, [[4
   'The Forum Boarium opened towards the starting gates of the Circus Maximus (Platner, Wikipedia). The road is likely; its line is guessed along today\'s Via dei Cerchi.');
 street('street-trastevere', 'Road west of the bridge into Trastevere', GUESS, [[piers.at(-1) - 4, -34], [-215, -30], [-270, -18], [-340, 0], [-420, 22]], 6, ['source:wikipedia-pons-aemilius', 'source:project-rules'],
   'The Pons Aemilius led over the river to the west bank. A road continuing from the bridge is likely; its line and width are guessed.');
+
+// Pass D, part 2: the north of the market. The theatre, the three temples of the Forum Holitorium and the Porticus Minucia
+// as Lanciani drew them on plate 28 (read to about 3-5 m; OpenStreetMap's outlines for the site agree within a few metres).
+// Names follow modern identification (north to south: Janus, Juno Sospita, Spes); Lanciani labelled them the other way round.
+const THEATRE = { c: [-115.2, -269], radius: 61.1 };
+const theatreFootprint = (() => {
+  const out = [[THEATRE.c[0] + THEATRE.radius, THEATRE.c[1] + 22], [THEATRE.c[0] - THEATRE.radius, THEATRE.c[1] + 22]];
+  for (let k = 0; k <= 18; k++) { const a = Math.PI + k / 18 * Math.PI; out.push([THEATRE.c[0] + Math.cos(a) * THEATRE.radius, THEATRE.c[1] + Math.sin(a) * THEATRE.radius]); }
+  return out.map(pt);
+})();
+add({ id: 'theatre-marcellus', kind: 'theatre', title: 'Theatre of Marcellus', certainty: BASED, shape: { type: 'theatre', centre: pt(THEATRE.c), radius: THEATRE.radius, wall: 28, seats: 15, scaena: 24 }, footprint: theatreFootprint,
+  sources: ['source:lanciani-fur-28', 'source:wikipedia-theatre-marcellus', 'source:osm-foro-olitorio'], time: { start: { year: -13 }, end: { year: 300 } }, uncertaintyYears: 5,
+  note: `Position, radius (${THEATRE.radius} m to the outer arcade, as the plate reads; Wikipedia gives a diameter of 111 m) and the half-ring plan are from Lanciani's plate, which draws the surviving arcade and the lost cavea; finished 13 BC (Wikipedia). The arcades' three storeys, the seating bowl and the stage building are massing, guessed.` });
+const holitorium = [
+  { id: 'temple-janus', title: 'Temple of Janus · Forum Holitorium', c: [-55.5, -232.5], size: [12.5, 28], columns: [6, 8], from: -260, snap: 'Founded in the First Punic War and restored in AD 17 (Wikipedia); the plan is as Lanciani drew its remains, so it stood in AD 100.' },
+  { id: 'temple-juno-sospita', title: 'Temple of Juno Sospita · Forum Holitorium', c: [-52.2, -216.5], size: [14, 29], columns: [6, 9], from: -195, snap: 'Founded about 195 BC and rebuilt in 90 BC (Wikipedia); the plan is as Lanciani drew its remains, so it stood in AD 100.' },
+  { id: 'temple-spes', title: 'Temple of Spes · Forum Holitorium', c: [-43.8, -201.9], size: [11.2, 28.8], columns: [6, 11], from: -260, snap: 'Founded in the First Punic War, rebuilt after the fire of 213 BC and restored in AD 17 (Wikipedia); the plan is as Lanciani drew its remains, so it stood in AD 100.' },
+];
+const hFront = [Math.cos(-13.5 * Math.PI / 180), Math.sin(-13.5 * Math.PI / 180)];
+for (const t of holitorium) {
+  add({ id: t.id, kind: 'temple', title: t.title, certainty: BASED, shape: { type: 'temple', centre: pt(t.c), front: hFront.map(r3), size: t.size, columns: t.columns, podium: 2.4, columnHeight: 8.6 }, footprint: rectOf(t.c, hFront, t.size[0], t.size[1]),
+    sources: ['source:lanciani-fur-28', 'source:wikipedia-forum-holitorium', 'source:osm-foro-olitorio'], time: { start: { year: t.from }, end: { year: 400 } }, uncertaintyYears: 20, snap: t.snap,
+    note: `One of the three republican temples on the Forum Holitorium (vegetable market), facing east. Its place, size and tilt are read from Lanciani's plate (about 3-5 m), the number of columns from Wikipedia; its column order, heights, podium and roof are massing, guessed. Columns of the Spes and Juno temples still stand in San Nicola in Carcere.` });
+}
+(() => {
+  // The pier-field Lanciani labels Porticus Minucia: a rectangle about 85 by 33 m with a wall on each long side and rows of piers between.
+  const P = [[-56.3, -313.2], [-10, -241.2], [18.8, -258.5], [-26.9, -328.7]];
+  const d = [(P[1][0] - P[0][0]) / len(P[0], P[1]), (P[1][1] - P[0][1]) / len(P[0], P[1])], across = [(P[3][0] - P[0][0]) / len(P[0], P[3]), (P[3][1] - P[0][1]) / len(P[0], P[3])];
+  const L = len(P[0], P[1]), W = len(P[0], P[3]), columns = [];
+  for (const f of [0.25, 0.5, 0.75]) for (let a = 5; a < L - 2; a += 8.4) columns.push(pt([P[0][0] + d[0] * a + across[0] * W * f, P[0][1] + d[1] * a + across[1] * W * f]));
+  add({ id: 'porticus-minucia', kind: 'colonnade', title: 'Porticus Minucia (as Lanciani placed it) · colonnaded hall', certainty: BASED, shape: { type: 'colonnade', corners: P.map(pt), columns, height: 8.4 }, footprint: P.map(pt),
+    sources: ['source:lanciani-fur-28'], time: { start: { year: -150 }, end: { year: 300 } }, uncertaintyYears: 50,
+    snap: 'Lanciani draws the piers as found and names them Porticus Minucia; the name and date are his identification, not secure, so it is shown within a window of 50 years around AD 100.',
+    note: 'A hall of rows of piers between two long walls, about 85 by 33 m, placed where Lanciani drew its remains; the label Porticus Minucia is his identification and later scholars place the porticoes of that name elsewhere. Pier spacing, heights and the roof are guessed.' });
+})();
 
 // ── Landmarks: the Circus Maximus and the Palatine palace ─────────────────────────────────────────────────────
 // Circus: axis and centre fitted to the OpenStreetMap outline of the site; width and length from Wikipedia (118 m by 621 m).
@@ -275,7 +313,7 @@ const squarePolygon = grow(forumOutline, 8);
 const altar = marker('ara-maxima'), churchBlock = [[40, 74], [112, 74], [112, 130], [40, 130]];
 const palaceFootprints = objects.filter(o => o.kind === 'palace').map(o => o.footprint);
 const noBuild = [{ poly: squarePolygon, pad: 2 }, { poly: portunus, pad: 9 }, { poly: hercules, pad: 9 }, { poly: churchBlock, pad: 0 }, { poly: rectOf(altar, [0, 1], 22, 16), pad: 0 },
-  { poly: circusOutline(CIRCUS.bank + 14), pad: 0 }, ...palaceFootprints.map(poly => ({ poly: grow(poly, 30), pad: 0 }))];
+  { poly: circusOutline(CIRCUS.bank + 14), pad: 0 }, { poly: grow(theatreFootprint, 10), pad: 0 }, ...objects.filter(o => o.id.startsWith('temple-') && o.shape.type === 'temple' || o.id === 'porticus-minucia').map(o => ({ poly: grow(o.footprint, 8), pad: 0 })), ...palaceFootprints.map(poly => ({ poly: grow(poly, 30), pad: 0 }))];
 const noBuildBox = noBuild.map(n => { const xs = n.poly.map(p => p[0]), zs = n.poly.map(p => p[1]); return [Math.min(...xs) - n.pad - 1, Math.max(...xs) + n.pad + 1, Math.min(...zs) - n.pad - 1, Math.max(...zs) + n.pad + 1]; });
 const roadLines = streets.filter(s => s.id !== 'street-quay').map(s => ({ line: s.points, half: s.width / 2 + 0.4 }));
 const palatineFoot = [[345, -300], [330, -250], [300, -200], [285, -155], [263, -112], [250, -82], [243, -60], [240, -46], [233, 1], [227, 44], [215, 100], [205, 135]];

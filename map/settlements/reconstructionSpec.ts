@@ -1,7 +1,7 @@
 import type { LocalPoint } from "@/map/settlements/romanSettlement";
 
 export type ReconstructionCertainty = "documented" | "evidence-based" | "best-guess";
-export type ReconstructionKind = "temple" | "bridge" | "quay" | "street" | "lane" | "stage" | "barge" | "square" | "altar" | "pen" | "stall" | "shop" | "insula" | "flats" | "warehouse" | "circus" | "palace" | "drain";
+export type ReconstructionKind = "temple" | "bridge" | "quay" | "street" | "lane" | "stage" | "barge" | "square" | "altar" | "pen" | "stall" | "shop" | "insula" | "flats" | "warehouse" | "circus" | "palace" | "drain" | "theatre" | "colonnade";
 export interface ReconstructionObject {
   id: string;
   kind: ReconstructionKind;

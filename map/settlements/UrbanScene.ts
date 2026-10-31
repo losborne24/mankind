@@ -136,6 +136,8 @@ export class UrbanScene {
       case "altar": case "pen": case "stall": return [shape.centre];
       case "circus": return circusFrame(shape).sampleRing();
       case "palace": return (shape.volumes as PalaceVolume[]).filter(v => v.role === "platform").flatMap(v => volumeCorners(v, true));
+      case "theatre": { const [cx, cz] = shape.centre as LocalPoint, r = shape.radius as number; return [[cx, cz], [cx - r, cz], [cx + r, cz], [cx, cz - r], [cx - r * 0.7, cz - r * 0.7], [cx + r * 0.7, cz - r * 0.7], [cx, cz + 22]]; }
+      case "temple": case "colonnade": return [shape.centre ?? [0, 0], ...o.footprint];
       default: return [];
     }
   }
@@ -203,6 +205,9 @@ export class UrbanScene {
         case "stall": this.stall(mesher, o, h); box(o, h(o.shape.centre), h(o.shape.centre) + 2.4); break;
         case "circus": { const top = this.circus(mesher, o, h); box(o, top.floor - 4, top.floor + o.shape.outerHeight + 24); break; }
         case "palace": { const top = this.palace(mesher, o, h); box(o, top.low, top.high); break; }
+        case "theatre": { const top = this.theatre(mesher, o, h); box(o, top.low, top.high); break; }
+        case "temple": { const top = this.temple(mesher, o, h); box(o, top.low, top.high); break; }
+        case "colonnade": { const top = this.colonnade(mesher, o, h); box(o, top.low, top.high); break; }
         default: break;
       }
     }
@@ -387,6 +392,67 @@ export class UrbanScene {
       high = Math.max(high, level + v.height + 1);
     }
     return { low, high };
+  }
+
+  /** Half-ring cavea and arcade facing north, a straight stage building on the diameter. Massing only. */
+  private theatre(mesher: Mesher, o: ReconstructionObject, h: Ground): { low: number; high: number } {
+    const { centre, radius, wall, seats, scaena } = o.shape as { centre: LocalPoint; radius: number; wall: number; seats: number; scaena: number };
+    const [cx, cz] = centre, grounds = [[0, 0], [-radius, 0], [radius, 0], [0, -radius], [-radius * 0.7, -radius * 0.7], [radius * 0.7, -radius * 0.7], [0, 22]].map(([a, b]) => h([cx + a, cz + b]));
+    const low = Math.min(...grounds) - 4, level = Math.max(...grounds) + 0.8;
+    const half = (outer: number, inner: number) => { const s = new THREE.Shape(); s.absarc(0, 0, outer, 0, Math.PI, false); s.absarc(0, 0, inner, Math.PI, 0, true); return s; };
+    // Local x runs east, local y runs north (-z), the extrusion rises.
+    const base = (y: number) => new THREE.Matrix4().makeBasis(new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 0, -1), new THREE.Vector3(0, 1, 0)).setPosition(cx, y, cz);
+    mesher.extrude(half(radius, radius - 5), level - low + wall, base(low), PALACE_WALL.clone().multiplyScalar(0.97));
+    mesher.extrude(half(radius - 5.5, 17), level - low + seats, base(low), TRAVERTINE.clone().multiplyScalar(0.9));
+    // Arcade: a pilaster and a dark arch bay on each of three storeys, round the outer wall.
+    const bays = 52, storey = wall / 3, dark = new THREE.Color(0x3a322a);
+    for (let k = 0; k <= bays; k++) {
+      const a = Math.PI + k / bays * Math.PI, rx = cx + Math.cos(a) * (radius + 0.3), rz = cz + Math.sin(a) * (radius + 0.3);
+      mesher.box(rx, level + wall / 2, rz, 1, wall, 1.7, -a, TRAVERTINE.clone().multiplyScalar(0.96));
+      if (k === bays) continue;
+      const m = a + Math.PI / bays / 1, bx = cx + Math.cos(m) * (radius + 0.15), bz = cz + Math.sin(m) * (radius + 0.15);
+      for (let t = 0; t < 3; t++) mesher.box(bx, level + storey * (t + 0.5) - 0.6, bz, 0.5, storey * 0.62, 2.9, -m, dark);
+    }
+    for (const t of [1, 2]) {
+      const R = radius + 0.5, steps = 26;
+      for (let k = 0; k < steps; k++) { const a0 = Math.PI + k / steps * Math.PI, a1 = Math.PI + (k + 1) / steps * Math.PI, m = (a0 + a1) / 2, chord = 2 * R * Math.sin((a1 - a0) / 2); mesher.box(cx + Math.cos(m) * R, level + storey * t, cz + Math.sin(m) * R, 0.9, 0.6, chord, -m, TRAVERTINE.clone().multiplyScalar(1.05)); }
+    }
+    mesher.box(cx, level + scaena / 2, cz + 11, radius * 2, scaena, 22, 0, PALACE_WALL.clone().multiplyScalar(1.03));
+    mesher.box(cx, level + scaena + 0.5, cz + 11, radius * 2 + 1.2, 1, 23.2, 0, PALACE_ROOF);
+    mesher.box(cx, (low + level) / 2, cz + 8, radius * 2 + 2, level - low, 30, 0, PALACE_STONE);
+    return { low, high: level + Math.max(wall, scaena) + 1 };
+  }
+
+  /** A peripteral temple on a podium: cella at the back, columns round it, entablature and a slab roof. */
+  private temple(mesher: Mesher, o: ReconstructionObject, h: Ground): { low: number; high: number } {
+    const { centre, front, size, columns, podium, columnHeight } = o.shape as { centre: LocalPoint; front: [number, number]; size: [number, number]; columns: [number, number]; podium: number; columnHeight: number };
+    const [width, length] = size, yaw = -Math.atan2(front[1], front[0]), side: [number, number] = [-front[1], front[0]];
+    const at = (a: number, b: number): LocalPoint => [centre[0] + front[0] * a + side[0] * b, centre[1] + front[1] * a + side[1] * b];
+    const grounds = [[-1, -1], [1, -1], [1, 1], [-1, 1], [0, 0]].map(([a, b]) => h(at(a * length / 2, b * width / 2)));
+    const low = Math.min(...grounds) - 3, level = Math.max(...grounds) + podium, top = level + columnHeight;
+    mesher.box(centre[0], (low + level) / 2, centre[1], length + 2, level - low, width + 2, yaw, PALACE_STONE);
+    const cellaLength = length * 0.55, cella = at(-length / 2 + cellaLength / 2 + 1.4, 0);
+    mesher.box(cella[0], level + columnHeight / 2, cella[1], cellaLength, columnHeight, width - 3.6, yaw, PALACE_WALL);
+    const [across, along] = columns, shaft = TRAVERTINE.clone().multiplyScalar(1.05);
+    const column = (a: number, b: number) => { const p = at(a, b); mesher.cylinder(p[0], level + columnHeight / 2, p[1], 0.5, columnHeight, shaft); };
+    for (let i = 0; i < across; i++) { const b = -width / 2 + 1.1 + i * (width - 2.2) / (across - 1); column(length / 2 - 1.1, b); column(-length / 2 + 1.1, b); }
+    for (let k = 1; k < along - 1; k++) { const a = -length / 2 + 1.1 + k * (length - 2.2) / (along - 1); column(a, -width / 2 + 1.1); column(a, width / 2 - 1.1); }
+    mesher.box(centre[0], top + 0.5, centre[1], length + 0.6, 1, width + 0.6, yaw, TRAVERTINE);
+    mesher.box(centre[0], top + 1.6, centre[1], length + 1.6, 1.2, width + 1.2, yaw, PALACE_ROOF);
+    return { low, high: top + 2.4 };
+  }
+
+  /** A pier hall: platform, a wall along each long side, rows of columns between, one slab roof. */
+  private colonnade(mesher: Mesher, o: ReconstructionObject, h: Ground): { low: number; high: number } {
+    const { corners, columns, height } = o.shape as { corners: LocalPoint[]; columns: LocalPoint[]; height: number };
+    const [a, b, , d] = corners, length = Math.hypot(b[0] - a[0], b[1] - a[1]), width = Math.hypot(d[0] - a[0], d[1] - a[1]), yaw = -Math.atan2(b[1] - a[1], b[0] - a[0]);
+    const centre: LocalPoint = [corners.reduce((sum, p) => sum + p[0], 0) / 4, corners.reduce((sum, p) => sum + p[1], 0) / 4], grounds = [...corners, centre].map(p => h(p));
+    const low = Math.min(...grounds) - 3, level = Math.max(...grounds) + 0.6, top = level + height;
+    mesher.box(centre[0], (low + level) / 2, centre[1], length, level - low, width, yaw, PALACE_STONE);
+    for (const [p, q] of [[corners[0], corners[1]], [corners[3], corners[2]]]) mesher.box((p[0] + q[0]) / 2, level + height / 2, (p[1] + q[1]) / 2, length, height, 1.4, yaw, PALACE_WALL);
+    for (const p of columns) mesher.cylinder(p[0], level + height / 2, p[1], 0.55, height, TRAVERTINE.clone().multiplyScalar(1.02));
+    mesher.box(centre[0], top + 0.5, centre[1], length + 1, 1, width + 1, yaw, PALACE_ROOF);
+    return { low, high: top + 1 };
   }
 
   private bridge(mesher: Mesher, o: ReconstructionObject, h: Height, water: number) {

@@ -149,8 +149,24 @@ became 1,622 because the widened river took some plots.
 * The label of the Cloaca Maxima still comes from today's OpenStreetMap outlet point, which is now in the river 15 m west of the ancient mouth. Not moved: it is a
   sourced modern datum.
 
+## Part 2 (v5.10.0): the north of the market, from the same plate
+
+| Object | Certainty | What was read | Date |
+| --- | --- | --- | --- |
+| Theatre of Marcellus | evidence-based | Centre (E −115, S −269) and outer radius (61 m) from a circle fitted to nine points on the plate's outer arcade (residuals under 3 m); the half-ring opens north. Wikipedia gives a diameter of 111 m, the plate reads about 122 m; the plate's figure is used. The surviving arcade in OpenStreetMap lies on the plate's arc to within a few metres. Three arcade storeys (28 m), the seating bowl and the stage block are massing | finished 13 BC |
+| Temples of Janus, Juno Sospita and Spes | evidence-based | Positions, tilt (13.5°, facing east) and sizes read from the plate; column counts from Wikipedia (6×8, 6×9, 6×11). Named by modern identification (north to south: Janus, Juno, Spes); Lanciani labelled them the other way round | republican; restored AD 17 |
+| Porticus Minucia (as Lanciani placed it) | evidence-based | The pier field about 85 by 33 m with a wall along each long side. The name is his identification and later scholars place the porticoes of that name elsewhere, so the note says so | shown within ±50 years |
+| Riverfront wall below the theatre | evidence-based | Extends the ancient bank north to S −260, along the wall Lanciani draws from the Pons Fabricius side (E −194 at S −255, E −143 at S −205), about 35 m east of today's bank at S −255 | undated |
+
+Not modelled: the Pons Fabricius and Pons Cestius (the bridge renderer is east–west only and Fabricius is diagonal), the Tiber Island buildings, the Porticus Octaviae (OpenStreetMap has its site at E −198 to −175, S −398 to −378, beyond the traced area), and the Capitoline temples.
+
+## Verification notes
+
+* Desktop only, in Chrome, at the explore beat and by moving the camera. At phone width nothing was looked at.
+* The local detailed scene falls back to placeholder blocks when the map centre sits about 200 m or more from the temples at high zoom, so the theatre and the Forum Holitorium temples could be inspected from a distance (zoom 18) but not from close in. Not changed; it is how the local scene is gated.
+
 ## Still open
 
 * Plates 22 (Fori Imperiali), 29 (Forum Romanum) and 35 (Circus Maximus end) were not traced; plate 35 shows the circus with its Marrana channel but not the river.
-* The Theatre of Marcellus, Forum Holitorium temples, Porticus Minucia and Tiber Island, all drawn on plate 28 north of the market, are still not modelled.
+* The Tiber Island, its two bridges and the Porticus Octaviae, all within or beside plate 28, are still missing.
 * The ground mesh is coarse (about 9 m near the temples), so the bank is a soft ramp with a stone coping on top, not a vertical wall face.
