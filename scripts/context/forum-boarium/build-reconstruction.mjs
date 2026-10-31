@@ -147,14 +147,17 @@ add({ id: 'temple-hercules-victor', kind: 'temple', title: 'Temple of Hercules V
 const bankAtBridge = bankAt(-34);
 
 // Bridge: Lanciani draws four piers (the Ponte Rotto pier and three more west of the arch) and the deck running on to the east bank.
-// The east piers are spaced evenly to the ancient bank. Seven spans (Wikipedia).
+// The east piers are spaced evenly to the ancient bank. His plate stops short of the west bank, so the bridge is carried on to an
+// abutment at today's west bank (no ancient west shore is read here) in spans no longer than the widest he drew.
 const fragmentE = [Math.min(...pons.map(p => p[0])), Math.max(...pons.map(p => p[0]))], bridgeS = r1(pons.reduce((a, p) => a + p[1], 0) / pons.length);
-const piersDrawn = [-154.5, -137.5, -121.4, -98.6], abutment = bankAtBridge + 4;
-const piers = [...piersDrawn, ...[1, 2, 3, 4].map(i => piersDrawn[3] + (abutment - piersDrawn[3]) * i / 4)];
+const piersDrawn = [-154.5, -137.5, -121.4, -98.6], abutment = bankAtBridge + 4, westAbutment = westBank(bridgeS) - 4;
+const drawnSpan = Math.max(...piersDrawn.slice(1).map((e, i) => e - piersDrawn[i])), westSpans = Math.ceil((piersDrawn[0] - westAbutment) / drawnSpan);
+const piers = [...piersDrawn, ...[1, 2, 3, 4].map(i => piersDrawn[3] + (abutment - piersDrawn[3]) * i / 4),
+  ...Array.from({ length: westSpans }, (_, i) => piersDrawn[0] + (westAbutment - piersDrawn[0]) * (i + 1) / westSpans)];
 piers.sort((a, b) => b - a);
 add({ id: 'pons-aemilius', kind: 'bridge', title: 'Pons Aemilius', certainty: BASED, shape: { type: 'bridge', axisS: bridgeS, piersE: piers.map(r1), deckWidth: 9, spans: piers.length - 1 },
   footprint: [[piers[0], bridgeS - 4.5], [piers.at(-1), bridgeS - 4.5], [piers.at(-1), bridgeS + 4.5], [piers[0], bridgeS + 4.5]], sources: ['source:osm-pons-aemilius', 'source:wikipedia-pons-aemilius', 'source:platner-1929', 'source:lanciani-fur-28'], time: { start: { year: -179 }, end: { year: 2025 } }, uncertaintyYears: 28,
-  note: `Four piers as Lanciani drew them (the Ponte Rotto pier at E ${r1(piersDrawn[2])} m is also fixed by the surviving arch outline at E ${r1(fragmentE[0])} to ${r1(fragmentE[1])} m); stone, seven spans (Wikipedia). The three east piers are spaced evenly to the ancient bank he surveyed; the deck width and arch profile are guessed.` });
+  note: `Four piers as Lanciani drew them (the Ponte Rotto pier at E ${r1(piersDrawn[2])} m is also fixed by the surviving arch outline at E ${r1(fragmentE[0])} to ${r1(fragmentE[1])} m); stone (Wikipedia). The three east piers are spaced evenly to the ancient bank he surveyed. The west end is a best guess: no ancient west bank is read off his plate, so the ${westSpans} west spans run on, evenly, to an abutment at today's west bank (E ${r1(westAbutment)} m). That makes ${piers.length - 1} spans where Wikipedia gives seven; seven would need spans of about ${Math.round((abutment - westAbutment - (piersDrawn[3] - piersDrawn[0])) / 4)} m, far wider than the ${Math.round(drawnSpan)} m he drew, so the count is kept to his spacing and the difference left open. The deck width and arch profile are guessed.` });
 
 // ── River frontage: quay wall, quay road, stages and barges ──────────────────────────────────────────────────
 const quayRuns = [{ id: 'quay-north', from: -262, to: -12 }, { id: 'quay-wall', from: WALL[0], to: WALL[1] }, { id: 'quay-south', from: 126, to: 322 }];
@@ -196,8 +199,8 @@ street('street-clivus-victoriae', 'Clivus Victoriae', BASED, victoriae, 5, ['sou
   'The steep street up the Palatine, on the line OpenStreetMap maps for it (Pleiades locates it to about 20 m). Width and paving are guessed.');
 street('street-circus', 'Road from the market to the Circus Maximus', GUESS, [[45, 10], [108, 14], [140, 43], [173, 72], [202, 94], [190, 140]], 8, ['source:platner-1929', 'source:osm-valley-streets', 'source:wikipedia-circus-maximus'],
   'The Forum Boarium opened towards the starting gates of the Circus Maximus (Platner, Wikipedia). The road is likely; its line is guessed along today\'s Via dei Cerchi.');
-street('street-trastevere', 'Road west of the bridge into Trastevere', GUESS, [[piers.at(-1) - 4, -34], [-215, -30], [-270, -18], [-340, 0], [-420, 22]], 6, ['source:wikipedia-pons-aemilius', 'source:project-rules'],
-  'The Pons Aemilius led over the river to the west bank. A road continuing from the bridge is likely; its line and width are guessed.');
+street('street-trastevere', 'Road west of the bridge into Trastevere', GUESS, [[westAbutment, -34], [-270, -18], [-340, 0], [-420, 22]], 6, ['source:wikipedia-pons-aemilius', 'source:project-rules'],
+  'The Pons Aemilius led over the river to the west bank. A road continuing from the bridge\'s west abutment is likely; its line and width are guessed.');
 
 // Pass D, part 2: the north of the market. The theatre, the three temples of the Forum Holitorium and the Porticus Minucia
 // as Lanciani drew them on plate 28 (read to about 3-5 m; OpenStreetMap's outlines for the site agree within a few metres).

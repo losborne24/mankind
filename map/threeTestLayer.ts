@@ -294,8 +294,9 @@ export class ThreeTestLayer implements CustomLayerInterface {
     if (this.settlementEnabled && this.procedural) this.updateProcedural();
     if (this.settlementEnabled && this.settlement && this.settlementAnchor && this.lodController.current.lod === "local") {
       this.settlement.setFineDetail(this.lodController.current.distance < 250);
+      const exaggeration = map.getTerrain()?.exaggeration;
       this.settlement.updateTerrain((coordinate) =>
-        queryTerrainSample(map, { lng: coordinate[0], lat: coordinate[1] }));
+        queryTerrainSample(map, { lng: coordinate[0], lat: coordinate[1] }), typeof exaggeration === "number" && exaggeration > 0 ? exaggeration : 1);
       if (this.settlement.timing.stage === "ready") {
         this.updateAmbientFrame(center.lng, center.lat);
         this.tickLocalGround(performance.now());

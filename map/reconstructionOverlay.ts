@@ -10,21 +10,29 @@ const PLASTER = ['#c9b08a', '#d6c8a8', '#b98a68', '#bcb3a0', '#cb9f78'];
 export const certaintyColour: Record<ReconstructionCertainty, string> = { documented: '#e9b75d', 'evidence-based': '#6fc0aa', 'best-guess': '#b58ad6' };
 const colourExpression = ['match', ['get', 'certainty'], 'documented', certaintyColour.documented, 'evidence-based', certaintyColour['evidence-based'], certaintyColour['best-guess']] as never;
 
+const BUILDING_KINDS = new Set(['temple', 'palace', 'theatre', 'circus', 'colonnade', 'insula', 'flats', 'shop', 'warehouse']);
 /** Footprint area in square metres (shoelace): the weight each object has in the best-guess share. */
 export const footprintArea = (o: ReconstructionObject) => Math.abs(o.footprint.reduce((a, p, i) => { const q = o.footprint[(i + 1) % o.footprint.length]; return a + p[0] * q[1] - q[0] * p[1]; }, 0)) / 2;
 /** Is the object present at this date? Same rule as every other map layer. */
 export const reconstructionMatch = (o: ReconstructionObject, at: HistoricalTime) => matchContext({ time: o.time ?? { start: { year: 100 }, end: { year: 100 } }, uncertaintyYears: o.uncertaintyYears } as ContextInfo, at);
 
-/** Share of the mapped object area inside the current view, by certainty. Pure; the legend line is built from it. */
+/**
+ * Share of the mapped object area inside the current view, by certainty, and how many objects (and how many of them are
+ * buildings) of each certainty are in view. A few landmarks can be a sliver of the area, so the legend gives both. Pure.
+ */
 export function certaintyShare(spec: ReconstructionSpec, origin: Coordinate, bounds: { contains(point: [number, number]): boolean }, at: HistoricalTime, includeGuess = true) {
   const totals: Record<ReconstructionCertainty, number> = { documented: 0, 'evidence-based': 0, 'best-guess': 0 };
+  const counts: Record<ReconstructionCertainty, number> = { documented: 0, 'evidence-based': 0, 'best-guess': 0 }, buildings = { ...counts };
   for (const o of spec.objects) {
     if (reconstructionMatch(o, at) === 'outside' || (!includeGuess && o.certainty === 'best-guess')) continue;
     const c = o.footprint.reduce((a, p) => [a[0] + p[0] / o.footprint.length, a[1] + p[1] / o.footprint.length], [0, 0]);
-    if (bounds.contains(offsetCoordinate(origin, c as [number, number]) as [number, number])) totals[o.certainty] += footprintArea(o);
+    if (bounds.contains(offsetCoordinate(origin, c as [number, number]) as [number, number])) {
+      totals[o.certainty] += footprintArea(o); counts[o.certainty]++;
+      if (BUILDING_KINDS.has(o.kind)) buildings[o.certainty]++;
+    }
   }
   const sum = totals.documented + totals['evidence-based'] + totals['best-guess'];
-  return { totals, sum, share: (k: ReconstructionCertainty) => sum ? totals[k] / sum : 0 };
+  return { totals, counts, buildings, sum, share: (k: ReconstructionCertainty) => sum ? totals[k] / sum : 0 };
 }
 
 const TILES = ['#b06a45', '#b97848', '#a2603f', '#bd8458', '#9c6a52', '#c08a62'];

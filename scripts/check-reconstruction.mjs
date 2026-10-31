@@ -51,7 +51,7 @@ assert.ok(counts['best-guess'] > 1000 && counts['evidence-based'] >= 8);
 
 // The things the briefs name are all there.
 for (const kind of ['bridge', 'quay', 'stage', 'barge', 'square', 'altar', 'street', 'lane', 'shop', 'insula', 'flats', 'warehouse', 'stall', 'pen', 'circus', 'palace']) assert.ok(data.objects.some(o => o.kind === kind), `${kind} is present`);
-assert.ok(data.objects.find(o => o.id === 'pons-aemilius').shape.spans === 7, 'seven spans (Wikipedia)');
+assert.equal(data.objects.find(o => o.id === 'pons-aemilius').shape.spans, data.objects.find(o => o.id === 'pons-aemilius').shape.piersE.length - 1, 'one span between each pair of piers');
 
 // Landmarks: placed and sized from their sources, and evidence-based (never documented, never a bare guess).
 const circus = data.objects.find(o => o.id === 'circus-maximus'), flavia = data.objects.find(o => o.id === 'domus-flavia'), augustana = data.objects.find(o => o.id === 'domus-augustana');
@@ -115,7 +115,13 @@ for (const id of ['quay-wall', 'street-basalt', 'street-basalt-cross', 'cloaca-m
 for (const id of ['quay-wall', 'street-basalt', 'street-basalt-cross', 'statio-annonae']) assert.ok(data.objects.find(o => o.id === id).snap?.length > 40, `${id} says why it is shown at AD 100`);
 for (const id of ['cloaca-maxima', 'cloaca-circi-maximi']) assert.equal(data.objects.find(o => o.id === id).kind, 'drain', `${id} is a drain`);
 const piersE = data.objects.find(o => o.id === 'pons-aemilius').shape.piersE;
-assert.equal(piersE.length, 8, 'eight piers, seven spans'); assert.ok(Math.abs(piersE.at(-1) + 154.5) < 0.2 && Math.abs(piersE[4] + 98.6) < 0.2, 'the four drawn piers are where the plate puts them');
+for (const e of [-154.5, -137.5, -121.4, -98.6]) assert.ok(piersE.some(p => Math.abs(p - e) < 0.2), `the drawn pier at E ${e} is where the plate puts it`);
+// Bank to bank: today's west bank at the bridge axis is at E -216.6 (OpenStreetMap), so the west abutment stands on land beyond it,
+// no span is wider than the widest Lanciani drew (22.8 m), the note says the west end and span count are a guess, and the Trastevere road starts at the abutment.
+assert.ok(piersE.at(-1) < -216.6, `the bridge reaches the west bank (west end at E ${piersE.at(-1)})`);
+assert.ok(piersE.slice(1).every((e, i) => piersE[i] - e < 23), 'no span is wider than the plate\'s widest');
+assert.match(data.objects.find(o => o.id === 'pons-aemilius').note, /west end is a best guess.*Wikipedia gives seven/);
+assert.deepEqual(data.objects.find(o => o.id === 'street-trastevere').shape.points[0], [piersE.at(-1), -34], 'the Trastevere road starts at the west abutment');
 assert.ok(data.waterExtra?.[0]?.length > 20, 'the strip of river the embankments took is carried as water');
 // The ancient east bank lies east of today's: every point of the strip's east edge is further east than its west edge.
 { const ring = data.waterExtra[0], half = ring.length / 2, east = ring.slice(0, half), west = ring.slice(half).reverse(); assert.ok(east.every((p, i) => p[0] > west[i][0] + 1), 'the ancient bank is east of the modern one'); }

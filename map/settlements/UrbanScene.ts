@@ -67,6 +67,13 @@ class Mesher {
 type Height = (point: LocalPoint) => number | undefined;
 type Ground = (point: LocalPoint) => number;
 const yawOf = (dx: number, dz: number) => -Math.atan2(dz, dx);
+/**
+ * Heights for river structures (bridges, quays, landing stages, barges). The relief correction exaggerates the terrain about
+ * sea level, which doubles the step from the river up to its banks; a structure measured from it would float above the
+ * water or stand on tall piers. So these measure the bank from the river with the exaggeration taken out: `height` is the
+ * river surface plus the bank's true height above it. `water` is the river surface (Infinity where none is drawn).
+ */
+interface River { water: number; height(point: LocalPoint): number }
 const LATTICE = 10;
 
 /** One wing volume of a palace as the generator writes it: an oriented box on the platform. */
@@ -160,10 +167,10 @@ export class UrbanScene {
    * Rebuild against the terrain; false while any needed height is unknown. The terrain refines as DEM tiles arrive,
    * so heights are compared on every call and the meshes are rebuilt only when they moved by more than 15 cm.
    * Heights come from a 10 m lattice interpolated bilinearly: the DEM is no finer, and thousands of lots would
-   * otherwise cost thousands of terrain queries.
+   * otherwise cost thousands of terrain queries. `exaggeration` is the terrain's display exaggeration (see River).
    */
-  update(height: Height, waterLevel: number | undefined): boolean {
-    const failed = { value: false }, nodes = new Map<string, number>(), signature: number[] = [waterLevel ?? -1];
+  update(height: Height, waterLevel: number | undefined, exaggeration = 1): boolean {
+    const failed = { value: false }, nodes = new Map<string, number>(), signature: number[] = [waterLevel ?? -1, exaggeration];
     const node = (i: number, j: number) => {
       const k = `${i},${j}`;
       let v = nodes.get(k);
@@ -187,6 +194,7 @@ export class UrbanScene {
     const walls: { o: ReconstructionObject; base: number; skirt: number }[] = [];
     const guessed = new Mesher(), based = new Mesher();
     const surface = waterLevel ?? Infinity;
+    const river: River = { water: surface, height: p => Number.isFinite(surface) ? surface + (h(p) - surface) / exaggeration : h(p) };
     for (const o of this.spec.objects) {
       const mesher = o.certainty === "best-guess" ? guessed : based;
       mesher.tint = this.tinted ? CERTAINTY_TINT[o.certainty] : undefined;
@@ -197,8 +205,8 @@ export class UrbanScene {
           walls.push({ o, base, skirt }); box(o, base, base + o.shape.height + 2.5);
           break;
         }
-        case "bridge": this.bridge(mesher, o, h, surface); box(o, (Number.isFinite(surface) ? surface : 0) - 3, Math.max(h([o.shape.piersE[0], o.shape.axisS]), h([o.shape.piersE.at(-1), o.shape.axisS]), Number.isFinite(surface) ? surface + 6.5 : 0) + 1.6); break;
-        case "quay": this.quay(mesher, o, h, surface); break;
+        case "bridge": { const top = this.bridge(mesher, o, h, river); box(o, top.low, top.high); break; }
+        case "quay": this.quay(mesher, o, h, river); break;
         case "stage": this.stage(mesher, o, surface); box(o, (Number.isFinite(surface) ? surface : 0) - 1.5, (Number.isFinite(surface) ? surface : 0) + 2); break;
         case "barge": this.barge(mesher, o, surface); box(o, (Number.isFinite(surface) ? surface : 0) - 0.5, (Number.isFinite(surface) ? surface : 0) + 2.2); break;
         case "altar": this.altar(mesher, o, h); box(o, h(o.shape.centre), h(o.shape.centre) + 2.8); break;
@@ -209,7 +217,7 @@ export class UrbanScene {
         case "theatre": { const top = this.theatre(mesher, o, h); box(o, top.low, top.high); break; }
         case "temple": { const top = this.temple(mesher, o, h); box(o, top.low, top.high); break; }
         case "colonnade": { const top = this.colonnade(mesher, o, h); box(o, top.low, top.high); break; }
-        case "skew-bridge": { const top = this.skewBridge(mesher, o, h, surface); box(o, top.low, top.high); break; }
+        case "skew-bridge": { const top = this.skewBridge(mesher, o, h, river); box(o, top.low, top.high); break; }
         default: break;
       }
     }
@@ -457,56 +465,66 @@ export class UrbanScene {
     return { low, high: top + 1 };
   }
 
-  /** A bridge on any line: round arches between piers, a deck with parapets, blocks down to the ground at both ends. */
-  private skewBridge(mesher: Mesher, o: ReconstructionObject, h: Height, water: number): { low: number; high: number } {
+  /** A bridge on any line, its piers spaced evenly. */
+  private skewBridge(mesher: Mesher, o: ReconstructionObject, h: Height, river: River): { low: number; high: number } {
     const { from, to, spans, deckWidth } = o.shape as { from: LocalPoint; to: LocalPoint; spans: number; deckWidth: number };
-    const dx = to[0] - from[0], dz = to[1] - from[1], length = Math.hypot(dx, dz), d = [dx / length, dz / length], n = [-d[1], d[0]], yaw = -Math.atan2(d[1], d[0]);
-    const ends = [h(from) ?? 0, h(to) ?? 0], deck = Math.max(ends[0], ends[1], Number.isFinite(water) ? water + 6.5 : 0) + 0.4, bottom = Number.isFinite(water) ? water - 3 : deck - 14, span = length / spans, pier = 3;
-    const along = (t: number): LocalPoint => [from[0] + d[0] * t, from[1] + d[1] * t];
-    for (let i = 0; i < spans; i++) {
-      const half = (span - pier) / 2, spring = deck - 1.9 - half * 0.95, shape = new THREE.Shape();
-      shape.moveTo(0, 0); shape.lineTo(span, 0); shape.lineTo(span, deck - bottom - 0.6); shape.lineTo(0, deck - bottom - 0.6); shape.closePath();
-      const hole = new THREE.Path(), cx = span / 2, base = Math.max(0.4, Math.min(spring - bottom, deck - bottom - 3));
-      hole.moveTo(cx - half, base); hole.absarc(cx, base, half, Math.PI, 0, true); hole.lineTo(cx - half, base); shape.holes.push(hole);
-      const start = along(span * i), m = new THREE.Matrix4().makeBasis(new THREE.Vector3(d[0], 0, d[1]), new THREE.Vector3(0, 1, 0), new THREE.Vector3(n[0], 0, n[1])).setPosition(start[0] - n[0] * deckWidth / 2, bottom, start[1] - n[1] * deckWidth / 2);
-      mesher.extrude(shape, deckWidth, m, STONE);
-    }
-    for (let i = 1; i < spans; i++) { const p = along(span * i); mesher.box(p[0], (deck + bottom) / 2 - 0.3, p[1], pier + 0.4, deck - bottom - 0.6, deckWidth + 0.8, yaw, STONE.clone().multiplyScalar(0.92)); }
-    const mid = along(length / 2);
-    mesher.box(mid[0], deck - 0.3, mid[1], length, 0.8, deckWidth + 0.6, yaw, STONE.clone().multiplyScalar(1.05));
-    for (const side of [-1, 1]) mesher.box(mid[0] + n[0] * side * deckWidth / 2, deck + 0.5, mid[1] + n[1] * side * deckWidth / 2, length, 1, 0.5, yaw, STONE);
-    [from, to].forEach((p, i) => { const g = ends[i] - 3; mesher.box(p[0], (deck + g) / 2, p[1], 4, deck - g, deckWidth + 0.8, yaw, STONE.clone().multiplyScalar(0.92)); });
-    return { low: Math.min(bottom, ...ends) - 1, high: deck + 1.6 };
+    const length = Math.hypot(to[0] - from[0], to[1] - from[1]);
+    return this.riverBridge(mesher, from, to, Array.from({ length: spans + 1 }, (_, i) => length * i / spans), deckWidth, 3, 4, h, river);
   }
 
-  private bridge(mesher: Mesher, o: ReconstructionObject, h: Height, water: number) {
+  /** A bridge along its east-west axis, piers where the plate puts them (east to west). */
+  private bridge(mesher: Mesher, o: ReconstructionObject, h: Height, river: River): { low: number; high: number } {
     const { axisS, piersE, deckWidth } = o.shape as { axisS: number; piersE: number[]; deckWidth: number };
-    const ends = [h([piersE[0], axisS]) ?? 0, h([piersE.at(-1)!, axisS]) ?? 0];
-    const deck = Math.max(ends[0], ends[1], Number.isFinite(water) ? water + 6.5 : 0) + 0.4, bottom = Number.isFinite(water) ? water - 3 : deck - 14;
-    for (let i = 0; i < piersE.length - 1; i++) {
-      const a = piersE[i], b = piersE[i + 1], span = a - b, pierWidth = 3.2;
-      // Spandrel wall with a round arch opening, extruded across the deck width.
-      const half = (span - pierWidth) / 2, spring = deck - 1.9 - half * 0.95, shape = new THREE.Shape();
-      shape.moveTo(0, 0); shape.lineTo(span, 0); shape.lineTo(span, deck - bottom - 0.6); shape.lineTo(0, deck - bottom - 0.6); shape.closePath();
-      const hole = new THREE.Path(), cx = span / 2, base = Math.max(0.4, Math.min(spring - bottom, deck - bottom - 3));
-      hole.moveTo(cx - half, base); hole.absarc(cx, base, half, Math.PI, 0, true); hole.lineTo(cx - half, base);
-      shape.holes.push(hole);
-      const m = new THREE.Matrix4().makeBasis(new THREE.Vector3(-1, 0, 0), new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 1)).setPosition(a, bottom, axisS - deckWidth / 2);
-      mesher.extrude(shape, deckWidth, m, STONE);
-    }
-    for (const e of piersE.slice(1, -1)) mesher.box(e, (deck + bottom) / 2 - 0.3, axisS, 3.4, deck - bottom - 0.6, deckWidth + 0.8, 0, STONE.clone().multiplyScalar(0.92));
-    const length = piersE[0] - piersE.at(-1)!, mid = (piersE[0] + piersE.at(-1)!) / 2;
-    mesher.box(mid, deck - 0.15, axisS, length, 0.7, deckWidth, 0, STONE.clone().multiplyScalar(1.05));
-    for (const side of [-1, 1]) mesher.box(mid, deck + 0.6, axisS + side * (deckWidth / 2 - 0.25), length, 1.0, 0.5, 0, STONE);
-    for (const [e, sign] of [[piersE[0], 1], [piersE.at(-1)!, -1]] as const) mesher.box(e + sign * 4, (deck + Math.min(ends[0], ends[1]) - 2) / 2, axisS, 8, deck - Math.min(ends[0], ends[1]) + 2, deckWidth + 1, 0, STONE.clone().multiplyScalar(0.9));
+    return this.riverBridge(mesher, [piersE[0], axisS], [piersE.at(-1)!, axisS], piersE.map(e => piersE[0] - e), deckWidth, 3.2, 8, h, river);
   }
 
-  private quay(mesher: Mesher, o: ReconstructionObject, h: Height, water: number) {
+  /**
+   * Round arches between piers (flattened where the deck is low), a deck with parapets, and an abutment at each end down to
+   * the ground. Each end of the deck sits on its bank as the river structures measure it (see River), and the deck runs
+   * straight between them with a slight hump over the water, so neither end stands on a tall pier.
+   */
+  private riverBridge(mesher: Mesher, from: LocalPoint, to: LocalPoint, stations: number[], deckWidth: number, pier: number, abutment: number, h: Height, river: River): { low: number; high: number } {
+    const dx = to[0] - from[0], dz = to[1] - from[1], length = Math.hypot(dx, dz), d = [dx / length, dz / length], n = [-d[1], d[0]], yaw = -Math.atan2(d[1], d[0]);
+    const ground = [h(from) ?? 0, h(to) ?? 0], ends = [river.height(from) + 0.4, river.height(to) + 0.4];
+    const wet = Number.isFinite(river.water), mid = (ends[0] + ends[1]) / 2;
+    const hump = wet ? Math.max(0, Math.min(river.water + 4.5 - mid, length * 0.04)) : 0;
+    const deckAt = (t: number) => { const u = t / length; return ends[0] + (ends[1] - ends[0]) * u + hump * 4 * u * (1 - u); };
+    const bottom = wet ? river.water - 3 : Math.min(...ends) - 14;
+    const along = (t: number): LocalPoint => [from[0] + d[0] * t, from[1] + d[1] * t];
+    const frame = (t: number, width: number, offset = 0) => new THREE.Matrix4().makeBasis(new THREE.Vector3(d[0], 0, d[1]), new THREE.Vector3(0, 1, 0), new THREE.Vector3(n[0], 0, n[1]))
+      .setPosition(along(t)[0] - n[0] * (width / 2 - offset), bottom, along(t)[1] - n[1] * (width / 2 - offset));
+    // A strip of the elevation between deck + lo and deck + hi over one span (in the span's frame, heights above `bottom`).
+    const strip = (a: number, b: number, lo: number, hi: number) => {
+      const shape = new THREE.Shape(), span = b - a;
+      shape.moveTo(0, deckAt(a) + lo - bottom); shape.lineTo(span, deckAt(b) + lo - bottom); shape.lineTo(span, deckAt(b) + hi - bottom); shape.lineTo(0, deckAt(a) + hi - bottom); shape.closePath();
+      return shape;
+    };
+    for (let i = 0; i < stations.length - 1; i++) {
+      const a = stations[i], b = stations[i + 1], span = b - a, shape = new THREE.Shape();
+      // Spandrel wall with an arch opening, extruded across the deck width.
+      shape.moveTo(0, 0); shape.lineTo(span, 0); shape.lineTo(span, deckAt(b) - bottom - 0.6); shape.lineTo(0, deckAt(a) - bottom - 0.6); shape.closePath();
+      const half = (span - pier) / 2, crown = Math.min(deckAt(a), deckAt(b)) - bottom - 1.9, base = Math.max(0.4, crown - half), rise = Math.min(half, crown - base);
+      if (rise > 0.5) { const hole = new THREE.Path(), cx = span / 2; hole.moveTo(cx - half, base); hole.absellipse(cx, base, half, rise, Math.PI, 0, true, 0); hole.lineTo(cx - half, base); shape.holes.push(hole); }
+      mesher.extrude(shape, deckWidth, frame(a, deckWidth), STONE);
+      mesher.extrude(strip(a, b, -0.7, 0.1), deckWidth + 0.6, frame(a, deckWidth + 0.6), STONE.clone().multiplyScalar(1.05));
+      for (const side of [-1, 1]) mesher.extrude(strip(a, b, 0.1, 1.1), 0.5, frame(a, 0.5, side * (deckWidth / 2 - 0.25)), STONE);
+    }
+    for (const t of stations.slice(1, -1)) { const p = along(t), top = deckAt(t) - 0.6; mesher.box(p[0], (top + bottom) / 2, p[1], pier + 0.4, top - bottom, deckWidth + 0.8, yaw, STONE.clone().multiplyScalar(0.92)); }
+    // Abutments run back onto each bank and down into the ground.
+    [from, to].forEach((p, i) => {
+      const out = i === 0 ? -1 : 1, base = Math.min(ground[i], ends[i]) - 3, c = [p[0] + d[0] * out * abutment / 2, p[1] + d[1] * out * abutment / 2];
+      mesher.box(c[0], (ends[i] + base) / 2, c[1], abutment, ends[i] - base, deckWidth + 1, yaw, STONE.clone().multiplyScalar(0.9));
+    });
+    return { low: Math.min(bottom, ...ground) - 1, high: Math.max(...ends) + hump + 1.6 };
+  }
+
+  private quay(mesher: Mesher, o: ReconstructionObject, h: Height, river: River) {
     const line = o.shape.line as LocalPoint[], wall = (o.shape.height as number | undefined) ?? 3.2;
     for (let i = 0; i < line.length - 1; i++) {
       // The coarse terrain can sit well below the river surface along the bank, so the coping stands 1.6 m above the river
-      // wherever the terrain is lower, and the wall is never shorter than its own height.
-      const a = line[i], b = line[i + 1], ground = Math.max(h(a) ?? 0, h(b) ?? 0) + 0.3, top = Number.isFinite(water) ? Math.max(ground, water + 1.6) : ground, bottom = Number.isFinite(water) ? Math.min(water - 2.2, top - wall) : top - 5;
+      // wherever the terrain is lower, and the wall is never shorter than its own height and always reaches the ground.
+      const water = river.water, a = line[i], b = line[i + 1], bank = Math.max(river.height(a), river.height(b)) + 0.3, low = Math.min(h(a) ?? 0, h(b) ?? 0);
+      const top = Number.isFinite(water) ? Math.max(bank, water + 1.6) : bank, bottom = Number.isFinite(water) ? Math.min(water - 2.2, top - wall, low - 1) : top - 5;
       const dx = b[0] - a[0], dz = b[1] - a[1], l = Math.hypot(dx, dz);
       mesher.box((a[0] + b[0]) / 2, (top + bottom) / 2, (a[1] + b[1]) / 2, l + 0.4, top - bottom, 1.8, yawOf(dx, dz), STONE.clone().multiplyScalar(0.95));
       mesher.box((a[0] + b[0]) / 2 - 0.1, top + 0.12, (a[1] + b[1]) / 2, l + 0.4, 0.3, 2.3, yawOf(dx, dz), STONE.clone().multiplyScalar(1.08));

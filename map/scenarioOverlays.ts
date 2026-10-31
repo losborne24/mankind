@@ -60,9 +60,11 @@ const layers = ['scenario-labels', 'scenario-points', 'scenario-route', ...label
 /** 1 once the lit 3D ground has faded in; the flat 2D ground and river fills give way to it. */
 const localHandover: ExpressionSpecification = ['-', 1, ['coalesce', ['global-state', 'local-ground'], 0]];
 const certainty = (documented: number | string, approximate: number | string, illustrative: number | string): ExpressionSpecification => ['match', ['get', 'certainty'], 'documented', documented, 'approximate', approximate, illustrative];
+/** Labels fade with an uncertain date, and vanish while they sit under the page header (see `clearHeader`). */
+const labelOpacity: ExpressionSpecification = ['case', ['boolean', ['feature-state', 'covered'], false], 0, ['==', ['get', 'state'], 'possible'], .6, 1];
 const fills: ExpressionSpecification = ['match', ['get', 'style'], 'water', '#5f8ea3', 'ground', '#b3a78e', 'extent', '#d2b36b', 'footprint', '#e9b75d', 'structure', '#c9b9a0', '#c9b9a0'];
 export function scenarioOverlays(map: Map, onInspect?: (id: string) => void) {
-    map.addSource(source, { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+    map.addSource(source, { type: 'geojson', data: { type: 'FeatureCollection', features: [] }, promoteId: 'id' });
     // Illustrative ground and water sit under everything else so no beat shows the bare biome plane.
     map.addLayer({ id: 'scenario-context-fill', type: 'fill', source, filter: ['==', ['geometry-type'], 'Polygon'], paint: { 'fill-color': fills, 'fill-opacity': ['interpolate', ['linear'], ['zoom'], REGIONAL_ZOOM, ['match', ['get', 'style'], 'ground', 0, 'water', 0, 'extent', .16, 'footprint', .35, .3], RIVER_FULL_ZOOM, ['match', ['get', 'style'], 'ground', 0, 'water', .88, 'extent', .16, 'footprint', .35, .3], LOCAL_ZOOM, ['match', ['get', 'style'], 'ground', ['*', .38, localHandover], 'water', ['*', .88, localHandover], 'extent', .16, 'footprint', .35, .3]] } });
     map.addLayer({ id: 'scenario-context-outline', type: 'line', source, filter: ['==', ['geometry-type'], 'Polygon'], paint: { 'line-color': ['match', ['get', 'style'], 'ground', 'rgba(0,0,0,0)', 'water', '#8fb8c9', '#f0d79a'], 'line-width': ['match', ['get', 'style'], 'footprint', 2, 1.5], 'line-opacity': ['interpolate', ['linear'], ['zoom'], REGIONAL_ZOOM, ['case', ['==', ['get', 'style'], 'water'], 0, ['==', ['get', 'state'], 'possible'], .45, .9], RIVER_FULL_ZOOM, ['case', ['==', ['get', 'state'], 'possible'], .45, .9], LOCAL_ZOOM, ['case', ['==', ['get', 'style'], 'water'], ['*', .9, localHandover], ['==', ['get', 'state'], 'possible'], .45, .9]], 'line-dasharray': ['match', ['get', 'certainty'], 'documented', ['literal', [1, 0]], ['literal', [3, 2]]] } });
@@ -81,10 +83,10 @@ export function scenarioOverlays(map: Map, onInspect?: (id: string) => void) {
     map.addLayer({ id: 'scenario-context-markers-site', type: 'circle', source, maxzoom: SITE_MARKER_MAXZOOM, filter: pointOf(['==', ['get', 'label'], true], named([SITE])), paint: markerPaint });
     // Label layouts are literal per layer: collision is a layer property, and a data expression there invalidates the style.
     const labelLayout: SymbolLayerSpecification['layout'] = { 'text-field': ['coalesce', ['get', 'short'], ['get', 'title']], 'text-size': 12, 'text-offset': [0, 1.1], 'text-anchor': 'top', 'text-max-width': 9 };
-    const labelPaint: SymbolLayerSpecification['paint'] = { 'text-color': '#fff', 'text-halo-color': 'rgba(11,17,25,.55)', 'text-halo-width': 1.2, 'text-opacity': ['case', ['==', ['get', 'state'], 'possible'], .6, 1] };
+    const labelPaint: SymbolLayerSpecification['paint'] = { 'text-color': '#fff', 'text-halo-color': 'rgba(11,17,25,.55)', 'text-halo-width': 1.2, 'text-opacity': labelOpacity };
     // MapLibre places the topmost symbol layer first, so layers are added lowest priority first: river, site name, hills, then the details.
     // The river is named along its own course, repeated sparsely rather than pinned beside the Forum.
-    map.addLayer({ id: 'scenario-context-labels-river', type: 'symbol', source, minzoom: ORIENTATION_MINZOOM, filter: ['all', ['==', ['geometry-type'], 'LineString'], ['==', ['get', 'kind'], 'context'], ['==', ['get', 'label'], true]], layout: { 'symbol-placement': 'line', 'symbol-spacing': 700, 'text-field': ['coalesce', ['get', 'short'], ['get', 'title']], 'text-size': 12, 'text-letter-spacing': .1, 'text-max-angle': 30 }, paint: { 'text-color': '#cfe6f0', 'text-halo-color': 'rgba(11,17,25,.6)', 'text-halo-width': 1.2, 'text-opacity': ['case', ['==', ['get', 'state'], 'possible'], .6, 1] } });
+    map.addLayer({ id: 'scenario-context-labels-river', type: 'symbol', source, minzoom: ORIENTATION_MINZOOM, filter: ['all', ['==', ['geometry-type'], 'LineString'], ['==', ['get', 'kind'], 'context'], ['==', ['get', 'label'], true]], layout: { 'symbol-placement': 'line', 'symbol-spacing': 700, 'text-field': ['coalesce', ['get', 'short'], ['get', 'title']], 'text-size': ['interpolate', ['linear'], ['zoom'], 14, 14, 17, 19], 'text-letter-spacing': .2, 'text-max-angle': 30 }, paint: { 'text-color': '#d8eef7', 'text-halo-color': 'rgba(11,17,25,.7)', 'text-halo-width': 1.6, 'text-opacity': labelOpacity } });
     map.addLayer({ id: 'scenario-context-labels-site', type: 'symbol', source, filter: pointOf(['==', ['get', 'label'], true], named([SITE])), layout: { ...labelLayout, 'symbol-placement': 'point' }, paint: labelPaint });
     // Orientation labels use a lighter, smaller style; they outrank the site name so the hills keep theirs.
     map.addLayer({ id: 'scenario-context-labels', type: 'symbol', source, minzoom: ORIENTATION_MINZOOM, filter: pointOf(['==', ['get', 'style'], 'orientation']), layout: { ...labelLayout, 'symbol-placement': 'point', 'text-size': 11, 'text-offset': [0, 0], 'text-anchor': 'center', 'text-letter-spacing': .12, 'text-transform': 'uppercase' }, paint: { ...labelPaint, 'text-color': 'rgba(255,255,255,.7)', 'text-halo-width': 1 } });
@@ -100,6 +102,27 @@ export function scenarioOverlays(map: Map, onInspect?: (id: string) => void) {
     const pointer = () => { map.getCanvas().style.cursor = 'pointer'; };
     const reset = () => { map.getCanvas().style.cursor = ''; };
     if (onInspect) for (const id of inspectable) { map.on('click', id, inspect); map.on('mouseenter', id, pointer); map.on('mouseleave', id, reset); }
+    // Map labels never show behind the page header (wordmark and search): MapLibre cannot avoid HTML, so a few times a second the
+    // labels placed under the header's items are found and hidden, and shown again once the camera moves them clear.
+    let covered = new Set<string | number>(), checked = 0;
+    const clearHeader = () => {
+        const now = performance.now();
+        if (now - checked < 150) return;
+        checked = now;
+        const header = document.querySelector('header'), canvas = map.getCanvas().getBoundingClientRect(), next = new Set<string | number>();
+        const shown = labelLayerIds.filter(id => map.getLayer(id));
+        for (const item of header ? Array.from(header.children) : []) {
+            const r = item.getBoundingClientRect();
+            if (!r.width || !r.height) continue;
+            for (const f of map.queryRenderedFeatures([[r.left - canvas.left - 8, r.top - canvas.top - 6], [r.right - canvas.left + 8, r.bottom - canvas.top + 6]], { layers: shown }))
+                if (f.id !== undefined) next.add(f.id);
+        }
+        for (const id of covered) if (!next.has(id)) map.setFeatureState({ source, id }, { covered: false });
+        for (const id of next) if (!covered.has(id)) map.setFeatureState({ source, id }, { covered: true });
+        covered = next;
+    };
+    const settle = () => { checked = 0; clearHeader(); };
+    map.on('render', clearHeader); map.on('idle', settle);
     return {
         /** Date-filtered, so layers outside the viewing date are left out rather than drawn faintly. */
         update(ids: string[], scenario: ScenarioDefinition, at: HistoricalTime = scenario.scope.time) {
@@ -133,6 +156,7 @@ export function scenarioOverlays(map: Map, onInspect?: (id: string) => void) {
             (map.getSource(source) as GeoJSONSource | undefined)?.setData(data);
         },
         dispose() {
+            map.off('render', clearHeader); map.off('idle', settle);
             if (onInspect) for (const id of inspectable) { map.off('click', id, inspect); map.off('mouseenter', id, pointer); map.off('mouseleave', id, reset); }
             for (const id of layers)
                 if (map.getLayer(id))

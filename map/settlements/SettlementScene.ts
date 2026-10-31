@@ -270,8 +270,8 @@ export class SettlementScene {
     }
   }
 
-  /** Call from the existing map frame after terrain/source/camera changes. */
-  updateTerrain(sample: TerrainSampler): void {
+  /** Call from the existing map frame after terrain/source/camera changes. `exaggeration` is the terrain's display exaggeration. */
+  updateTerrain(sample: TerrainSampler, exaggeration = 1): void {
     if (!this.active || !this.dirty) return;
     const terrainStarted = performance.now();
     this.dirty = false;
@@ -333,7 +333,7 @@ export class SettlementScene {
       if (entry.model) { entry.model.position.y = top!; entry.model.visible = true; }
     }
     if (this.contextGround && this.definition.contextGround && !this.contextGround.update(resolve, this.definition.contextGround)) this.terrainPending++;
-    if (this.urban && this.contextGround && !this.urban.update(point => resolve(point).height, this.contextGround.waterLevel)) this.terrainPending++;
+    if (this.urban && this.contextGround && !this.urban.update(point => resolve(point).height, this.contextGround.waterLevel, exaggeration)) this.terrainPending++;
     const sceneryGround = this.scenery.updateTerrain(resolve);
     this.terrainPending += sceneryGround.pending;
     this.terrainRetained += sceneryGround.retained;
