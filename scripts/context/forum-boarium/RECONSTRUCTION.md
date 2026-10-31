@@ -158,7 +158,19 @@ became 1,622 because the widened river took some plots.
 | Porticus Minucia (as Lanciani placed it) | evidence-based | The pier field about 85 by 33 m with a wall along each long side. The name is his identification and later scholars place the porticoes of that name elsewhere, so the note says so | shown within ±50 years |
 | Riverfront wall below the theatre | evidence-based | Extends the ancient bank north to S −260, along the wall Lanciani draws from the Pons Fabricius side (E −194 at S −255, E −143 at S −205), about 35 m east of today's bank at S −255 | undated |
 
-Not modelled: the Pons Fabricius and Pons Cestius (the bridge renderer is east–west only and Fabricius is diagonal), the Tiber Island buildings, the Porticus Octaviae (OpenStreetMap has its site at E −198 to −175, S −398 to −378, beyond the traced area), and the Capitoline temples.
+## Part 3 (v5.11.0): Tiber Island and phone width
+
+| Object | Certainty | What was read | Date |
+| --- | --- | --- | --- |
+| Pons Fabricius | evidence-based | Ends at E −178.5 / S −231.8 and E −217.5 / S −192.8, two arches and a central pier as drawn; it still stands | 62 BC |
+| Pons Cestius | evidence-based | Island end E −256.5 / S −130.5 to the west bank E −288 / S −57, three spans as the piers are drawn; the present bridge is of 1892, the Roman one was rebuilt in AD 370 | about 46 BC |
+| Temple of Aesculapius | evidence-based | Place read where Lanciani labels the excavated remains (E −190.5, S −127.5); orientation, size, column count and heights guessed | 3rd century BC |
+
+* The bridge renderer got a second form (`skew-bridge`) that runs on any line; the original east–west form is unchanged for the Pons Aemilius.
+* The Cloaca Maxima marker still sits at today's mapped mouth, now relabelled "(mouth today)", with a note that Lanciani puts the ancient mouth about 15 m east.
+* **Phone width.** The journey card used to cover most of the map. While a journey plays it now has a "Hide details / Show details" toggle on narrow screens (`sm:hidden`); folded, only the title shows. Looked at in a 390×790 frame on the river crossing, the two temples and the exterior beats: the scene is visible with the card folded. The "Portunus" label still sits on the temple model.
+
+Not modelled: the other Tiber Island buildings (Jupiter Jurarius and the Faunus temple on the island's neighbour), the Porticus Octaviae (OpenStreetMap has its site at E −198 to −175, S −398 to −378, beyond plate 28's top edge), and the Capitoline temples.
 
 ## Verification notes
 
@@ -168,5 +180,5 @@ Not modelled: the Pons Fabricius and Pons Cestius (the bridge renderer is east�
 ## Still open
 
 * Plates 22 (Fori Imperiali), 29 (Forum Romanum) and 35 (Circus Maximus end) were not traced; plate 35 shows the circus with its Marrana channel but not the river.
-* The Tiber Island, its two bridges and the Porticus Octaviae, all within or beside plate 28, are still missing.
+* The Porticus Octaviae lies off the top of plate 28, on a plate not traced.
 * The ground mesh is coarse (about 9 m near the temples), so the bank is a soft ramp with a stone coping on top, not a vertical wall face.

@@ -138,6 +138,7 @@ export class UrbanScene {
       case "palace": return (shape.volumes as PalaceVolume[]).filter(v => v.role === "platform").flatMap(v => volumeCorners(v, true));
       case "theatre": { const [cx, cz] = shape.centre as LocalPoint, r = shape.radius as number; return [[cx, cz], [cx - r, cz], [cx + r, cz], [cx, cz - r], [cx - r * 0.7, cz - r * 0.7], [cx + r * 0.7, cz - r * 0.7], [cx, cz + 22]]; }
       case "temple": case "colonnade": return [shape.centre ?? [0, 0], ...o.footprint];
+      case "skew-bridge": return [shape.from, shape.to];
       default: return [];
     }
   }
@@ -208,6 +209,7 @@ export class UrbanScene {
         case "theatre": { const top = this.theatre(mesher, o, h); box(o, top.low, top.high); break; }
         case "temple": { const top = this.temple(mesher, o, h); box(o, top.low, top.high); break; }
         case "colonnade": { const top = this.colonnade(mesher, o, h); box(o, top.low, top.high); break; }
+        case "skew-bridge": { const top = this.skewBridge(mesher, o, h, surface); box(o, top.low, top.high); break; }
         default: break;
       }
     }
@@ -453,6 +455,28 @@ export class UrbanScene {
     for (const p of columns) mesher.cylinder(p[0], level + height / 2, p[1], 0.55, height, TRAVERTINE.clone().multiplyScalar(1.02));
     mesher.box(centre[0], top + 0.5, centre[1], length + 1, 1, width + 1, yaw, PALACE_ROOF);
     return { low, high: top + 1 };
+  }
+
+  /** A bridge on any line: round arches between piers, a deck with parapets, blocks down to the ground at both ends. */
+  private skewBridge(mesher: Mesher, o: ReconstructionObject, h: Height, water: number): { low: number; high: number } {
+    const { from, to, spans, deckWidth } = o.shape as { from: LocalPoint; to: LocalPoint; spans: number; deckWidth: number };
+    const dx = to[0] - from[0], dz = to[1] - from[1], length = Math.hypot(dx, dz), d = [dx / length, dz / length], n = [-d[1], d[0]], yaw = -Math.atan2(d[1], d[0]);
+    const ends = [h(from) ?? 0, h(to) ?? 0], deck = Math.max(ends[0], ends[1], Number.isFinite(water) ? water + 6.5 : 0) + 0.4, bottom = Number.isFinite(water) ? water - 3 : deck - 14, span = length / spans, pier = 3;
+    const along = (t: number): LocalPoint => [from[0] + d[0] * t, from[1] + d[1] * t];
+    for (let i = 0; i < spans; i++) {
+      const half = (span - pier) / 2, spring = deck - 1.9 - half * 0.95, shape = new THREE.Shape();
+      shape.moveTo(0, 0); shape.lineTo(span, 0); shape.lineTo(span, deck - bottom - 0.6); shape.lineTo(0, deck - bottom - 0.6); shape.closePath();
+      const hole = new THREE.Path(), cx = span / 2, base = Math.max(0.4, Math.min(spring - bottom, deck - bottom - 3));
+      hole.moveTo(cx - half, base); hole.absarc(cx, base, half, Math.PI, 0, true); hole.lineTo(cx - half, base); shape.holes.push(hole);
+      const start = along(span * i), m = new THREE.Matrix4().makeBasis(new THREE.Vector3(d[0], 0, d[1]), new THREE.Vector3(0, 1, 0), new THREE.Vector3(n[0], 0, n[1])).setPosition(start[0] - n[0] * deckWidth / 2, bottom, start[1] - n[1] * deckWidth / 2);
+      mesher.extrude(shape, deckWidth, m, STONE);
+    }
+    for (let i = 1; i < spans; i++) { const p = along(span * i); mesher.box(p[0], (deck + bottom) / 2 - 0.3, p[1], pier + 0.4, deck - bottom - 0.6, deckWidth + 0.8, yaw, STONE.clone().multiplyScalar(0.92)); }
+    const mid = along(length / 2);
+    mesher.box(mid[0], deck - 0.3, mid[1], length, 0.8, deckWidth + 0.6, yaw, STONE.clone().multiplyScalar(1.05));
+    for (const side of [-1, 1]) mesher.box(mid[0] + n[0] * side * deckWidth / 2, deck + 0.5, mid[1] + n[1] * side * deckWidth / 2, length, 1, 0.5, yaw, STONE);
+    [from, to].forEach((p, i) => { const g = ends[i] - 3; mesher.box(p[0], (deck + g) / 2, p[1], 4, deck - g, deckWidth + 0.8, yaw, STONE.clone().multiplyScalar(0.92)); });
+    return { low: Math.min(bottom, ...ends) - 1, high: deck + 1.6 };
   }
 
   private bridge(mesher: Mesher, o: ReconstructionObject, h: Height, water: number) {

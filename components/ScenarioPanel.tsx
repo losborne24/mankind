@@ -123,6 +123,8 @@ function Playback({ map, layer, reconId, onReconInspect, player, streamingStatus
 }) {
     const { session: historicalSession, snapshot: historicalSnapshot } = useHistoricalDataset();
     const snapshot = useSyncExternalStore(player.subscribe, player.getSnapshot, player.getSnapshot);
+    // On a phone the card would cover the map, so its body can be folded away while a journey plays.
+    const [folded, setFolded] = useState(false);
     const scenario = player.scenario;
     const storeYear = useExplorationStore(s => s.year), storeTime = useExplorationStore(s => s.historicalTime);
     const viewTime: HistoricalTime = storeTime ?? { start: { year: storeYear } };
@@ -146,6 +148,8 @@ function Playback({ map, layer, reconId, onReconInspect, player, streamingStatus
     return <>{reconId && <ReconstructionInspector id={reconId} at={viewTime} onClose={() => onReconInspect(null)}/>}{inspected && !reconId && <ContextInspector feature={inspected} year={yearLabel} onClose={onCloseInspect}/>}<section aria-label="Historical scenario" className="pointer-events-auto absolute right-12 top-28 z-20 max-h-[calc(100dvh-292px)] sm:top-20 sm:max-h-[calc(100dvh-260px)] overflow-y-auto w-[min(340px,calc(100vw-76px))] rounded-2xl border border-panel-border bg-panel p-4 pb-8 shadow-xl backdrop-blur-md sm:right-16">
     <div className="text-[10px] uppercase tracking-[.22em] text-accent">A guided historical journey</div>
     <h1 className="mt-2 text-base font-medium leading-snug">{scenario.title}</h1>
+    {!idle && <button className="mt-1 text-[11px] text-accent underline sm:hidden" aria-expanded={!folded} onClick={() => setFolded(f => !f)}>{folded ? 'Show details' : 'Hide details'}</button>}
+    <div className={folded && !idle ? 'max-sm:hidden' : undefined}>
     {idle && <label className="mt-3 block text-xs text-white/65">Journey<select aria-label="Journey selection" className="mt-1 w-full rounded border border-panel-border bg-background p-1" value={scenario.id} onChange={event => player.load(event.target.value === portunusJourney.id ? portunusJourney : london2012)}><option value={portunusJourney.id}>Portunus · evidence and reconstruction</option><option value={london2012.id}>London 2012 · geographic journey</option></select></label>}
     {historical && <p className="mt-3 text-[11px] text-accent">Interpretation · AD 100 editorial preview · inferred details</p>}
     {idle ? <><p className="my-3 text-xs leading-relaxed text-white/60">{scenario.description}</p><p className="mb-3 text-[11px] text-white/45">{historical ? 'Sourced map layers and two temple interpretations' : 'Illustrative route · geographic context'} · about {Math.round(scenario.beats.reduce((total, beat) => total + beat.actions.reduce((sum, action) => sum + action.camera.duration, 0), 0) / 1000)} seconds</p></> : <>
@@ -164,6 +168,7 @@ function Playback({ map, layer, reconId, onReconInspect, player, streamingStatus
     {historical && !idle && <p className="mt-1 text-[11px] text-white/50">Positions: {[['place:temple-of-portunus', 'Portunus'], ['place:temple-of-hercules-victor', 'Hercules Victor']].map(([id, label], i) => <span key={id}>{i ? ' · ' : ''}<button className="text-accent underline" onClick={() => { player.pause('Inspecting a temple position'); historicalSession?.inspect({ kind: 'place', id }); }}>{label}</button></span>)}</p>}
     {snapshot.error && <p role="alert" className="my-2 text-xs text-red-300">{snapshot.error}</p>}
     {idle && <button className="mt-3 rounded-full bg-accent px-4 py-2 text-xs font-medium text-black" onClick={() => player.play()}>{historical ? 'Start the Forum Boarium journey' : 'Start London journey'}</button>}
+    </div>
     <div aria-hidden className="pointer-events-none sticky -bottom-8 -mx-4 -mb-8 h-8 bg-gradient-to-t from-panel to-transparent"/>
   </section></>;
 }

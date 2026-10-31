@@ -126,6 +126,9 @@ assert.ok(Math.abs(theatre.shape.centre[0] + 115) < 10 && Math.abs(theatre.shape
 for (const id of ['temple-janus', 'temple-juno-sospita', 'temple-spes']) { const t = data.objects.find(o => o.id === id); assert.equal(t.certainty, 'evidence-based', `${id} is evidence-based`); assert.ok(t.snap.length > 40 && t.sources.includes('source:wikipedia-forum-holitorium'), `${id} cites Wikipedia and says why it stood in AD 100`); assert.equal(t.shape.type, 'temple'); }
 const hall = data.objects.find(o => o.id === 'porticus-minucia');
 assert.ok(hall.certainty === 'evidence-based' && hall.shape.columns.length > 20 && /identification/.test(hall.note + hall.snap), 'the pier hall is marked as Lanciani\'s identification');
+// Tiber Island: two bridges and the temple of Aesculapius from the plate, each with a date note.
+for (const id of ['pons-fabricius', 'pons-cestius', 'temple-aesculapius']) { const o = data.objects.find(x => x.id === id); assert.equal(o.certainty, 'evidence-based', `${id} is evidence-based`); assert.ok(o.sources.includes('source:lanciani-fur-28') && o.snap.length > 40, `${id} cites the plate and says why it stood in AD 100`); }
+assert.equal(data.objects.find(o => o.id === 'pons-fabricius').shape.spans, 2, 'the Pons Fabricius has two arches'); assert.equal(data.objects.find(o => o.id === 'pons-cestius').shape.spans, 3);
 // No building stands in the ancient river.
 for (const b of buildings) assert.ok(!insidePolygon(b.shape.centre, data.waterExtra[0]), `${b.id} is not in the ancient river`);
 

@@ -234,6 +234,21 @@ for (const t of holitorium) {
     note: 'A hall of rows of piers between two long walls, about 85 by 33 m, placed where Lanciani drew its remains; the label Porticus Minucia is his identification and later scholars place the porticoes of that name elsewhere. Pier spacing, heights and the roof are guessed.' });
 })();
 
+// Pass D, part 3: Tiber Island. The two bridges to it and the temple of Aesculapius, read from plate 28.
+const skewBridge = (id, title, A, B, spans, deckWidth, from, note, snap) => add({ id, kind: 'bridge', title, certainty: BASED, shape: { type: 'skew-bridge', from: pt(A), to: pt(B), spans, deckWidth }, footprint: ribbon([A, B], deckWidth),
+  sources: ['source:lanciani-fur-28'], time: { start: { year: from }, end: { year: 400 } }, uncertaintyYears: 20, note, snap });
+skewBridge('pons-fabricius', 'Pons Fabricius · east bank to Tiber Island', [-178.5, -231.8], [-217.5, -192.8], 2, 5.5, -62,
+  'The bridge to the island from the Forum Holitorium side, with two arches and a central pier as Lanciani draws it (it still stands). Its ends are read from his plate to about 3-5 m; the deck width, parapets and arch profile are guessed.',
+  'Dated 62 BC by its inscription, and still in use; it stood in AD 100 as drawn.');
+skewBridge('pons-cestius', 'Pons Cestius · Tiber Island to Trastevere', [-256.5, -130.5], [-288, -57], 3, 6, -46,
+  'The bridge from the island to the west bank, three spans as Lanciani draws the piers. Its line is read from his plate to about 3-5 m; the span lengths, deck width and arch profile are guessed. The present bridge dates from 1892; the Roman one was rebuilt in AD 370.',
+  'Built about 46 BC and rebuilt in AD 370; the earlier bridge is shown, on the line Lanciani gives.');
+const aescFront = [Math.cos(-8 * Math.PI / 180), Math.sin(-8 * Math.PI / 180)];
+add({ id: 'temple-aesculapius', kind: 'temple', title: 'Temple of Aesculapius · Tiber Island', certainty: BASED, shape: { type: 'temple', centre: pt([-190.5, -127.5]), front: aescFront.map(r3), size: [14, 28], columns: [6, 9], podium: 2.4, columnHeight: 8.6 }, footprint: rectOf([-190.5, -127.5], aescFront, 14, 28),
+  sources: ['source:lanciani-fur-28'], time: { start: { year: -280 }, end: { year: 400 } }, uncertaintyYears: 30,
+  snap: 'A temple of the god stood on the island from the 3rd century BC; the remains Lanciani drew are taken as the building of AD 100.',
+  note: 'The island\'s temple of the healing god, where Lanciani labels it (T. AESCVLAPI, with excavated remains). Its place is read from his plate to about 3-5 m; its orientation, size, column count, order and heights are guessed.' });
+
 // ── Landmarks: the Circus Maximus and the Palatine palace ─────────────────────────────────────────────────────
 // Circus: axis and centre fitted to the OpenStreetMap outline of the site; width and length from Wikipedia (118 m by 621 m).
 const circusFit = minRect(membersOf(11384819));
