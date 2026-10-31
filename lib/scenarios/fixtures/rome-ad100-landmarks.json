@@ -4,6 +4,10 @@
   "accessed": "2026-10-31",
   "licence": "ODbL 1.0 · © OpenStreetMap contributors"
  },
+ "ohm": {
+  "accessed": "2026-10-31",
+  "licence": "CC0 · OpenHistoricalMap contributors"
+ },
  "landmarks": [
   {
    "id": "colosseum",
@@ -901,6 +905,319 @@
    "position": "Pleiades 986274170",
    "sources": [
     "source:pleiades-horologium-augusti",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "iseum",
+   "title": "Iseum Campense (sanctuary of Isis)",
+   "kit": "precinct",
+   "depth": 21,
+   "height": 12,
+   "note": "The long court of the sanctuary of Isis, between the Saepta and the Porticus Divorum, by a traced reconstruction (its east and west porticoes); rebuilt by Domitian after the fire of AD 80. Height a guess.",
+   "centre": [
+    12.4792805,
+    41.8983752
+   ],
+   "angle": 92,
+   "size": [
+    143.2,
+    71
+   ],
+   "built": -100,
+   "certainty": "best-guess",
+   "position": "OpenHistoricalMap relation/2753804 + relation/2753805 (traced reconstruction)",
+   "sources": [
+    "source:ohm-landmark-iseum-court",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "iseum-temple",
+   "title": "Temple of Isis",
+   "kit": "temple",
+   "size": [
+    28,
+    18
+   ],
+   "podium": 3,
+   "height": 16,
+   "note": "At the north end of the court, facing down it to the Serapeum (just east of Santa Maria sopra Minerva, as the remains are placed); size and height a guess.",
+   "centre": [
+    12.4792603,
+    41.8988076
+   ],
+   "angle": 272,
+   "built": -100,
+   "certainty": "best-guess",
+   "position": "OpenHistoricalMap relation/2753804 + relation/2753805 (traced reconstruction)",
+   "sources": [
+    "source:ohm-landmark-iseum-court",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "serapeum",
+   "title": "Serapeum",
+   "kit": "hall",
+   "height": 16,
+   "note": "The hall at the south end of the sanctuary, under Santo Stefano del Cacco, by a traced reconstruction; its apsed court is drawn as one hall. Height a guess.",
+   "centre": [
+    12.4793207,
+    41.8975348
+   ],
+   "angle": 2,
+   "size": [
+    70.9,
+    43.5
+   ],
+   "built": -100,
+   "certainty": "best-guess",
+   "position": "OpenHistoricalMap relation/2753803 (traced reconstruction)",
+   "sources": [
+    "source:ohm-landmark-serapeum",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "porticus-divorum",
+   "title": "Porticus Divorum",
+   "kit": "precinct",
+   "depth": 12.5,
+   "height": 12,
+   "note": "Domitian's portico for the deified Vespasian and Titus on the site of the Villa Publica, about 240 × 78 m, by a traced reconstruction. The OpenStreetMap and Pleiades point for it lies about 50 m further east, so the position is good to about that. Height a guess.",
+   "centre": [
+    12.479416,
+    41.8960665
+   ],
+   "angle": 92.5,
+   "size": [
+    239.9,
+    78.3
+   ],
+   "built": 89,
+   "certainty": "best-guess",
+   "position": "OpenHistoricalMap relation/2751512 (traced reconstruction)",
+   "sources": [
+    "source:ohm-landmark-porticus-divorum",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "theatre-balbus",
+   "title": "Theatre of Balbus",
+   "kit": "theatre",
+   "diameter": 95,
+   "orchestra": 24,
+   "height": 24,
+   "note": "Cavea about 95 m across (published), facing east to the Crypta, set with its back on the back of the traced outline (which is 113 m across); the orientation is disputed. Height a guess.",
+   "centre": [
+    12.4783734,
+    41.8942609
+   ],
+   "angle": 0.5,
+   "size": [
+    79.1,
+    113
+   ],
+   "built": -13,
+   "certainty": "best-guess",
+   "position": "OpenHistoricalMap way/199853034 (traced reconstruction)",
+   "sources": [
+    "source:ohm-landmark-theatre-balbus",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "crypta-balbi",
+   "title": "Crypta Balbi",
+   "kit": "precinct",
+   "depth": 14,
+   "height": 11,
+   "note": "The portico behind the theatre's stage, about 114 × 90 m, by a traced reconstruction; its remains are under the Crypta Balbi museum. Height a guess.",
+   "centre": [
+    12.4795426,
+    41.8942788
+   ],
+   "angle": 91.5,
+   "size": [
+    113.7,
+    89.6
+   ],
+   "built": -13,
+   "certainty": "best-guess",
+   "position": "OpenHistoricalMap relation/2751618 (traced reconstruction)",
+   "sources": [
+    "source:ohm-landmark-crypta-balbi",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "porticus-philippi",
+   "title": "Porticus Philippi",
+   "kit": "precinct",
+   "depth": 9,
+   "height": 11,
+   "note": "The portico round the Temple of Hercules Musarum, about 92 × 50 m, by a traced reconstruction, moved 13 m north-west to clear the Porticus of Octavia at its published size. Height a guess.",
+   "centre": [
+    12.4779405,
+    41.8932998
+   ],
+   "angle": 61.5,
+   "size": [
+    91.7,
+    50.1
+   ],
+   "built": -29,
+   "certainty": "best-guess",
+   "position": "OpenHistoricalMap relation/2751523 (traced reconstruction)",
+   "sources": [
+    "source:ohm-landmark-porticus-philippi",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "temple-hercules-musarum",
+   "title": "Temple of Hercules Musarum",
+   "kit": "round-temple",
+   "angle": 61.5,
+   "diameter": 14,
+   "podium": 2.5,
+   "height": 12,
+   "note": "A round temple inside the Porticus Philippi, at the traced position (marked approximate), moved with the portico. Height a guess.",
+   "centre": [
+    12.478052,
+    41.8934502
+   ],
+   "size": [
+    13.9,
+    13.9
+   ],
+   "built": -100,
+   "certainty": "best-guess",
+   "position": "OpenHistoricalMap way/199853033 (traced reconstruction)",
+   "sources": [
+    "source:ohm-landmark-temple-hercules-musarum",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "temple-juno-regina",
+   "title": "Temple of Juno Regina",
+   "kit": "temple",
+   "podium": 3,
+   "height": 16,
+   "note": "One of the two temples inside the Porticus of Octavia, by a traced reconstruction; height a guess.",
+   "centre": [
+    12.478767,
+    41.893015
+   ],
+   "angle": 242.5,
+   "size": [
+    41,
+    18.9
+   ],
+   "built": -100,
+   "certainty": "best-guess",
+   "position": "OpenHistoricalMap way/199853021 (traced reconstruction)",
+   "sources": [
+    "source:ohm-landmark-temple-juno-regina",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "temple-jupiter-stator",
+   "title": "Temple of Jupiter Stator",
+   "kit": "temple",
+   "podium": 3,
+   "height": 16,
+   "note": "The other temple inside the Porticus of Octavia, by a traced reconstruction; height a guess.",
+   "centre": [
+    12.4791734,
+    41.8928718
+   ],
+   "angle": 241.5,
+   "size": [
+    41,
+    19
+   ],
+   "built": -100,
+   "certainty": "best-guess",
+   "position": "OpenHistoricalMap way/199853020 (traced reconstruction)",
+   "sources": [
+    "source:ohm-landmark-temple-jupiter-stator",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "temple-neptune-circo",
+   "title": "Temple of Neptune in Circo",
+   "kit": "temple",
+   "podium": 3,
+   "height": 18,
+   "note": "On the north side of the Circus Flaminius, facing it; the traced position is marked approximate. Size and height a guess.",
+   "centre": [
+    12.477526,
+    41.893502
+   ],
+   "angle": 240,
+   "size": [
+    44,
+    34.8
+   ],
+   "built": -100,
+   "certainty": "best-guess",
+   "position": "OpenHistoricalMap way/199853025 (traced reconstruction)",
+   "sources": [
+    "source:ohm-landmark-temple-neptune-circo",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "temple-hercules-custos",
+   "title": "Temple of Hercules Custos",
+   "kit": "temple",
+   "podium": 3,
+   "height": 18,
+   "note": "On the north side of the Circus Flaminius, facing it, by a traced reconstruction. Size and height a guess.",
+   "centre": [
+    12.477035,
+    41.8936965
+   ],
+   "angle": 240.5,
+   "size": [
+    44.1,
+    35.8
+   ],
+   "built": -100,
+   "certainty": "best-guess",
+   "position": "OpenHistoricalMap way/199853026 (traced reconstruction)",
+   "sources": [
+    "source:ohm-landmark-temple-hercules-custos",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "minervium",
+   "title": "Temple of Minerva Chalcidica",
+   "kit": "temple",
+   "podium": 2.5,
+   "height": 13,
+   "note": "Domitian's temple east of the Iseum, by a traced reconstruction; which way it faced is a judgement. Height a guess.",
+   "centre": [
+    12.480245,
+    41.8974657
+   ],
+   "angle": 271.5,
+   "size": [
+    37.6,
+    18.6
+   ],
+   "built": 90,
+   "certainty": "best-guess",
+   "position": "OpenHistoricalMap way/199864869 (traced reconstruction)",
+   "sources": [
+    "source:ohm-landmark-minervium",
     "source:platner-1929"
    ]
   },

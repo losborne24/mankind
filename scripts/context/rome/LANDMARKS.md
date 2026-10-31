@@ -5,6 +5,8 @@ They now carry **simple reconstructions**: each monument is one kit shape, stood
 until proper assets are made, and are labelled as such.
 
 * `scripts/context/rome/fetch-landmarks.mjs` snapshots the OpenStreetMap outlines of the remains (`data/history/rome/source/osm-landmarks.json`).
+* `scripts/context/rome/fetch-ohm-landmarks.mjs` snapshots traced reconstruction outlines from OpenHistoricalMap (CC0) for the Campus
+  monuments with no mapped remains (`data/history/rome/source/ohm-landmarks.json`).
 * `scripts/context/rome/build-landmarks.mjs` turns them, with Pleiades points and published sizes, into
   `lib/scenarios/fixtures/rome-ad100-landmarks.json`: one entry per monument (kit, centre, facing, size, height, dates, note, sources).
 * `lib/scenarios/romeLandmarks.ts` draws each entry as extruded pieces; `lib/scenarios/romeFill.ts` adds them to the fill as kind
@@ -25,6 +27,15 @@ until proper assets are made, and are labelled as such.
   the cavea), the Ara Pacis at its original site, the Horologium obelisk and the Circus of Gaius and Nero.
 * **Described positions (best guess).** The Saepta Julia (east of the Pantheon), the Baths of Nero and the Odeum of Domitian, placed as
   Platner describes them, to about 50 m.
+* **Traced reconstructions (best guess, v5.21.0).** Where nothing of a Campus monument is mapped, it is placed the same way from an
+  outline OpenHistoricalMap contributors traced off published reconstruction plans (the Larousse plan of ancient Rome, plans on
+  Wikimedia Commons): the Iseum's court, the Temple of Isis at its north end and the Serapeum at its south; the Porticus Divorum (the
+  OpenStreetMap and Pleiades point for it lies about 50 m further east, so it is good to about that); the Theatre of Balbus (published
+  95 m cavea, facing east, backed onto the back of the 113 m traced outline; its orientation is disputed) and its Crypta; the Porticus
+  Philippi with the round Temple of Hercules Musarum, moved 13 m north-west to clear the Porticus of Octavia at its published size; the
+  temples of Juno Regina and Jupiter Stator inside the Porticus of Octavia; the temples of Neptune and Hercules Custos on the north side
+  of the Circus Flaminius; and Domitian's Temple of Minerva Chalcidica east of the Iseum. Every one is a best guess: a trace of a
+  reconstruction, not of remains.
 * **Zone centres (best guess).** The Baths of Titus, the Claudianum terrace and temple, and the Castra Praetoria (also turned by the zone).
 
 **Sizes** are the published figures (Platner 1929; the Wikipedia article on each monument), rounded. Where an outline covers only the
@@ -50,6 +61,8 @@ note says which.
 | camp | walls, the headquarters and barrack rows (Castra Praetoria) |
 | block | the Arch of Titus, the Ara Pacis enclosure, the obelisk |
 
+The Iseum, Serapeum, Theatre and Crypta of Balbus and the Circus Flaminius temples use the same kits.
+
 ## Rules
 
 * **Dated.** Only monuments standing by AD 100 are drawn: Trajan's Forum and Baths, the Temple of Venus and Roma, the Basilica of
@@ -59,13 +72,19 @@ note says which.
   Marcellus, the Forum Holitorium temples, the Temple of Aesculapius) is not drawn again. A landmark any of whose pieces would stand in
   one of the neighbourhood's footprints is left out whole and listed (`landmarksLeftOut`): only the House of the Vestals, which the
   Domus Tiberiana platform covers as the neighbourhood draws it.
-* **Kept clear.** The lots keep the same 20 m margin from the landmarks as from the monumental zones.
-* **Colour by certainty.** Landmarks placed from mapped remains tint as evidence-based, the rest as best guess; the rest of the fill
+* **Kept clear.** The lots keep the same 20 m margin from the landmarks as from the monumental zones, measured from each landmark's
+  whole outline (the hull of its pieces, courts included).
+* **Colour by certainty.** Landmarks placed from mapped remains tint as evidence-based, the rest (traced reconstructions included) as best guess; the rest of the fill
   stays best guess.
 
 ## Known gaps
 
 * Kit shapes, not models: no columns, arches or steps; roofs are stepped slabs.
-* The central Campus Martius still has open ground where the Iseum, the Porticus Divorum, the Theatre of Balbus and smaller temples
-  stood: no mapped remains or confident positions were found for this pass.
+* **The northern Campus stays open.** Between the Pantheon and the Mausoleum it was largely open ground c. AD 100 (Strabo's grassy
+  plain, the Ustrinum, the Horologium's pavement); the Temple of Matidia (c. AD 119), the Hadrianeum (145) and the Antonine columns
+  came later. The Basilica of Neptune (burned AD 80, rebuilt by Hadrian), the Porticus Vipsania (east of the Via Lata, in the housing),
+  the Porticus Argonautarum (folded into the Saepta's width), the Porticus Minucia Frumentaria (no outline found), the Stagnum
+  Agrippae (no water kit) and the Diribitorium (unroofed after AD 80) are not drawn.
+* The Saepta keeps its published 310 × 120 m on Platner's position; the traced plan has it narrower (257 × 53 m) with flanking
+  porticoes. The Iseum's west portico meets it within about 2 m.
 * The Forum square's smaller monuments (Rostra, arches, statues) are not drawn.

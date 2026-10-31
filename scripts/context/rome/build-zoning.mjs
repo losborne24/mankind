@@ -304,6 +304,10 @@ const drawn = [
     [[12.4752, 41.8936], [12.4800, 41.8943], [12.4813, 41.8925], [12.4808, 41.8906], [12.4795, 41.8900], [12.4779, 41.8909], [12.4753, 41.8925]],
     `The vegetable market and its temples, the Theatre of Marcellus (13 BC), the Porticus Octaviae and the Circus Flaminius, a public square ringed by temples and porticoes. The circus's exact line is disputed; ${GUESS.toLowerCase()}`,
     [P('theatrum-marcelli'), P('forum-holitorium'), P('circus-flaminius'), P('regio-ix'), 'source:platner-1929']),
+  zone('zone:balbus', 'monumental', 'Theatre and Crypta of Balbus', 'approximate', [-13, 300],
+    [[12.4776, 41.8949], [12.4803, 41.8950], [12.4803, 41.8936], [12.4776, 41.8936]],
+    `The theatre Cornelius Balbus dedicated in 13 BC and the portico (the Crypta) behind its stage, between the Campus and the Circus Flaminius, round the traced reconstruction the landmarks are placed by (OpenHistoricalMap); the Crypta's remains are under the Crypta Balbi museum. ${GUESS}`,
+    [P('regio-ix'), 'source:platner-1929']),
   zone('zone:campus-centre', 'monumental', 'Central Campus Martius: Pantheon, Saepta, Baths of Agrippa and lake, Stadium of Domitian, Theatre of Pompey, porticoes up to the sundial', 'approximate', [86, 300],
     [[12.4711, 41.8976], [12.4716, 41.9006], [12.4745, 41.9016], [12.4772, 41.9022], [12.4800, 41.9022], [12.4806, 41.8996], [12.4802, 41.8962], [12.4787, 41.8947], [12.4762, 41.8944], [12.4733, 41.8943], [12.4716, 41.8948]],
     `Public buildings packed close: Agrippa's Pantheon and baths with their lake (Stagnum Agrippae), the Saepta Julia, the temples of the Largo Argentina, Pompey's theatre and portico, Domitian's stadium and odeum (after AD 86), and the porticoes between the Pantheon and the Horologium. Extended north to meet the Mausoleum zone; the northern edge is new and approximate. ${GUESS}`,
@@ -567,7 +571,7 @@ function labelPoint(poly) {
   return round(best);
 }
 const shortNames = { 'zone:tiber': 'Tiber', 'zone:forum-palatine': 'Fora · Palatine', 'zone:forum-boarium': 'Forum Boarium', 'zone:oppian': 'Oppian', 'zone:claudianum': 'Claudianum',
-  'zone:circus-flaminius': 'Circus Flaminius', 'zone:campus-centre': 'Campus Martius', 'zone:campus-north': 'Mausoleum', 'zone:castra-praetoria': 'Castra Praetoria', 'zone:tiber-island': 'Tiber Island',
+  'zone:circus-flaminius': 'Circus Flaminius', 'zone:balbus': 'Balbus', 'zone:campus-centre': 'Campus Martius', 'zone:campus-north': 'Mausoleum', 'zone:castra-praetoria': 'Castra Praetoria', 'zone:tiber-island': 'Tiber Island',
   'zone:baths-of-trajan': 'Baths of Trajan', 'zone:forum-of-trajan': "Trajan's Forum", 'zone:emporium': 'Emporium', 'zone:trastevere-river': 'Riverfront',
   'zone:collis-hortorum': 'Collis Hortorum', 'zone:esquiline-horti': 'Esquiline horti', 'zone:esquiline-plateau': 'Esquiline gardens', 'zone:caelian-east': 'Caelian houses',
   'zone:campus-river': 'Trigarium', 'zone:residential-dense': 'Dense housing', 'zone:residential-hills': 'Hill housing', 'zone:residential-elite': 'Elite houses',

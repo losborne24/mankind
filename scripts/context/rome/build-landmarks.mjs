@@ -8,10 +8,14 @@
 // are published where recorded, otherwise guesses, as each note says. Where nothing is mapped the position is a Pleiades point or
 // the centre of the zone drawn round the monument. The volumes are kit shapes, not models: placeholders until assets are made.
 //
+// For Campus Martius monuments with no mapped remains, the outline is a reconstruction traced on OpenHistoricalMap (fetch-ohm-landmarks.mjs)
+// from published plans; those are placed the same way and are best guesses.
+//
 // Output: lib/scenarios/fixtures/rome-ad100-landmarks.json.
 import { readFile, writeFile } from 'node:fs/promises';
 const json = async path => JSON.parse(await readFile(path, 'utf8'));
 const osm = await json('data/history/rome/source/osm-landmarks.json');
+const ohm = await json('data/history/rome/source/ohm-landmarks.json');
 const pleiades = await json('data/history/rome/source/pleiades-zoning.json');
 const zoning = await json('lib/scenarios/fixtures/rome-ad100-zoning.json');
 const LAT = 41.892, KX = Math.cos(LAT * Math.PI / 180) * 111320, KY = 110950;
@@ -38,13 +42,13 @@ const toward = (axis, hint) => { const d = a => Math.abs(((a - BEARING[hint]) % 
 const offset = (p, metres, deg) => [p[0] + metres * Math.cos(deg * Math.PI / 180) / KX, p[1] + metres * Math.sin(deg * Math.PI / 180) / KY];
 const zoneRectangle = id => rectangle(zoning.zones.find(z => z.id === id).multipolygon.flatMap(poly => poly[0]));
 
-const OSM = key => `source:osm-landmark-${key}`, PLATNER = 'source:platner-1929';
+const OSM = key => `source:osm-landmark-${key}`, OHM = key => `source:ohm-landmark-${key}`, PLATNER = 'source:platner-1929';
 /**
  * The monuments standing c. AD 100 in the zones the fill leaves open. Those the Forum Boarium neighbourhood already models (the Circus
  * Maximus, the Palatine palaces, the Theatre of Marcellus, the Forum Holitorium temples, the Temple of Aesculapius) are not repeated.
  * Later ones (Trajan's Forum and Baths, the Temple of Venus and Roma, Hadrian's Pantheon rotunda as such) are left out or noted.
  *
- * `osm`: the outline key; `axis`: which of its axes is the monument's length ('long' by default); `front`: the rough compass bearing it
+ * `osm`: the outline key (`ohm`: a traced reconstruction's, which may give `angle` to override the outline's); `axis`: which of its axes is the monument's length ('long' by default); `front`: the rough compass bearing it
  * faces (temples' fronts, the Pantheon's porch, a stadium's straight end, a theatre's stage), so the kit is turned the right way round.
  * `size`: [length, width] in metres where the published size replaces the outline's.
  */
@@ -104,6 +108,33 @@ const SPEC = [
     note: 'About 89 m across (mapped). The drum and the planted mound above it are drawn as stepped tiers; heights after the published reconstructions (about 42 m), a guess.' },
   { id: 'ara-pacis', title: 'Ara Pacis Augustae (original site)', kit: 'block', pleiades: 'ara-pacis', angle: 0, size: [11.6, 10.6], height: 6, note: 'The enclosure, 11.6 × 10.6 m (published), at its original site from Pleiades (it now stands by the Mausoleum).' },
   { id: 'horologium-obelisk', title: 'Obelisk of the Horologium Augusti', kit: 'block', pleiades: 'horologium-augusti', angle: 0, size: [3, 3], height: 30, note: 'The obelisk (21.8 m) on its base, at the Pleiades point.' },
+  // ---- Campus Martius, from traced reconstructions (OpenHistoricalMap): the monuments with no mapped remains.
+  { id: 'iseum', title: 'Iseum Campense (sanctuary of Isis)', kit: 'precinct', ohm: 'iseum-court', depth: 21, height: 12,
+    note: 'The long court of the sanctuary of Isis, between the Saepta and the Porticus Divorum, by a traced reconstruction (its east and west porticoes); rebuilt by Domitian after the fire of AD 80. Height a guess.' },
+  { id: 'iseum-temple', title: 'Temple of Isis', kit: 'temple', ohm: 'iseum-court', front: 'S', shift: [-48, 0], size: [28, 18], podium: 3, height: 16,
+    note: 'At the north end of the court, facing down it to the Serapeum (just east of Santa Maria sopra Minerva, as the remains are placed); size and height a guess.' },
+  { id: 'serapeum', title: 'Serapeum', kit: 'hall', ohm: 'serapeum', height: 16,
+    note: 'The hall at the south end of the sanctuary, under Santo Stefano del Cacco, by a traced reconstruction; its apsed court is drawn as one hall. Height a guess.' },
+  { id: 'porticus-divorum', title: 'Porticus Divorum', kit: 'precinct', ohm: 'porticus-divorum', depth: 12.5, height: 12, built: 89,
+    note: 'Domitian\'s portico for the deified Vespasian and Titus on the site of the Villa Publica, about 240 × 78 m, by a traced reconstruction. The OpenStreetMap and Pleiades point for it lies about 50 m further east, so the position is good to about that. Height a guess.' },
+  { id: 'theatre-balbus', title: 'Theatre of Balbus', kit: 'theatre', ohm: 'theatre-balbus', axis: 'short', front: 'E', shift: [8, 0], diameter: 95, orchestra: 24, height: 24, built: -13,
+    note: 'Cavea about 95 m across (published), facing east to the Crypta, set with its back on the back of the traced outline (which is 113 m across); the orientation is disputed. Height a guess.' },
+  { id: 'crypta-balbi', title: 'Crypta Balbi', kit: 'precinct', ohm: 'crypta-balbi', depth: 14, height: 11, built: -13,
+    note: 'The portico behind the theatre\'s stage, about 114 × 90 m, by a traced reconstruction; its remains are under the Crypta Balbi museum. Height a guess.' },
+  { id: 'porticus-philippi', title: 'Porticus Philippi', kit: 'precinct', ohm: 'porticus-philippi', shift: [0, 13], depth: 9, height: 11, built: -29,
+    note: 'The portico round the Temple of Hercules Musarum, about 92 × 50 m, by a traced reconstruction, moved 13 m north-west to clear the Porticus of Octavia at its published size. Height a guess.' },
+  { id: 'temple-hercules-musarum', title: 'Temple of Hercules Musarum', kit: 'round-temple', ohm: 'temple-hercules-musarum', angle: 61.5, shift: [0, 13], diameter: 14, podium: 2.5, height: 12,
+    note: 'A round temple inside the Porticus Philippi, at the traced position (marked approximate), moved with the portico. Height a guess.' },
+  { id: 'temple-juno-regina', title: 'Temple of Juno Regina', kit: 'temple', ohm: 'temple-juno-regina', front: 'SW', podium: 3, height: 16,
+    note: 'One of the two temples inside the Porticus of Octavia, by a traced reconstruction; height a guess.' },
+  { id: 'temple-jupiter-stator', title: 'Temple of Jupiter Stator', kit: 'temple', ohm: 'temple-jupiter-stator', front: 'SW', podium: 3, height: 16,
+    note: 'The other temple inside the Porticus of Octavia, by a traced reconstruction; height a guess.' },
+  { id: 'temple-neptune-circo', title: 'Temple of Neptune in Circo', kit: 'temple', ohm: 'temple-neptune-circo', front: 'SW', podium: 3, height: 18,
+    note: 'On the north side of the Circus Flaminius, facing it; the traced position is marked approximate. Size and height a guess.' },
+  { id: 'temple-hercules-custos', title: 'Temple of Hercules Custos', kit: 'temple', ohm: 'temple-hercules-custos', front: 'SW', podium: 3, height: 18,
+    note: 'On the north side of the Circus Flaminius, facing it, by a traced reconstruction. Size and height a guess.' },
+  { id: 'minervium', title: 'Temple of Minerva Chalcidica', kit: 'temple', ohm: 'minervium', front: 'S', podium: 2.5, height: 13, built: 90,
+    note: 'Domitian\'s temple east of the Iseum, by a traced reconstruction; which way it faced is a judgement. Height a guess.' },
   // ---- Oppian, Caelian, Viminal, Vatican.
   { id: 'baths-titus', title: 'Baths of Titus', kit: 'baths', zone: 'zone:oppian', size: [120, 110], height: 22, built: 80, certainty: 'best-guess', note: 'A bath block of about 120 × 110 m at the centre of the zone drawn round it; size and height a guess.' },
   { id: 'claudianum-terrace', title: 'Temple of the Deified Claudius: terrace', kit: 'precinct', zone: 'zone:claudianum', size: [200, 175], depth: 10, height: 10, built: 70, certainty: 'best-guess',
@@ -116,7 +147,7 @@ const SPEC = [
 ];
 
 /** Keys that say how to place a monument; the output keeps only where it ended up. */
-const PLACING = new Set(['osm', 'pleiades', 'zone', 'point', 'axis', 'front', 'shift', 'from', 'built']);
+const PLACING = new Set(['osm', 'ohm', 'pleiades', 'zone', 'point', 'axis', 'front', 'shift', 'from', 'built']);
 const out = SPEC.map(s => {
   let centre, angle, size = s.size, position;
   if (s.osm) {
@@ -124,6 +155,11 @@ const out = SPEC.map(s => {
     angle = s.axis === 'short' ? rect.angle + 90 : rect.angle;
     centre = rect.centre; size = size ?? (s.axis === 'short' ? [rect.short, rect.long] : [rect.long, rect.short]);
     position = `OpenStreetMap ${l.osm} (${l.name})`;
+  } else if (s.ohm) {
+    const l = ohm.landmarks[s.ohm], rect = rectangle(l.ways.flat());
+    angle = s.angle ?? (s.axis === 'short' ? rect.angle + 90 : rect.angle);
+    centre = rect.centre; size = size ?? (s.axis === 'short' ? [rect.short, rect.long] : [rect.long, rect.short]);
+    position = `OpenHistoricalMap ${l.ohm} (traced reconstruction)`;
   } else if (s.pleiades) { centre = pleiades.places[s.pleiades].reprPoint; angle = s.angle; position = `Pleiades ${pleiades.places[s.pleiades].id}`; }
   else if (s.zone) { const rect = zoneRectangle(s.zone); centre = rect.centre; angle = s.angle ?? rect.angle; position = `centre of ${s.zone}`; }
   else { centre = s.point; angle = s.angle; position = 'Platner 1929 (described position)'; }
@@ -133,9 +169,9 @@ const out = SPEC.map(s => {
   const rest = Object.fromEntries(Object.entries(s).filter(([k]) => !PLACING.has(k))), built = s.built;
   return { ...rest, centre: [r7(centre[0]), r7(centre[1])], angle: r1(((angle % 360) + 360) % 360), ...(size ? { size: size.map(r1) } : {}), built: built ?? -100,
     certainty: s.certainty ?? (s.osm ? 'evidence-based' : 'best-guess'), position,
-    sources: [...(s.osm ? [OSM(s.osm)] : []), ...(s.pleiades ? [`source:pleiades-${s.pleiades}`] : []), ...(s.zone ? [s.zone] : []), PLATNER] };
+    sources: [...(s.osm ? [OSM(s.osm)] : []), ...(s.ohm ? [OHM(s.ohm)] : []), ...(s.pleiades ? [`source:pleiades-${s.pleiades}`] : []), ...(s.zone ? [s.zone] : []), PLATNER] };
 });
 await writeFile('lib/scenarios/fixtures/rome-ad100-landmarks.json', JSON.stringify({
   about: 'Simple landmark reconstructions, Rome c. AD 100 (build-landmarks.mjs). angle: degrees from east, anticlockwise, of the length axis, pointing to the front where a kit has one. size: [length, width] metres.',
-  osm: { accessed: osm.accessed, licence: osm.licence }, landmarks: out }, null, 1) + '\n');
+  osm: { accessed: osm.accessed, licence: osm.licence }, ohm: { accessed: ohm.accessed, licence: ohm.licence }, landmarks: out }, null, 1) + '\n');
 console.log(`landmarks: ${out.length}`);

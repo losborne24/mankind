@@ -97,6 +97,13 @@ function distanceTo(source: (i: number) => boolean) {
   return d;
 }
 
+/** Convex hull of a set of points (monotone chain), anticlockwise. */
+function hull(points: [number, number][]) {
+  const p = [...points].sort((a, b) => a[0] - b[0] || a[1] - b[1]), cross = (o: number[], a: number[], b: number[]) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const half = (pts: [number, number][]) => { const h: [number, number][] = []; for (const q of pts) { while (h.length > 1 && cross(h[h.length - 2], h[h.length - 1], q) <= 0) h.pop(); h.push(q); } h.pop(); return h; };
+  return [...half(p), ...half([...p].reverse())];
+}
+
 /** Zones present at AD 100 that the fill reads (the suburban classes and the Campagna are read from the field instead). */
 const present = (z: Zone) => z.time.start.year <= 100 && (z.time.end?.year ?? Infinity) >= 100 && z.use !== 'suburban' && z.use !== 'campagna';
 
@@ -121,7 +128,8 @@ export function generateRomeFill(keepOut: [number, number][][]): RomeFill {
   const zoneAt = (p: readonly number[]) => { const i = gridOf(p); return i < 0 ? undefined : zones[zoneGrid[i]]; };
   // Landmarks: one that would stand in any of the neighbourhood's own footprints (a corner or the centre of any piece inside one) is
   // left out whole and listed: the neighbourhood's models win where the two meet, and half a monument would mislead. The rest are
-  // rasterised with the monumental ground, so lots keep the same margin from a landmark that overhangs its zone.
+  // rasterised whole (the hull of their pieces, so a precinct's court counts and a portico thinner than a cell is not missed) with the
+  // monumental ground, so lots keep the same margin from a landmark that overhangs its zone.
   const nb = keepOut.map(ring => { const r = ring.map(toXY), xs = r.map(p => p[0]), ys = r.map(p => p[1]); return { r, b: [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)] }; });
   const inRing = (p: readonly number[], ring: [number, number][]) => { let x = false; for (let n = 0, m = ring.length - 1; n < ring.length; m = n++) if ((ring[n][1] > p[1]) !== (ring[m][1] > p[1]) && p[0] < (ring[m][0] - ring[n][0]) * (p[1] - ring[n][1]) / (ring[m][1] - ring[n][1]) + ring[n][0]) x = !x; return x; };
   const inNeighbourhood = (p: readonly number[]) => nb.some(({ r, b }) => p[0] >= b[0] && p[0] <= b[2] && p[1] >= b[1] && p[1] <= b[3] && inRing(p, r));
@@ -129,7 +137,9 @@ export function generateRomeFill(keepOut: [number, number][][]): RomeFill {
   const centreOf = (ring: [number, number][]) => [ring.reduce((s, p) => s + p[0], 0) / ring.length, ring.reduce((s, p) => s + p[1], 0) / ring.length];
   const left = new Set(pieces.filter(p => [centreOf(p.ring), ...p.ring].some(inNeighbourhood)).map(p => p.id));
   const landmarkGrid = new Uint8Array(GW * GH);
-  rasterise(pieces.filter(p => !left.has(p.id)).map(p => [p.ring]), i => { landmarkGrid[i] = 1; });
+  const outlines = new Map<string, [number, number][]>();
+  for (const p of pieces) if (!left.has(p.id)) outlines.set(p.id, [...outlines.get(p.id) ?? [], ...p.ring]);
+  rasterise([...outlines.values()].map(points => [hull(points)]), i => { landmarkGrid[i] = 1; });
   // Monumental and open ground and the rivers, with a margin of one cell (20 m): no lot reaches into them, and a street's width is left round them.
   const open = distanceTo(i => landmarkGrid[i] === 1 || zoneGrid[i] >= 0 && ['monumental', 'open', 'open-river'].includes(zones[zoneGrid[i]].use));
   const nearOpen = (p: readonly number[], margin: number) => { const i = gridOf(p); return i >= 0 && open[i] <= margin; };

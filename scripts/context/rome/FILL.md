@@ -58,7 +58,9 @@ neighbourhood's guessed lots).
   named zone.
 
 * **Landmarks (v5.20.0).** The monumental zones carry simple reconstructions of their monuments, placed from the mapped remains,
-  Pleiades and published sizes: see `LANDMARKS.md`. Lots keep the same 20 m margin from them as from the zones.
+  Pleiades and published sizes: see `LANDMARKS.md`. Lots keep the same 20 m margin from them as from the zones. Each landmark is
+  cleared whole, as the hull of its pieces (v5.21.0): a precinct's court counts as the monument's ground, and a portico thinner than
+  the 20 m cell is not missed (one lot had stood in the Porticus Divorum's wall).
 
 ## On the map
 
@@ -109,7 +111,7 @@ The close-up's extra heap is the roof data (22,413 slabs). Single runs: frame ti
 ## Known gaps
 
 * **Landmarks are kit shapes.** The monumental zones now carry simple reconstructions (v5.20.0), placeholders until assets are made;
-  the central Campus Martius still has open ground where smaller monuments stood (`LANDMARKS.md`).
+  the Campus gaps are filled from traced plans (v5.21.0), and the northern Campus is left open, as it was (`LANDMARKS.md`).
 * **The block grid is still generic.** Each quarter now runs with the grain of the sourced lines about it, but the lanes themselves
   are no reconstruction of the Severan plan's streets: inside the city the only sourced street is the Via Lata (the other road
   entries are straight illustrative links to the gates), so there is nothing more to follow without tracing a plan.

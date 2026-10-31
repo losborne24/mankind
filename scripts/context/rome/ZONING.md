@@ -209,3 +209,9 @@ The zones and the density field now drive the generated city and suburbium: see 
 
 The monumental zones now hold simple reconstructions of their monuments (`LANDMARKS.md`), and each residential quarter of the fill
 runs with the grain of the sourced lines about it (`FILL.md`). The zones themselves are unchanged.
+
+## Campus gaps (v5.21.0)
+
+One zone is added: **Theatre and Crypta of Balbus** (monumental, from 13 BC), a 0.018 km² rectangle round the traced plan the two
+landmarks are placed by. The dense-housing zone had run between the central Campus and the Circus Flaminius across where they stood.
+Its edges are a guess, like the other outlines'.
