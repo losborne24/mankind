@@ -46,10 +46,13 @@ export function ReconstructionControls({ map, layer, at, onInspect, inspectedId,
     return () => { try { map.setTerrain({ source: TERRAIN_SOURCE, exaggeration: DEFAULT_TERRAIN_EXAGGERATION }); map.setGlobalStateProperty(LOCAL_HILLSHADE_STRENGTH, DEFAULT_LOCAL_HILLSHADE); } catch { /* map removed */ } };
   }, [map, relief]);
   const share = useMemo(() => map.getZoom() >= 15.5 ? certaintyShare(spec, origin, map.getBounds(), at, showGuess) : null, [map, spec, origin, at, showGuess, view]);
+  const lots = useMemo(() => spec.objects.filter(o => o.shape.type === 'building').length, [spec]);
   const percent = (k: ReconstructionCertainty) => `${Math.round((share?.share(k) ?? 0) * 100)}%`;
   return <div className="mt-3 border-t border-white/10 pt-2 text-[11px] text-white/70">
     {share && share.sum > 0 && <p aria-label="Share of the view that is best guess" title="Share of the mapped object area in view (streets, buildings, quays, bridge, stalls and the two temples)">
       <span style={{ color: certaintyColour['best-guess'] }}>{percent('best-guess')} best guess</span> · <span style={{ color: certaintyColour['evidence-based'] }}>{percent('evidence-based')} evidence-based</span> · <span style={{ color: certaintyColour.documented }}>{percent('documented')} documented</span> <span className="text-white/40">of the mapped area in view</span></p>}
+    {!share && showGuess && <p aria-label="Basis of the distant city" title="The distant roofscape is drawn from the lot layout generated for this journey: terraced blocks, lanes and open courts packed between the mapped sites and the river. Its edge is where that layout stops, not where Rome's built-up area ended in AD 100, so it is shown feathered.">
+      <span style={{ color: certaintyColour['best-guess'] }}>City roofscape: best guess</span> <span className="text-white/40">· extent of the {lots.toLocaleString()} generated lots around the mapped sites, not a survey of Rome in AD 100</span></p>}
     <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
       <label className="flex items-center gap-1.5"><input type="checkbox" checked={showGuess} onChange={e => setShowGuess(e.target.checked)} />Show best guesses</label>
       <label className="flex items-center gap-1.5"><input type="checkbox" checked={tint} onChange={e => setTint(e.target.checked)} />Colour by certainty</label>

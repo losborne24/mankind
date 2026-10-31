@@ -172,6 +172,15 @@ became 1,622 because the widened river took some plots.
 
 Not modelled: the other Tiber Island buildings (Jupiter Jurarius and the Faunus temple on the island's neighbour), the Porticus Octaviae (OpenStreetMap has its site at E −198 to −175, S −398 to −378, beyond plate 28's top edge), and the Capitoline temples.
 
+## Part 4 (v5.12.0): the city from the first beat, roofs at mid LOD
+
+* **Low LOD.** `reconstruction-city-roofscape` is a heatmap of one point per lot, tinted terracotta and visible from zoom 7, so "Rome from above" shows a roofscape during the fly-in instead of one dot. It is feathered by construction (the heatmap falls off over about 60 m) and fades out by zoom 15.6 as the extruded blocks take over. At zoom 13 to 15.5 the blocks at the thin edge of the laid-out area (lots with few neighbours within about 60 m) are lower and blend toward the ground colour, so the patch no longer ends in a hard edge.
+* **Basis, stated in the journey card:** "City roofscape: best guess, extent of the 1,619 generated lots around the mapped sites, not a survey of Rome in AD 100". The extent is where the generated layout stops. It is not the ancient built-up area, which was far larger. The certainty percentage line still appears from zoom 15.5, where it is computed from mapped areas.
+* **Mid LOD roofs.** Each lot's massing is now wall plus a three-slab stepped gable (eave slab, mid slab, ridge strip) in the same tile palette as the 3D roofs, so the hand-over to the lit scene keeps the colours. Palace wings carry the palace roof colour. Same single `fill-extrusion` layer and source, three more polygons per lot.
+* **Bridges at mid LOD.** `massingFeatures` draws a deck on pier blocks for the Pons Aemilius and the two skew bridges. No arches; those are the 3D scene's.
+* **Cost.** `map.redraw()` plus a GL read-back, 55 repeats at a fixed camera on this Mac (median, ms): before / after at zoom 11.5, 13.2, 14.7, 15.6 = 5.0 / 5.2, 7.0 / 5.1, 5.1 / 8.2, 6.4 / 7.9. The roofs add about 2 to 3 ms at zoom 14.7 to 15.6; everything is under the 16.7 ms frame. Run-to-run noise is about ±1 ms.
+* **Looked at:** desktop (800×600 pane), beats 1 to 3 played in real time and the explore beat reached with Next; 390×844, beats 1 and 2 only. Beats 4 to 6 were not looked at, and the changes do not touch them. No console errors during the run; the earlier `folded is not defined` crash did not reproduce, since `folded` is declared in `Playback`.
+
 ## Verification notes
 
 * Desktop only, in Chrome, at the explore beat and by moving the camera. At phone width nothing was looked at.
