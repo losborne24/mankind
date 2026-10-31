@@ -17,7 +17,8 @@ export const CertaintyChip = ({ certainty }: { certainty: ContextFeature['certai
 export function LeftOut({ features, year }: { features: ContextFeature[]; year: string }) {
   const out = features.filter(f => f.match === 'outside');
   if (!out.length) return null;
-  return <p role="note" className="mt-2 text-[11px] leading-relaxed text-white/55">Not shown at {year}: {out.map(f => `${f.title} (${f.time ? `from ${formatHistoricalDate(f.time.start)}` : 'undated'})`).join('; ')}.</p>;
+  // A title that already says when the feature was built keeps its own wording rather than a bare start date.
+  return <p role="note" className="mt-2 text-[11px] leading-relaxed text-white/55">Not shown at {year}: {out.map(f => /\(.*\d.*\)$/.test(f.title) ? f.title : `${f.title} (${f.time ? `from ${formatHistoricalDate(f.time.start)}` : 'undated'})`).join('; ')}.</p>;
 }
 /** A switchable group of map layers (the AD 100 land-use zoning), listed with the others when it is on. */
 export interface LayerGroup { title: string; on: boolean; onChange(on: boolean): void; features: ContextFeature[] }

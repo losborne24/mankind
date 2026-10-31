@@ -1,6 +1,7 @@
 // Gate for the AD 100 land-use zoning of Rome: it regenerates byte-for-byte; every zone and marker carries an evidence tier, an
 // existence interval, a note and listed sources; the uses and housing classes are all present; zones present at AD 100 do not overlap
-// and fill the extent; later features (Baths of Trajan, Trajan's Forum) are dated after AD 100; the extent is not the Aurelian circuit
+// and fill the frame; later features (Baths of Trajan, Trajan's Forum, Baths of Caracalla, Hadrian's Mausoleum) are dated after AD 100 and
+// say what the date means; the suburbium has its roads, aqueducts, Vatican plain and Campagna; the extent is not the Aurelian circuit
 // and nothing from the walls or their gates appears; the temple anchors sit in the Forum Boarium zone; markers sit inside what they label.
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -44,10 +45,12 @@ for (const z of data.zones) {
 dated(data.extent);
 assert.equal(data.extent.certainty, 'approximate', 'the extent is approximate');
 const now = data.zones.filter(at100), later = data.zones.filter(z => !at100(z));
-assert.deepEqual(later.map(z => z.id).sort(), ['zone:baths-of-trajan', 'zone:forum-of-trajan'], 'only the Trajanic works are dated after AD 100');
-for (const z of later) assert.ok(z.time.start.year > 100, `${z.id} starts after AD 100`);
+assert.deepEqual(later.map(z => z.id).sort(), ['zone:baths-of-caracalla', 'zone:baths-of-trajan', 'zone:forum-of-trajan', 'zone:mausoleum-hadriani'], 'only these are dated after AD 100');
+for (const z of later) { assert.ok(z.time.start.year > 100, `${z.id} starts after AD 100`); assert.match(`${z.dateNote} ${z.title}`, /construction|built|opened|dedicated|finished/i, `${z.id} says what its start date means`); }
+assert.match(data.zones.find(z => z.id === 'zone:forum-of-trajan').title, /construction from c\. AD 106, dedicated 112/, "Trajan's Forum date is a construction start");
+assert.match(data.zones.find(z => z.id === 'zone:baths-of-trajan').title, /opened 109/, 'Baths of Trajan date is a construction start');
 
-for (const use of ['residential', 'monumental', 'horti', 'port', 'open', 'open-river']) assert.ok(now.some(z => z.use === use), `${use} is zoned`);
+for (const use of ['residential', 'monumental', 'necropolis', 'horti', 'port', 'open', 'open-river', 'suburban', 'campagna']) assert.ok(now.some(z => z.use === use), `${use} is zoned`);
 for (const cls of ['dense', 'mixed', 'elite', 'roadside']) assert.ok(now.some(z => z.housing === cls), `${cls} housing is zoned`);
 const z = id => data.zones.find(q => q.id === id);
 assert.ok(z('zone:residential-elite').density < z('zone:residential-dense').density && z('zone:residential-trastevere').density < z('zone:residential-dense').density, 'elite and Trastevere housing are looser than the dense core');
@@ -66,18 +69,33 @@ for (const id of ['place:temple-of-portunus', 'place:temple-of-hercules-victor']
 }
 assert.equal(z('zone:forum-boarium').use, 'monumental');
 
-// No overlaps among the zones of AD 100; together they fill the extent.
-const extent = [[data.extent.ring]];
+// No overlaps among the zones of AD 100; city zones stay inside the continuous city and the rest outside it; together they fill the frame.
+const extent = [[data.extent.ring]], frame = [[data.frame]];
 let union = [];
 for (const q of now) {
   assert.ok(area(polygonClipping.intersection(union, q.multipolygon)) < 50, `${q.id} overlaps no other zone`);
-  // The river runs the length of the map; every other zone stays inside the continuous city.
-  const shape = q.use === 'open-river' ? polygonClipping.intersection(q.multipolygon, extent) : q.multipolygon;
-  if (q.use !== 'open-river') assert.ok(area(polygonClipping.difference(q.multipolygon, extent)) < 50, `${q.id} stays inside the extent`);
-  union = polygonClipping.union(union, shape);
+  if (q.ring === 'city') assert.ok(area(polygonClipping.difference(q.multipolygon, extent)) < 50, `${q.id} stays inside the extent`);
+  if (q.ring === 'suburbium' || q.ring === 'campagna') assert.ok(area(polygonClipping.intersection(q.multipolygon, extent)) < 50, `${q.id} stays outside the extent`);
+  union = polygonClipping.union(union, q.multipolygon);
 }
-const covered = area(union) / area(extent);
-assert.ok(covered > 0.99, `zones cover the extent (${(covered * 100).toFixed(1)}%)`);
+const covered = area(polygonClipping.intersection(union, frame)) / area(frame);
+assert.ok(covered > 0.99, `zones cover the frame (${(covered * 100).toFixed(1)}%)`);
+assert.ok(area(polygonClipping.intersection(union, extent)) / area(extent) > 0.99, 'zones cover the continuous city');
+
+// Suburbium: the right bank's named places, the Aniene to its confluence, roads and aqueducts.
+for (const id of ['zone:circus-vaticanus', 'zone:horti-agrippinae', 'zone:vatican-necropolis', 'zone:horti-domitiae', 'zone:suburb-roadside', 'zone:suburb-belt', 'zone:campagna', 'zone:aniene'])
+  assert.ok(now.some(q => q.id === id), `${id} is drawn at AD 100`);
+for (const q of now.filter(q => q.ring === 'suburbium' || q.ring === 'campagna')) if (!['zone:circus-vaticanus', 'zone:horti-agrippinae', 'zone:vatican-necropolis', 'zone:horti-domitiae'].includes(q.id)) assert.equal(q.certainty, 'illustrative', `${q.id} is illustrative`);
+const anieneWest = Math.min(...data.zones.find(q => q.id === 'zone:aniene').multipolygon.flat(2).map(p => p[0]));
+assert.ok(anieneWest < 12.506, 'the Aniene reaches its confluence with the Tiber');
+const lines = new Map(data.lines.map(l => [l.id, l]));
+for (const l of data.lines) { dated(l, 60); assert.ok(l.lines.length && l.lines.every(line => line.length > 1 && line.flat().every(Number.isFinite)), `${l.id} has geometry`); assert.ok(at100(l), `${l.id} exists at AD 100`); }
+for (const r of ['flaminia', 'salaria', 'nomentana', 'tiburtina', 'labicana', 'praenestina', 'latina', 'appia', 'ostiensis', 'portuensis', 'aurelia', 'triumphalis', 'cornelia']) assert.ok(lines.has(`road:via-${r}`), `Via ${r} is drawn`);
+assert.equal(lines.get('road:via-appia').certainty, 'documented', 'the Via Appia is documented');
+assert.equal(lines.get('road:via-cornelia').certainty, 'illustrative', 'the hand-drawn Via Cornelia is illustrative');
+assert.equal(lines.get('aqueduct:claudia-arches').certainty, 'documented', 'the standing Claudia arches are documented');
+for (const id of ['aqueduct:claudia-arches', 'aqueduct:claudia-route']) assert.equal(lines.get(id).time.start.year, 52, `${id} dates from AD 52`);
+assert.doesNotMatch(JSON.stringify(data.lines.map(l => l.sources)), /felice/i, 'the Acqua Felice (1586) is not a source');
 // Not the wall line: the Janiculum slopes inside the later wall's triangle (away from the Via Aurelia) are outside the continuous city.
 for (const p of [[12.4628, 41.8895], [12.4645, 41.8800]]) assert.ok(!inside(p, extent), `${p} on the Janiculum is outside the continuous city`);
 assert.ok(data.extent.area > 10e6 && data.extent.area < 16e6, 'extent is a city-sized area');
@@ -85,11 +103,12 @@ assert.ok(!inside([12.4846, 41.8956], now.filter(q => q.use === 'monumental').fl
 
 // Markers: fourteen regions plus anchors, each dated and inside what it labels.
 const markers = new Map(data.markers.map(m => [m.id, m]));
-for (const m of data.markers) { dated(m, 40); assert.ok(inside(m.coordinate, extent), `${m.id} is inside the city`); }
+const suburbMarkers = new Set(['marker:pons-neronianus', 'marker:via-triumphalis-necropolis']);
+for (const m of data.markers) { dated(m, 40); assert.equal(inside(m.coordinate, extent), !suburbMarkers.has(m.id), `${m.id} is ${suburbMarkers.has(m.id) ? 'outside' : 'inside'} the city`); }
 for (const n of ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x', 'xi', 'xii', 'xiii', 'xiv']) assert.ok(markers.has(`marker:regio-${n}`), `Regio ${n.toUpperCase()} has a marker`);
 assert.ok(inside(markers.get('marker:regio-xiv').coordinate, z('zone:residential-trastevere').multipolygon), 'Regio XIV is in Trastevere');
 assert.ok(inside(markers.get('marker:horti-luculliani').coordinate, z('zone:collis-hortorum').multipolygon), 'Horti Luculliani is in its zone');
 assert.ok(!markers.has('marker:horti-maecenatis'), 'the Horti Maecenatis zone is not duplicated by a marker');
 for (const id of ['marker:horti-lamiani']) assert.ok(inside(markers.get(id).coordinate, z('zone:esquiline-horti').multipolygon), `${id} is in its zone`);
 for (const id of ['marker:emporium', 'marker:porticus-aemilia']) assert.ok(inside(markers.get(id).coordinate, z('zone:emporium').multipolygon), `${id} is in the port zone`);
-console.log(`zoning ok: ${data.zones.length} zones (${later.length} after AD 100), ${data.markers.length} markers, ${(data.extent.area / 1e6).toFixed(2)} km², ${(covered * 100).toFixed(1)}% covered`);
+console.log(`zoning ok: ${data.zones.length} zones (${later.length} after AD 100), ${data.lines.length} roads and aqueducts, ${data.markers.length} markers, city ${(data.extent.area / 1e6).toFixed(2)} km², frame ${(covered * 100).toFixed(1)}% covered`);

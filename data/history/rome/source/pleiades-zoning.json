@@ -6992,6 +6992,1002 @@
     }
    ]
   },
+  "circus-gaii-et-neronis": {
+   "id": 395487201,
+   "uri": "https://pleiades.stoa.org/places/395487201",
+   "title": "Circus Gaii et Neronis",
+   "description": "Circus Gaii et Neronis was originally built as a private racecourse for the emperor Caius. In the fourth century A.D., the north side of the circus was destroyed in order to make room for the first basilica of St. Peter.",
+   "reprPoint": [
+    12.4540108,
+    41.9016831
+   ],
+   "bbox": [
+    12.4540108,
+    41.9016831,
+    12.4540108,
+    41.9016831
+   ],
+   "locations": [
+    {
+     "title": "OSM location of Circus Gai et Neronis",
+     "provenance": "OpenStreetMap (Node 1416733018, version 15, osm:changeset=138540889, 2023-07-15T11:26:04Z)",
+     "accuracy": 20,
+     "start": -30,
+     "end": 640,
+     "geometry": {
+      "type": "Point",
+      "coordinates": [
+       12.4540108,
+       41.9016831
+      ]
+     }
+    }
+   ]
+  },
+  "vatican-obelisk": {
+   "id": 855632226,
+   "uri": "https://pleiades.stoa.org/places/855632226",
+   "title": "Vatican Obelisk",
+   "description": "An obelisk from Heliopolis in Egypt that the emperor Caius erected in the Circus Gaii et Neronis. It now stands in St. Peter's Square in Vatican City, having been re-erected there by Domenico Fontana in 1586.",
+   "reprPoint": [
+    12.457253726012437,
+    41.90223193966866
+   ],
+   "bbox": [
+    12.4572349,
+    41.9022186,
+    12.4572726,
+    41.9022453
+   ],
+   "locations": [
+    {
+     "title": "OSM location of Vatican Obelisk",
+     "provenance": "OpenStreetMap (Way 799694267, version 3, osm:changeset=89027589, 2020-08-06T09:15:17Z)",
+     "accuracy": 20,
+     "start": null,
+     "end": null,
+     "geometry": {
+      "type": "LineString",
+      "coordinates": [
+       [
+        12.4572349,
+        41.9022445
+       ],
+       [
+        12.4572715,
+        41.9022453
+       ],
+       [
+        12.4572726,
+        41.9022194
+       ],
+       [
+        12.4572359,
+        41.9022186
+       ],
+       [
+        12.4572349,
+        41.9022445
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  "via-cornelia": {
+   "id": 741499023,
+   "uri": "https://pleiades.stoa.org/places/741499023",
+   "title": "Via Cornelia",
+   "description": "The Via Cornelia was an ancient road that ran along the north side of the circus Gai et Neronis. The road diverged from the Via Triumphalis west of the pons Neronianus, near a large tomb known as the Meta Romuli.",
+   "reprPoint": null,
+   "bbox": null,
+   "locations": []
+  },
+  "via-triumphalis": {
+   "id": 839719167,
+   "uri": "https://pleiades.stoa.org/places/839719167",
+   "title": "Via Triumphalis",
+   "description": "A road running from the Pons Neronianus toward Monte Mario, eventually joining the Via Clodia some 7 miles from Rome.",
+   "reprPoint": [
+    12.4558767,
+    41.9056115
+   ],
+   "bbox": [
+    12.4558767,
+    41.9056115,
+    12.4558767,
+    41.9056115
+   ],
+   "locations": []
+  },
+  "via-triumphalis-necropolis": {
+   "id": 578501279,
+   "uri": "https://pleiades.stoa.org/places/578501279",
+   "title": "Via Triumphalis necropolis",
+   "description": "A segment of an imperial necropolis preserved along a portion of a consular road on the Vatican Hill. The Via Triumphalis necropolis was uncovered during the construction of a parking structure in the Via del Pellegrino.",
+   "reprPoint": [
+    12.4558767,
+    41.9056115
+   ],
+   "bbox": [
+    12.4558767,
+    41.9056115,
+    12.4558767,
+    41.9056115
+   ],
+   "locations": [
+    {
+     "title": "OSM location of Necropoli della Via Triumphalis",
+     "provenance": "OpenStreetMap (Node 3721907363, version 6, osm:changeset=140738494, 2023-09-02T22:55:49Z)",
+     "accuracy": 20,
+     "start": -30,
+     "end": 300,
+     "geometry": {
+      "type": "Point",
+      "coordinates": [
+       12.4558767,
+       41.9056115
+      ]
+     }
+    }
+   ]
+  },
+  "pons-neronianus": {
+   "id": 100447491,
+   "uri": "https://pleiades.stoa.org/places/100447491",
+   "title": "Pons Neronianus",
+   "description": "A bridge across the Tiber river built either by Caius or Nero in order to connect the western part of the Campus Martius with the Campus Vaticanus.",
+   "reprPoint": [
+    12.4641,
+    41.901
+   ],
+   "bbox": [
+    12.4641,
+    41.901,
+    12.4641,
+    41.901
+   ],
+   "locations": [
+    {
+     "title": "Imagery location of Pons Neronianus",
+     "provenance": "Pleiades",
+     "accuracy": 5,
+     "start": -30,
+     "end": 300,
+     "geometry": {
+      "type": "Point",
+      "coordinates": [
+       12.4641,
+       41.901
+      ]
+     }
+    }
+   ]
+  },
+  "mausoleum-hadriani": {
+   "id": 334776904,
+   "uri": "https://pleiades.stoa.org/places/334776904",
+   "title": "Mausoleum Hadriani",
+   "description": "Mausoleum Hadriani (now Castel Sant'Angelo) located on the right bank of the Tiber River was an imperial mausoleum built by Hadrian between 134 and 139 CE. It continued as a tomb for subsequent emperors through to Caracalla, who died in 217 CE. By 401 the tomb had become a fortress with Honorius incorporating it into the line of the Aurelianic walls. During Alaric's sacking of Rome in 410 the mausoleum was looted and the ash urns dispersed. Procopius describes the destruction of the tomb's bronze statuary in 537. By the fourteenth century, the mausoleum had become a papal fortress. At one point, a fortified corridor known as Passetto di Borgo connected the fortress to St. Peter's Basilica.",
+   "reprPoint": [
+    12.46636062330096,
+    41.90303914694194
+   ],
+   "bbox": [
+    12.4659343,
+    41.9027264,
+    12.4667812,
+    41.9033551
+   ],
+   "locations": [
+    {
+     "title": "OSM Location: Mauseoleum of Hadrian",
+     "provenance": "OpenStreetMap (Relation 2720817, version 9, osm:changeset=125835126, 2022-09-06T01:03:34Z)",
+     "accuracy": 20,
+     "start": null,
+     "end": null,
+     "geometry": {
+      "type": "MultiLineString",
+      "coordinates": [
+       [
+        [
+         12.4665479,
+         41.9033221
+        ],
+        [
+         12.4666108,
+         41.9032933
+        ],
+        [
+         12.4666661,
+         41.9032567
+        ],
+        [
+         12.4667176,
+         41.9032149
+        ],
+        [
+         12.4667538,
+         41.9031681
+        ],
+        [
+         12.4667749,
+         41.903113
+        ],
+        [
+         12.4667812,
+         41.9030586
+        ],
+        [
+         12.4667791,
+         41.9030035
+        ],
+        [
+         12.4667709,
+         41.9029471
+        ],
+        [
+         12.466748,
+         41.9028943
+        ],
+        [
+         12.4667099,
+         41.9028492
+        ],
+        [
+         12.4666852,
+         41.9028245
+        ],
+        [
+         12.4666524,
+         41.9027985
+        ],
+        [
+         12.4666077,
+         41.9027706
+        ],
+        [
+         12.4665513,
+         41.9027454
+        ],
+        [
+         12.4665475,
+         41.9027756
+        ],
+        [
+         12.4665012,
+         41.9027467
+        ],
+        [
+         12.466466,
+         41.9027453
+        ],
+        [
+         12.4663647,
+         41.9027506
+        ],
+        [
+         12.4663346,
+         41.9027473
+        ],
+        [
+         12.4663088,
+         41.9027264
+        ],
+        [
+         12.4662363,
+         41.9027375
+        ]
+       ],
+       [
+        [
+         12.4662363,
+         41.9027375
+        ],
+        [
+         12.4661677,
+         41.9027579
+        ],
+        [
+         12.4661047,
+         41.9027867
+        ],
+        [
+         12.4660495,
+         41.9028233
+        ],
+        [
+         12.4660036,
+         41.9028664
+        ],
+        [
+         12.4659684,
+         41.9029148
+        ],
+        [
+         12.4659451,
+         41.902967
+        ],
+        [
+         12.4659343,
+         41.9030214
+        ],
+        [
+         12.4659365,
+         41.9030765
+        ],
+        [
+         12.4659514,
+         41.9031304
+        ],
+        [
+         12.4659786,
+         41.9031815
+        ],
+        [
+         12.4660174,
+         41.9032283
+        ],
+        [
+         12.4660666,
+         41.9032695
+        ],
+        [
+         12.4661284,
+         41.903307
+        ],
+        [
+         12.4661473,
+         41.9032895
+        ],
+        [
+         12.4661955,
+         41.9033091
+        ],
+        [
+         12.4661828,
+         41.9033302
+        ],
+        [
+         12.4662597,
+         41.9033472
+        ],
+        [
+         12.4663329,
+         41.9033551
+        ],
+        [
+         12.4664068,
+         41.9033536
+        ],
+        [
+         12.4664808,
+         41.9033295
+        ],
+        [
+         12.4665479,
+         41.9033221
+        ]
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  "aqua-claudia": {
+   "id": 423563,
+   "uri": "https://pleiades.stoa.org/places/423563",
+   "title": "Aqua Claudia",
+   "description": "The Aqua Claudia was one of the four great aqueducts of the ancient city of Rome. It was begun by Caius in A.D. 38 and completed by Claudius in A.D. 52.",
+   "reprPoint": [
+    12.539650480636517,
+    41.8661529314345
+   ],
+   "bbox": [
+    12.5123169,
+    41.8364607,
+    12.5705729,
+    41.8910705
+   ],
+   "locations": [
+    {
+     "title": "OSM location of Aqua Neroniana",
+     "provenance": "OpenStreetMap (Way 98554683, version 19, osm:changeset=116058253, 2022-01-12T09:33:49Z)",
+     "accuracy": 20,
+     "start": -30,
+     "end": 640,
+     "geometry": {
+      "type": "LineString",
+      "coordinates": [
+       [
+        12.5143428,
+        41.8909979
+       ],
+       [
+        12.5143293,
+        41.8909997
+       ],
+       [
+        12.5143086,
+        41.8910025
+       ],
+       [
+        12.5142902,
+        41.8910044
+       ],
+       [
+        12.5142105,
+        41.8910114
+       ],
+       [
+        12.514176,
+        41.8910163
+       ],
+       [
+        12.5141514,
+        41.8910203
+       ],
+       [
+        12.5140102,
+        41.8910433
+       ],
+       [
+        12.5139879,
+        41.8910347
+       ],
+       [
+        12.5139555,
+        41.8910221
+       ],
+       [
+        12.5138418,
+        41.8909733
+       ],
+       [
+        12.5136245,
+        41.890878
+       ],
+       [
+        12.5134289,
+        41.8907873
+       ],
+       [
+        12.5132516,
+        41.8907057
+       ],
+       [
+        12.513192,
+        41.8906909
+       ],
+       [
+        12.513143,
+        41.8906821
+       ],
+       [
+        12.5131204,
+        41.8906813
+       ],
+       [
+        12.5130953,
+        41.8906778
+       ],
+       [
+        12.5130616,
+        41.8906792
+       ],
+       [
+        12.5129344,
+        41.8907026
+       ],
+       [
+        12.5127669,
+        41.8906042
+       ],
+       [
+        12.5127706,
+        41.8905912
+       ],
+       [
+        12.5123362,
+        41.8903594
+       ],
+       [
+        12.5123169,
+        41.8903794
+       ],
+       [
+        12.5127545,
+        41.8906134
+       ],
+       [
+        12.5129532,
+        41.8907229
+       ],
+       [
+        12.5130698,
+        41.8906987
+       ],
+       [
+        12.5130841,
+        41.8906916
+       ],
+       [
+        12.5131024,
+        41.8906916
+       ],
+       [
+        12.5131189,
+        41.8906924
+       ],
+       [
+        12.5131385,
+        41.8906924
+       ],
+       [
+        12.5131519,
+        41.8906923
+       ],
+       [
+        12.5131815,
+        41.8906987
+       ],
+       [
+        12.5132466,
+        41.8907173
+       ],
+       [
+        12.5133955,
+        41.8907841
+       ],
+       [
+        12.5134211,
+        41.8907948
+       ],
+       [
+        12.5134329,
+        41.8908003
+       ],
+       [
+        12.5136057,
+        41.8908801
+       ],
+       [
+        12.5136187,
+        41.890887
+       ],
+       [
+        12.5138286,
+        41.8909894
+       ],
+       [
+        12.5138987,
+        41.8910173
+       ],
+       [
+        12.5138931,
+        41.8910243
+       ],
+       [
+        12.513941,
+        41.8910429
+       ],
+       [
+        12.5139754,
+        41.8910566
+       ],
+       [
+        12.5140102,
+        41.8910705
+       ],
+       [
+        12.5141565,
+        41.8910489
+       ],
+       [
+        12.5141822,
+        41.8910451
+       ],
+       [
+        12.5142126,
+        41.8910404
+       ],
+       [
+        12.5142926,
+        41.8910281
+       ],
+       [
+        12.5143133,
+        41.8910247
+       ],
+       [
+        12.5143311,
+        41.891022
+       ],
+       [
+        12.5144117,
+        41.8910094
+       ]
+      ]
+     }
+    },
+    {
+     "title": "OSM Location: Aqua Claudia ruins in Parco degli Acquedotti ",
+     "provenance": "OpenStreetMap (Way 781857867, version 5, osm:changeset=153707510, 2024-07-08T14:50:57Z)",
+     "accuracy": 20,
+     "start": -30,
+     "end": 640,
+     "geometry": {
+      "type": "LineString",
+      "coordinates": [
+       [
+        12.5705297,
+        41.8364607
+       ],
+       [
+        12.5703089,
+        41.8370099
+       ],
+       [
+        12.5653945,
+        41.8422217
+       ],
+       [
+        12.5627507,
+        41.8448354
+       ],
+       [
+        12.5617842,
+        41.8456419
+       ],
+       [
+        12.5609807,
+        41.8462475
+       ],
+       [
+        12.5609974,
+        41.8462591
+       ],
+       [
+        12.5610013,
+        41.8462618
+       ],
+       [
+        12.5610115,
+        41.8462689
+       ],
+       [
+        12.5618096,
+        41.8456596
+       ],
+       [
+        12.5627795,
+        41.8448523
+       ],
+       [
+        12.5654328,
+        41.8422415
+       ],
+       [
+        12.5703467,
+        41.8370227
+       ],
+       [
+        12.5705729,
+        41.8364693
+       ],
+       [
+        12.5705588,
+        41.8364665
+       ],
+       [
+        12.5705518,
+        41.8364651
+       ],
+       [
+        12.5705297,
+        41.8364607
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  "aqua-anio-novus": {
+   "id": 423559,
+   "uri": "https://pleiades.stoa.org/places/423559",
+   "title": "Aqua Anio Novus",
+   "description": "Aqua Anio Novus is an ancient aqueduct supplying the city of Rome. Begun by Caius in A.D. 38, it was completed and dedicated by Claudius in A.D. 52.",
+   "reprPoint": [
+    12.557053029338894,
+    41.84874619315096
+   ],
+   "bbox": [
+    12.5540048,
+    41.8468774,
+    12.5601627,
+    41.8507059
+   ],
+   "locations": [
+    {
+     "title": "OSM location of Acquedotti Claudio e Anio novus",
+     "provenance": "OpenStreetMap (Way 128274578, version 9, osm:changeset=113136865, 2021-10-29T18:40:40Z)",
+     "accuracy": 20,
+     "start": -30,
+     "end": 640,
+     "geometry": {
+      "type": "LineString",
+      "coordinates": [
+       [
+        12.5540048,
+        41.8507059
+       ],
+       [
+        12.5547983,
+        41.850064
+       ],
+       [
+        12.5554527,
+        41.8496237
+       ],
+       [
+        12.5562717,
+        41.84915
+       ],
+       [
+        12.5566441,
+        41.8489369
+       ],
+       [
+        12.5575135,
+        41.8484601
+       ],
+       [
+        12.5587106,
+        41.8478046
+       ],
+       [
+        12.5593158,
+        41.8474729
+       ],
+       [
+        12.5596835,
+        41.8472282
+       ],
+       [
+        12.5598026,
+        41.8471384
+       ],
+       [
+        12.5601627,
+        41.8468774
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  "via-nomentana": {
+   "id": 699256589,
+   "uri": "https://pleiades.stoa.org/places/699256589",
+   "title": "Via Nomentana",
+   "description": "The ancient road connecting Rome and Nomentum.",
+   "reprPoint": [
+    12.551350320163285,
+    41.940706422218064
+   ],
+   "bbox": [
+    12.515972,
+    41.9224726,
+    12.6424255,
+    42.101134
+   ],
+   "locations": []
+  },
+  "thermae-antoninianae": {
+   "id": 322942899,
+   "uri": "https://pleiades.stoa.org/places/322942899",
+   "title": "Thermae Antoninianae",
+   "description": "The Thermae Antoninianae, commonly known as the Baths of Caracalla, were built in Rome between AD 212 and 216.",
+   "reprPoint": [
+    12.492404983273032,
+    41.8789180459977
+   ],
+   "bbox": [
+    12.4899015,
+    41.8769443,
+    12.4948861,
+    41.8808698
+   ],
+   "locations": [
+    {
+     "title": "OSM location of Baths of Caracalla",
+     "provenance": "OpenStreetMap (Relation 13476232, version 7, osm:changeset=143488748, 2023-11-01T17:56:22Z)",
+     "accuracy": 20,
+     "start": 200,
+     "end": 640,
+     "geometry": {
+      "type": "MultiLineString",
+      "coordinates": [
+       [
+        [
+         12.491505,
+         41.8803964
+        ],
+        [
+         12.4914089,
+         41.8803357
+        ],
+        [
+         12.4912941,
+         41.880297
+        ],
+        [
+         12.4911695,
+         41.8802831
+        ],
+        [
+         12.4908614,
+         41.8803045
+        ],
+        [
+         12.4907693,
+         41.8803422
+        ],
+        [
+         12.4906151,
+         41.880272
+        ],
+        [
+         12.4903199,
+         41.8799537
+        ],
+        [
+         12.4902384,
+         41.879655
+        ],
+        [
+         12.4902043,
+         41.8796319
+        ],
+        [
+         12.4899042,
+         41.8791442
+        ],
+        [
+         12.4899015,
+         41.8790635
+        ],
+        [
+         12.4899362,
+         41.879005
+        ],
+        [
+         12.4927328,
+         41.8769576
+        ],
+        [
+         12.4927703,
+         41.8769443
+        ],
+        [
+         12.4928123,
+         41.8769568
+        ],
+        [
+         12.4928972,
+         41.8770126
+        ],
+        [
+         12.4932795,
+         41.8772637
+        ],
+        [
+         12.4933312,
+         41.8772275
+        ],
+        [
+         12.4939095,
+         41.8773586
+        ],
+        [
+         12.494131,
+         41.8774803
+        ],
+        [
+         12.4942926,
+         41.8777474
+        ],
+        [
+         12.4946178,
+         41.8783729
+        ],
+        [
+         12.4945712,
+         41.87842
+        ],
+        [
+         12.4948861,
+         41.87866
+        ],
+        [
+         12.4948338,
+         41.8787001
+        ],
+        [
+         12.4947803,
+         41.8787412
+        ],
+        [
+         12.4947596,
+         41.8789157
+        ],
+        [
+         12.4927061,
+         41.8803929
+        ],
+        [
+         12.4923655,
+         41.8806379
+        ],
+        [
+         12.4922846,
+         41.8807026
+        ],
+        [
+         12.4923295,
+         41.8807904
+        ],
+        [
+         12.4922342,
+         41.8808386
+        ],
+        [
+         12.4921726,
+         41.8808698
+        ],
+        [
+         12.4919635,
+         41.8807253
+        ],
+        [
+         12.4919609,
+         41.8806952
+        ],
+        [
+         12.4917564,
+         41.8805317
+        ],
+        [
+         12.4917323,
+         41.8805535
+        ],
+        [
+         12.491505,
+         41.8803964
+        ]
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  "vaticanus-ager": {
+   "id": 104629751,
+   "uri": "https://pleiades.stoa.org/places/104629751",
+   "title": "Vaticanus Ager",
+   "description": "A district on the right bank of the river Tiber, between the lower course of the river and the territory of Veii.",
+   "reprPoint": [
+    12.461592849216194,
+    41.904097551134775
+   ],
+   "bbox": [
+    12.449895,
+    41.9015804,
+    12.4636,
+    41.907927
+   ],
+   "locations": []
+  },
   "horologium-augusti": {
    "id": 986274170,
    "uri": "https://pleiades.stoa.org/places/986274170",

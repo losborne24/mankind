@@ -3,10 +3,12 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { loadTypescript } from '../../lib/load-typescript.mjs';
-const { zoningPlanSvg } = await import(await loadTypescript('lib/scenarios/zoningPlan'));
+const { zoningPlanSvg, PLAN_WIDTH, PLAN_HEIGHT } = await import(await loadTypescript('lib/scenarios/zoningPlan'));
 const out = 'docs/previews/rome-zoning';
 await mkdir(out, { recursive: true });
 await writeFile(`${out}/zoning-ad100.svg`, zoningPlanSvg(100));
-const ql = spawnSync('qlmanage', ['-t', '-s', '1600', '-o', out, `${out}/zoning-ad100.svg`], { encoding: 'utf8' });
-if (ql.status === 0) spawnSync('mv', [`${out}/zoning-ad100.svg.png`, `${out}/zoning-ad100.png`]);
-console.log(`wrote ${out}/zoning-ad100.svg${ql.status === 0 ? ' and .png' : ' (no PNG: Quick Look not available)'}`);
+// PNG: headless Chrome at the plan's own size where it is installed (Quick Look crops to a square, so it is only the fallback).
+const chrome = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+let png = spawnSync(chrome, ['--headless', '--disable-gpu', '--hide-scrollbars', `--window-size=${PLAN_WIDTH},${PLAN_HEIGHT}`, `--screenshot=${process.cwd()}/${out}/zoning-ad100.png`, `file://${process.cwd()}/${out}/zoning-ad100.svg`], { encoding: 'utf8' }).status === 0;
+if (!png) { png = spawnSync('qlmanage', ['-t', '-s', String(PLAN_WIDTH), '-o', out, `${out}/zoning-ad100.svg`]).status === 0; if (png) spawnSync('mv', [`${out}/zoning-ad100.svg.png`, `${out}/zoning-ad100.png`]); }
+console.log(`wrote ${out}/zoning-ad100.svg${png ? ' and .png' : ' (no PNG: neither Chrome nor Quick Look available)'}`);

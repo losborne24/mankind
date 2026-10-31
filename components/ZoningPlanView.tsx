@@ -1,11 +1,11 @@
 "use client";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { zoningPlanSvg } from '@/lib/scenarios/zoningPlan';
+import { PLAN_HEIGHT, PLAN_WIDTH, zoningPlanCityView, zoningPlanSvg } from '@/lib/scenarios/zoningPlan';
 
 /** A small picture of the 2D land-use plan that opens it full screen. */
 export function ZoningPlanThumbnail({ year, onOpen }: { year: number; onOpen(): void }) {
-  // Cropped to the city: the plan's square frame also holds the river's reaches and the outskirts.
-  const src = useMemo(() => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(zoningPlanSvg(year).replace(/viewBox="[^"]*"/, 'viewBox="430 400 820 820"'))}`, [year]);
+  // Cropped to the city: the plan's frame also holds the suburbium and the Campagna.
+  const src = useMemo(() => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(zoningPlanSvg(year).replace(/viewBox="[^"]*"/, `viewBox="${zoningPlanCityView()}"`))}`, [year]);
   return <button aria-label="Open the 2D land-use plan" className="mt-3 flex w-full items-center gap-3 rounded-xl border border-white/10 p-1.5 text-left hover:border-accent" onClick={onOpen}>
     {/* eslint-disable-next-line @next/next/no-img-element -- an inline data URL, nothing to optimise */}
     <img src={src} alt="" className="h-16 w-16 shrink-0 rounded-lg" />
@@ -48,7 +48,7 @@ export function ZoningPlanView({ year, onInspect, onClose }: { year: number; onI
       </span>
     </div>
     <div ref={scroller} className="min-h-0 flex-1 overflow-auto rounded-xl" onClick={event => { const id = (event.target as Element).closest('[data-id]')?.getAttribute('data-id'); if (id) onInspect(id); }}>
-      <div className="mx-auto aspect-square [&_[data-id]]:cursor-pointer [&_[data-id]:hover]:opacity-80 [&_svg]:h-full [&_svg]:w-full" style={{ width: `calc(${scale} * min(100%, 100dvh - 6.5rem))` }}
+      <div className="mx-auto [&_[data-id]]:cursor-pointer [&_[data-id]:hover]:opacity-80 [&_svg]:h-full [&_svg]:w-full" style={{ aspectRatio: `${PLAN_WIDTH} / ${PLAN_HEIGHT}`, width: `calc(${scale} * min(100%, (100dvh - 6.5rem) * ${PLAN_WIDTH / PLAN_HEIGHT}))` }}
         // The plan is generated here from the zoning data; nothing user-supplied goes into it.
         dangerouslySetInnerHTML={{ __html: svg }} />
     </div>

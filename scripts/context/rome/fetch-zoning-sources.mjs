@@ -21,7 +21,9 @@ const ids = {
   'forum-romanum': 502866838, 'forum-iulium': 445545537, 'templum-pacis': 152567558, 'amphitheatrum-flavium': 285857974, 'theatrum-marcelli': 300583267,
   'forum-holitorium': 72845305, 'circus-flaminius': 158081395, 'jupiter-capitolinus': 871801169, 'stadium-domitiani': 92342486,
   'theatrum-pompei': 541950317, pantheon: 128044615, 'saepta-iulia': 854946506, 'thermae-agrippae': 921692078, 'mausoleum-augusti': 281368358,
-  'ara-pacis': 816091000, 'horologium-augusti': 986274170, 'circus-maximus': 458808506, 'campus-martius': 422863, palatine: 971691208,
+  'ara-pacis': 816091000, 'circus-gaii-et-neronis': 395487201, 'horti-agrippinae': 124755045, 'vatican-obelisk': 855632226, 'via-cornelia': 741499023, 'via-triumphalis': 839719167,
+  'via-triumphalis-necropolis': 578501279, 'pons-neronianus': 100447491, 'mausoleum-hadriani': 334776904, 'aqua-claudia': 423563, 'aqua-anio-novus': 423559, 'via-nomentana': 699256589,
+  'thermae-antoninianae': 322942899, 'vaticanus-ager': 104629751, 'horologium-augusti': 986274170, 'circus-maximus': 458808506, 'campus-martius': 422863, palatine: 971691208,
 };
 const places = {};
 for (const [key, id] of Object.entries(ids)) {
@@ -47,4 +49,18 @@ const osm = await o.json();
 const ll = g => g.map(p => [Math.round(p.lon * 1e6) / 1e6, Math.round(p.lat * 1e6) / 1e6]);
 await writeFile(`${out}/osm-tiber.json`, JSON.stringify({ accessed, baseTimestamp: osm.osm3s.timestamp_osm_base, licence: 'ODbL 1.0 · © OpenStreetMap contributors', licenceUrl: 'https://www.openstreetmap.org/copyright',
   elements: osm.elements.map(e => ({ type: e.type, id: e.id, ...(e.geometry ? { geometry: ll(e.geometry) } : {}), ...(e.members ? { members: e.members.filter(m => m.geometry).map(m => ({ role: m.role, geometry: ll(m.geometry) })) } : {}) })) }) + '\n');
-console.log('saved', Object.keys(places).length, 'Pleiades places and', osm.elements.length, 'Tiber polygons');
+
+// The suburbium: modern streets that keep the line of the consular roads, the standing Aqua Claudia arches (Pleiades cites way 781857867) and the Anio Novus way, and the Aniene.
+const roadNames = ['Via Flaminia', 'Via Salaria', 'Via Nomentana', 'Via Tiburtina', 'Via Labicana', 'Via Casilina', 'Via Prenestina', 'Via Latina', 'Via di Porta San Sebastiano', 'Via Appia Antica', 'Via Ostiense', 'Via Portuense', 'Via Aurelia Antica', 'Via Trionfale'];
+const suburbQuery = `[out:json][timeout:180];(way["highway"]["name"~"^(${roadNames.join('|')})$"](41.82,12.38,41.97,12.60);${[781857867, 781857868, 781857869, 781857870, 781857871, 781857872, 781857874, 997532460, 128274578].map(w => `way(${w});`).join('')}rel(16025341););out geom;`;
+let r;
+for (let attempt = 0; attempt < 5; attempt++) {
+  r = await fetch('https://overpass-api.de/api/interpreter', { method: 'POST', headers: { ...agent, accept: 'application/json', 'content-type': 'application/x-www-form-urlencoded' }, body: 'data=' + encodeURIComponent(suburbQuery) });
+  if (r.ok) break;
+  await new Promise(resolve => setTimeout(resolve, 4000 * (attempt + 1)));
+}
+if (!r.ok) throw Error(`Overpass: ${r.status}`);
+const suburb = await r.json();
+await writeFile(`${out}/osm-suburbium.json`, JSON.stringify({ accessed, baseTimestamp: suburb.osm3s.timestamp_osm_base, licence: 'ODbL 1.0 · © OpenStreetMap contributors', licenceUrl: 'https://www.openstreetmap.org/copyright',
+  elements: suburb.elements.map(e => ({ type: e.type, id: e.id, name: e.tags?.name ?? e.tags?.['name:it'] ?? null, ...(e.geometry ? { geometry: ll(e.geometry) } : {}), ...(e.members ? { members: e.members.filter(m => m.geometry).map(m => ({ role: m.role, geometry: ll(m.geometry) })) } : {}) })).sort((a, b) => a.id - b.id) }) + '\n');
+console.log('saved', Object.keys(places).length, 'Pleiades places,', osm.elements.length, 'Tiber polygons and', suburb.elements.length, 'suburbium ways');

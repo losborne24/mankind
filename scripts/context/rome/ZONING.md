@@ -65,6 +65,33 @@ No zone is **documented**: every boundary is drawn by hand.
   they do not overlap (a label that finds no free place is left out: Horti Lamiani's, beside Regio V).
 * **Not yet built:** the suburbium (consular roads, Vatican plain, aqueducts, Campagna). Nothing is off-frame; that is the next stage.
 
+## Suburbium (v5.18.0)
+
+The plan now covers a frame about 14 km square (12.40–12.57 E), with the continuous city, the suburbium round it and the Campagna beyond.
+
+* **Roads (13).** Flaminia, Salaria, Nomentana, Tiburtina, Labicana, Praenestina, Latina, Appia, Ostiensis, Portuensis, Aurelia, Triumphalis and Cornelia.
+  Each is drawn along the modern streets that keep its line (OpenStreetMap: Via Flaminia, Via Salaria, … Via Casilina for the Labicana,
+  Via Appia Antica, Via Aurelia Antica, Via Trionfale), simplified at 8 m and cut at the frame. The Via Appia is **documented**: the Appia Antica keeps the
+  ancient line and paving. The others are **approximate**: the road is documented, but the modern street only approximates its line. The Via Cornelia and the link from the
+  Pons Neronianus to the Via Trionfale have no modern street; they are drawn by hand and are **illustrative**. The Via Latina is drawn only where
+  stretches named Via Latina survive. Roads begin where the modern street begins, so some start a few hundred metres outside the city edge.
+* **Ribbons** now follow these roads, not hand-drawn axes: within 700 m of the city they are part of it (100 m wide, narrowing to 60 m); from 700 m to
+  2.5 km they are suburban roadside (60 m narrowing to 25 m), illustrative.
+* **Belt** (illustrative): villas, gardens and farms within 1.2 km of the city and up to 3.5 km out along the roads, so it reaches out with them.
+* **Campagna** (illustrative): everything beyond, to the frame. On the 3D map it is left unfilled, since its square frame would show on the globe.
+* **Vatican plain:** Circus of Gaius and Nero (begun under Caligula, AD 37–41), the Vatican necropolis, the Horti Agrippinae and the Horti Domitiae
+  (the river bend where Hadrian's mausoleum later stood), all **approximate**, with the Pons Neronianus and Via Triumphalis necropolis markers.
+* **Aqueducts:** the standing arches of the Aqua Claudia and Anio Novus in the Campagna (OpenStreetMap, **documented**). The link from them into the
+  city at the later Porta Maggiore is drawn by hand through Pleiades' Aqua Claudia point (**approximate**). Nero's Arcus Neroniani to the Caelian, which Domitian
+  extended to the Palatine, is **illustrative**. All date from AD 52 or later. The Acqua Felice (1586), which OpenStreetMap maps along part of the
+  Claudia's line, is not used.
+* **Aniene:** drawn to its confluence with the Tiber. The upstream pieces at the top of the earlier plan were clipped meanders; the frame now
+  takes them in whole. Rivers are simplified at 2 m and drawn without an outline.
+* **Not shown at AD 100**, each with what its date means: Baths of Trajan (built after the fire of 104, opened 109), Trajan's Forum (construction from
+  c. 106, dedicated 112), Baths of Caracalla (built c. 212–216), Hadrian's Mausoleum (construction from 134, finished 139).
+* **Not drawn:** brickworks, clay pits and riverside market gardens. No source used here places them.
+* **Plan:** the legend is in a side panel. `plot-zoning.mjs` writes the PNG with headless Chrome at the plan's own size (Quick Look as the fallback).
+
 ## In the app: the 2D plan
 
 The journey card (start card and every beat) has a **2D plan** thumbnail. It opens the plan full screen, drawn live from the zoning data
