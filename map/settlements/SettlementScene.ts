@@ -292,12 +292,16 @@ export class SettlementScene {
       }
       return result;
     };
+    // The lit ground reshapes the river banks (see ContextGround.update); everything that stands on the ground follows it.
+    if (this.contextGround && this.definition.contextGround && !this.contextGround.update(resolve, this.definition.contextGround, exaggeration)) this.terrainPending++;
+    const ground = this.contextGround, raw = resolve;
+    const shaped = (point: LocalPoint): GroundResult => { const r = raw(point); return ground && r.height !== undefined ? { ...r, height: ground.shapeHeight(point, r.height) } : r; };
     for (const entry of this.entries) {
       const count = entry.model ? entry.surface.points.length / 2 : entry.surface.points.length;
       const heights: number[] = [];
       let missing = false, retained = false;
       for (let i = 0; i < count; i++) {
-        const result = resolve(entry.surface.points[i]);
+        const result = shaped(entry.surface.points[i]);
         if (result.height === undefined) missing = true;
         else heights.push(result.height);
         retained ||= result.retained;
@@ -332,14 +336,13 @@ export class SettlementScene {
       entry.mesh.visible = true;
       if (entry.model) { entry.model.position.y = top!; entry.model.visible = true; }
     }
-    if (this.contextGround && this.definition.contextGround && !this.contextGround.update(resolve, this.definition.contextGround, exaggeration)) this.terrainPending++;
-    if (this.urban && this.contextGround && !this.urban.update(point => resolve(point).height, this.contextGround.waterLevel, exaggeration)) this.terrainPending++;
-    const sceneryGround = this.scenery.updateTerrain(resolve);
+    if (this.urban && this.contextGround && !this.urban.update(point => shaped(point).height, this.contextGround.waterLevel)) this.terrainPending++;
+    const sceneryGround = this.scenery.updateTerrain(shaped);
     this.terrainPending += sceneryGround.pending;
     this.terrainRetained += sceneryGround.retained;
     this.scenerySteep = sceneryGround.steep;
     const stableFloors = this.entries.filter((entry) => entry.model?.visible).map((entry) => entry.model!.position.y);
-    const center = stableFloors.length ? { height: stableFloors.reduce((sum, value) => sum + value, 0) / stableFloors.length } : resolve([0, 0]);
+    const center = stableFloors.length ? { height: stableFloors.reduce((sum, value) => sum + value, 0) / stableFloors.length } : shaped([0, 0]);
     if (center.height !== undefined) { this.centreHeight = center.height; this.urban?.setFocus(this.focusScratch.set(0, center.height + 6, 0)); }
     if (this.sun && center.height !== undefined) {
       const lightScale = Math.max(1, (this.definition.groundSizeMeters ?? GROUND_DEPTH) / GROUND_DEPTH);

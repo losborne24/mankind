@@ -372,12 +372,13 @@ function buildable(p) {
 // ── Docks: stages and barges upstream of the bridge ────────────────────────────────────────────────────────────
 const dockS = []; for (let s = -70; s > -250; s -= 24) dockS.push(s);
 dockS.forEach((s, i) => {
-  const e = bankAt(s) + 1.5, stage = [[e, s - 1.6], [e - 12, s - 1.6], [e - 12, s + 1.6], [e, s + 1.6]];
+  // Stages run out from the quay wall's river face; barges moor against the wall, measured where each one lies (the bank slants).
+  const e = waterEdge(s), stage = [[e, s - 1.6], [e - 12, s - 1.6], [e - 12, s + 1.6], [e, s + 1.6]];
   add({ id: `stage-${i + 1}`, kind: 'stage', title: `Timber landing stage ${i + 1}`, certainty: GUESS, shape: { type: 'stage', origin: pt([e, s]), length: 12, width: 3.2 }, footprint: stage,
     sources: ['source:wikidata-portus', 'source:it-wikipedia-porto-tiberino'], time: AD100, uncertaintyYears: 25,
     note: 'A timber landing stage for the river harbour. The Portus Tiberinus is recorded only as a point about 1 km wide and as in use to at least AD 96; the stages and their spacing are guessed.' });
   if (rand() < 0.75) {
-    const bl = between(15, 20), bw = between(4, 5.2), side = rand() < 0.5 ? 1 : -1, bs = s + side * 13, be = e - 5 - bw / 2;
+    const bl = between(15, 20), bw = between(4, 5.2), side = rand() < 0.5 ? 1 : -1, bs = s + side * 13, be = waterEdge(bs) - 0.6 - bw / 2;
     add({ id: `barge-${i + 1}`, kind: 'barge', title: `Moored river barge ${i + 1}`, certainty: GUESS, shape: { type: 'barge', centre: pt([be, bs]), length: r1(bl), beam: r1(bw), cargo: pick(['amphorae', 'sacks', 'timber', 'stone']), crates: Math.floor(between(3, 7)) },
       footprint: [[be - bw / 2, bs - bl / 2], [be + bw / 2, bs - bl / 2], [be + bw / 2, bs + bl / 2], [be - bw / 2, bs + bl / 2]], sources: ['source:it-wikipedia-porto-tiberino'], time: AD100, uncertaintyYears: 25,
       note: 'A river barge of the kind that brought goods upstream from Ostia, towed by men on the bank (Italian Wikipedia). Size, cargo and mooring are guessed.' });

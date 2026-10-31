@@ -196,6 +196,15 @@ Not modelled: the other Tiber Island buildings (Jupiter Jurarius and the Faunus 
 * **Look.** The foam band is gone; the bank darkens in a narrow wet band (about 1 m of height) above the water line. The water is muddy ochre-olive in the shallows to olive-brown in the channel, after *flavus Tiberis*; that colour is a best guess and the Tiber layer's note says so. The surface noise is broader and weaker; sky reflection and sun glint are kept. No foam at the bridge piers.
 * **Limitation.** The elevation model still has the market (about 15 m) below the river level (18.5 m), so the quay wall along the market stands higher on its land side than on the water side, more so with relief ×2.
 
+## Part 7 (v5.15.0): banks, shoreline, docks
+
+* **Banks.** The banks are reshaped over 45 m instead of 10 m: at the water's edge the bank stands at most 1 m above the water (measured without the relief exaggeration) and rises smoothly to the terrain's own height 45 m back (`ContextGround.shapeHeight`, from a 4 m distance field). Buildings, temples, streets, scenery and river structures stand on this shaped ground, so they move with it rather than floating or sinking. This removes the steep, faceted bank faces the modern embankments left in the elevation model.
+* **Shoreline.** The water has a crisp edge just outside the channel outline; under the water no ground stands above the level. The wet edge is the mask's 2 m band on the bank side, the same width everywhere.
+* **Depth.** The water is shaded by distance from the bank (shallow ochre-olive at the edge to olive-brown 24 m out), with long, slow streaks along the flow and a broader sun sheen.
+* **Docks.** Barges were placed 13 m along the bank from their stage but at the stage's east coordinate; the bank slants, so several lay on the land side of the quay wall. Stages now start at the wall's river face and barges moor against it where they lie; `check-reconstruction.mjs` checks both.
+* **Bridge ends** never sit lower than the quay coping (1.6 m above the water) where the land behind is lower than the river (the market).
+* **Looked at** (1280×660): the river-crossing beat at relief ×2; the two-temples beat at ×2; the "Where the evidence ends" view from the north (the reported view) at ×2 and ×1; the crossing pose at ×1. The pale slab beside the journey card in that view is the Pons Cestius seen end-on; its ends now sit 1 to 2 m above the water.
+
 ## Verification notes
 
 * Desktop only, in Chrome, at the explore beat and by moving the camera. At phone width nothing was looked at.

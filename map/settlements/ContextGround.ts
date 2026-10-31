@@ -30,8 +30,20 @@ function polarGrid(radius: number) {
   return { points, indices };
 }
 
-/** How far from the water the banks are reshaped (un-exaggerated, see `update`), metres. Buildings stand at least 11 m back. */
-const BANK_REACH = 10;
+/** How far back from the water the banks are reshaped (see `shapeHeight`), and the most the bank stands above the water at its edge, metres. */
+const BANK_REACH = 45, BANK_RISE = 1;
+/** Cell size of the distance fields (to the water, to the bank), metres. */
+const FIELD_CELL = 4;
+
+/** Distance (metres) from every cell of an n×n grid to the nearest source cell: a two-pass 3-4 chamfer transform. */
+function distanceField(n: number, cell: number, source: (i: number, j: number) => boolean): Float32Array {
+  const d = new Float32Array(n * n), diag = cell * Math.SQRT2;
+  for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) d[j * n + i] = source(i, j) ? 0 : 1e9;
+  const relax = (k: number, i: number, j: number, step: number) => { if (i >= 0 && j >= 0 && i < n && j < n) d[k] = Math.min(d[k], d[j * n + i] + step); };
+  for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) { const k = j * n + i; relax(k, i - 1, j, cell); relax(k, i, j - 1, cell); relax(k, i - 1, j - 1, diag); relax(k, i + 1, j - 1, diag); }
+  for (let j = n - 1; j >= 0; j--) for (let i = n - 1; i >= 0; i--) { const k = j * n + i; relax(k, i + 1, j, cell); relax(k, i, j + 1, cell); relax(k, i + 1, j + 1, diag); relax(k, i - 1, j + 1, diag); }
+  return d;
+}
 
 /**
  * The local ground: a textured, lit mesh draped on MapLibre's terrain, feathered to nothing at its rim,
@@ -54,10 +66,16 @@ export class ContextGround {
   private readonly depthReset: THREE.Mesh;
   private readonly depthResetMaterial: THREE.ShaderMaterial;
   private readonly maskData: Uint8Array;
-  /** Per vertex: river cover from the mask (0..1), whether it lies in the strip the embankments took, and its nearness to open water (1 at the water, 0 by BANK_REACH). */
+  /** Per vertex: river cover from the mask (0..1) and whether it lies in the strip the embankments took. */
   private readonly cover: Float32Array;
   private readonly inStrip: boolean[];
-  private readonly nearWater: Float32Array;
+  /** Distance from each field cell to the open water, and from each water cell to the bank (metres). */
+  private readonly toWater: Float32Array;
+  private readonly fieldSize: number;
+  private readonly coverAt: (x: number, z: number) => number;
+  private readonly sizeMeters: number;
+  private level: number | undefined;
+  private exaggeration = 1;
   private heights: number[] | undefined;
   private shownSince = 0;
   waterVisible = false;
@@ -80,17 +98,16 @@ export class ContextGround {
       const u = Math.floor((x / spec.sizeMeters + 0.5) * res), v = Math.floor((z / spec.sizeMeters + 0.5) * res);
       return u < 0 || v < 0 || u >= res || v >= res ? 0 : this.maskData[(v * res + u) * 4 + 1] / 255;
     };
+    this.coverAt = coverAt; this.sizeMeters = spec.sizeMeters;
     this.cover = Float32Array.from(this.points, ([x, z]) => coverAt(x, z));
-    // Nearness to the water: the closest of 24 probes (three rings) that lands in open water.
-    this.nearWater = Float32Array.from(this.points, ([x, z], i) => {
-      if (this.cover[i] > 0.5) return 1;
-      let best = 0;
-      for (const r of [BANK_REACH / 3, BANK_REACH * 2 / 3, BANK_REACH]) for (let k = 0; k < 8; k++) {
-        const a = k / 8 * Math.PI * 2;
-        if (coverAt(x + Math.cos(a) * r, z + Math.sin(a) * r) > 0.5) best = Math.max(best, 1 - r / BANK_REACH * 0.9);
-      }
-      return best;
-    });
+    const n = this.fieldSize = Math.round(spec.sizeMeters / FIELD_CELL), cell = spec.sizeMeters / n;
+    const wetCell = (i: number, j: number) => coverAt((i + 0.5) * cell - spec.sizeMeters / 2, (j + 0.5) * cell - spec.sizeMeters / 2) > 0.5;
+    this.toWater = distanceField(n, cell, wetCell);
+    // Distance from the bank, for the water's shallow-to-deep colour (saturates at 40 m).
+    const toBank = distanceField(n, cell, (i, j) => !wetCell(i, j));
+    const depth = new THREE.DataTexture(Uint8Array.from(toBank, v => Math.min(255, Math.round(v / 40 * 255))), n, n, THREE.RedFormat);
+    depth.unpackAlignment = 1; depth.magFilter = depth.minFilter = THREE.LinearFilter; depth.wrapS = depth.wrapT = THREE.ClampToEdgeWrapping; depth.needsUpdate = true;
+    this.textures.push(depth);
     const strip = spec.waterExtra ?? [];
     this.inStrip = this.points.map(([x, z]) => strip.some(ring => {
       let c = false;
@@ -106,7 +123,7 @@ export class ContextGround {
     this.groundGeometry.setAttribute("normal", new THREE.Float32BufferAttribute(grid.points.flatMap(() => [0, 1, 0]), 3));
     this.groundGeometry.setAttribute("uv", new THREE.Float32BufferAttribute(grid.points.flatMap(([x, z]) => [x / spec.sizeMeters + 0.5, z / spec.sizeMeters + 0.5]), 2));
 
-    const shared = { tMask: { value: mask }, uSize: { value: spec.sizeMeters }, uFade: { value: 0 } };
+    const shared = { tMask: { value: mask }, uSize: { value: spec.sizeMeters }, uFade: { value: 0 } }, depthTexture = depth;
     this.groundMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, metalness: 0, transparent: true, depthWrite: true });
     const groundUniforms = { ...shared, tEarth: { value: earth }, tScrub: { value: scrub }, tPaving: { value: paving }, tCobble: { value: cobbles }, tSurface: { value: surface }, uGuess: this.guess, uWater: this.waterUniform };
     this.groundMaterial.onBeforeCompile = shader => {
@@ -138,16 +155,17 @@ export class ContextGround {
         vec3 cobble = texture2D(tCobble, vGround / 5.0).rgb * 0.7 + texture2D(tCobble, spin / 2.3).rgb * 0.3;
         col = mix(col, cobble, smoothstep(0.3, 0.7, m2.r) * uGuess);
         col *= 1.0 - 0.5 * m.a;                       // baked contact shadow beside walls
-        // The river bed (seen through the water) is silt; the bank is darkened in a narrow wet band just above the water line.
-        col = mix(col, vec3(0.27, 0.24, 0.15), smoothstep(0.3, 0.7, m.g));
-        float wet = 1.0 - smoothstep(0.05, 0.9, vHeight - uWater);
-        col *= mix(1.0, 0.68, wet);
+        // Under the water the bed is silt, and nothing of the ground stands above the water there. The bank is darkened in a
+        // narrow wet band (the mask's 2 m edge) along the water.
+        if (m.g > 0.5 && vHeight > uWater - 0.05) discard;
+        col = mix(col, vec3(0.27, 0.24, 0.15), smoothstep(0.45, 0.6, m.g));
+        col *= mix(1.0, 0.7, smoothstep(0.02, 0.45, m.g));
         float rim = 1.0 - smoothstep(0.42, 1.0, length(vGround) / (uSize * 0.5));
         diffuseColor.rgb = col;
         diffuseColor.a *= rim * uFade;
       `);
     };
-    this.groundMaterial.customProgramCacheKey = () => "context-ground-v4";
+    this.groundMaterial.customProgramCacheKey = () => "context-ground-v5";
     this.ground = new THREE.Mesh(this.groundGeometry, this.groundMaterial);
     this.ground.receiveShadow = true; this.ground.renderOrder = 1; this.ground.visible = false; this.ground.frustumCulled = false;
     // Drawn before everything else in the scene: resets the depth over the ground's footprint so MapLibre's terrain no longer
@@ -162,22 +180,24 @@ export class ContextGround {
 
     this.waterMaterial = new THREE.ShaderMaterial({
       transparent: true, depthWrite: false,
-      uniforms: { ...shared, uTime: { value: 0 }, uSunDir: { value: sunDirection.clone() }, uSunColour: { value: new THREE.Color(SUN_COLOUR) },
+      uniforms: { ...shared, tDepth: { value: depthTexture }, uTime: { value: 0 }, uSunDir: { value: sunDirection.clone() }, uSunColour: { value: new THREE.Color(SUN_COLOUR) },
         uCam: { value: new THREE.Vector3(0, 400, 0) }, uSkyLow: { value: new THREE.Color(0xe3dccb) }, uSkyHigh: { value: new THREE.Color(0x7fa2c8) },
         // "Flavus Tiberis": the yellow, silty Tiber. Muddy ochre-olive in the shallows to olive-brown in the deep channel (best guess).
-        uShallow: { value: new THREE.Color(0xa89458) }, uDeep: { value: new THREE.Color(0x6a5a34) } },
+        uShallow: { value: new THREE.Color(0x7a6b42) }, uDeep: { value: new THREE.Color(0x56472a) } },
       vertexShader: `varying vec2 vGround; varying vec3 vPos;
         void main(){ vGround = position.xz; vPos = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-      fragmentShader: `uniform sampler2D tMask; uniform float uSize, uTime, uFade; uniform vec3 uSunDir, uSunColour, uCam, uSkyLow, uSkyHigh, uShallow, uDeep;
+      fragmentShader: `uniform sampler2D tMask, tDepth; uniform float uSize, uTime, uFade; uniform vec3 uSunDir, uSunColour, uCam, uSkyLow, uSkyHigh, uShallow, uDeep;
         varying vec2 vGround; varying vec3 vPos; ${noiseGlsl}
         float swell(vec2 p){ vec2 flow = vec2(0.0, 1.0) * uTime;   // the river runs roughly south here
           return vnoise(p * 0.22 + flow * 0.3) * 0.6 + vnoise(p * 0.6 - flow * 0.45 + 9.0) * 0.3 + vnoise(p * 1.6 + flow * 0.7 + 3.0) * 0.04; }
         void main(){
           vec2 muv = vGround / uSize + 0.5;
           vec4 m = texture2D(tMask, muv);
-          float cover = smoothstep(0.1, 0.6, m.g);
+          // A crisp edge just outside the channel outline; where the bank is higher the ground hides it, so the shoreline is the
+          // line where the bank meets the level water.
+          float cover = smoothstep(0.03, 0.1, m.g);
           if (cover < 0.01) discard;
-          float inner = smoothstep(0.0, 1.0, textureLod(tMask, muv, 3.0).g);
+          float inner = smoothstep(0.0, 0.6, texture2D(tDepth, muv).r);   // shallow at the bank, deep by 24 m out
           vec3 view = uCam - vPos; float dist = length(view); view /= dist;
           float e = 0.35, h = swell(vGround);
           vec2 grad = vec2(swell(vGround + vec2(e, 0.0)) - h, swell(vGround + vec2(0.0, e)) - h) / e;
@@ -186,11 +206,13 @@ export class ContextGround {
           float up = clamp(r.y, 0.0, 1.0);
           vec3 sky = mix(uSkyLow, uSkyHigh, pow(up, 0.55));
           float fres = clamp(0.03 + 0.97 * pow(1.0 - max(dot(n, view), 0.0), 5.0), 0.0, 0.85);
-          float sunGlint = pow(max(dot(r, uSunDir), 0.0), 380.0) * 3.5 + pow(max(dot(r, uSunDir), 0.0), 36.0) * 0.18;
+          float sunGlint = pow(max(dot(r, uSunDir), 0.0), 380.0) * 3.5 + pow(max(dot(r, uSunDir), 0.0), 24.0) * 0.3 + pow(max(dot(r, uSunDir), 0.0), 4.0) * 0.06;
           vec3 body = mix(uShallow, uDeep, smoothstep(0.1, 0.9, inner));
           body *= 0.72 + 0.28 * max(dot(n, uSunDir), 0.0);
+          // Long, slow streaks along the flow, so the surface reads as moving water.
+          body *= 0.94 + 0.12 * vnoise(vec2(vGround.x * 0.06, vGround.y * 0.012 - uTime * 0.06));
           vec3 col = mix(body, sky, fres) + uSunColour * sunGlint;
-          gl_FragColor = vec4(col, cover * uFade * mix(0.9, 0.97, inner));
+          gl_FragColor = vec4(col, cover * uFade * mix(0.92, 0.98, inner));
           #include <tonemapping_fragment>
           #include <colorspace_fragment>
         }`,
@@ -207,7 +229,7 @@ export class ContextGround {
    * The river is one level surface. Its level is a low percentile (the 10th) of the terrain over the open channel with the
    * exaggeration taken out, so it sits near the lowest bed the coarse model shows rather than riding up its embankments.
    * Under the water the ground is cut 1.5 m below the level. Within BANK_REACH of the water the banks are measured from the
-   * river without the exaggeration, so relief ×2 does not steepen them; buildings stand further back and are unaffected.
+   * river without the exaggeration (see `shapeHeight`), so relief ×2 does not steepen them.
    */
   update(resolve: (point: LocalPoint) => HeightResult, spec: ContextGroundSpec, exaggeration = 1): boolean {
     const heights: number[] = new Array(this.points.length);
@@ -226,12 +248,8 @@ export class ContextGround {
     const channel = heights.map(h => h / k).filter((_, i) => this.cover[i] > 0.9 && !this.inStrip[i]).sort((a, b) => a - b);
     this.waterVisible = channel.length > 3;
     const level = this.waterVisible ? channel[Math.floor((channel.length - 1) * 0.1)] * k : undefined;
-    const shaped = heights.map((h, i) => {
-      if (level === undefined) return h;
-      const bank = level + (h - level) / k, near = this.nearWater[i];
-      const g = h + (bank - h) * near;
-      return this.cover[i] > 0.5 ? Math.min(g, level - 1.5) : g;
-    });
+    this.level = level; this.exaggeration = k;
+    const shaped = heights.map((h, i) => this.shapeHeight(this.points[i], h));
     // The coarse rim sits higher so the terrain mesh cannot poke through between vertices.
     for (let i = 0; i < heights.length; i++) ground.setY(i, shaped[i] + 0.07 + Math.hypot(this.points[i][0], this.points[i][1]) / radius * 0.8);
     ground.needsUpdate = true;
@@ -247,6 +265,24 @@ export class ContextGround {
     if (!this.shownSince) this.shownSince = performance.now();
     this.ground.visible = this.depthReset.visible = true; this.water.visible = this.waterVisible;
     return true;
+  }
+
+  /**
+   * The ground height the scene uses at a point, from the terrain's height there. Under the water the ground is cut 1.5 m
+   * below the level. Beside it the bank is measured from the river without the relief exaggeration and stands at most
+   * BANK_RISE above the water at the edge, rising smoothly to the terrain's own height BANK_REACH back. Buildings, streets
+   * and river structures stand on this ground, so they move with it.
+   */
+  shapeHeight(point: LocalPoint, h: number): number {
+    const level = this.level;
+    if (level === undefined) return h;
+    const edge = level + Math.min((h - level) / this.exaggeration, BANK_RISE);
+    if (this.coverAt(point[0], point[1]) > 0.5) return Math.min(edge, level - 1.5);
+    const n = this.fieldSize, cell = this.sizeMeters / n, fx = (point[0] + this.sizeMeters / 2) / cell - 0.5, fz = (point[1] + this.sizeMeters / 2) / cell - 0.5;
+    const i = Math.max(0, Math.min(n - 2, Math.floor(fx))), j = Math.max(0, Math.min(n - 2, Math.floor(fz))), tx = Math.min(1, Math.max(0, fx - i)), tz = Math.min(1, Math.max(0, fz - j));
+    const f = this.toWater, d = (f[j * n + i] * (1 - tx) + f[j * n + i + 1] * tx) * (1 - tz) + (f[(j + 1) * n + i] * (1 - tx) + f[(j + 1) * n + i + 1] * tx) * tz;
+    const t = Math.min(1, d / BANK_REACH), s = t * t * (3 - 2 * t);
+    return edge + (h - edge) * s;
   }
 
   /**

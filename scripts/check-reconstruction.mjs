@@ -123,6 +123,12 @@ assert.ok(piersE.slice(1).every((e, i) => piersE[i] - e < 23), 'no span is wider
 assert.match(data.objects.find(o => o.id === 'pons-aemilius').note, /west end is a best guess.*Wikipedia gives seven/);
 assert.deepEqual(data.objects.find(o => o.id === 'street-trastevere').shape.points[0], [piersE.at(-1), -34], 'the Trastevere road starts at the west abutment');
 assert.ok(data.waterExtra?.[0]?.length > 20, 'the strip of river the embankments took is carried as water');
+// Docks: each stage starts at the quay wall's river face and each barge lies wholly on the river side of the wall beside it.
+{ const quay = data.objects.find(o => o.id === 'quay-north').shape.line, wallAt = s => { for (let i = 0; i < quay.length - 1; i++) { const [a, b] = [quay[i], quay[i + 1]]; if ((s - a[1]) * (s - b[1]) <= 0) return a[0] + (b[0] - a[0]) * (s - a[1]) / (b[1] - a[1] || 1); } return quay.reduce((a, p) => Math.abs(p[1] - s) < Math.abs(a[1] - s) ? p : a)[0]; };
+  for (const o of data.objects.filter(o => o.kind === 'stage' || o.kind === 'barge')) {
+    const xs = o.footprint.map(p => p[0]), s = o.footprint.reduce((a, p) => a + p[1], 0) / o.footprint.length;
+    assert.ok(Math.max(...xs) <= wallAt(s) - 0.6, `${o.id} is on the river side of the quay wall (east edge ${Math.max(...xs).toFixed(1)}, wall ${wallAt(s).toFixed(1)})`);
+  } }
 // The ancient east bank lies east of today's: every point of the strip's east edge is further east than its west edge.
 { const ring = data.waterExtra[0], half = ring.length / 2, east = ring.slice(0, half), west = ring.slice(half).reverse(); assert.ok(east.every((p, i) => p[0] > west[i][0] + 1), 'the ancient bank is east of the modern one'); }
 // The north of the market: the theatre, three temples and the pier hall, from the plate, evidence-based, with a date note where the date is not secure.

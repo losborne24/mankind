@@ -68,10 +68,9 @@ type Height = (point: LocalPoint) => number | undefined;
 type Ground = (point: LocalPoint) => number;
 const yawOf = (dx: number, dz: number) => -Math.atan2(dz, dx);
 /**
- * Heights for river structures (bridges, quays, landing stages, barges). The relief correction exaggerates the terrain about
- * sea level, which doubles the step from the river up to its banks; a structure measured from it would float above the
- * water or stand on tall piers. So these measure the bank from the river with the exaggeration taken out: `height` is the
- * river surface plus the bank's true height above it. `water` is the river surface (Infinity where none is drawn).
+ * Heights for river structures (bridges, quays, landing stages, barges): `water` is the river's level (Infinity where none is
+ * drawn) and `height` the ground beside it. The ground arrives already reshaped by ContextGround, whose banks are measured from
+ * the river without the relief exaggeration, so these neither float above the water nor stand on tall piers.
  */
 interface River { water: number; height(point: LocalPoint): number }
 const LATTICE = 10;
@@ -167,10 +166,10 @@ export class UrbanScene {
    * Rebuild against the terrain; false while any needed height is unknown. The terrain refines as DEM tiles arrive,
    * so heights are compared on every call and the meshes are rebuilt only when they moved by more than 15 cm.
    * Heights come from a 10 m lattice interpolated bilinearly: the DEM is no finer, and thousands of lots would
-   * otherwise cost thousands of terrain queries. `exaggeration` is the terrain's display exaggeration (see River).
+   * otherwise cost thousands of terrain queries.
    */
-  update(height: Height, waterLevel: number | undefined, exaggeration = 1): boolean {
-    const failed = { value: false }, nodes = new Map<string, number>(), signature: number[] = [waterLevel ?? -1, exaggeration];
+  update(height: Height, waterLevel: number | undefined): boolean {
+    const failed = { value: false }, nodes = new Map<string, number>(), signature: number[] = [waterLevel ?? -1];
     const node = (i: number, j: number) => {
       const k = `${i},${j}`;
       let v = nodes.get(k);
@@ -194,7 +193,7 @@ export class UrbanScene {
     const walls: { o: ReconstructionObject; base: number; skirt: number }[] = [];
     const guessed = new Mesher(), based = new Mesher();
     const surface = waterLevel ?? Infinity;
-    const river: River = { water: surface, height: p => Number.isFinite(surface) ? surface + (h(p) - surface) / exaggeration : h(p) };
+    const river: River = { water: surface, height: h };
     for (const o of this.spec.objects) {
       const mesher = o.certainty === "best-guess" ? guessed : based;
       mesher.tint = this.tinted ? CERTAINTY_TINT[o.certainty] : undefined;
@@ -485,7 +484,9 @@ export class UrbanScene {
    */
   private riverBridge(mesher: Mesher, from: LocalPoint, to: LocalPoint, stations: number[], deckWidth: number, pier: number, abutment: number, h: Height, river: River): { low: number; high: number } {
     const dx = to[0] - from[0], dz = to[1] - from[1], length = Math.hypot(dx, dz), d = [dx / length, dz / length], n = [-d[1], d[0]], yaw = -Math.atan2(d[1], d[0]);
-    const ground = [h(from) ?? 0, h(to) ?? 0], ends = [river.height(from) + 0.4, river.height(to) + 0.4];
+    const ground = [h(from) ?? 0, h(to) ?? 0];
+    // Each end sits on its bank, and never lower than the quay coping (1.6 m above the water) where the land behind is lower.
+    const ends = [from, to].map(p => Math.max(river.height(p), Number.isFinite(river.water) ? river.water + 1.2 : -Infinity) + 0.4);
     const wet = Number.isFinite(river.water), mid = (ends[0] + ends[1]) / 2;
     const hump = wet ? Math.max(0, Math.min(river.water + 4.5 - mid, length * 0.04)) : 0;
     const deckAt = (t: number) => { const u = t / length; return ends[0] + (ends[1] - ends[0]) * u + hump * 4 * u * (1 - u); };
