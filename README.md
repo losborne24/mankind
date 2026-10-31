@@ -317,6 +317,13 @@ was changed at that milestone. Phase 4 acceptance later replaced the custom
 Tailwind loader with the shared PostCSS integration; both production builds now
 pass with compiled styles. See [the current handoff](docs/phase4-completion.md).
 
+## Scene generation pipeline
+
+- [docs/scene-generation-pipeline.md](docs/scene-generation-pipeline.md) — design guide
+  for turning a place and date into a rendered historical scene (Phase 4/5; not
+  yet implemented): stages, fallback ladder, validation checkpoints, data
+  contracts, build order.
+
 ## Natural biomes
 
 Biome colour comes from offline-generated OpenLandMap PNV raster tiles, loaded
