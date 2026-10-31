@@ -1,7 +1,9 @@
 // Gate for the zoned fill of Rome c. AD 100 (lib/scenarios/romeFill.ts): it is deterministic (the same in a second process); its size
 // is bounded; nothing stands on the rivers, in monumental or open ground, or inside the Forum Boarium neighbourhood; buildings keep off
 // the sourced roads; density follows the housing classes and falls off outside the continuous city without a step at its edge; heights
-// stay under the Roman limit; the Appia's tombs, the Tomb of Caecilia Metella, the aqueduct kit and the field strips are where they belong.
+// stay under the Roman limit; the Appia's tombs, the Tomb of Caecilia Metella, the aqueduct kit and the field strips are where they belong;
+// the landmarks stand in their monumental zones, clear of the neighbourhood and the lots, none later than AD 100; each residential
+// quarter's lanes run with the grain about it (the Campus quarter with the Via Lata).
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
@@ -10,6 +12,7 @@ const { generateRomeFill } = await import(await loadTypescript('lib/scenarios/ro
 const { romeZoning } = await import(await loadTypescript('lib/scenarios/zoning'));
 const { forumReconstruction } = await import(await loadTypescript('lib/history/localContext'));
 const { offsetCoordinate } = await import(await loadTypescript('map/settlements/romanSettlement'));
+const { landmarks } = await import(await loadTypescript('lib/scenarios/romeLandmarks'));
 const neighbourhood = forumReconstruction.objects.map(o => o.footprint.map(p => offsetCoordinate(forumReconstruction.origin, p)));
 const started = performance.now(), fill = generateRomeFill(neighbourhood), ms = performance.now() - started;
 const digest = f => createHash('sha256').update(JSON.stringify(f.items)).digest('hex');
@@ -19,7 +22,7 @@ assert.equal(again.status, 0, again.stderr);
 assert.equal(again.stdout.trim(), digest(fill), 'the fill is the same in a second process');
 
 const { items, counts } = fill, KX = Math.cos(41.892 * Math.PI / 180) * 111320, KY = 110950;
-const built = items.filter(i => i.kind !== 'field'), buildings = items.filter(i => ['insula', 'house', 'domus', 'warehouse', 'villa'].includes(i.kind));
+const built = items.filter(i => i.kind !== 'field' && i.kind !== 'landmark'), buildings = items.filter(i => ['insula', 'house', 'domus', 'warehouse', 'villa'].includes(i.kind));
 assert.ok(items.length < 40000 && buildings.length > 10000, `the fill is bounded (${items.length} items, ${buildings.length} buildings)`);
 const centre = i => [i.ring.reduce((a, p) => a + p[0], 0) / i.ring.length, i.ring.reduce((a, p) => a + p[1], 0) / i.ring.length];
 const inRing = (p, ring) => { let x = false; for (let n = 0, m = ring.length - 1; n < ring.length; m = n++) if ((ring[n][1] > p[1]) !== (ring[m][1] > p[1]) && p[0] < (ring[m][0] - ring[n][0]) * (p[1] - ring[n][1]) / (ring[m][1] - ring[n][1]) + ring[n][0]) x = !x; return x; };
@@ -78,4 +81,26 @@ assert.ok(counts.pier > 500 && counts.pier === counts.channel, `the aqueducts ar
 assert.ok(items.filter(i => i.kind === 'channel').every(i => i.base > 5 && Math.abs(i.height - i.base - 2.2) < 0.11), 'every channel span rides on its piers');
 const extent = [[romeZoning.extent.ring]];
 assert.ok(counts.field > 2000 && items.filter(i => i.kind === 'field').every(i => !inside(centre(i), extent)), `field strips lie in the Campagna (${counts.field})`);
-console.log(`rome fill ok: ${items.length} items (${JSON.stringify(counts)}) in ${Math.round(ms)} ms; cover ${JSON.stringify(share)}; outside the edge ${outside.map(v => Math.round(v / 1000)).join(' ')} thousand m² per 150 m ring`);
+
+// Landmarks: every one standing by AD 100 is drawn, or listed as left to the neighbourhood (only the House of the Vestals, which
+// the Domus Tiberiana's footprint covers); each stands in a monumental zone; no corner of any piece is inside the neighbourhood;
+// no lot's centre is inside a landmark piece.
+const pieces = items.filter(i => i.kind === 'landmark'), drawn = new Set(pieces.map(i => i.id));
+assert.ok(landmarks.every(l => l.built <= 100 ? drawn.has(l.id) !== fill.landmarksLeftOut.includes(l.id) : !drawn.has(l.id)), 'each landmark of AD 100 is drawn or listed as left out, and none later');
+assert.deepEqual(fill.landmarksLeftOut, ['atrium-vestae'], `only the House of the Vestals is left to the neighbourhood (${fill.landmarksLeftOut})`);
+const monumental = now.filter(z => z.use === 'monumental').map(inZone);
+assert.ok(landmarks.every(l => monumental.some(test => test(l.centre))), 'every landmark stands in a monumental zone');
+assert.ok(pieces.every(i => !i.ring.some(p => nb.some(({ ring, b }) => p[0] >= b[0] && p[0] <= b[2] && p[1] >= b[1] && p[1] <= b[3] && inRing(p, ring)))), 'no landmark piece reaches into the neighbourhood');
+const pieceBoxes = pieces.map(i => ({ ring: i.ring, b: box([[i.ring]]) }));
+const underLandmark = buildings.filter(i => { const c = centre(i); return pieceBoxes.some(({ ring, b }) => c[0] >= b[0] && c[0] <= b[2] && c[1] >= b[1] && c[1] <= b[3] && inRing(c, ring)); }).length;
+assert.equal(underLandmark, 0, 'no lot stands inside a landmark');
+assert.ok(pieces.length > 400 && pieces.every(i => i.certainty && i.height > i.base), `the landmarks are drawn piece by piece (${pieces.length} pieces of ${drawn.size} monuments)`);
+// Grain: in the residential quarter by the Via Lata, lot edges run with the street (modulo 90 degrees) within 12 degrees.
+const lata = romeZoning.lines.find(l => l.id === 'road:via-flaminia').links.find(k => k.certainty !== 'illustrative').line;
+const dir = (a, b) => Math.atan2((b[1] - a[1]) * KY, (b[0] - a[0]) * KX), mod90 = a => ((a * 180 / Math.PI) % 90 + 90) % 90;
+const lataDir = mod90(dir(lata[0], lata.at(-1)));
+const campus = now.find(z => z.id === 'zone:residential-dense').multipolygon.find(poly => inRing([12.4741, 41.9033], poly[0]));
+const campusLots = buildings.filter(i => inRing(centre(i), campus[0]));
+const offs = campusLots.map(i => { const d = Math.abs(mod90(dir(i.ring[0], i.ring[1])) - lataDir); return Math.min(d, 90 - d); }).sort((a, b) => a - b);
+assert.ok(campusLots.length > 100 && offs[Math.floor(offs.length / 2)] < 12, `the Campus quarter's lanes run with the Via Lata (median ${offs[Math.floor(offs.length / 2)]?.toFixed(1)} degrees off, ${campusLots.length} lots)`);
+console.log(`rome fill ok: ${items.length} items (${JSON.stringify(counts)}) in ${Math.round(ms)} ms; ${drawn.size} landmarks (${fill.landmarksLeftOut.length} left to the neighbourhood); Campus grain ${offs[Math.floor(offs.length / 2)].toFixed(1)} degrees off the Via Lata; cover ${JSON.stringify(share)}; outside the edge ${outside.map(v => Math.round(v / 1000)).join(' ')} thousand m² per 150 m ring`);

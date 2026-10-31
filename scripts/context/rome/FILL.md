@@ -27,6 +27,11 @@ neighbourhood's guessed lots).
   * **Grid:** columns and rows about 64 × 50 m, each line jittered (blocks vary from about 50 to 78 m), then the whole grid is bent by
     a three-octave smooth warp (up to about 70 m). Lanes curve, and no straight avenue runs across the city. A 4.5 m lane runs between
     blocks, with an 8 m street every fourth row and column.
+  * **Quarters (v5.20.0):** each piece of a residential zone inside the city has its own grid, turned to the grain of the sourced lines
+    about it: the Via Lata, the Tiber bank and the axes of the mapped monuments (`LANDMARKS.md`), each weighted by its length over
+    (distance + 100 m)², averaged as directions modulo 90°. The Campus quarter runs with the Via Lata, the Subura with the Imperial Fora,
+    the riverside quarters with the bank. A quarter's lots stay inside it, so quarters meet along a seam, as Rome's differently turned
+    districts did. The port, the horti and the houses beyond the city share one grid turned 12°.
   * **Lots:** each block is lined with attached lots round a courtyard, 9–17 m wide and 12–13 m deep. Elite houses and horti get
     20–30 m lots; port blocks get warehouses of 26–48 m.
 * **Which lots stand.**
@@ -52,17 +57,26 @@ neighbourhood's guessed lots).
   quarter are left as open pasture. They go only where the field is at most 0.32, off water, outside the continuous city and every
   named zone.
 
+* **Landmarks (v5.20.0).** The monumental zones carry simple reconstructions of their monuments, placed from the mapped remains,
+  Pleiades and published sizes: see `LANDMARKS.md`. Lots keep the same 20 m margin from them as from the zones.
+
 ## On the map
 
 * **Far:** the buildings are crisp flat footprints from zoom 9 to 13.8, not a glow. The neighbourhood's lots draw the same way, so
   the city reads by its lots thinning out.
 * **Near:** from zoom 13 they stand as one extrusion each (roof-tile colours, vertical gradient). MapLibre batches them per tile,
   so draw calls stay a handful whatever the count.
+* **Close (v5.20.0):** from zoom 15 the lots' walls turn to plaster and they take the neighbourhood's stepped gable: a slab over the
+  whole lot, then two narrower bands along its length, the same rise as `massingFeatures`. Roofs on every lot would triple the data
+  handed to the map (6.7 to 19.4 MB), so they are built only for the lots within 1.5 km of the view's centre, again once it has moved
+  500 m, from a compact table of the lots (about 1 MB), and handed over as a blob URL like the rest. Beyond 1.5 km at zoom 15 a lot is
+  a few pixels across. At 3 km the roof data cost about 23 MB more heap at the close-up (see below).
 * **Ground layers:** field strips at 0.4–0.5 opacity, and the roads.
 * **Handing over to the lit 3D scene:** the flat layers give way to its ground, roads only within its 720 m disc. The extrusions
   stay, because they are kept clear of what the scene draws.
-* **Loading:** the fill is generated once, after the first frame (about 0.4 s), and handed to MapLibre as a blob URL, so its worker
-  holds the data and the page does not keep a second copy.
+* **Loading:** the fill is generated once, after the first frame (about 0.6 s), and handed to MapLibre as a blob URL, so the page
+  never holds the collection and its JSON text at once. Correction (v5.20.0): MapLibre 6.15 sends data loaded from a URL back to the
+  page as the source's copy, so one copy of the features does stay on the main thread; the blob URL saves the second.
 * **Removed:** the terracotta heatmap (`reconstruction-city-roofscape`), the "orange haze", and the neighbourhood's edge feathering
   (lower, ground-tinted lots at its rim). The fill now carries the city on past that edge.
 
@@ -79,12 +93,26 @@ Dev build, 2048×1536 canvas, frames forced and timed through `gl.finish()`, jou
 | Close-up z18.3 · before | 3.6 ms | 4.7 ms | 68 | 38.4 MB | 117.7 MB |
 | Close-up z18.3 · after | 4.0 ms | 4.8 ms | 78 | 51.3 MB | 140.7 MB |
 
+### v5.20.0 (landmarks, quarters, close-in roofs), against v5.19.0 measured the same day in the same tree
+
+| View | Median frame | p95 | Draw calls | GPU buffers | JS heap (settled) |
+| --- | --- | --- | --- | --- | --- |
+| Overview z14.7 · v5.19.0 | 2.4 ms | 4.4 ms | 67 | 30.0 MB | 99.6 MB |
+| Overview z14.7 · v5.20.0 | 1.8 ms | 3.2 ms | 67 | 32.3 MB | 97.5 MB |
+| Regional z12.6 · v5.19.0 | 1.2 ms | 2.2 ms | 16 | 33.3 MB | – |
+| Regional z12.6 · v5.20.0 | 1.0 ms | 3.3 ms | 16 | 35.7 MB | – |
+| Close-up z18.3 · v5.19.0 | 3.9 ms | 4.9 ms | 78 | 48.8 MB | 147.2 MB |
+| Close-up z18.3 · v5.20.0 | 3.5 ms | 4.8 ms | 80 | 52.2 MB | 159.9 MB |
+
+The close-up's extra heap is the roof data (22,413 slabs). Single runs: frame times vary by a few tenths of a millisecond between runs.
+
 ## Known gaps
 
-* **Monumental zones are left open.** The Campus Martius, the Capitoline and the Fora read as open ground, which they were not.
-  Landmark massing (porticoes, temples, the Theatre of Marcellus) would fill them, but it was not part of this stage.
-* **The block grid is generic.** The warp keeps it from being a straight grid, but it is no reconstruction of the Severan plan's streets.
-* **Simpler roofs.** Each fill lot is one extrusion with a flat top. The neighbourhood's lots have stepped roofs, and the difference
-  shows close in (the river-crossing beat).
+* **Landmarks are kit shapes.** The monumental zones now carry simple reconstructions (v5.20.0), placeholders until assets are made;
+  the central Campus Martius still has open ground where smaller monuments stood (`LANDMARKS.md`).
+* **The block grid is still generic.** Each quarter now runs with the grain of the sourced lines about it, but the lanes themselves
+  are no reconstruction of the Severan plan's streets: inside the city the only sourced street is the Via Lata (the other road
+  entries are straight illustrative links to the gates), so there is nothing more to follow without tracing a plan.
+* **Roofs only close in.** Below zoom 15, and beyond 1.5 km of the view, lots keep their flat tops.
 * **One river margin.** The field strips' crops, the tomb sizes and the villa layout are generic. Floodplain ground keeps strips
   where the field allows.

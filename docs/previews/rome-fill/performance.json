@@ -1,21 +1,116 @@
 {
   "note": "Stage 3 zoned fill, measured in the dev build in the app's built-in browser pane (canvas 2048x1536, device pixel ratio 2). The pane was hidden, so requestAnimationFrame was replaced by a 16 ms timer to let the map load; every frame below was forced with map.redraw() and timed through gl.finish(), 40 frames per view, so the times are CPU plus GPU per frame and do not depend on the browser's frame pacing. Draw calls are counted on the shared WebGL context (MapLibre and the Three.js scene). GPU buffers: live bufferData bytes on that context. JS heap: performance.memory.usedJSHeapSize after the heap had settled (read every 7-8 s until stable), main thread only (MapLibre's workers are separate). Journey started, then paused (no haze or depth of field). Script: scripts/context/rome/measure-fill.js.",
-  "cameras": { "overview": "Rome from above: centre 12.48089, 41.88885, zoom 14.7, pitch 40, bearing 200", "regional": "centre 12.485, 41.893, zoom 12.6, pitch 30, bearing 0", "close-up": "Two temples: centre 12.48082, 41.88903, zoom 18.3, pitch 58, bearing 165, local 3D scene loaded" },
+  "cameras": {
+    "overview": "Rome from above: centre 12.48089, 41.88885, zoom 14.7, pitch 40, bearing 200",
+    "regional": "centre 12.485, 41.893, zoom 12.6, pitch 30, bearing 0",
+    "close-up": "Two temples: centre 12.48082, 41.88903, zoom 18.3, pitch 58, bearing 165, local 3D scene loaded"
+  },
   "before": {
     "commit": "e774224 (1,620-lot neighbourhood plus the terracotta heatmap)",
-    "overview": { "medianMs": 1.9, "p95Ms": 4.0, "drawCalls": 53, "gpuBufferMB": 21.2, "jsHeapSettledMB": 81.2 },
-    "regional": { "medianMs": 1.0, "p95Ms": 1.7, "drawCalls": 24, "gpuBufferMB": 16.9 },
-    "close-up": { "medianMs": 3.6, "p95Ms": 4.7, "drawCalls": 68, "gpuBufferMB": 38.4, "jsHeapSettledMB": 117.7 }
+    "overview": {
+      "medianMs": 1.9,
+      "p95Ms": 4,
+      "drawCalls": 53,
+      "gpuBufferMB": 21.2,
+      "jsHeapSettledMB": 81.2
+    },
+    "regional": {
+      "medianMs": 1,
+      "p95Ms": 1.7,
+      "drawCalls": 24,
+      "gpuBufferMB": 16.9
+    },
+    "close-up": {
+      "medianMs": 3.6,
+      "p95Ms": 4.7,
+      "drawCalls": 68,
+      "gpuBufferMB": 38.4,
+      "jsHeapSettledMB": 117.7
+    }
   },
   "after": {
     "fill": "27,389 items: 18,719 buildings, 1,886 tombs, 1,456 aqueduct piers and 1,456 channel spans, 3,872 field strips; generated in about 0.4 s after the first frame",
-    "overview": { "medianMs": 1.8, "p95Ms": 3.5, "drawCalls": 67, "gpuBufferMB": 30.0, "jsHeapSettledMB": 98.1 },
-    "regional": { "medianMs": 1.1, "p95Ms": 2.8, "drawCalls": 16, "gpuBufferMB": 33.3 },
-    "close-up": { "medianMs": 4.0, "p95Ms": 4.8, "drawCalls": 78, "gpuBufferMB": 51.3, "jsHeapSettledMB": 140.7 }
+    "overview": {
+      "medianMs": 1.8,
+      "p95Ms": 3.5,
+      "drawCalls": 67,
+      "gpuBufferMB": 30,
+      "jsHeapSettledMB": 98.1
+    },
+    "regional": {
+      "medianMs": 1.1,
+      "p95Ms": 2.8,
+      "drawCalls": 16,
+      "gpuBufferMB": 33.3
+    },
+    "close-up": {
+      "medianMs": 4,
+      "p95Ms": 4.8,
+      "drawCalls": 78,
+      "gpuBufferMB": 51.3,
+      "jsHeapSettledMB": 140.7
+    }
   },
   "caveats": [
     "Single runs. GPU buffer totals include every tile the session had loaded, so they depend on the path the camera took; before and after followed the same path (start, pause, overview, regional, then the two-temples beat).",
     "The regional view had no settled heap reading before; its unsettled readings swing by tens of megabytes with garbage collection and are left out.",
     "A first version handed MapLibre the GeoJSON object, which it keeps a copy of on the main thread: about 70-80 MB more heap. The fill is now handed over as a blob URL, parsed in the worker."
-  ]
+  ],
+  "v5.20.0": {
+    "note": "Landmarks, quarters and close-in roofs. Same method, cameras and path as above, measured the same day in the same working tree (which also held another session's uncommitted journey edits) so the two columns compare; the v5.19.0 column was taken by putting back the v5.19.0 versions of romeFill.ts, romeFillOverlay.ts and reconstructionOverlay.ts.",
+    "baseline": {
+      "commit": "bc0909e (v5.19.0), same tree",
+      "overview": {
+        "medianMs": 2.4,
+        "p95Ms": 4.4,
+        "drawCalls": 67,
+        "gpuBufferMB": 30,
+        "jsHeapSettledMB": 99.6
+      },
+      "regional": {
+        "medianMs": 1.2,
+        "p95Ms": 2.2,
+        "drawCalls": 16,
+        "gpuBufferMB": 33.3
+      },
+      "close-up": {
+        "medianMs": 3.9,
+        "p95Ms": 4.9,
+        "drawCalls": 78,
+        "gpuBufferMB": 48.8,
+        "jsHeapSettledMB": 147.2
+      }
+    },
+    "after": {
+      "fill": "27,595 items including 590 landmark pieces (41 monuments); roofs for the lots within 1.5 km of the view from zoom 15 (22,413 slabs at the close-up)",
+      "overview": {
+        "medianMs": 1.8,
+        "p95Ms": 3.2,
+        "drawCalls": 67,
+        "gpuBufferMB": 32.3,
+        "jsHeapSettledMB": 97.5
+      },
+      "regional": {
+        "medianMs": 1,
+        "p95Ms": 3.3,
+        "drawCalls": 16,
+        "gpuBufferMB": 35.7
+      },
+      "close-up": {
+        "medianMs": 3.5,
+        "p95Ms": 4.8,
+        "drawCalls": 80,
+        "gpuBufferMB": 52.2,
+        "jsHeapSettledMB": 159.9
+      }
+    },
+    "rejected": [
+      "Roofs from zoom 14 (built from 14.5): the overview at 14.7 rose to 2.6 ms median and 99 draw calls, with 52 MB of GPU buffers and about 19 MB more heap, for roofs a few pixels wide.",
+      "Roofs within 3 km: close-up heap 170.5 MB (23 MB over the baseline). MapLibre 6.15 keeps a copy of URL-loaded data on the page, so the roof ring was cut to 1.5 km.",
+      "Roofs for every lot in the main data: 82,353 features, 19.4 MB of GeoJSON against 6.7 MB; not measured in the browser."
+    ],
+    "caveats": [
+      "Single runs; frame times in this hidden pane vary by a few tenths of a millisecond between runs (the baseline overview was 1.8 ms when measured for v5.19.0 and 2.4 ms today)."
+    ]
+  }
 }

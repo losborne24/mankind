@@ -204,3 +204,8 @@ The zones and the density field now drive the generated city and suburbium: see 
 * Road ribbons use straight approximate axes and a fixed width.
 * The Trajan's Forum saddle falls to dense housing at AD 100; what stood there is uncertain.
 * Plates of Lanciani's map for the Campus Martius, the Esquiline and Trastevere were not traced.
+
+## Landmarks (v5.20.0)
+
+The monumental zones now hold simple reconstructions of their monuments (`LANDMARKS.md`), and each residential quarter of the fill
+runs with the grain of the sourced lines about it (`FILL.md`). The zones themselves are unchanged.

@@ -226,3 +226,12 @@ Not modelled: the other Tiber Island buildings (Jupiter Jurarius and the Faunus 
 * **Journey card.** The note still opens "City roofscape: best guess". It now gives the fill's building and tomb counts, names the
   zoning sources (Pleiades regions, Platner, Lanciani; roads and arches from OpenStreetMap), says that density thins with distance
   from the city and the roads, and adds the neighbourhood's lot count.
+
+## Landmarks, quarters and roofs (v5.20.0)
+
+* **Monuments in the open zones.** The Campus Martius, the Capitoline and the Fora now carry simple reconstructions (kit shapes) of
+  their monuments, placed from the mapped remains, Pleiades and published sizes (`scripts/context/rome/LANDMARKS.md`). Nothing this
+  neighbourhood models is drawn again; the House of the Vestals is left out because the Domus Tiberiana footprint here covers half of it.
+* **Matching roofs.** From zoom 15 the fill's lots take plaster walls and this neighbourhood's stepped gable (same rise, same three
+  slabs), built for the lots round the view, so the two read alike at the river crossing.
+* **Colour by certainty** tints landmarks placed from mapped remains as evidence-based.

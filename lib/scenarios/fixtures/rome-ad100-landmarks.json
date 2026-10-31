@@ -1,0 +1,1027 @@
+{
+ "about": "Simple landmark reconstructions, Rome c. AD 100 (build-landmarks.mjs). angle: degrees from east, anticlockwise, of the length axis, pointing to the front where a kit has one. size: [length, width] metres.",
+ "osm": {
+  "accessed": "2026-10-31",
+  "licence": "ODbL 1.0 · © OpenStreetMap contributors"
+ },
+ "landmarks": [
+  {
+   "id": "colosseum",
+   "title": "Flavian Amphitheatre (Colosseum)",
+   "kit": "amphitheatre",
+   "size": [
+    189,
+    156
+   ],
+   "arena": [
+    87,
+    55
+   ],
+   "height": 48,
+   "note": "Outer ellipse 189 × 156 m, arena 87 × 55 m, 48 m high (published); placed and turned by the mapped outline. Four tiers of seating stepped down to an open arena.",
+   "centre": [
+    12.4923875,
+    41.8902663
+   ],
+   "angle": 7.5,
+   "built": 80,
+   "certainty": "evidence-based",
+   "position": "OpenStreetMap relation/1834818 (Colosseo)",
+   "sources": [
+    "source:osm-landmark-colosseum",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "ludus-magnus",
+   "title": "Ludus Magnus (gladiators' school)",
+   "kit": "precinct",
+   "depth": 14,
+   "height": 11,
+   "note": "Barracks round a courtyard with a small arena, by the mapped outline of the excavated part. Height a guess.",
+   "centre": [
+    12.4949625,
+    41.8901306
+   ],
+   "angle": 163,
+   "size": [
+    86.2,
+    42.1
+   ],
+   "built": 90,
+   "certainty": "evidence-based",
+   "position": "OpenStreetMap relation/1894844 (Ludus Magnus)",
+   "sources": [
+    "source:osm-landmark-ludus-magnus",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "arch-of-titus",
+   "title": "Arch of Titus",
+   "kit": "block",
+   "size": [
+    13.5,
+    4.8
+   ],
+   "height": 15.4,
+   "note": "Published size and height, on its standing position.",
+   "centre": [
+    12.4885842,
+    41.8906721
+   ],
+   "angle": 67.5,
+   "built": 81,
+   "certainty": "evidence-based",
+   "position": "OpenStreetMap way/23913953 (Arco di Tito)",
+   "sources": [
+    "source:osm-landmark-arch-of-titus",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "basilica-iulia",
+   "title": "Basilica Julia",
+   "kit": "basilica",
+   "size": [
+    101,
+    49
+   ],
+   "height": 22,
+   "aisle": 13,
+   "note": "Published plan 101 × 49 m, by the mapped outline; heights a guess.",
+   "centre": [
+    12.4847751,
+    41.8919569
+   ],
+   "angle": 155.5,
+   "built": -100,
+   "certainty": "evidence-based",
+   "position": "OpenStreetMap way/131451564 (Basilica Iulia)",
+   "sources": [
+    "source:osm-landmark-basilica-iulia",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "basilica-aemilia",
+   "title": "Basilica Aemilia",
+   "kit": "basilica",
+   "size": [
+    100,
+    29
+   ],
+   "height": 20,
+   "aisle": 12,
+   "note": "About 100 × 29 m by the mapped outline; heights a guess.",
+   "centre": [
+    12.4860827,
+    41.8926253
+   ],
+   "angle": 147.5,
+   "built": -100,
+   "certainty": "evidence-based",
+   "position": "OpenStreetMap relation/1766532 (Basilica Aemilia)",
+   "sources": [
+    "source:osm-landmark-basilica-aemilia",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "curia",
+   "title": "Curia Julia (Senate house, Domitian's rebuilding)",
+   "kit": "hall",
+   "size": [
+    27,
+    18
+   ],
+   "height": 21,
+   "note": "The standing building is Diocletian's on the same plan: 27 × 18 m, 21 m high.",
+   "centre": [
+    12.4853973,
+    41.8929628
+   ],
+   "angle": 40,
+   "built": 94,
+   "certainty": "evidence-based",
+   "position": "OpenStreetMap relation/1841079 (Curia Iulia)",
+   "sources": [
+    "source:osm-landmark-curia",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "temple-castor",
+   "title": "Temple of Castor and Pollux",
+   "kit": "temple",
+   "size": [
+    50,
+    32
+   ],
+   "podium": 7,
+   "height": 26,
+   "note": "Podium about 50 × 32 m and 7 m high (published); columns 12.5 m. Faces the Forum square.",
+   "centre": [
+    12.4856423,
+    41.8916733
+   ],
+   "angle": 65,
+   "built": -100,
+   "certainty": "evidence-based",
+   "position": "OpenStreetMap relation/1842061 (Templum Castoris)",
+   "sources": [
+    "source:osm-landmark-temple-castor",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "temple-divus-iulius",
+   "title": "Temple of the Deified Julius",
+   "kit": "temple",
+   "size": [
+    30,
+    26
+   ],
+   "podium": 5.5,
+   "height": 18,
+   "note": "By the mapped podium; height a guess.",
+   "centre": [
+    12.4860203,
+    41.8920276
+   ],
+   "angle": 149.5,
+   "built": -100,
+   "certainty": "evidence-based",
+   "position": "OpenStreetMap way/131451819 (Tempio del Divo Giulio)",
+   "sources": [
+    "source:osm-landmark-temple-divus-iulius",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "temple-concord",
+   "title": "Temple of Concord",
+   "kit": "temple",
+   "size": [
+    24,
+    45
+   ],
+   "podium": 5,
+   "height": 19,
+   "note": "Transverse cella, wider (45 m) than deep, facing down the Forum, by the mapped podium (whose outline is near square, so the facing is a judgement); height a guess.",
+   "centre": [
+    12.4842121,
+    41.8929442
+   ],
+   "angle": 327.5,
+   "built": -100,
+   "certainty": "evidence-based",
+   "position": "OpenStreetMap relation/1767601 (Tempio della Concordia)",
+   "sources": [
+    "source:osm-landmark-temple-concord",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "temple-saturn",
+   "title": "Temple of Saturn",
+   "kit": "temple",
+   "size": [
+    40,
+    22
+   ],
+   "podium": 9,
+   "height": 22,
+   "note": "Podium 40 × 22 m and about 9 m high; the standing columns are 11 m. Faces north-east across the Vicus Iugarius to the Forum, as the mapped podium runs.",
+   "centre": [
+    12.4840955,
+    41.8924214
+   ],
+   "angle": 54.5,
+   "built": -100,
+   "certainty": "evidence-based",
+   "position": "OpenStreetMap relation/1849835 (Tempio di Saturno)",
+   "sources": [
+    "source:osm-landmark-temple-saturn",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "temple-vespasian",
+   "title": "Temple of Vespasian and Titus",
+   "kit": "temple",
+   "size": [
+    33,
+    22
+   ],
+   "podium": 5,
+   "height": 21,
+   "note": "By the mapped podium; columns 15.2 m.",
+   "centre": [
+    12.4839209,
+    41.89273
+   ],
+   "angle": 327,
+   "built": 87,
+   "certainty": "evidence-based",
+   "position": "OpenStreetMap relation/1767603 (Tempio di Vespasiano e Tito)",
+   "sources": [
+    "source:osm-landmark-temple-vespasian",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "temple-vesta",
+   "title": "Temple of Vesta",
+   "kit": "round-temple",
+   "diameter": 15,
+   "podium": 3,
+   "height": 13,
+   "note": "Round temple about 15 m across; height a guess.",
+   "centre": [
+    12.4861969,
+    41.8916944
+   ],
+   "angle": 48,
+   "size": [
+    13.5,
+    12.9
+   ],
+   "built": -100,
+   "certainty": "evidence-based",
+   "position": "OpenStreetMap relation/1842062 (Tempio di Vesta)",
+   "sources": [
+    "source:osm-landmark-temple-vesta",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "atrium-vestae",
+   "title": "House of the Vestals",
+   "kit": "precinct",
+   "depth": 13,
+   "height": 11,
+   "note": "Rooms round a long court, at the size of the mapped outline (about 104 × 55 m); height a guess.",
+   "centre": [
+    12.4866137,
+    41.8913935
+   ],
+   "angle": 155,
+   "size": [
+    104.2,
+    54.6
+   ],
+   "built": -100,
+   "certainty": "evidence-based",
+   "position": "OpenStreetMap relation/1842058 (Casa delle Vestali)",
+   "sources": [
+    "source:osm-landmark-atrium-vestae",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "regia",
+   "title": "Regia",
+   "kit": "hall",
+   "size": [
+    30,
+    20
+   ],
+   "height": 8,
+   "note": "Small irregular building; a block of about its size.",
+   "centre": [
+    12.4864315,
+    41.8918829
+   ],
+   "angle": 72.5,
+   "built": -100,
+   "certainty": "evidence-based",
+   "position": "OpenStreetMap relation/1765429 (Regia)",
+   "sources": [
+    "source:osm-landmark-regia",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "temple-jupiter",
+   "title": "Temple of Jupiter Optimus Maximus (Capitoline)",
+   "kit": "temple",
+   "angle": 255,
+   "size": [
+    62,
+    54
+   ],
+   "podium": 5,
+   "height": 32,
+   "certainty": "best-guess",
+   "note": "Podium about 62 × 54 m (published; estimates vary). Placed at the Pleiades point, which is only good to about 2 km, and checked against the remains under Palazzo Caffarelli; faced south. Domitian's rebuilding after AD 80.",
+   "centre": [
+    12.481667,
+    41.892222
+   ],
+   "built": 82,
+   "position": "Pleiades 871801169",
+   "sources": [
+    "source:pleiades-jupiter-capitolinus",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "forum-caesar",
+   "title": "Forum of Caesar",
+   "kit": "precinct",
+   "size": [
+    160,
+    75
+   ],
+   "depth": 12,
+   "height": 13,
+   "note": "Colonnaded square 160 × 75 m (published), by the mapped outline.",
+   "centre": [
+    12.4851995,
+    41.8936856
+   ],
+   "angle": 138.5,
+   "built": -100,
+   "certainty": "evidence-based",
+   "position": "OpenStreetMap relation/1841081 (Foro di Cesare)",
+   "sources": [
+    "source:osm-landmark-forum-caesar",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "temple-venus-genetrix",
+   "title": "Temple of Venus Genetrix",
+   "kit": "temple",
+   "size": [
+    37,
+    30
+   ],
+   "podium": 5,
+   "height": 23,
+   "note": "By the mapped podium at the head of the Forum of Caesar; height a guess.",
+   "centre": [
+    12.4848428,
+    41.8941594
+   ],
+   "angle": 311.5,
+   "built": -100,
+   "certainty": "evidence-based",
+   "position": "OpenStreetMap relation/1809171 (Tempio di Venere Genitrice)",
+   "sources": [
+    "source:osm-landmark-temple-venus-genetrix",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "forum-augustus",
+   "title": "Forum of Augustus",
+   "kit": "precinct",
+   "size": [
+    125,
+    118
+   ],
+   "depth": 15,
+   "height": 18,
+   "note": "Colonnades and exedrae round the square, about 125 × 118 m with them, by the mapped outline; the 33 m fire wall behind is drawn at the colonnades' height.",
+   "centre": [
+    12.4867448,
+    41.8942129
+   ],
+   "angle": 137,
+   "built": -100,
+   "certainty": "evidence-based",
+   "position": "OpenStreetMap relation/1899638 (Foro di Augusto)",
+   "sources": [
+    "source:osm-landmark-forum-augustus",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "temple-mars-ultor",
+   "title": "Temple of Mars Ultor",
+   "kit": "temple",
+   "size": [
+    50,
+    38
+   ],
+   "podium": 3.5,
+   "height": 30,
+   "note": "By the mapped podium; columns 17.7 m (published).",
+   "centre": [
+    12.4868985,
+    41.8943266
+   ],
+   "angle": 220.5,
+   "built": -100,
+   "certainty": "evidence-based",
+   "position": "OpenStreetMap relation/13353050 (Tempio di Marte Ultore)",
+   "sources": [
+    "source:osm-landmark-temple-mars-ultor",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "forum-nerva",
+   "title": "Forum of Nerva (Forum Transitorium)",
+   "kit": "precinct",
+   "size": [
+    120,
+    45
+   ],
+   "depth": 6,
+   "height": 15,
+   "note": "A long walled square, 120 × 45 m, by the mapped outline; its columns stood against the walls.",
+   "centre": [
+    12.4865777,
+    41.8933262
+   ],
+   "angle": 40.5,
+   "built": 97,
+   "certainty": "evidence-based",
+   "position": "OpenStreetMap relation/1899639 (Foro di Nerva)",
+   "sources": [
+    "source:osm-landmark-forum-nerva",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "temple-minerva",
+   "title": "Temple of Minerva (Forum of Nerva)",
+   "kit": "temple",
+   "size": [
+    32,
+    22
+   ],
+   "podium": 4,
+   "height": 22,
+   "note": "At the head of the Forum of Nerva, by the mapped remains; size and height a guess.",
+   "centre": [
+    12.48716,
+    41.8936948
+   ],
+   "angle": 220,
+   "built": 97,
+   "certainty": "evidence-based",
+   "position": "OpenStreetMap way/140264246 (Tempio di Minerva)",
+   "sources": [
+    "source:osm-landmark-temple-minerva",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "templum-pacis",
+   "title": "Temple of Peace (Templum Pacis)",
+   "kit": "precinct",
+   "size": [
+    135,
+    110
+   ],
+   "depth": 14,
+   "height": 14,
+   "certainty": "best-guess",
+   "note": "A garden square of about 135 × 110 m inside porticoes. The mapped outline covers only the excavated part, so the published size is set on its centre and axis.",
+   "centre": [
+    12.4873134,
+    41.892633
+   ],
+   "angle": 148.5,
+   "built": 75,
+   "position": "OpenStreetMap relation/1841167 (Tempio della Pace)",
+   "sources": [
+    "source:osm-landmark-templum-pacis",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "pantheon",
+   "title": "Pantheon (Agrippa's, restored by Domitian)",
+   "kit": "rotunda",
+   "diameter": 56,
+   "drum": 30,
+   "height": 43,
+   "porch": [
+    34,
+    16
+   ],
+   "certainty": "best-guess",
+   "note": "Drawn on the plan of Hadrian's rebuilding (c. AD 113-125), which stands on the same site and faces the same way; the Pantheon of AD 100 was Domitian's restoration of Agrippa's, and its form is uncertain.",
+   "centre": [
+    12.4768278,
+    41.8986278
+   ],
+   "angle": 93.5,
+   "size": [
+    82.8,
+    58.1
+   ],
+   "built": -100,
+   "position": "OpenStreetMap relation/3374342 (Pantheon)",
+   "sources": [
+    "source:osm-landmark-pantheon",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "saepta-iulia",
+   "title": "Saepta Julia",
+   "kit": "precinct",
+   "angle": 90,
+   "size": [
+    310,
+    120
+   ],
+   "depth": 15,
+   "height": 14,
+   "certainty": "best-guess",
+   "note": "Porticoes round a long enclosure, about 310 × 120 m (published), set east of the Pantheon as Platner describes it; position about 50 m.",
+   "centre": [
+    12.47815,
+    41.898
+   ],
+   "built": -100,
+   "position": "Platner 1929 (described position)",
+   "sources": [
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "baths-agrippa",
+   "title": "Baths of Agrippa",
+   "kit": "baths",
+   "size": [
+    100,
+    80
+   ],
+   "height": 20,
+   "certainty": "best-guess",
+   "note": "The mapped fragment is the round hall (Arco della Ciambella); the bath block about it is a guess, about 100 × 80 m.",
+   "centre": [
+    12.4769961,
+    41.8969313
+   ],
+   "angle": 93.5,
+   "built": -100,
+   "position": "OpenStreetMap relation/6596512 (Terme di Agrippa)",
+   "sources": [
+    "source:osm-landmark-baths-agrippa",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "stadium-domitian",
+   "title": "Stadium of Domitian",
+   "kit": "stadium",
+   "cavea": 26,
+   "height": 22,
+   "note": "Piazza Navona keeps the arena (about 258 × 54 m, the mapped square); the stands round it about 26 m deep (outer size about 275 × 106 m, published). Curved end to the north. Height a guess.",
+   "centre": [
+    12.473093,
+    41.8989273
+   ],
+   "angle": 273.5,
+   "size": [
+    258,
+    54.3
+   ],
+   "built": 86,
+   "certainty": "evidence-based",
+   "position": "OpenStreetMap way/4247138 (Piazza Navona)",
+   "sources": [
+    "source:osm-landmark-piazza-navona",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "theatre-pompey",
+   "title": "Theatre of Pompey",
+   "kit": "theatre",
+   "angle": 0,
+   "diameter": 150,
+   "orchestra": 30,
+   "height": 35,
+   "crown": true,
+   "certainty": "best-guess",
+   "note": "Cavea about 150 m across (published), facing east. The Pleiades point is the line of Via di Grotta Pinta, which follows the curve; the centre is set 25 m east of it. The Temple of Venus Victrix crowns the cavea. Height a guess.",
+   "centre": [
+    12.4740537,
+    41.8951692
+   ],
+   "built": -100,
+   "position": "Pleiades 541950317",
+   "sources": [
+    "source:pleiades-theatrum-pompei",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "porticus-pompey",
+   "title": "Porticus of Pompey",
+   "kit": "precinct",
+   "angle": 0,
+   "size": [
+    180,
+    135
+   ],
+   "depth": 12,
+   "height": 12,
+   "certainty": "best-guess",
+   "note": "The garden portico behind the stage, about 180 × 135 m (published), reaching east to the Largo Argentina temples.",
+   "centre": [
+    12.4752846,
+    41.8951692
+   ],
+   "built": -100,
+   "position": "Pleiades 541950317",
+   "sources": [
+    "source:pleiades-theatrum-pompei",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "baths-nero",
+   "title": "Baths of Nero",
+   "kit": "baths",
+   "angle": 90,
+   "size": [
+    190,
+    120
+   ],
+   "height": 20,
+   "certainty": "best-guess",
+   "note": "Between the Stadium of Domitian and the Pantheon, under Palazzo Madama, as Platner places them; about 190 × 120 m. Position about 50 m; size and height a guess.",
+   "centre": [
+    12.4748,
+    41.8991
+   ],
+   "built": 62,
+   "position": "Platner 1929 (described position)",
+   "sources": [
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "odeum-domitian",
+   "title": "Odeum of Domitian",
+   "kit": "theatre",
+   "angle": 90,
+   "diameter": 100,
+   "orchestra": 26,
+   "height": 22,
+   "certainty": "best-guess",
+   "note": "South of the stadium; the curved front of Palazzo Massimo follows its cavea, so the stage faced north. About 100 m across; height a guess.",
+   "centre": [
+    12.4727,
+    41.8972
+   ],
+   "built": 86,
+   "position": "Platner 1929 (described position)",
+   "sources": [
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "largo-argentina-b",
+   "title": "Largo Argentina, Temple B",
+   "kit": "round-temple",
+   "diameter": 18,
+   "podium": 2.5,
+   "height": 14,
+   "note": "Round temple by its mapped podium; height a guess.",
+   "centre": [
+    12.4768619,
+    41.8953759
+   ],
+   "angle": 7.5,
+   "size": [
+    23.5,
+    18.1
+   ],
+   "built": -100,
+   "certainty": "evidence-based",
+   "position": "OpenStreetMap way/125566965 (Tempio B)",
+   "sources": [
+    "source:osm-landmark-largo-argentina-b",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "largo-argentina-c",
+   "title": "Largo Argentina, Temple C",
+   "kit": "temple",
+   "podium": 4,
+   "height": 13,
+   "note": "By its mapped podium; height a guess.",
+   "centre": [
+    12.476772,
+    41.895147
+   ],
+   "angle": 5,
+   "size": [
+    22.4,
+    15.6
+   ],
+   "built": -100,
+   "certainty": "evidence-based",
+   "position": "OpenStreetMap way/125566967 (Tempio C)",
+   "sources": [
+    "source:osm-landmark-largo-argentina-c",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "largo-argentina-d",
+   "title": "Largo Argentina, Temple D",
+   "kit": "temple",
+   "podium": 3,
+   "height": 15,
+   "note": "By its mapped podium; height a guess.",
+   "centre": [
+    12.4767725,
+    41.8949285
+   ],
+   "angle": 4.5,
+   "size": [
+    41,
+    18.7
+   ],
+   "built": -100,
+   "certainty": "evidence-based",
+   "position": "OpenStreetMap way/125566969 (Tempio D)",
+   "sources": [
+    "source:osm-landmark-largo-argentina-d",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "porticus-octaviae",
+   "title": "Porticus of Octavia",
+   "kit": "precinct",
+   "size": [
+    132,
+    119
+   ],
+   "depth": 12,
+   "height": 12,
+   "certainty": "best-guess",
+   "note": "Porticoes 119 × 132 m (published) behind the standing propylon, which is mapped; the precinct is set on it.",
+   "centre": [
+    12.4789467,
+    41.8930483
+   ],
+   "angle": 242,
+   "built": -100,
+   "position": "OpenStreetMap way/123530471 (Portico d'Ottavia)",
+   "sources": [
+    "source:osm-landmark-porticus-octaviae-propylon",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "mausoleum-augustus",
+   "title": "Mausoleum of Augustus",
+   "kit": "drum",
+   "tiers": [
+    [
+     44.5,
+     12
+    ],
+    [
+     32,
+     24
+    ],
+    [
+     17,
+     38
+    ],
+    [
+     5,
+     42
+    ]
+   ],
+   "note": "About 89 m across (mapped). The drum and the planted mound above it are drawn as stepped tiers; heights after the published reconstructions (about 42 m), a guess.",
+   "centre": [
+    12.4764255,
+    41.9060141
+   ],
+   "angle": 162.5,
+   "size": [
+    89.3,
+    89
+   ],
+   "built": -100,
+   "certainty": "evidence-based",
+   "position": "OpenStreetMap relation/2709954 (Mausoleo di Augusto)",
+   "sources": [
+    "source:osm-landmark-mausoleum-augustus",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "ara-pacis",
+   "title": "Ara Pacis Augustae (original site)",
+   "kit": "block",
+   "angle": 0,
+   "size": [
+    11.6,
+    10.6
+   ],
+   "height": 6,
+   "note": "The enclosure, 11.6 × 10.6 m (published), at its original site from Pleiades (it now stands by the Mausoleum).",
+   "centre": [
+    12.4790948,
+    41.9028424
+   ],
+   "built": -100,
+   "certainty": "best-guess",
+   "position": "Pleiades 816091000",
+   "sources": [
+    "source:pleiades-ara-pacis",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "horologium-obelisk",
+   "title": "Obelisk of the Horologium Augusti",
+   "kit": "block",
+   "angle": 0,
+   "size": [
+    3,
+    3
+   ],
+   "height": 30,
+   "note": "The obelisk (21.8 m) on its base, at the Pleiades point.",
+   "centre": [
+    12.4781241,
+    41.9032264
+   ],
+   "built": -100,
+   "certainty": "best-guess",
+   "position": "Pleiades 986274170",
+   "sources": [
+    "source:pleiades-horologium-augusti",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "baths-titus",
+   "title": "Baths of Titus",
+   "kit": "baths",
+   "size": [
+    120,
+    110
+   ],
+   "height": 22,
+   "certainty": "best-guess",
+   "note": "A bath block of about 120 × 110 m at the centre of the zone drawn round it; size and height a guess.",
+   "centre": [
+    12.4958402,
+    41.8925404
+   ],
+   "angle": 178,
+   "built": 80,
+   "position": "centre of zone:oppian",
+   "sources": [
+    "zone:oppian",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "claudianum-terrace",
+   "title": "Temple of the Deified Claudius: terrace",
+   "kit": "precinct",
+   "size": [
+    200,
+    175
+   ],
+   "depth": 10,
+   "height": 10,
+   "certainty": "best-guess",
+   "note": "The terrace, about 200 × 175 m, with porticoes round it, in the zone drawn round it; height a guess.",
+   "centre": [
+    12.4936,
+    41.887
+   ],
+   "angle": 90,
+   "built": 70,
+   "position": "centre of zone:claudianum",
+   "sources": [
+    "zone:claudianum",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "claudianum-temple",
+   "title": "Temple of the Deified Claudius",
+   "kit": "temple",
+   "size": [
+    42,
+    26
+   ],
+   "podium": 4,
+   "base": 8,
+   "height": 26,
+   "certainty": "best-guess",
+   "note": "The temple on its terrace; size a guess.",
+   "centre": [
+    12.4936,
+    41.887
+   ],
+   "angle": 90,
+   "built": 70,
+   "position": "centre of zone:claudianum",
+   "sources": [
+    "zone:claudianum",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "castra-praetoria",
+   "title": "Castra Praetoria",
+   "kit": "camp",
+   "size": [
+    440,
+    380
+   ],
+   "height": 5,
+   "certainty": "best-guess",
+   "note": "Walls of about 440 × 380 m (published), turned by the zone drawn round the camp, about 5 m high before the Aurelian heightening; barrack rows inside are a guess.",
+   "centre": [
+    12.5085,
+    41.9066
+   ],
+   "angle": 98,
+   "built": 23,
+   "position": "centre of zone:castra-praetoria",
+   "sources": [
+    "zone:castra-praetoria",
+    "source:platner-1929"
+   ]
+  },
+  {
+   "id": "circus-vaticanus",
+   "title": "Circus of Gaius and Nero",
+   "kit": "circus",
+   "angle": 0,
+   "size": [
+    540,
+    90
+   ],
+   "cavea": 16,
+   "height": 11,
+   "certainty": "best-guess",
+   "note": "About 540 × 90 m, running east-west along the south flank of today's St Peter's, with the obelisk on its spine; on the Pleiades point. Height a guess.",
+   "centre": [
+    12.4540108,
+    41.9016831
+   ],
+   "built": -100,
+   "position": "Pleiades 395487201",
+   "sources": [
+    "source:pleiades-circus-gaii-et-neronis",
+    "source:platner-1929"
+   ]
+  }
+ ]
+}

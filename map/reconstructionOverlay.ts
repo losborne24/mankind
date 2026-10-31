@@ -7,7 +7,8 @@ import { queryTerrainSample } from '@/map/terrain';
 import type { ContextInfo, HistoricalTime } from '@/lib/scenarios/schema';
 
 const source = 'reconstruction-objects', fill = 'reconstruction-fill', selected = 'reconstruction-selected', massSource = 'reconstruction-massing', massLayer = 'reconstruction-massing-3d', flatLayer = 'reconstruction-massing-flat';
-const PLASTER = ['#c9b08a', '#d6c8a8', '#b98a68', '#bcb3a0', '#cb9f78'];
+/** Wall plaster and roof tiles, shared with the zoned fill (romeFillOverlay) so the city's lots match the neighbourhood's close in. */
+export const PLASTER = ['#c9b08a', '#d6c8a8', '#b98a68', '#bcb3a0', '#cb9f78'];
 export const certaintyColour: Record<ReconstructionCertainty, string> = { documented: '#e9b75d', 'evidence-based': '#6fc0aa', 'best-guess': '#b58ad6' };
 const colourExpression = ['match', ['get', 'certainty'], 'documented', certaintyColour.documented, 'evidence-based', certaintyColour['evidence-based'], certaintyColour['best-guess']] as never;
 

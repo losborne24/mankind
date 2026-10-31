@@ -28,4 +28,5 @@ const [[w, s], , [e, n]] = romeZoning.frame;
 await plan('fill-frame', [w, s, e, n], 1600);
 await plan('fill-city', [12.455, 41.868, 12.515, 41.913], 1600);
 await plan('fill-detail', [12.470, 41.884, 12.490, 41.899], 1600);
+await plan('fill-landmarks', [12.468, 41.887, 12.496, 41.908], 1600);
 console.log('wrote', out, JSON.stringify(fill.counts));

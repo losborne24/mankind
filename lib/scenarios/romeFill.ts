@@ -1,5 +1,6 @@
 import field from '@/lib/scenarios/fixtures/rome-ad100-suburb-density.json';
 import { romeZoning, type Zone } from '@/lib/scenarios/zoning';
+import { landmarkPieces, landmarks, type LandmarkCertainty } from '@/lib/scenarios/romeLandmarks';
 
 /**
  * The zoned fill for Rome c. AD 100 (Stage 3): every building, tomb, aqueduct pier and field strip outside the detailed
@@ -13,9 +14,11 @@ import { romeZoning, type Zone } from '@/lib/scenarios/zoning';
  * - Suburbium: villas on a jittered grid, tombs lining the roads, both drawn against the field; the Appia's tombs denser.
  * - Aqueducts: one kit piece (a pier and the span of channel it carries) repeated along each sourced line.
  * - Campagna: field strips in farm blocks where the field is low, not on water.
+ * - Landmarks: the monuments in the monumental zones as simple kit shapes (romeLandmarks.ts), placed from the mapped remains,
+ *   Pleiades and published sizes; pieces that would stand in the neighbourhood are left to it.
  */
 
-export type FillKind = 'insula' | 'house' | 'domus' | 'warehouse' | 'villa' | 'tomb' | 'pier' | 'channel' | 'field';
+export type FillKind = 'insula' | 'house' | 'domus' | 'warehouse' | 'villa' | 'tomb' | 'pier' | 'channel' | 'field' | 'landmark';
 export interface FillItem {
   kind: FillKind;
   /** Four corners, longitude/latitude, counter-clockwise or clockwise. */
@@ -23,8 +26,14 @@ export interface FillItem {
   /** Extrusion top and base, metres above the ground (0 for field strips). */
   height: number; base: number;
   colour: string;
+  /** Landmarks only: which monument, and how sure its placing is (the rest of the fill is all best guess). */
+  id?: string; certainty?: LandmarkCertainty;
 }
-export interface RomeFill { items: FillItem[]; counts: Record<FillKind, number> }
+export interface RomeFill {
+  items: FillItem[]; counts: Record<FillKind, number>;
+  /** Landmarks not drawn because they would stand in the neighbourhood's own footprints. */
+  landmarksLeftOut: string[];
+}
 
 const LAT = 41.892, KX = Math.cos(LAT * Math.PI / 180) * 111320, KY = 110950;
 const [[W, S], , [E, N]] = romeZoning.frame;
@@ -110,8 +119,19 @@ export function generateRomeFill(keepOut: [number, number][][]): RomeFill {
   keep = new Uint8Array(GW * GH);
   for (let i = 0; i < keep.length; i++) keep[i] = shrink[i] > 20 || grow[i] === 0 ? 1 : 0;
   const zoneAt = (p: readonly number[]) => { const i = gridOf(p); return i < 0 ? undefined : zones[zoneGrid[i]]; };
+  // Landmarks: one that would stand in any of the neighbourhood's own footprints (a corner or the centre of any piece inside one) is
+  // left out whole and listed: the neighbourhood's models win where the two meet, and half a monument would mislead. The rest are
+  // rasterised with the monumental ground, so lots keep the same margin from a landmark that overhangs its zone.
+  const nb = keepOut.map(ring => { const r = ring.map(toXY), xs = r.map(p => p[0]), ys = r.map(p => p[1]); return { r, b: [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)] }; });
+  const inRing = (p: readonly number[], ring: [number, number][]) => { let x = false; for (let n = 0, m = ring.length - 1; n < ring.length; m = n++) if ((ring[n][1] > p[1]) !== (ring[m][1] > p[1]) && p[0] < (ring[m][0] - ring[n][0]) * (p[1] - ring[n][1]) / (ring[m][1] - ring[n][1]) + ring[n][0]) x = !x; return x; };
+  const inNeighbourhood = (p: readonly number[]) => nb.some(({ r, b }) => p[0] >= b[0] && p[0] <= b[2] && p[1] >= b[1] && p[1] <= b[3] && inRing(p, r));
+  const pieces = landmarkPieces(toXY), certainty = new Map(landmarks.map(l => [l.id, l.certainty]));
+  const centreOf = (ring: [number, number][]) => [ring.reduce((s, p) => s + p[0], 0) / ring.length, ring.reduce((s, p) => s + p[1], 0) / ring.length];
+  const left = new Set(pieces.filter(p => [centreOf(p.ring), ...p.ring].some(inNeighbourhood)).map(p => p.id));
+  const landmarkGrid = new Uint8Array(GW * GH);
+  rasterise(pieces.filter(p => !left.has(p.id)).map(p => [p.ring]), i => { landmarkGrid[i] = 1; });
   // Monumental and open ground and the rivers, with a margin of one cell (20 m): no lot reaches into them, and a street's width is left round them.
-  const open = distanceTo(i => zoneGrid[i] >= 0 && ['monumental', 'open', 'open-river'].includes(zones[zoneGrid[i]].use));
+  const open = distanceTo(i => landmarkGrid[i] === 1 || zoneGrid[i] >= 0 && ['monumental', 'open', 'open-river'].includes(zones[zoneGrid[i]].use));
   const nearOpen = (p: readonly number[], margin: number) => { const i = gridOf(p); return i >= 0 && open[i] <= margin; };
   const kept = (p: readonly number[]) => { const i = gridOf(p); return i >= 0 && keep[i] === 1; };
   const depthInside = (p: readonly number[]) => { const i = gridOf(p); return i < 0 || !city[i] ? 0 : inside[i]; };
@@ -148,62 +168,97 @@ export function generateRomeFill(keepOut: [number, number][][]): RomeFill {
   // ---- City blocks. Column and row lines are jittered (each line keeps its own offset, so neighbouring blocks share their
   // lanes and blocks vary from about 50 to 78 m), then the whole grid is bent by a smooth warp of three octaves (up to about 70 m):
   // lanes curve and no street runs straight for long. Its slope is mostly well under 1, so blocks do not fold over each other.
-  const ROT = 12 * Math.PI / 180, cr = Math.cos(ROT), sr = Math.sin(ROT);
-  const warp = ([u, v]: readonly number[]): [number, number] => {
-    const octave = (a: number, l: number, salt: number) => a * (noise(u / l, v / l, salt) - 0.5) * 2;
-    const wx = octave(44, 900, 1) + octave(20, 340, 3) + octave(5, 110, 5), wy = octave(44, 900, 2) + octave(20, 340, 4) + octave(5, 110, 6);
-    return [cr * u - sr * v + wx, sr * u + cr * v + wy];
+  // Each residential quarter (one piece of a residential zone) has its own grid, turned to the grain of the sourced lines about it:
+  // the Via Lata, the river bank and the axes of the mapped monuments, weighted by length over distance squared, averaged as
+  // directions modulo 90 degrees. Its lots stay inside it, so quarters meet along a seam, as Rome's differently turned districts
+  // did. Everything else (the port, the horti, the houses beyond the city) shares one grid turned 12 degrees.
+  const grain: [number, number, number, number][] = [];   // x, y, direction (radians), weight (metres)
+  const addGrain = (line: readonly (readonly number[])[]) => line.map(toXY).forEach((b, n, all) => {
+    if (!n) return;
+    const a = all[n - 1], len = Math.hypot(b[0] - a[0], b[1] - a[1]), dir = Math.atan2(b[1] - a[1], b[0] - a[0]), pieces = Math.ceil(len / 50);
+    for (let k = 0; k < pieces; k++) grain.push([a[0] + (b[0] - a[0]) * (k + 0.5) / pieces, a[1] + (b[1] - a[1]) * (k + 0.5) / pieces, dir, len / pieces]);
+  });
+  for (const l of romeZoning.lines.filter(l => l.kind === 'road')) for (const link of l.links ?? []) if (link.certainty !== 'illustrative') addGrain(link.line);
+  for (const ring of romeZoning.zones.find(z => z.id === 'zone:tiber')?.multipolygon.flatMap(poly => poly) ?? []) addGrain(ring);
+  for (const l of landmarks) if (l.size) { const c = toXY(l.centre); grain.push([c[0], c[1], l.angle * Math.PI / 180, l.size[0]]); }
+  const grainAt = ([x, y]: readonly number[]) => {
+    let sx = 0, sy = 0;
+    for (const [gx, gy, dir, w] of grain) { const k = w / (Math.hypot(gx - x, gy - y) + 100) ** 2; sx += k * Math.cos(4 * dir); sy += k * Math.sin(4 * dir); }
+    return Math.atan2(sy, sx) / 4;
   };
-  const BX = 64, BY = 50, reach = Math.hypot(HALF_W, HALF_H), lineU = (i: number) => i * BX + 28 * (hash(i, 5) - 0.5), lineV = (j: number) => j * BY + 22 * (hash(j, 7) - 0.5);
-  for (let bi = Math.floor(-reach / BX); bi <= reach / BX; bi++) for (let bj = Math.floor(-reach / BY); bj <= reach / BY; bj++) {
-    const u0 = lineU(bi), v0 = lineV(bj), u1 = lineU(bi + 1), v1 = lineV(bj + 1), centre = warp([(u0 + u1) / 2, (v0 + v1) / 2]);
-    if (Math.abs(centre[0]) > HALF_W || Math.abs(centre[1]) > HALF_H) continue;
-    const zone = zoneAt(centre), f = fieldAt(centre);
-    if (!zone && f < 0.3) continue;
-    // Lanes 4.5 m; every fourth row and column a street of 8 m.
-    const laneU = bi % 4 === 0 ? 4 : 2.25, laneV = bj % 4 === 0 ? 4 : 2.25;
-    const ua = u0 + laneU, ub = u1 - 2.25, va = v0 + laneV, vb = v1 - 2.25;
-    const use = zone?.use, housing = zone?.housing;
-    const elite = housing === 'elite' || use === 'horti', port = use === 'port';
-    const depth = port ? (vb - va) / 2 : elite ? (vb - va) / 2 : housing === 'dense' ? 13 : 12;
-    const widths: [number, number] = port ? [26, 48] : elite ? [20, 30] : [9, 17];
-    // Strips: north and south rows the full width; west and east rows between them when the block leaves a courtyard.
-    const strips: [number, number, number, number, boolean][] = [[ua, ub, vb - depth, vb, true], [ua, ub, va, va + depth, true]];
-    if (!port && !elite && vb - va - 2 * depth > 8) strips.push([ua, ua + depth, va + depth, vb - depth, false], [ub - depth, ub, va + depth, vb - depth, false]);
-    strips.forEach(([x0, x1, y0, y1, alongU], s) => {
-      const length = alongU ? x1 - x0 : y1 - y0;
-      for (let at = 0, n = 0; length - at > 5; n++) {
-        let w = widths[0] + (widths[1] - widths[0]) * hash(bi, bj, s, n, 11);
-        if (length - at - w < widths[0] * 0.6) w = length - at;
-        const q = alongU ? [[x0 + at, y0], [x0 + at + w, y0], [x0 + at + w, y1], [x0 + at, y1]] : [[x0, y0 + at], [x1, y0 + at], [x1, y0 + at + w], [x0, y0 + at + w]];
-        at += w;
-        const corners = q.map(warp), c = warp([(q[0][0] + q[2][0]) / 2, (q[0][1] + q[2][1]) / 2]), r = hash(bi, bj, s, n, 17);
-        const lotZone = zoneAt(c), lotF = fieldAt(c);
-        if (lotF <= 0.001 || kept(c) || nearOpen(c, CELL) || corners.some(p => kept(p) || nearOpen(p, 0))) continue;
-        let kind: FillKind, keepP: number, storeys: number;
-        if (lotZone) {
-          const u = lotZone.use, h = lotZone.housing;
-          if (u === 'residential') {
-            const taper = 0.55 + 0.45 * smooth(0, 300, depthInside(c));
-            keepP = (lotZone.density ?? 0.5) * taper;
-            kind = h === 'elite' ? 'domus' : h === 'roadside' ? 'house' : 'insula';
-            storeys = h === 'dense' && (lotZone.density ?? 1) > 0.8 ? 3 + Math.floor(r * 3) : h === 'elite' ? 1 + Math.floor(r * 2) : h === 'roadside' ? 1 + Math.floor(r * 2) : 2 + Math.floor(r * 3);
-            storeys = Math.max(1, Math.round(storeys * (0.7 + 0.3 * taper)));
-          } else if (u === 'port') { keepP = 0.75; kind = 'warehouse'; storeys = 2; }
-          else if (u === 'horti') { keepP = 0.1; kind = 'villa'; storeys = 1 + Math.floor(r * 2); }
-          else continue;
-        } else {
-          // Beyond the continuous city: houses and workshops thinning with the field, densest along the roads.
-          keepP = 0.4 * smooth(0.3, 1, lotF) ** 1.4; kind = 'house'; storeys = 1 + Math.floor(r * 2);
-        }
-        if (hash(bi, bj, s, n, 23) >= keepP) continue;
-        const half = Math.max(w, depth) / 2;
-        if (onLine(c, half * 0.7)) continue;
-        const height = kind === 'warehouse' ? 8 + 2 * r : kind === 'villa' ? 3.5 * storeys + 1 : Math.min(16.8, 4 + 3.2 * (storeys - 1));
-        push(kind, corners, height, 0, TILES[Math.floor(hash(bi, bj, s, n, 29) * TILES.length)]);
-      }
-    });
+  const quarters: { rot: number; origin: [number, number]; box: [number, number, number, number] }[] = [];
+  const quarterGrid = new Int16Array(GW * GH).fill(-1);
+  for (const z of zones.filter(z => z.use === 'residential')) for (const poly of z.multipolygon) {
+    const rings = poly.map(ring => ring.map(toXY)), outer = rings[0], xs = outer.map(p => p[0]), ys = outer.map(p => p[1]);
+    const origin: [number, number] = [xs.reduce((a, b) => a + b, 0) / xs.length, ys.reduce((a, b) => a + b, 0) / ys.length];
+    if (depthInside(origin) === 0 && !outer.some(p => depthInside(p) > 0)) continue;   // the roadside ribbons out in the suburbium share the common grid
+    const k = quarters.length;
+    quarters.push({ rot: grainAt(origin), origin, box: [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)] });
+    rasterise([rings], i => { quarterGrid[i] = k; });
   }
+  const quarterAt = (p: readonly number[]) => { const i = gridOf(p); return i < 0 ? -1 : quarterGrid[i]; };
+  const BX = 64, BY = 50;
+  const frames = [{ rot: 12 * Math.PI / 180, origin: [0, 0] as [number, number], box: [-HALF_W, -HALF_H, HALF_W, HALF_H] as [number, number, number, number] }, ...quarters];
+  frames.forEach((frame, fi) => {
+    const quarter = fi - 1, salt = fi * 7919, cr = Math.cos(frame.rot), sr = Math.sin(frame.rot);
+    const warp = ([u, v]: readonly number[]): [number, number] => {
+      const octave = (a: number, l: number, salt: number) => a * (noise(u / l, v / l, salt) - 0.5) * 2;
+      const wx = octave(44, 900, 1) + octave(20, 340, 3) + octave(5, 110, 5), wy = octave(44, 900, 2) + octave(20, 340, 4) + octave(5, 110, 6);
+      return [frame.origin[0] + cr * u - sr * v + wx, frame.origin[1] + sr * u + cr * v + wy];
+    };
+    const reach = Math.hypot(frame.box[2] - frame.box[0], frame.box[3] - frame.box[1]) / 2 + 120;
+    const lineU = (i: number) => i * BX + 28 * (hash(i, 5, salt) - 0.5), lineV = (j: number) => j * BY + 22 * (hash(j, 7, salt) - 0.5);
+    for (let bi = Math.floor(-reach / BX); bi <= reach / BX; bi++) for (let bj = Math.floor(-reach / BY); bj <= reach / BY; bj++) {
+      const u0 = lineU(bi), v0 = lineV(bj), u1 = lineU(bi + 1), v1 = lineV(bj + 1), centre = warp([(u0 + u1) / 2, (v0 + v1) / 2]);
+      if (Math.abs(centre[0]) > HALF_W || Math.abs(centre[1]) > HALF_H) continue;
+      if (quarter >= 0 && (centre[0] < frame.box[0] - 80 || centre[0] > frame.box[2] + 80 || centre[1] < frame.box[1] - 80 || centre[1] > frame.box[3] + 80)) continue;
+      const zone = zoneAt(centre), f = fieldAt(centre);
+      if (!zone && f < 0.3) continue;
+      // Lanes 4.5 m; every fourth row and column a street of 8 m.
+      const laneU = bi % 4 === 0 ? 4 : 2.25, laneV = bj % 4 === 0 ? 4 : 2.25;
+      const ua = u0 + laneU, ub = u1 - 2.25, va = v0 + laneV, vb = v1 - 2.25;
+      const use = zone?.use, housing = zone?.housing;
+      const elite = housing === 'elite' || use === 'horti', port = use === 'port';
+      const depth = port ? (vb - va) / 2 : elite ? (vb - va) / 2 : housing === 'dense' ? 13 : 12;
+      const widths: [number, number] = port ? [26, 48] : elite ? [20, 30] : [9, 17];
+      // Strips: north and south rows the full width; west and east rows between them when the block leaves a courtyard.
+      const strips: [number, number, number, number, boolean][] = [[ua, ub, vb - depth, vb, true], [ua, ub, va, va + depth, true]];
+      if (!port && !elite && vb - va - 2 * depth > 8) strips.push([ua, ua + depth, va + depth, vb - depth, false], [ub - depth, ub, va + depth, vb - depth, false]);
+      strips.forEach(([x0, x1, y0, y1, alongU], s) => {
+        const length = alongU ? x1 - x0 : y1 - y0;
+        for (let at = 0, n = 0; length - at > 5; n++) {
+          let w = widths[0] + (widths[1] - widths[0]) * hash(bi + salt, bj, s, n, 11);
+          if (length - at - w < widths[0] * 0.6) w = length - at;
+          const q = alongU ? [[x0 + at, y0], [x0 + at + w, y0], [x0 + at + w, y1], [x0 + at, y1]] : [[x0, y0 + at], [x1, y0 + at], [x1, y0 + at + w], [x0, y0 + at + w]];
+          at += w;
+          const corners = q.map(warp), c = warp([(q[0][0] + q[2][0]) / 2, (q[0][1] + q[2][1]) / 2]), r = hash(bi + salt, bj, s, n, 17);
+          const lotZone = zoneAt(c), lotF = fieldAt(c);
+          if (lotF <= 0.001 || kept(c) || nearOpen(c, CELL) || corners.some(p => kept(p) || nearOpen(p, 0) || quarterAt(p) !== quarter) || quarterAt(c) !== quarter) continue;
+          let kind: FillKind, keepP: number, storeys: number;
+          if (lotZone) {
+            const u = lotZone.use, h = lotZone.housing;
+            if (u === 'residential') {
+              const taper = 0.55 + 0.45 * smooth(0, 300, depthInside(c));
+              keepP = (lotZone.density ?? 0.5) * taper;
+              kind = h === 'elite' ? 'domus' : h === 'roadside' ? 'house' : 'insula';
+              storeys = h === 'dense' && (lotZone.density ?? 1) > 0.8 ? 3 + Math.floor(r * 3) : h === 'elite' ? 1 + Math.floor(r * 2) : h === 'roadside' ? 1 + Math.floor(r * 2) : 2 + Math.floor(r * 3);
+              storeys = Math.max(1, Math.round(storeys * (0.7 + 0.3 * taper)));
+            } else if (u === 'port') { keepP = 0.75; kind = 'warehouse'; storeys = 2; }
+            else if (u === 'horti') { keepP = 0.1; kind = 'villa'; storeys = 1 + Math.floor(r * 2); }
+            else continue;
+          } else {
+            // Beyond the continuous city: houses and workshops thinning with the field, densest along the roads.
+            keepP = 0.4 * smooth(0.3, 1, lotF) ** 1.4; kind = 'house'; storeys = 1 + Math.floor(r * 2);
+          }
+          if (hash(bi + salt, bj, s, n, 23) >= keepP) continue;
+          const half = Math.max(w, depth) / 2;
+          if (onLine(c, half * 0.7)) continue;
+          const height = kind === 'warehouse' ? 8 + 2 * r : kind === 'villa' ? 3.5 * storeys + 1 : Math.min(16.8, 4 + 3.2 * (storeys - 1));
+          push(kind, corners, height, 0, TILES[Math.floor(hash(bi + salt, bj, s, n, 29) * TILES.length)]);
+        }
+      });
+    }
+  });
 
   // ---- Suburban villas: one chance per 220 m cell, drawn against the field (horti everywhere they are zoned), clear of roads.
   const VC = 220;
@@ -302,7 +357,11 @@ export function generateRomeFill(keepOut: [number, number][][]): RomeFill {
     }
   }
 
-  const counts = { insula: 0, house: 0, domus: 0, warehouse: 0, villa: 0, tomb: 0, pier: 0, channel: 0, field: 0 } as Record<FillKind, number>;
+  // ---- Landmarks (placed above, before the lots).
+  for (const piece of pieces) if (!left.has(piece.id))
+    items.push({ kind: 'landmark', ring: piece.ring.map(toLL), height: piece.height, base: piece.base, colour: piece.colour, id: piece.id, certainty: certainty.get(piece.id) });
+
+  const counts = { insula: 0, house: 0, domus: 0, warehouse: 0, villa: 0, tomb: 0, pier: 0, channel: 0, field: 0, landmark: 0 } as Record<FillKind, number>;
   for (const item of items) counts[item.kind]++;
-  return { items, counts };
+  return { items, counts, landmarksLeftOut: [...left] };
 }
