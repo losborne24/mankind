@@ -51,7 +51,7 @@ import { glbCache, type ModelLease } from "@/lib/assets/glbCache";
 import { prepareAsset, ROMAN_TEST_CENTER, ROMAN_TEST_PLACEMENTS, type AssetPlacement } from "@/map/romanTestScene";
 
 import { SettlementScene, type SettlementStatus } from "@/map/settlements/SettlementScene";
-import { ROMAN_SETTLEMENT, ROMAN_VARIATION_PREVIEW, ROMAN_SETTLEMENT_BASELINE, type Coordinate } from "@/map/settlements/romanSettlement";
+import { ROMAN_SETTLEMENT, ROMAN_VARIATION_PREVIEW, ROMAN_SETTLEMENT_BASELINE, offsetCoordinate, type Coordinate } from "@/map/settlements/romanSettlement";
 
 import { settlementProfileConfig, SETTLEMENT_PROFILES, DEFAULT_PROCEDURAL_CONFIG, type GenerationResult, type ProceduralSettlementConfig } from "@/map/settlements/proceduralSettlement";
 import { ProceduralSettlementSession } from "@/map/settlements/ProceduralSettlementSession";
@@ -496,9 +496,14 @@ export class ThreeTestLayer implements CustomLayerInterface {
     const map=this.map;if(!map)return;
     // MapLibre 6.15 exposes its projection-aware camera via _camera; keep this adapter here.
     const eye=map._camera.transform.getCameraLngLat(), altitude=Math.max(0,map._camera.transform.getCameraAltitude()-map.getCameraTargetElevation());
+    // A settlement is in view when the camera stands inside its extent or any of its centre and rim projects on screen,
+    // so panning the origin out of frame while looking at the rest of a large city keeps it streaming.
+    const canvas=map.getCanvas(),onScreen=(c:Coordinate)=>{const p=map.project([...c]);return Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.x>=-100&&p.y>=-100&&p.x<=canvas.clientWidth+100&&p.y<=canvas.clientHeight+100;};
     const observations=this.streamingEnabled?this.descriptors.map(descriptor=>{
-      const p=map.project([...descriptor.origin]),canvas=map.getCanvas();
-      return {descriptor,distance:settlementDistance([eye.lng,eye.lat],altitude,descriptor),visible:Number.isFinite(p.x)&&Number.isFinite(p.y)&&p.x>=-100&&p.y>=-100&&p.x<=canvas.clientWidth+100&&p.y<=canvas.clientHeight+100};
+      const distance=settlementDistance([eye.lng,eye.lat],altitude,descriptor),r=descriptor.radiusMeters;
+      const visible=settlementDistance([eye.lng,eye.lat],0,descriptor)===0||onScreen(descriptor.origin)||
+        Array.from({length:12},(_,i)=>i*Math.PI/6).some(a=>onScreen(offsetCoordinate(descriptor.origin,[Math.cos(a)*r,Math.sin(a)*r])));
+      return {descriptor,distance,visible};
     }):[];
     const decision=this.lodController.update(observations),d=decision.descriptor;
     const markerFilter=decision.lod === "global" || this.historicalDetailFailed ? "" : d?.id ?? "";

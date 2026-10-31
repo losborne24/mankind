@@ -43,7 +43,10 @@ export class SettlementLODController {
   current: StreamingDecision = {lod:"global",distance:Infinity};
   override: SettlementLOD | "auto" = "auto";
   update(observations: readonly SettlementObservation[]): StreamingDecision {
-    const relevant=observations.filter(o=>o.visible).sort((a,b)=>a.distance-b.distance);
+    // Visibility gates entry only: the incumbent stays while within its exit distance, so glancing away from the site
+    // does not tear down a loaded scene that panning back would have to stream again.
+    const current=this.current;
+    const relevant=observations.filter(o=>o.visible || (current.lod!=="global" && o.descriptor.id===current.descriptor?.id && o.distance<=LOD_DISTANCES.regionalExit)).sort((a,b)=>a.distance-b.distance);
     let nearest=relevant[0];
     const incumbent=relevant.find(o=>o.descriptor.id===this.current.descriptor?.id);
     // Require a material improvement to steal a local slot in overlapping coverage.

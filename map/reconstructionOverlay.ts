@@ -3,6 +3,7 @@ import type { Feature, FeatureCollection } from 'geojson';
 import { offsetCoordinate, type Coordinate } from '@/map/settlements/romanSettlement';
 import type { ReconstructionCertainty, ReconstructionObject, ReconstructionSpec } from '@/map/settlements/reconstructionSpec';
 import { matchContext } from '@/lib/scenarios/contextLayers';
+import { queryTerrainSample } from '@/map/terrain';
 import type { ContextInfo, HistoricalTime } from '@/lib/scenarios/schema';
 
 const source = 'reconstruction-objects', fill = 'reconstruction-fill', selected = 'reconstruction-selected', massSource = 'reconstruction-massing', massLayer = 'reconstruction-massing-3d', citySource = 'reconstruction-city', cityLayer = 'reconstruction-city-roofscape';
@@ -37,6 +38,7 @@ export function certaintyShare(spec: ReconstructionSpec, origin: Coordinate, bou
 
 const TILES = ['#b06a45', '#b97848', '#a2603f', '#bd8458', '#9c6a52', '#c08a62'];
 const GROUND = '#66724a';
+const DECK_BASE = 4.8, DECK_TOP = 6.4;
 const hexMix = (a: string, b: string, t: number) => { const f = (h: string, i: number) => parseInt(h.slice(1 + i * 2, 3 + i * 2), 16); return '#' + [0, 1, 2].map(i => Math.round(f(a, i) + (f(b, i) - f(a, i)) * t).toString(16).padStart(2, '0')).join(''); };
 const isLot = (o: ReconstructionObject) => o.shape.type === 'building';
 /** Where an object sits on the map, as the mean of its footprint (settlement metres). */
@@ -61,14 +63,30 @@ export function builtUpness(spec: ReconstructionSpec): Record<string, number> {
  * Extruded massing for the regional view (zoom 13 to 17), drawn by the map itself, so Rome from above reads as a city before the 3D scene
  * streams in. It fades out as the lit 3D scene takes over. Buildings carry a stepped terracotta roof (the 3D scene's gable, in three
  * stacked slabs, same tile palette), the circus (stands round an empty track), the palace wings, and the bridges as a deck on piers.
- * Lots at the thin edge of the laid-out area are lower and blend into the ground colour.
+ * Lots at the thin edge of the laid-out area are lower and blend into the ground colour. `ground` is the drawn terrain height
+ * (display metres) at a map point, which bridges need to keep deck and piers together; without it the ground is taken as flat.
  */
-export function massingFeatures(spec: ReconstructionSpec, origin: Coordinate, at: HistoricalTime, includeGuess: boolean, tint: boolean, edges: Record<string, number> = builtUpness(spec)): FeatureCollection {
+export function massingFeatures(spec: ReconstructionSpec, origin: Coordinate, at: HistoricalTime, includeGuess: boolean, tint: boolean, edges: Record<string, number> = builtUpness(spec), ground?: (p: [number, number]) => number | null): FeatureCollection {
   const ll = (p: readonly number[]) => offsetCoordinate(origin, p as [number, number]) as [number, number];
   const ring = (points: readonly (readonly number[])[]) => [...points, points[0]].map(ll);
   const features: Feature[] = [];
   const add = (o: ReconstructionObject, rings: readonly (readonly (readonly number[])[])[], height: number, colour: string, base = 0) => features.push({ type: 'Feature', properties: { id: o.id, height, base, color: tint ? certaintyColour[o.certainty] : colour }, geometry: { type: 'Polygon', coordinates: rings.map(ring) } });
   const rect = (a: readonly number[], b: readonly number[], length: number, width: number, heading: number) => { const ux = Math.cos(heading), uz = Math.sin(heading); return [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([s, t]) => [(a[0] + b[0]) / 2 + ux * length / 2 * s - uz * width / 2 * t, (a[1] + b[1]) / 2 + uz * length / 2 * s + ux * width / 2 * t]); };
+  // A deck on pier blocks (abutments at both ends), stood on the 2D river. MapLibre lifts each extrusion by the terrain under its own
+  // centroid, so one flat deck over a sloping DEM leaves some piers short of it and others through it. The deck is cut into spans and
+  // every span and pier is offset onto a straight ramp between the ground at the two ends; `stations` run 0 (from) to 1 (to).
+  const bridge = (o: ReconstructionObject, from: readonly number[], to: readonly number[], stations: number[], deckWidth: number, pier: number) => {
+    const length = Math.hypot(to[0] - from[0], to[1] - from[1]), heading = Math.atan2(to[1] - from[1], to[0] - from[0]);
+    const at = (t: number) => [from[0] + (to[0] - from[0]) * t, from[1] + (to[1] - from[1]) * t], lift = (p: readonly number[]) => ground?.(ll(p)) ?? 0;
+    const [start, end] = [lift(from), lift(to)], offset = (t: number) => start + (end - start) * t - lift(at(t));
+    stations.forEach((t, i) => {
+      const top = DECK_BASE + offset(t);
+      if (top > 0) add(o, [rect(at(t), at(t), pier, deckWidth * 0.85, heading)], top, '#a79d89');
+      if (i === 0) return;
+      const s = stations[i - 1], rise = offset((s + t) / 2);
+      if (DECK_TOP + rise > 0) add(o, [rect(at(s), at(t), (t - s) * length, deckWidth, heading)], DECK_TOP + rise, '#b9ae98', DECK_BASE + rise);
+    });
+  };
   spec.objects.forEach((o, index) => {
     if (reconstructionMatch(o, at) === 'outside' || (!includeGuess && o.certainty === 'best-guess')) return;
     const shape = o.shape;
@@ -90,16 +108,11 @@ export function massingFeatures(spec: ReconstructionSpec, origin: Coordinate, at
       add(o, [wing], v.height, '#e0d4b8'); add(o, [wing], v.height + 1.2, '#a05f42', v.height);
     }
     else if (shape.type === 'bridge') {
-      // A deck on pier blocks, stood on the 2D river: a simplified Pons Aemilius, not a ring of arches.
-      const piers = shape.piersE as number[], head = (piers[0] + piers.at(-1)!) / 2, length = piers[0] - piers.at(-1)!;
-      add(o, [rect([head, shape.axisS], [head, shape.axisS], length, shape.deckWidth, 0)], 6.4, '#b9ae98', 4.8);
-      for (const e of piers.slice(1, -1)) add(o, [rect([e, shape.axisS], [e, shape.axisS], 3.4, shape.deckWidth * 0.85, 0)], 4.8, '#a79d89');
+      // A simplified Pons Aemilius, not a ring of arches.
+      const piers = shape.piersE as number[], length = piers[0] - piers.at(-1)!;
+      bridge(o, [piers[0], shape.axisS], [piers.at(-1)!, shape.axisS], piers.map(e => (piers[0] - e) / length), shape.deckWidth, 3.4);
     }
-    else if (shape.type === 'skew-bridge') {
-      const [from, to] = [shape.from as number[], shape.to as number[]], length = Math.hypot(to[0] - from[0], to[1] - from[1]), heading = Math.atan2(to[1] - from[1], to[0] - from[0]);
-      add(o, [rect(from, to, length, shape.deckWidth, heading)], 6.4, '#b9ae98', 4.8);
-      for (let i = 1; i < shape.spans; i++) { const t = i / shape.spans, p = [from[0] + (to[0] - from[0]) * t, from[1] + (to[1] - from[1]) * t]; add(o, [rect(p, p, 3, shape.deckWidth * 0.85, heading)], 4.8, '#a79d89'); }
-    }
+    else if (shape.type === 'skew-bridge') bridge(o, shape.from as number[], shape.to as number[], Array.from({ length: shape.spans + 1 }, (_, i) => i / shape.spans), shape.deckWidth, 3);
   });
   return { type: 'FeatureCollection', features };
 }
@@ -140,21 +153,29 @@ export function reconstructionOverlay(map: Map, spec: ReconstructionSpec, origin
   };
   const pointer = () => { map.getCanvas().style.cursor = 'pointer'; }, reset = () => { map.getCanvas().style.cursor = ''; };
   map.on('click', click); map.on('mouseenter', fill, pointer); map.on('mouseleave', fill, reset);
-  const edges = builtUpness(spec);
+  const edges = builtUpness(spec), ground = (p: [number, number]) => queryTerrainSample(map, p).displayMeters;
+  // Bridges are fitted to the drawn terrain, which streams in after the first update and changes with the relief toggle:
+  // redraw the massing once the map settles if the ground under any bridge has moved.
+  const bridgeEnds = spec.objects.filter(o => o.kind === 'bridge').flatMap(o => o.footprint.map(p => offsetCoordinate(origin, p as [number, number]) as [number, number]));
+  const groundKey = () => bridgeEnds.map(p => Math.round((ground(p) ?? 0) * 4)).join();
+  let last: { at: HistoricalTime; includeGuess: boolean; tint: boolean } | undefined, fitted = '';
+  const mass = () => { if (!last) return; fitted = groundKey(); (map.getSource(massSource) as GeoJSONSource | undefined)?.setData(massingFeatures(spec, origin, last.at, last.includeGuess, last.tint, edges, ground)); };
+  const settle = () => { if (groundKey() !== fitted) mass(); };
+  map.on('idle', settle);
   const features = (at: HistoricalTime, includeGuess: boolean): FeatureCollection => ({ type: 'FeatureCollection', features: spec.objects
     .filter(o => reconstructionMatch(o, at) !== 'outside' && (includeGuess || o.certainty !== 'best-guess'))
     .map((o): Feature => ({ type: 'Feature', properties: { id: o.id, certainty: o.certainty, kind: o.kind }, geometry: { type: 'Polygon', coordinates: [[...o.footprint, o.footprint[0]].map(p => offsetCoordinate(origin, p as [number, number]) as [number, number])] } })) });
   return {
     update(at: HistoricalTime, includeGuess: boolean, tint: boolean, highlight?: string) {
       (map.getSource(source) as GeoJSONSource | undefined)?.setData(features(at, includeGuess));
-      (map.getSource(massSource) as GeoJSONSource | undefined)?.setData(massingFeatures(spec, origin, at, includeGuess, tint, edges));
+      last = { at, includeGuess, tint }; mass();
       (map.getSource(citySource) as GeoJSONSource | undefined)?.setData(cityPoints(spec, origin, at, includeGuess));
       if (map.getLayer(cityLayer)) map.setPaintProperty(cityLayer, 'heatmap-color', heatRamp(tint ? HEAT_TINT : HEAT_NATURAL));
       if (map.getLayer(fill)) map.setPaintProperty(fill, 'fill-opacity', tint ? 0.42 : 0.02);
       if (map.getLayer(selected)) map.setFilter(selected, ['==', ['get', 'id'], highlight ?? '']);
     },
     dispose() {
-      map.off('click', click); map.off('mouseenter', fill, pointer); map.off('mouseleave', fill, reset);
+      map.off('click', click); map.off('mouseenter', fill, pointer); map.off('mouseleave', fill, reset); map.off('idle', settle);
       for (const id of [selected, fill, massLayer, cityLayer]) if (map.getLayer(id)) map.removeLayer(id);
       for (const id of [source, massSource, citySource]) if (map.getSource(id)) map.removeSource(id);
     },
