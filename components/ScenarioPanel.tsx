@@ -171,7 +171,7 @@ function Playback({ map, layer, reconId, onReconInspect, player, streamingStatus
             const source = scenario.content.sources.find(s => s.id === id)!;
             return <a key={id} href={source.url} target="_blank" rel="noreferrer" className="mt-2 block text-[10px] text-accent underline">{source.title}</a>;
         })}</div>)}
-      <LeftOut features={features} year={yearLabel}/>
+      <LeftOut features={historical ? [...features, ...zones] : features} year={yearLabel}/>
       {historical && <ReconstructionControls map={map} layer={layer} at={viewTime} inspectedId={reconId} onInspect={inspectRecon} onClose={() => onReconInspect(null)}/>}
       <ContextLayerList features={features} onInspect={inspectContext} group={historical ? { title: 'Land use c. AD 100 (zoning)', on: zoning, onChange: setZoning, features: zones } : undefined}/>
       {snapshot.warning && <p className="mt-2 text-xs text-white/60">{snapshot.warning}</p>}
