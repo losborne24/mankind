@@ -8,12 +8,14 @@
 // Output: lib/scenarios/fixtures/rome-ad100-zoning.json, longitude/latitude, zones that never overlap (each is cut by every zone
 // of higher priority), with an evidence tier, an existence interval and a source note each.
 import { readFile, writeFile } from 'node:fs/promises';
+import { deflateSync } from 'node:zlib';
 import polygonClipping from 'polygon-clipping';
 const json = async path => JSON.parse(await readFile(path, 'utf8'));
 const pleiades = await json('data/history/rome/source/pleiades-zoning.json');
 const context = await json('lib/scenarios/fixtures/forum-boarium-context.json');
 const tiberSnapshot = await json('data/history/rome/source/osm-tiber.json');
 const suburbSnapshot = await json('data/history/rome/source/osm-suburbium.json');
+const dem = await json('data/history/rome/source/mapterhorn-dem.json');
 const r6 = v => Math.round(v * 1e6) / 1e6, round = p => [r6(p[0]), r6(p[1])];
 const LAT = 41.892, KX = Math.cos(LAT * Math.PI / 180) * 111320, KY = 110950;   // metres per degree at Rome
 const pl = key => pleiades.places[key] ?? (() => { throw Error(`Missing Pleiades ${key}`); })();
@@ -136,7 +138,7 @@ const roadDefs = [
   ['via-salaria', 'Via Salaria', ['Via Salaria'], 'approximate', -500, 'The salt road to the Sabine country, among the oldest (Wikipedia). Drawn along today\'s Via Salaria.', ['source:wikipedia-via-salaria']],
   ['via-nomentana', 'Via Nomentana', ['Via Nomentana'], 'approximate', -500, 'To Nomentum; it started at the Porta Collina of the Servian wall until the 3rd century (Wikipedia). Drawn along today\'s Via Nomentana.', [P('via-nomentana'), 'source:wikipedia-via-nomentana']],
   ['via-tiburtina', 'Via Tiburtina', ['Via Tiburtina'], 'approximate', -307, 'To Tibur, probably built in 307 BC (Wikipedia). Drawn along today\'s Via Tiburtina.', ['source:wikipedia-via-tiburtina']],
-  ['via-labicana', 'Via Labicana', ['Via Labicana', 'Via Casilina'], 'approximate', -400, 'To Labici, leaving the city with the Praenestina at the aqueduct crossing later called Porta Maggiore (Wikipedia). Drawn along today\'s Via Labicana in the city and Via Casilina beyond.', ['source:wikipedia-via-labicana']],
+  ['via-labicana', 'Via Labicana', ['Via Casilina'], 'approximate', -400, 'To Labici. It left the city with the Via Tiburtina at the Porta Esquilina (Pleiades, Arch of Gallienus) and passed the aqueduct crossing later called Porta Maggiore (Wikipedia). Drawn along today\'s Via Casilina beyond that crossing.', ['source:wikipedia-via-labicana', P('porta-esquilina')]],
   ['via-praenestina', 'Via Praenestina', ['Via Prenestina'], 'approximate', -400, 'To Praeneste (Wikipedia). Drawn along today\'s Via Prenestina.', ['source:wikipedia-via-praenestina']],
   ['via-latina', 'Via Latina', ['Via Latina'], 'approximate', -400, 'South-east to the Alban hills, lined with tombs (Wikipedia). Drawn along the surviving stretches named Via Latina; much of its line between is not drawn.', ['source:wikipedia-via-latina']],
   ['via-appia', 'Via Appia', ['Via di Porta San Sebastiano', 'Via Appia Antica'], 'documented', -312, 'Begun by Appius Claudius Caecus in 312 BC (Wikipedia). Outside the city the Via Appia Antica keeps the ancient line, with stretches of its paving and the tombs that lined it, so this road is marked documented; inside the later wall it follows Via di Porta San Sebastiano.', ['source:wikipedia-via-appia']],
@@ -149,10 +151,35 @@ const roadDefs = [
     [[PONS_NERONIANUS, [12.4590, 41.9033], [12.4530, 41.9032], [12.4460, 41.9040], [12.4380, 41.9060]]]],
 ];
 const roads = roadDefs.map(([key, title, names, certainty, from, note, sourceIds, hand = [], handGaps = []]) => {
-  const { lines, gaps } = chain(names.flatMap(streets));
-  return { id: `road:${key}`, kind: 'road', title, certainty, time: { start: { year: from }, end: { year: 600 } }, note: gaps.length || handGaps.length ? `${note} Where the street breaks off, the gap is drawn dashed: the road is taken to run straight on, a guess.` : note,
-    sources: sourceIds, lines: [...lines, ...hand.map(line => line.map(round))], gaps: [...gaps, ...handGaps].map(line => line.map(round)) };
+  const pieces = names.flatMap(streets), { lines, gaps } = chain(pieces);
+  const ways = names.reduce((n, name) => n + suburbSnapshot.elements.filter(e => e.type === 'way' && e.name === name).length, 0);
+  return { id: `road:${key}`, kind: 'road', title, certainty, osm: { streets: names, ways }, time: { start: { year: from }, end: { year: 600 } }, note: gaps.length || handGaps.length ? `${note} Where the street breaks off, the gap is drawn dashed: the road is taken to run straight on, a guess.` : note,
+    sources: names.length ? [...sourceIds, 'source:osm-suburbium'] : sourceIds, lines: [...lines, ...hand.map(line => line.map(round))], gaps: [...gaps, ...handGaps].map(line => line.map(round)) };
 });
+// Into the city: each road is carried in to the gate of the Servian wall or the bridge it left from, where a source places that gate.
+// The Via Flaminia runs in along the Via Lata (today's Via del Corso, which keeps its line) to the foot of the Capitoline; the others are
+// straight links from the gate to where the modern street begins, drawn faintly over the city as illustrative.
+const gate = key => round(pl(key).reprPoint), PONS_AEMILIUS_WEST = [12.4778, 41.8890];
+const viaLata = chain(streets('Via del Corso')).lines.flat();
+const linkDefs = {
+  'via-flaminia': [{ certainty: 'approximate', line: viaLata, why: 'the Via Lata, along today\'s Via del Corso' }],
+  'via-salaria': [{ certainty: 'illustrative', from: 'porta-collina' }], 'via-nomentana': [{ certainty: 'illustrative', from: 'porta-collina' }],
+  'via-tiburtina': [{ certainty: 'illustrative', from: 'porta-esquilina' }],
+  'via-labicana': [{ certainty: 'illustrative', from: 'porta-esquilina', via: [[12.5153, 41.8915]] }], 'via-praenestina': [{ certainty: 'illustrative', from: 'porta-esquilina', via: [[12.5153, 41.8915]] }],
+  'via-appia': [{ certainty: 'illustrative', from: 'porta-capena' }], 'via-latina': [{ certainty: 'illustrative', from: 'porta-capena' }],
+  'via-ostiensis': [{ certainty: 'illustrative', from: 'porta-trigemina' }],
+  'via-portuensis': [{ certainty: 'illustrative', start: PONS_AEMILIUS_WEST, why: 'from the Pons Aemilius' }],
+  'via-aurelia': [{ certainty: 'illustrative', start: PONS_AEMILIUS_WEST, via: [[12.4700, 41.8892], [12.4655, 41.8880]], why: 'from the Pons Aemilius up the Janiculum' }],
+};
+for (const road of roads) {
+  const first = road.lines[0]?.[0];
+  road.links = (linkDefs[road.id.slice(5)] ?? []).map(({ certainty, line, from, start, via = [], why }) => {
+    const path = line ? [...line, first] : [from ? gate(from) : start, ...via, first];
+    return { certainty, line: path.filter((p, n) => !n || metres(p, path[n - 1]) > 1).map(round), note: why ?? `from the ${pl(from).title} (Pleiades)` };
+  });
+  if (road.links.length) road.sources = [...new Set([...road.sources, ...road.links.flatMap(l => /Pleiades/.test(l.note) ? [P(Object.entries(linkDefs).find(([k]) => k === road.id.slice(5))[1][0].from)] : [])])];
+}
+
 // Aqueducts. The Aqua Claudia and Anio Novus shared one line of arches into the city at the later Porta Maggiore (Wikipedia). OpenStreetMap
 // maps only the standing arches in the Campagna (the ways below; Pleiades cites the first); the link from them to the city is drawn by hand
 // through Pleiades' point for the Aqua Claudia. The later Acqua Felice (1586), which OpenStreetMap maps along part of that line, is not used.
@@ -225,6 +252,7 @@ const sources = [
   src('source:wikipedia-castel-sant-angelo', 'Wikipedia · Castel Sant\'Angelo (Hadrian\'s tomb, AD 134-139)', 'https://en.wikipedia.org/wiki/Castel_Sant%27Angelo', 'CC BY-SA 4.0 · text read for dates'),
   src('source:wikipedia-baths-of-caracalla', 'Wikipedia · Baths of Caracalla (built AD 212-216)', 'https://en.wikipedia.org/wiki/Baths_of_Caracalla', 'CC BY-SA 4.0 · text read for dates'),
   src('source:wikipedia-caecilia-metella', 'Wikipedia · Tomb of Caecilia Metella (third mile of the Via Appia, c. 30-10 BC)', 'https://en.wikipedia.org/wiki/Tomb_of_Caecilia_Metella', 'CC BY-SA 4.0 · text read'),
+  src('source:mapterhorn', 'Mapterhorn terrain tiles (Copernicus GLO-30 around Rome), sampled at 60 m', 'https://mapterhorn.com/attribution', dem.licence),
   src('source:wikipedia-roman-campagna', 'Wikipedia · Roman Campagna', 'https://en.wikipedia.org/wiki/Roman_Campagna', 'CC BY-SA 4.0 · text read'),
   src('source:wikipedia-aniene', 'Wikipedia · Aniene (the ancient Anio)', 'https://en.wikipedia.org/wiki/Aniene', 'CC BY-SA 4.0 · text read'),
   src('source:osm-suburbium', 'OpenStreetMap · streets on the consular roads, Aqua Claudia ways 98554683 and 781857867, Anio Novus way 128274578, Aniene relation 16025341', 'https://www.openstreetmap.org/way/781857867', suburbSnapshot.licence),
@@ -442,22 +470,84 @@ resolved.push({ id: 'zone:suburb-roadside', use: 'residential', housing: 'roadsi
   time: { start: { year: 0 }, end: { year: 300 } }, multipolygon: suburbRoadside,
   note: 'Along each consular road from about 700 m to 2.5 km beyond the continuous city, narrowing from 60 m to 25 m wide: tombs, inns, workshops and small clusters of houses, as the tomb-lined Via Appia and Via Latina show (Wikipedia). The roads are sourced; the ribbons, their width and their length are a guess.',
   sources: ['source:osm-suburbium', 'source:wikipedia-via-appia', 'source:wikipedia-via-latina'] });
-// The belt, in three bands that thin out with distance from the city and from the roads (out to 2.5 km from the city): within 300 m,
-// 300-700 m and 700-1,200 m. Each band is the union of circles round points spaced half its width apart, so the edges stay smooth.
-const circle = (c, r) => closed(Array.from({ length: 16 }, (_, k) => [c[0] + Math.cos(k * Math.PI / 8) * r / KX, c[1] + Math.sin(k * Math.PI / 8) * r / KY]));
-const beltRoads = roads.filter(r => r.certainty !== 'illustrative').flatMap(r => r.lines);
-const around = r => unionAll([extent, ...densify(extent[0][0], r / 2).map(p => circle(p, r)),
-  ...beltRoads.flatMap(line => densify(line, r / 2)).filter(p => toCore(p) < 2500).map(p => circle(p, r))]);
-const BANDS = [[300, 0.06, 'Suburbium · villas, gardens and farms close to the city and the roads'], [700, 0.03, 'Suburbium · scattered villas and farms'], [1200, 0.012, 'Suburbium · farms thinning into the Campagna']];
-BANDS.forEach(([radius, density, title], n) => {
-  const band = keep(polygonClipping.difference(polygonClipping.intersection(around(radius), [FRAME]), suburbTaken));
-  suburbTaken = polygonClipping.union(suburbTaken, band);
-  resolved.push({ id: `zone:suburb-belt-${n + 1}`, use: 'suburban', band: n + 1, ring: 'suburbium', density, title, certainty: 'illustrative', time: { start: { year: 0 }, end: { year: 300 } }, multipolygon: band,
-    note: `Land ${n ? `${BANDS[n - 1][0]}-${radius}` : `within ${radius}`} m of the continuous city or of a road (out to 2.5 km from the city), between the roads: suburban villas and horti like those named on the Vatican plain and the Esquiline, with farms and pasture, thinning with distance. Nothing here is placed from a source; the bands and their densities are a guess.`,
-    sources: [P('vaticanus-ager'), P('horti-agrippinae'), 'source:platner-1929'] });
-});
+// ---- The suburbium as a continuous density field on the elevation grid (60 m cells; Mapterhorn / Copernicus GLO-30). Density falls off
+// with distance from the continuous city (scale 700 m) and from the roads (250 m, weakening over 2.5 km from the city); it is zero on
+// water, reduced on the floodplain (ground less than about 8 m above the nearest river surface) and on slopes steeper than 10 %. The
+// zone is where it is at least 0.2; the Campagna is the rest. The field is drawn as an image, not as bands.
+const G = { west: dem.frame[0], north: dem.frame[3], cell: dem.cell, cols: dem.cols, rows: dem.rows };
+const cellCentre = (r, c) => [G.west + (c + 0.5) * G.cell / KX, G.north - (r + 0.5) * G.cell / KY];
+const edgesOf = mp => mp.flatMap(poly => poly.flatMap(ring => ring.slice(1).map((b, n) => [ring[n], b])));
+const distToEdges = (p, edges) => { let best = Infinity; for (const [a, b] of edges) { const dx = (b[0] - a[0]) * KX, dy = (b[1] - a[1]) * KY, px = (p[0] - a[0]) * KX, py = (p[1] - a[1]) * KY, t = Math.max(0, Math.min(1, (px * dx + py * dy) / (dx * dx + dy * dy || 1))); const d = Math.hypot(px - t * dx, py - t * dy); if (d < best) best = d; } return best; };
+const insideMp = (p, mp) => mp.some(poly => poly.reduce((c, ring, k) => { let x = false; for (let n = 0, m = ring.length - 1; n < ring.length; m = n++) if ((ring[n][1] > p[1]) !== (ring[m][1] > p[1]) && p[0] < (ring[m][0] - ring[n][0]) * (p[1] - ring[n][1]) / (ring[m][1] - ring[n][1]) + ring[n][0]) x = !x; return k ? c && !x : x; }, false));
+const cityEdges = edgesOf(extent), roadEdges = roads.filter(r => r.certainty !== 'illustrative').flatMap(r => [...r.lines, ...r.gaps]).flatMap(line => line.slice(1).map((b, n) => [line[n], b]));
+const waters = [fullRiver, aniene], N = G.rows * G.cols, elev = dem.elevation;
+const wet = new Uint8Array(N), riverLevel = new Float64Array(N).fill(NaN), riverSteps = new Float64Array(N).fill(Infinity);
+for (let r = 0; r < G.rows; r++) for (let c = 0; c < G.cols; c++) if (waters.some(w => insideMp(cellCentre(r, c), w))) { const i = r * G.cols + c; wet[i] = 1; riverLevel[i] = elev[i]; riverSteps[i] = 0; }
+// The nearest river surface for every cell: breadth-first from the water cells, carrying the water's elevation outwards.
+for (let queue = [...wet.keys()].filter(i => wet[i]), next = []; queue.length; queue = next, next = []) for (const i of queue) {
+  const r = Math.floor(i / G.cols), c = i % G.cols;
+  for (const [dr, dc] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const rr = r + dr, cc = c + dc, j = rr * G.cols + cc; if (rr < 0 || cc < 0 || rr >= G.rows || cc >= G.cols || riverSteps[j] !== Infinity) continue; riverSteps[j] = riverSteps[i] + 1; riverLevel[j] = riverLevel[i]; next.push(j); }
+}
+const at = (r, c) => elev[Math.min(G.rows - 1, Math.max(0, r)) * G.cols + Math.min(G.cols - 1, Math.max(0, c))];
+const field = new Float64Array(N), CAMPAGNA_FLOOR = 0.03, limits = { cells: 0, water: 0, floodplain: 0, steep: 0 };
+for (let r = 0; r < G.rows; r++) for (let c = 0; c < G.cols; c++) {
+  const i = r * G.cols + c, p = cellCentre(r, c);
+  limits.cells++;
+  if (wet[i]) { limits.water++; continue; }
+  const dCity = insideMp(p, extent) ? 0 : distToEdges(p, cityEdges), dRoad = distToEdges(p, roadEdges);
+  const base = Math.max(Math.exp(-dCity / 700), Math.exp(-dRoad / 250) * Math.exp(-Math.max(0, dCity - 300) / 2500));
+  const slope = Math.hypot(at(r, c + 1) - at(r, c - 1), at(r + 1, c) - at(r - 1, c)) / (2 * G.cell);
+  const flood = riverSteps[i] * G.cell < 2500 ? Math.min(1, Math.max(0.15, (elev[i] - riverLevel[i] - 3) / 5)) : 1;
+  const steep = Math.min(1, Math.max(0.3, 1 - (slope - 0.10) / 0.20));
+  if (flood < 1) limits.floodplain++; if (steep < 1) limits.steep++;
+  field[i] = Math.max(CAMPAGNA_FLOOR, base * flood * steep);
+}
+// The suburbium zone: cells at 0.2 or more, merged row by row into rectangles, outside everything already placed.
+const SUBURB_MIN = 0.2, rects = [];
+for (let r = 0; r < G.rows; r++) for (let c = 0; c < G.cols;) {
+  if (field[r * G.cols + c] < SUBURB_MIN) { c++; continue; }
+  let e = c; while (e < G.cols && field[r * G.cols + e] >= SUBURB_MIN) e++;
+  const [w, n] = [G.west + c * G.cell / KX, G.north - r * G.cell / KY], [east, s] = [G.west + e * G.cell / KX, G.north - (r + 1) * G.cell / KY];
+  rects.push(closed([[w, n], [east, n], [east, s], [w, s]])); c = e;
+}
+// The cell outline is a staircase; it is only a click target over the field's image, so it is simplified at 30 m (half a cell) first.
+const simplifyRing = ring => { const open = simplify(ring.slice(0, -1).concat([ring[0]]), 30); return open.length >= 4 ? open : ring; };
+const suburbium = keep(polygonClipping.difference(polygonClipping.intersection(unionAll(rects).map(poly => poly.map(simplifyRing)).filter(poly => poly[0].length >= 4), [FRAME]), suburbTaken));
+suburbTaken = polygonClipping.union(suburbTaken, suburbium);
+const meanField = mp => { let sum = 0, n = 0; for (let r = 0; r < G.rows; r++) for (let c = 0; c < G.cols; c++) if (insideMp(cellCentre(r, c), mp)) { sum += field[r * G.cols + c]; n++; } return n ? sum / n : 0; };
+const SUBURB_SCALE = 0.06;   // a field value of 1 means 0.06 of the dense core's building density
+resolved.push({ id: 'zone:suburbium', use: 'suburban', ring: 'suburbium', density: +(SUBURB_SCALE * meanField(suburbium)).toFixed(4), title: 'Suburbium · villas, gardens and farms between the roads, thinning with distance', certainty: 'illustrative', time: { start: { year: 0 }, end: { year: 300 } }, multipolygon: suburbium,
+  note: 'Where the suburban density field is at least 0.2: it falls off with distance from the continuous city and from the roads, is zero on the rivers, and is lower on the Tiber\'s floodplain and on steep slopes (Mapterhorn elevation, from the modern Copernicus surface model). Villas and horti like those named on the Vatican plain and the Esquiline, farms and pasture. Nothing here is placed from a source; the field and its scales are a guess.',
+  sources: [P('vaticanus-ager'), P('horti-agrippinae'), 'source:platner-1929', 'source:mapterhorn'] });
+// The field as an image: Campagna colour to suburbium colour by density, fading out radially between 5 and 7 km from the frame's centre,
+// so neither the plan nor the 3D map ends at a square edge.
+const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)), [SUB, CAMP] = [hex('#a3b878'), hex('#c4ba8e')];
+const FADE = { centre: [12.485, 41.896], from: 5000, to: 7000 };
+function png(width, height, rgba) {
+  const table = Array.from({ length: 256 }, (_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
+  const crc = buf => { let c = 0xffffffff; for (const b of buf) c = table[(c ^ b) & 0xff] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; };
+  const chunk = (type, data) => { const out = Buffer.alloc(12 + data.length), body = Buffer.concat([Buffer.from(type), data]); out.writeUInt32BE(data.length, 0); body.copy(out, 4); out.writeUInt32BE(crc(body), 8 + data.length); return out; };
+  const header = Buffer.alloc(13); header.writeUInt32BE(width, 0); header.writeUInt32BE(height, 4); header[8] = 8; header[9] = 6;
+  const raw = Buffer.alloc((width * 4 + 1) * height);
+  for (let y = 0; y < height; y++) { raw[y * (width * 4 + 1)] = 0; rgba.copy(raw, y * (width * 4 + 1) + 1, y * width * 4, (y + 1) * width * 4); }
+  return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', header), chunk('IDAT', deflateSync(raw, { level: 9 })), chunk('IEND', Buffer.alloc(0))]);
+}
+// Two cells to a pixel (120 m): drawn with smoothing, and the rivers are drawn over it, so the finer grid adds size, not detail.
+const IW = Math.floor(G.cols / 2), IH = Math.floor(G.rows / 2), pixels = Buffer.alloc(IW * IH * 4);
+for (let y = 0; y < IH; y++) for (let x = 0; x < IW; x++) {
+  const cells = [[2 * y, 2 * x], [2 * y, 2 * x + 1], [2 * y + 1, 2 * x], [2 * y + 1, 2 * x + 1]].map(([r, c]) => r * G.cols + c), dry = cells.filter(i => !wet[i]);
+  const value = dry.length ? dry.reduce((sum, i) => sum + field[i], 0) / dry.length : 0, t = Math.min(1, (value - CAMPAGNA_FLOOR) / (1 - CAMPAGNA_FLOOR)) ** 0.7;
+  const fade = Math.min(1, Math.max(0, (FADE.to - metres(cellCentre(2 * y + 1, 2 * x + 1), FADE.centre)) / (FADE.to - FADE.from)));
+  const o = (y * IW + x) * 4;
+  for (let k = 0; k < 3; k++) pixels[o + k] = Math.round(CAMP[k] + (SUB[k] - CAMP[k]) * t);
+  pixels[o + 3] = Math.round(255 * fade * (0.7 + 0.3 * t) * dry.length / 4);
+}
+const suburbImage = { bounds: [round([G.west, G.north]), round([G.west + IW * 2 * G.cell / KX, G.north - IH * 2 * G.cell / KY])], fade: FADE, png: png(IW, IH, pixels).toString('base64') };
+// The raw field for the zoned fill (not loaded by the app): one byte per cell, 0-255 for 0-1.
+await writeFile('lib/scenarios/fixtures/rome-ad100-suburb-density.json', JSON.stringify({ about: 'Suburban density field, AD 100 (build-zoning.mjs). Row 0 is the north edge; value/255 times scale is the building density relative to the dense core.',
+  west: round([G.west, 0])[0], north: round([0, G.north])[1], cell: G.cell, cols: G.cols, rows: G.rows, scale: SUBURB_SCALE, values: Buffer.from(field.map(v => Math.round(v * 255))).toString('base64') }) + '\n');
 const campagna = keep(polygonClipping.difference([FRAME], suburbTaken));
-resolved.push({ id: 'zone:campagna', use: 'campagna', ring: 'campagna', density: 0.01, title: 'Roman Campagna · farmland, pasture and scattered villas', certainty: 'illustrative', time: { start: { year: -300 }, end: { year: 400 } }, multipolygon: campagna,
+resolved.push({ id: 'zone:campagna', use: 'campagna', ring: 'campagna', density: +(SUBURB_SCALE * CAMPAGNA_FLOOR).toFixed(4), title: 'Roman Campagna · farmland, pasture and scattered villas', certainty: 'illustrative', time: { start: { year: -300 }, end: { year: 400 } }, multipolygon: campagna,
   note: 'The low countryside round Rome beyond the suburbium (Wikipedia, Roman Campagna): farmland, pasture and scattered villas and tombs. Nothing here is placed from a source; where it begins is a guess.',
   sources: ['source:wikipedia-roman-campagna'] });
 
@@ -480,11 +570,22 @@ const shortNames = { 'zone:tiber': 'Tiber', 'zone:forum-palatine': 'Fora · Pala
   'zone:campus-river': 'Trigarium', 'zone:residential-dense': 'Dense housing', 'zone:residential-hills': 'Hill housing', 'zone:residential-elite': 'Elite houses',
   'zone:residential-trastevere': 'Trastevere', 'zone:residential-roadside': 'Roadside', 'zone:aniene': 'Aniene', 'zone:baths-of-caracalla': 'Baths of Caracalla',
   'zone:circus-vaticanus': 'Circus of Gaius and Nero', 'zone:vatican-necropolis': 'Necropolis', 'zone:horti-domitiae': 'Horti Domitiae', 'zone:horti-agrippinae': 'Horti Agrippinae',
-  'zone:mausoleum-hadriani': "Hadrian's Mausoleum", 'zone:suburb-roadside': 'Roadside', 'zone:suburb-belt-1': 'Suburbium', 'zone:via-appia-tombs': 'Appia tombs', 'zone:campagna': 'Campagna' };
+  'zone:mausoleum-hadriani': "Hadrian's Mausoleum", 'zone:suburb-roadside': 'Roadside', 'zone:suburbium': 'Suburbium', 'zone:via-appia-tombs': 'Appia tombs', 'zone:campagna': 'Campagna' };
 for (const z of resolved) if (!z.multipolygon.length) throw Error(`${z.id} is empty after the cuts`);
+// Rivers carry a fade per polygon for the 3D map, which cannot fade a fill by position: they are cut into rings round the field's fade
+// centre (whole within 5 km, then 0.8 to 0.2 in 500 m steps, 0 beyond 7 km).
+const ringAt = r => closed(Array.from({ length: 96 }, (_, k) => [FADE.centre[0] + Math.cos(k * Math.PI / 48) * r / KX, FADE.centre[1] + Math.sin(k * Math.PI / 48) * r / KY]));
+const RINGS = [[0, 5000, 1], [5000, 5500, 0.8], [5500, 6000, 0.6], [6000, 6500, 0.4], [6500, 7000, 0.2], [7000, Infinity, 0]];
+for (const z of resolved.filter(z => z.ring === 'river')) {
+  const pieces = RINGS.map(([a, b, fade]) => [fade, polygonClipping.difference(b === Infinity ? z.multipolygon : polygonClipping.intersection(z.multipolygon, ringAt(b)), ...(a ? [ringAt(a)] : []))]);
+  z.multipolygon = pieces.flatMap(([, mp]) => mp); z.fade = pieces.flatMap(([fade, mp]) => mp.map(() => fade));
+}
 const zones = resolved.sort((a, b) => priority.indexOf(a.use) - priority.indexOf(b.use)).map(z => ({
   ...z, short: shortNames[z.id], area: Math.round(areaOf(z.multipolygon)), label: labelPoint(z.multipolygon.slice().sort((a, b) => areaOf([b]) - areaOf([a]))[0]),
   multipolygon: z.multipolygon.map(poly => poly.map(ring => ring.map(round))) }));
+// The Campagna is everything in the frame the other zones leave; its outline would repeat all of theirs, so it is not stored.
+const campagnaZone = zones.find(z => z.id === 'zone:campagna');
+campagnaZone.area = Math.round(areaOf(campagnaZone.multipolygon)); campagnaZone.multipolygon = []; campagnaZone.implicit = 'the frame less every other zone';
 
 // ---- Markers: one per Augustan region and per named anchor. Pleiades points are used as they are unless they fall outside what they
 // label; those are moved by hand and say so. Gates and walls of the later circuit are not markers.
@@ -519,10 +620,10 @@ const out = {
   extent: { id: 'zone:extent', title: 'Continuous city c. AD 100 · approximate extent', certainty: 'approximate', time: { start: { year: 64 }, end: { year: 200 } },
     note: 'Where building was more or less continuous around AD 100, drawn by hand at about 150 m precision from the topography of the fourteen regions (Pleiades), Platner and the general layout in Lanciani\'s plan, with modern atlases as reference only. It includes the gardens at the edge of the city (Pincian, Esquiline) and ribbons along the consular roads within about 700 m of it; Trastevere stops at the foot of the Janiculum. The edge is a guess: building thinned out gradually rather than stopping at a line. It is not taken from any wall; the Aurelian Walls were built in AD 271-275.',
     sources: [...regions, 'source:platner-1929', 'source:lanciani-fur', 'source:atlas-ancient-rome', 'source:osm-tiber'], area: Math.round(areaOf(extent)), ring: extent[0][0].map(round) },
-  frame: FRAME.map(round),
+  frame: FRAME.map(round), suburbImage,
   lines: [...roads, ...aqueducts],
   sources: sources.filter(s => used.has(s.id)),
   zones, markers,
 };
 await writeFile('lib/scenarios/fixtures/rome-ad100-zoning.json', JSON.stringify(out) + '\n');
-console.log(JSON.stringify({ extentKm2: +(out.extent.area / 1e6).toFixed(2), markers: markers.length, lines: out.lines.map(l => [l.id, l.lines.length, l.lines.flat().length]), zones: zones.map(z => [z.id, z.use, z.certainty, +(z.area / 1e6).toFixed(3)]) }));
+console.log(JSON.stringify({ fieldCells: limits, extentKm2: +(out.extent.area / 1e6).toFixed(2), markers: markers.length, lines: out.lines.map(l => [l.id, l.lines.length, l.lines.flat().length]), zones: zones.map(z => [z.id, z.use, z.certainty, +(z.area / 1e6).toFixed(3)]) }));

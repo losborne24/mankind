@@ -31,7 +31,10 @@ export function zoningPlanSvg(year = 100): string {
   s += `<defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="8" stroke="#ccc" stroke-opacity=".5" stroke-width="2"/></pattern></defs>`;
   for (let x = Math.ceil(x0 * 100) / 100; x <= x1 + 1e-9; x += 0.01) s += `<line x1="${f(X(x))}" x2="${f(X(x))}" y1="0" y2="${H}" stroke="#fff" stroke-opacity=".08"/><text x="${f(X(x))}" y="14" font-size="10" fill="#9aa" text-anchor="middle">${x.toFixed(3)}</text>`;
   for (let y = Math.ceil(y0 * 100) / 100; y <= y1; y += 0.01) s += `<line y1="${f(Y(y))}" y2="${f(Y(y))}" x1="0" x2="${W}" stroke="#fff" stroke-opacity=".08"/><text x="4" y="${f(Y(y) - 3)}" font-size="10" fill="#9aa">${y.toFixed(3)}</text>`;
-  for (const z of now) s += `<path data-id="${esc(z.id)}" d="${path(z.multipolygon)}" fill="${colourOf(z)}" fill-opacity="${z.ring === 'campagna' ? .5 : z.use === 'suburban' ? .62 : z.certainty === 'illustrative' ? .68 : .88}" fill-rule="evenodd" ${z.ring === 'river' || z.ring === 'campagna' || z.use === 'suburban' ? 'stroke="none"' : `stroke="#1b1b1b" stroke-width=".8" stroke-dasharray="${z.certainty === 'illustrative' ? '2 3' : z.certainty === 'approximate' ? '6 3' : ''}"`}><title>${esc(z.title)}</title></path>`;
+  // The suburban density field under everything (Campagna to suburbium colour, transparent on the rivers), then the zones over it.
+  const [[iw, inorth], [ie, isouth]] = romeZoning.suburbImage.bounds;
+  s += `<image href="data:image/png;base64,${romeZoning.suburbImage.png}" x="${f(X(iw))}" y="${f(Y(inorth))}" width="${f(X(ie) - X(iw))}" height="${f(Y(isouth) - Y(inorth))}" preserveAspectRatio="none" style="image-rendering:auto"/>`;
+  for (const z of now) s += `<path data-id="${esc(z.id)}" d="${path(z.multipolygon)}" fill="${colourOf(z)}" fill-opacity="${z.ring === 'campagna' || z.use === 'suburban' ? 0 : z.certainty === 'illustrative' ? .68 : .88}" fill-rule="evenodd" ${z.ring === 'river' || z.ring === 'campagna' || z.use === 'suburban' ? 'stroke="none"' : `stroke="#1b1b1b" stroke-width=".8" stroke-dasharray="${z.certainty === 'illustrative' ? '2 3' : z.certainty === 'approximate' ? '6 3' : ''}"`}><title>${esc(z.title)}</title></path>`;
   for (const z of later) s += `<path data-id="${esc(z.id)}" d="${path(z.multipolygon)}" fill="url(#hatch)" stroke="#bbb" stroke-width="1.4" stroke-dasharray="4 3"><title>${esc(z.title)} (not shown at AD ${year})</title></path>`;
   // Roads and aqueducts: solid documented, dashed approximate, dotted illustrative; aqueducts carry ticks for their arches.
   for (const l of lines.filter(present)) {
@@ -42,6 +45,8 @@ export function zoningPlanSvg(year = 100): string {
       ? `<g data-id="${esc(l.id)}"><path d="${d}" fill="none" stroke="${lineColour.aqueduct}" stroke-width="3" stroke-dasharray="${dash}"/><path d="${d}" fill="none" stroke="${lineColour.aqueduct}" stroke-width="9" stroke-dasharray="1.5 5"/><path d="${d}" fill="none" stroke="transparent" stroke-width="12"/><title>${esc(l.title)}</title></g>`
       : `<g data-id="${esc(l.id)}"><path d="${d}" fill="none" stroke="#1b1b1b" stroke-opacity=".5" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="${lineColour.road}" stroke-width="2" stroke-dasharray="${dash}" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="transparent" stroke-width="10"/><title>${esc(l.title)}</title></g>`;
   }
+  // Roads into the city, faint over the zones: approximate dashed, illustrative dotted.
+  for (const l of lines.filter(l => present(l) && l.links?.length)) for (const link of l.links!) s += `<path data-id="${esc(l.id)}" d="M${link.line.map(p => f(X(p[0])) + ',' + f(Y(p[1]))).join('L')}" fill="none" stroke="${lineColour.road}" stroke-opacity=".75" stroke-width="1.6" stroke-dasharray="${link.certainty === 'approximate' ? '6 3' : '2 4'}" stroke-linecap="round"><title>${esc(l.title)} · ${esc(link.note)}</title></path>`;
   s += `<path data-id="${esc(extent.id)}" d="M${extent.ring.map(p => f(X(p[0])) + ',' + f(Y(p[1]))).join('L')}Z" fill="none" stroke="#fff6e0" stroke-width="2" stroke-dasharray="9 6" pointer-events="stroke"><title>${esc(extent.title)}</title></path>`;
 
   type Box = { x0: number; x1: number; y0: number; y1: number };
@@ -77,9 +82,13 @@ export function zoningPlanSvg(year = 100): string {
     place(m.title.replace(/ \(.*\)$/, ''), x, y, 10, [[7, 4, 'start'], [-7, 4, 'end'], [0, -7, 'middle'], [0, 15, 'middle'], [7, -6, 'start'], [-7, 14, 'end'], [7, 14, 'start'], [-7, -6, 'end'], [0, -18, 'middle'], [0, 26, 'middle']], 'fill="#fff"');
   }
 
+  // Everything fades into the background radially, as the field does (5 to 7 km from the centre), so nothing ends at the frame's square edge.
+  const { centre, from, to } = romeZoning.suburbImage.fade, pxPerMetre = W / ((x1 - x0) * Math.cos(41.892 * Math.PI / 180) * 111320);
+  s += `<defs><radialGradient id="fade" gradientUnits="userSpaceOnUse" cx="${f(X(centre[0]))}" cy="${f(Y(centre[1]))}" r="${f(to * pxPerMetre)}"><stop offset="${(from / to).toFixed(3)}" stop-color="#26302a" stop-opacity="0"/><stop offset="1" stop-color="#26302a" stop-opacity="1"/></radialGradient></defs>`;
+  s += `<rect width="${W}" height="${H}" fill="url(#fade)" pointer-events="none"/>`;
   s += '</g>';
   const legend: [string, string][] = [['Dense housing', colourOf({ housing: 'dense' } as Zone)], ['Hill housing (mixed)', colourOf({ housing: 'mixed' } as Zone)], ['Elite housing', colourOf({ housing: 'elite' } as Zone)],
-    ['Roadside ribbons', colourOf({ housing: 'roadside' } as Zone)], ['Monumental / commercial', zoneColour.monumental], ['Horti', zoneColour.horti], ['Port', zoneColour.port], ['Open ground', zoneColour.open], ['Tombs', zoneColour.necropolis], ['Suburbium, near the roads', colourOf({ use: 'suburban', band: 1 })], ['Suburbium, thinning out', colourOf({ use: 'suburban', band: 3 })], ['Campagna', zoneColour.campagna], ['Tiber, Aniene', zoneColour['open-river']]];
+    ['Roadside ribbons', colourOf({ housing: 'roadside' } as Zone)], ['Monumental / commercial', zoneColour.monumental], ['Horti', zoneColour.horti], ['Port', zoneColour.port], ['Open ground', zoneColour.open], ['Tombs', zoneColour.necropolis], ['Suburbium, dense to sparse', zoneColour.suburban], ['Campagna', zoneColour.campagna], ['Tiber, Aniene', zoneColour['open-river']]];
   const lx = W + 28, ly = 52;
   s += `<g pointer-events="none"><text x="${lx}" y="${ly - 6}" font-size="12" fill="#fff" font-weight="600">${esc(title)}</text>`;
   legend.forEach(([t, c], n) => { s += `<rect x="${lx}" y="${ly + n * 18 + 4}" width="14" height="11" fill="${c}"/><text x="${lx + 20}" y="${ly + n * 18 + 14}" font-size="11" fill="#eee">${t}</text>`; });
@@ -90,6 +99,7 @@ export function zoningPlanSvg(year = 100): string {
   s += `<line x1="${lx}" x2="${lx + 14}" y1="${k + 56}" y2="${k + 56}" stroke="${lineColour.road}" stroke-width="2"/><text x="${lx + 20}" y="${k + 60}" font-size="11" fill="#eee">Consular road</text>`;
   s += `<line x1="${lx}" x2="${lx + 14}" y1="${k + 74}" y2="${k + 74}" stroke="${lineColour.aqueduct}" stroke-width="7" stroke-dasharray="1.5 4"/><text x="${lx + 20}" y="${k + 78}" font-size="11" fill="#eee">Aqueduct arches</text>`;
   s += `<line x1="${lx}" x2="${lx + 14}" y1="${k + 92}" y2="${k + 92}" stroke="${lineColour.road}" stroke-width="1.6" stroke-dasharray="2 4"/><text x="${lx + 20}" y="${k + 96}" font-size="11" fill="#eee">Gap in the source, road assumed</text>`;
-  s += `<text x="${lx}" y="${k + 114}" font-size="10" fill="#aaa">Solid documented, dashed approximate,</text><text x="${lx}" y="${k + 127}" font-size="10" fill="#aaa">dotted illustrative</text></g>`;
+  s += `<line x1="${lx}" x2="${lx + 14}" y1="${k + 110}" y2="${k + 110}" stroke="${lineColour.road}" stroke-opacity=".75" stroke-width="1.6" stroke-dasharray="2 3"/><text x="${lx + 20}" y="${k + 114}" font-size="11" fill="#eee">Road into its gate (faint, over the city)</text>`;
+  s += `<text x="${lx}" y="${k + 132}" font-size="10" fill="#aaa">Solid documented, dashed approximate,</text><text x="${lx}" y="${k + 145}" font-size="10" fill="#aaa">dotted illustrative</text></g>`;
   return s + '</svg>\n';
 }

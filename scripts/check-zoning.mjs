@@ -36,7 +36,7 @@ const ids = new Set();
 for (const z of data.zones) {
   assert.ok(!ids.has(z.id), `${z.id} is unique`); ids.add(z.id);
   dated(z);
-  assert.ok(z.multipolygon.length && z.multipolygon.flat(3).every(Number.isFinite), `${z.id} has geometry`);
+  assert.ok((z.multipolygon.length || z.implicit) && z.multipolygon.flat(3).every(Number.isFinite), `${z.id} has geometry`);
   assert.ok((z.short || z.band > 1) && z.label.length === 2, `${z.id} has a label (outer suburban bands go unlabelled)`);
   // A hand-drawn boundary is never presented as documented, and says it is a guess or approximate.
   if (z.use !== 'open-river') assert.notEqual(z.certainty, 'documented', `${z.id}: hand-drawn outlines are not documented`);
@@ -73,22 +73,42 @@ assert.equal(z('zone:forum-boarium').use, 'monumental');
 const extent = [[data.extent.ring]], frame = [[data.frame]];
 let union = [];
 for (const q of now) {
-  assert.ok(area(polygonClipping.intersection(union, q.multipolygon)) < 50, `${q.id} overlaps no other zone`);
+  // Coordinates are rounded to 1e-6°, so edges shared with a large zone leave slivers: allow 50 m² or one part per million of its area.
+  assert.ok(area(polygonClipping.intersection(union, q.multipolygon)) < Math.max(50, area(q.multipolygon) * 1e-6), `${q.id} overlaps no other zone`);
   if (q.ring === 'city') assert.ok(area(polygonClipping.difference(q.multipolygon, extent)) < 50, `${q.id} stays inside the extent`);
   if (q.ring === 'suburbium' || q.ring === 'campagna') assert.ok(area(polygonClipping.intersection(q.multipolygon, extent)) < 50, `${q.id} stays outside the extent`);
   union = polygonClipping.union(union, q.multipolygon);
 }
+// The Campagna's outline is implicit: whatever the frame holds that no other zone does.
+const campagnaZone = data.zones.find(q => q.id === 'zone:campagna');
+assert.equal(campagnaZone.implicit, 'the frame less every other zone');
+const campagnaArea = area(frame) - area(polygonClipping.intersection(union, frame));
+assert.ok(Math.abs(campagnaArea - campagnaZone.area) / campagnaZone.area < 0.01, `the Campagna is what the other zones leave (${(campagnaArea / 1e6).toFixed(1)} km²)`);
+union = polygonClipping.union(union, polygonClipping.difference(frame, union));
 const covered = area(polygonClipping.intersection(union, frame)) / area(frame);
 assert.ok(covered > 0.99, `zones cover the frame (${(covered * 100).toFixed(1)}%)`);
 assert.ok(area(polygonClipping.intersection(union, extent)) / area(extent) > 0.99, 'zones cover the continuous city');
 
 // Suburbium: the right bank's named places, the Aniene to its confluence, roads and aqueducts.
-for (const id of ['zone:circus-vaticanus', 'zone:horti-agrippinae', 'zone:vatican-necropolis', 'zone:horti-domitiae', 'zone:via-appia-tombs', 'zone:suburb-roadside', 'zone:suburb-belt-1', 'zone:suburb-belt-2', 'zone:suburb-belt-3', 'zone:campagna', 'zone:aniene'])
+for (const id of ['zone:circus-vaticanus', 'zone:horti-agrippinae', 'zone:vatican-necropolis', 'zone:horti-domitiae', 'zone:via-appia-tombs', 'zone:suburb-roadside', 'zone:suburbium', 'zone:campagna', 'zone:aniene'])
   assert.ok(now.some(q => q.id === id), `${id} is drawn at AD 100`);
 for (const q of now.filter(q => q.ring === 'suburbium' || q.ring === 'campagna')) if (!['zone:circus-vaticanus', 'zone:horti-agrippinae', 'zone:vatican-necropolis', 'zone:horti-domitiae', 'zone:via-appia-tombs'].includes(q.id)) assert.equal(q.certainty, 'illustrative', `${q.id} is illustrative`);
-// The belt thins with distance; the Appia's tombs reach the Tomb of Caecilia Metella.
-const bands = [1, 2, 3].map(n => data.zones.find(q => q.id === `zone:suburb-belt-${n}`));
-assert.ok(bands[0].density > bands[1].density && bands[1].density > bands[2].density && bands[2].density > data.zones.find(q => q.id === 'zone:campagna').density, 'suburban density falls off towards the Campagna');
+// The suburbium is a continuous field: zero on the rivers, falling off with distance from the city, lower on the floodplain; its image
+// fades to nothing by the frame's corners. The Appia's tombs reach the Tomb of Caecilia Metella.
+const fieldFile = JSON.parse(await readFile('lib/scenarios/fixtures/rome-ad100-suburb-density.json', 'utf8')), values = Buffer.from(fieldFile.values, 'base64');
+assert.equal(values.length, fieldFile.rows * fieldFile.cols, 'the field has one value per cell');
+const cellOf = p => { const c = Math.floor((p[0] - fieldFile.west) * KX / fieldFile.cell), r = Math.floor((fieldFile.north - p[1]) * KY / fieldFile.cell); return values[r * fieldFile.cols + c] / 255; };
+const tiberZone = data.zones.find(q => q.id === 'zone:tiber');
+let wetCells = 0, wetZero = 0;
+for (let r = 0; r < fieldFile.rows; r += 3) for (let c = 0; c < fieldFile.cols; c += 3) { const p = [fieldFile.west + (c + 0.5) * fieldFile.cell / KX, fieldFile.north - (r + 0.5) * fieldFile.cell / KY]; if (inside(p, tiberZone.multipolygon)) { wetCells++; if (values[r * fieldFile.cols + c] === 0) wetZero++; } }
+assert.ok(wetCells > 20 && wetZero === wetCells, `no suburban density on the river (${wetZero}/${wetCells} river cells are zero)`);
+const along = [[12.505, 41.904], [12.535, 41.915], [12.56, 41.925]].map(cellOf);   // out from the city towards the north-east, off the roads
+assert.ok(along[0] > along[1] && along[1] >= along[2], `the field falls off with distance (${along.map(v => v.toFixed(2))})`);
+assert.ok(data.zones.find(q => q.id === 'zone:suburbium').density > data.zones.find(q => q.id === 'zone:campagna').density, 'the suburbium is denser than the Campagna');
+assert.ok(/floodplain/.test(data.zones.find(q => q.id === 'zone:suburbium').note) && /slope/.test(data.zones.find(q => q.id === 'zone:suburbium').note), 'the suburbium note names the floodplain and slope limits');
+const png = Buffer.from(data.suburbImage.png, 'base64');
+assert.equal(png.subarray(1, 4).toString(), 'PNG', 'the field image is a PNG');
+assert.ok(data.suburbImage.fade.to <= Math.min(data.frame[1][0] - data.frame[0][0], data.frame[2][1] - data.frame[0][1]) / 2 * KY, 'the field fades out before the frame edge');
 const caecilia = data.markers.find(m => m.id === 'marker:caecilia-metella').coordinate, tombs = data.zones.find(q => q.id === 'zone:via-appia-tombs');
 assert.ok(tombs.multipolygon.flat(2).some(p => Math.hypot((p[0] - caecilia[0]) * KX, (p[1] - caecilia[1]) * KY) < 120), 'the Appia tombs reach the Tomb of Caecilia Metella');
 const anieneWest = Math.min(...data.zones.find(q => q.id === 'zone:aniene').multipolygon.flat(2).map(p => p[0]));
@@ -97,6 +117,11 @@ const lines = new Map(data.lines.map(l => [l.id, l]));
 for (const l of data.lines) { dated(l, 60); assert.ok(l.lines.length && [...l.lines, ...(l.gaps ?? [])].every(line => line.length > 1 && line.flat().every(Number.isFinite)), `${l.id} has geometry`); assert.ok(at100(l), `${l.id} exists at AD 100`); }
 // Roads are joined into one chain each, with at most a few gaps, and no road crosses the Tiber except at a bridge point.
 for (const l of data.lines.filter(l => l.kind === 'road')) assert.ok(l.lines.length <= 4 && (l.gaps ?? []).length <= 3, `${l.id} is one chain with few gaps (${l.lines.length} runs)`);
+// Every road from the east bank or Trastevere is carried in to its gate or bridge, and that way in ends where the road begins.
+for (const l of data.lines.filter(l => l.kind === 'road' && !/triumphalis|cornelia/.test(l.id))) {
+  assert.ok(l.links?.length, `${l.id} runs in to the city`);
+  for (const link of l.links) { assert.deepEqual(link.line.at(-1), l.lines[0][0], `${l.id}'s way in ends where the road begins`); assert.ok(inside(link.line[0], extent), `${l.id}'s way in starts inside the city`); assert.ok(link.note, `${l.id}'s way in says where from`); }
+}
 const tiber = data.zones.find(q => q.id === 'zone:tiber').multipolygon, riverEdges = tiber.flatMap(poly => poly.flatMap(r => r.slice(1).map((b, n) => [r[n], b])));
 const crosses = (a, b, c, e) => { const o = (p, q, r) => Math.sign((q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0])); return o(a, b, c) !== o(a, b, e) && o(c, e, a) !== o(c, e, b); };
 // Bridges a road may cross at: the Pons Neronianus (a marker) and the Pons Mulvius, where the Via Flaminia crosses 3 km north (Ponte Milvio today).

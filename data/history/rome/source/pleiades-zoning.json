@@ -8142,6 +8142,243 @@
     }
    ]
   },
+  "porta-capena": {
+   "id": 27164982,
+   "uri": "https://pleiades.stoa.org/places/27164982",
+   "title": "Porta Capena",
+   "description": "The Porta Capena was a gate in Rome's Republican city walls (\"Servian Wall\") located on the south-west slope of the Caelian Hill.",
+   "reprPoint": [
+    12.491,
+    41.884
+   ],
+   "bbox": [
+    12.491,
+    41.884,
+    12.491,
+    41.884
+   ],
+   "locations": [
+    {
+     "title": "GeoHack location of Porta Capena",
+     "provenance": "Pleiades",
+     "accuracy": 2000,
+     "start": -330,
+     "end": 640,
+     "geometry": {
+      "type": "Point",
+      "coordinates": [
+       12.491,
+       41.884
+      ]
+     }
+    }
+   ]
+  },
+  "porta-collina": {
+   "id": 268637493,
+   "uri": "https://pleiades.stoa.org/places/268637493",
+   "title": "Porta Collina",
+   "description": "The Porta Collina was a gate in Rome's Servian Wall located on the Quirinal Hill. At the Porta Collina the Via Salaria and the Via Nomentana divided. Some remains of the gate were identified in 1872 on the Via Venti Settembre beneath the Italian Ministry of Finance.",
+   "reprPoint": [
+    12.4986786,
+    41.9073248
+   ],
+   "bbox": [
+    12.4986786,
+    41.9073248,
+    12.4986786,
+    41.9073248
+   ],
+   "locations": [
+    {
+     "title": "OSM location",
+     "provenance": "OpenStreetMap (Node 733351947, version 3, osm:changeset=94084434, 2020-11-13T20:22:07Z)",
+     "accuracy": 20,
+     "start": 1700,
+     "end": 2100,
+     "geometry": {
+      "type": "Point",
+      "coordinates": [
+       12.4986786,
+       41.9073248
+      ]
+     }
+    }
+   ]
+  },
+  "porta-trigemina": {
+   "id": 303638861,
+   "uri": "https://pleiades.stoa.org/places/303638861",
+   "title": "Porta Trigemina",
+   "description": "Now lost, the Porta Trigemina was one of the main gates of the Servian Wall.",
+   "reprPoint": [
+    12.474640015162992,
+    41.88233520759034
+   ],
+   "bbox": [
+    12.4738744,
+    41.8801881,
+    12.5024275,
+    41.9064016
+   ],
+   "locations": []
+  },
+  "porta-esquilina": {
+   "id": 29110684,
+   "uri": "https://pleiades.stoa.org/places/29110684",
+   "title": "Arch of Gallienus",
+   "description": "The Arch of Gallienus marked the Porta Esquilina, a gate in the Servian Wall of Rome. The via Labicana and via Tiburtina issue from Rome at this point. The arch was erected in A.D. 262.",
+   "reprPoint": [
+    12.50135682891754,
+    41.89577686705159
+   ],
+   "bbox": [
+    12.5013266,
+    41.8957242,
+    12.5013887,
+    41.8958309
+   ],
+   "locations": [
+    {
+     "title": "OSM location of Arch of Gallienus",
+     "provenance": "OpenStreetMap (Way 81741050, version 11, osm:changeset=135959632, 2023-05-11T05:19:35Z)",
+     "accuracy": 20,
+     "start": -30,
+     "end": 300,
+     "geometry": {
+      "type": "LineString",
+      "coordinates": [
+       [
+        12.501332,
+        41.8957242
+       ],
+       [
+        12.5013719,
+        41.8957253
+       ],
+       [
+        12.5013887,
+        41.8957258
+       ],
+       [
+        12.501388,
+        41.8957381
+       ],
+       [
+        12.5013867,
+        41.8957642
+       ],
+       [
+        12.5013851,
+        41.8957961
+       ],
+       [
+        12.5013843,
+        41.8958116
+       ],
+       [
+        12.5013702,
+        41.8958112
+       ],
+       [
+        12.5013692,
+        41.8958309
+       ],
+       [
+        12.5013266,
+        41.8958297
+       ],
+       [
+        12.5013297,
+        41.8957691
+       ],
+       [
+        12.501332,
+        41.8957242
+       ]
+      ]
+     }
+    }
+   ]
+  },
+  "pons-mulvius": {
+   "id": 423008,
+   "uri": "https://pleiades.stoa.org/places/423008",
+   "title": "Pons Mulvius",
+   "description": "Pons Mulvius (the Milvian Bridge) is a Roman bridge over the Tiber River. The original phase of the bridge dates to the consulship of Gaius Claudius Nero in 206 B.C. The bridge is most famous as the site of a decisive battle between Maxentius and Constantine I fought in A.D. 312.",
+   "reprPoint": [
+    12.466894851968604,
+    41.935631417362714
+   ],
+   "bbox": [
+    12.4666225,
+    41.9347682,
+    12.4672821,
+    41.936223
+   ],
+   "locations": [
+    {
+     "title": "DARMC location 17983",
+     "provenance": "DARMC OBJECTID: 17983",
+     "accuracy": 10,
+     "start": -330,
+     "end": 640,
+     "geometry": {
+      "type": "Point",
+      "coordinates": [
+       12.466793,
+       41.935845
+      ]
+     }
+    },
+    {
+     "title": "DARE Location",
+     "provenance": "Digital Atlas of the Roman Empire (2012-10-15)",
+     "accuracy": 10,
+     "start": -330,
+     "end": 640,
+     "geometry": {
+      "type": "Point",
+      "coordinates": [
+       12.466944,
+       41.935556
+      ]
+     }
+    },
+    {
+     "title": "OSM location of Milvian Bridge",
+     "provenance": "OpenStreetMap (Way 113077526, version 12, osm:changeset=47331025, 2017-03-31T16:08:37Z)",
+     "accuracy": 20,
+     "start": 1700,
+     "end": 2100,
+     "geometry": {
+      "type": "LineString",
+      "coordinates": [
+       [
+        12.4672821,
+        41.9347682
+       ],
+       [
+        12.4672148,
+        41.9348911
+       ],
+       [
+        12.4672081,
+        41.9349062
+       ],
+       [
+        12.466628,
+        41.9362105
+       ],
+       [
+        12.4666225,
+        41.936223
+       ]
+      ]
+     }
+    }
+   ]
+  },
   "horologium-augusti": {
    "id": 986274170,
    "uri": "https://pleiades.stoa.org/places/986274170",
