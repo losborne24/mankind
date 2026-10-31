@@ -32,8 +32,9 @@ export function ContextLayerList({ features, onInspect, group }: { features: Con
     <ul className="mt-2 space-y-1">{shown.map(item)}</ul>
   </details>;
 }
-export function ContextInspector({ feature, year, onClose }: { feature: ContextFeature; year: string; onClose(): void }) {
-  return <section aria-label="Map layer evidence" className="pointer-events-auto absolute inset-x-3 top-28 z-30 max-h-[calc(100dvh-292px)] overflow-y-auto rounded-2xl border border-panel-border bg-panel p-4 text-xs shadow-xl backdrop-blur-md sm:inset-x-auto sm:top-20 sm:max-h-[calc(100dvh-260px)] sm:w-[300px] sm:right-[calc(4rem+min(340px,calc(100vw-76px))+12px)]">
+/** `aside` docks the card at the screen's right edge, clear of a full-screen view such as the 2D plan. */
+export function ContextInspector({ feature, year, onClose, aside = false }: { feature: ContextFeature; year: string; onClose(): void; aside?: boolean }) {
+  return <section aria-label="Map layer evidence" className={`pointer-events-auto absolute inset-x-3 z-30 overflow-y-auto rounded-2xl border border-panel-border bg-panel p-4 text-xs shadow-xl backdrop-blur-md sm:inset-x-auto sm:w-[300px] ${aside ? 'bottom-3 max-h-[45dvh] sm:bottom-auto sm:right-4 sm:top-16 sm:max-h-[calc(100dvh-88px)]' : 'top-28 max-h-[calc(100dvh-292px)] sm:top-20 sm:max-h-[calc(100dvh-260px)] sm:right-[calc(4rem+min(340px,calc(100vw-76px))+12px)]'}`}>
     <div className="flex items-start justify-between gap-2"><h2 className="text-sm font-medium leading-snug">{feature.title}</h2><button aria-label="Close layer evidence" className="text-white/60 hover:text-white" onClick={onClose}>✕</button></div>
     <div className="mt-2"><CertaintyChip certainty={feature.certainty} /></div>
     <dl className="mt-2 space-y-1 text-white/70">

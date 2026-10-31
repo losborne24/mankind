@@ -65,6 +65,13 @@ No zone is **documented**: every boundary is drawn by hand.
   they do not overlap (a label that finds no free place is left out: Horti Lamiani's, beside Regio V).
 * **Not yet built:** the suburbium (consular roads, Vatican plain, aqueducts, Campagna). Nothing is off-frame; that is the next stage.
 
+## In the app: the 2D plan
+
+The journey card (start card and every beat) has a **2D plan** thumbnail. It opens the plan full screen, drawn live from the zoning data
+by `lib/scenarios/zoningPlan.ts`, the same drawing `plot-zoning.mjs` writes to `docs/previews/rome-zoning`. Clicking a zone, a marker or
+the city outline opens its evidence card, docked at the right edge, including the hatched features dated after AD 100. The view zooms with
++ and −, keeping the centre, and closes with ✕ or Escape. Opening it pauses a playing journey.
+
 ## Sources
 
 | Source | Licence | Used for |

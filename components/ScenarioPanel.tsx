@@ -18,6 +18,7 @@ import { ReconstructionControls, ReconstructionInspector } from '@/components/Re
 import { ContextInspector, ContextLayerList, LeftOut } from '@/components/ContextLayers';
 import { zoningFeatures } from '@/lib/scenarios/zoning';
 import { zoningOverlay } from '@/map/zoningOverlay';
+import { ZoningPlanThumbnail, ZoningPlanView } from '@/components/ZoningPlanView';
 import { formatHistoricalYear } from '@/lib/historicalDate';
 import type { HistoricalTime, ScenarioDefinition } from '@/lib/scenarios/schema';
 import { useScenarioController, useHistoricalDataset } from '@/components/ScenarioContext';
@@ -133,6 +134,7 @@ function Playback({ map, layer, reconId, onReconInspect, player, streamingStatus
     const features = useMemo(() => scenario && snapshot.state !== 'idle' ? contextFeatures(scenario, scenario.beats[snapshot.beat].actions[snapshot.action].overlays, viewTime) : [], [scenario, snapshot.state, snapshot.beat, snapshot.action, storeYear, storeTime]); // eslint-disable-line react-hooks/exhaustive-deps
     const yearLabel = formatHistoricalYear(viewTime.start.year);
     // The AD 100 land-use zoning: a 2D map layer for the Forum Boarium journey, off until switched on under Map layers.
+    const [planOpen, setPlanOpen] = useState(false), closePlan = useCallback(() => setPlanOpen(false), [setPlanOpen]);
     const [zoning, setZoning] = useState(false), zoningLayer = useRef<ReturnType<typeof zoningOverlay> | null>(null), inspectZone = useRef(onInspect), zoningState = useRef({ zoning, viewTime });
     useEffect(() => { inspectZone.current = onInspect; zoningState.current = { zoning, viewTime }; });
     const zones = useMemo(() => zoningFeatures(viewTime), [storeYear, storeTime]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -147,7 +149,8 @@ function Playback({ map, layer, reconId, onReconInspect, player, streamingStatus
     // An object of the reconstructed neighbourhood is inspected in its own panel; it replaces the map-layer panel and the reverse.
     const inspectRecon = useCallback((id: string) => { player.pause('Inspecting a reconstructed object'); onReconInspect(id); onCloseInspect(); }, [player, onReconInspect, onCloseInspect]);
     const inspectContext = (id: string) => { onReconInspect(null); onInspect(id); };
-    const inspected = [...features, ...(zoning ? zones : [])].find(f => f.id === inspectedId && f.match !== 'outside');
+    // Zoning features are inspectable from the map layer and the 2D plan; the plan also shows features dated later, so those open too.
+    const inspected = [...features, ...(zoning || planOpen ? zones : [])].find(f => f.id === inspectedId && (f.match !== 'outside' || (planOpen && f.overlayId === 'zoning')));
     if (!scenario)
         return <section role="alert" className="absolute right-12 top-20 z-20 max-w-xs rounded-2xl border border-panel-border bg-panel p-4 text-sm"><p>{snapshot.error}</p><button className="mt-3 rounded-full bg-accent px-4 py-2 text-black" onClick={() => player.load(london2012)}>Load London demo</button></section>;
     const beat = scenario.beats[snapshot.beat], active = beat.actions[snapshot.action];
@@ -159,7 +162,7 @@ function Playback({ map, layer, reconId, onReconInspect, player, streamingStatus
     const local = streamingStatus?.activeId === 'layout:forum-boarium-temples' && streamingStatus.lod === 'local';
     const rendering = historical && requesting && !snapshot.warning ? historicalModelStatus(hasDescriptor, local, settlementStatus.state, settlementStatus.errors) : undefined;
 
-    return <>{reconId && <ReconstructionInspector id={reconId} at={viewTime} onClose={() => onReconInspect(null)}/>}{inspected && !reconId && <ContextInspector feature={inspected} year={yearLabel} onClose={onCloseInspect}/>}<section aria-label="Historical scenario" className="pointer-events-auto absolute right-12 top-28 z-20 max-h-[calc(100dvh-292px)] sm:top-20 sm:max-h-[calc(100dvh-260px)] overflow-y-auto w-[min(340px,calc(100vw-76px))] rounded-2xl border border-panel-border bg-panel p-4 pb-8 shadow-xl backdrop-blur-md sm:right-16">
+    return <>{planOpen && historical && <ZoningPlanView year={viewTime.start.year} onInspect={inspectContext} onClose={closePlan}/>}{reconId && <ReconstructionInspector id={reconId} at={viewTime} onClose={() => onReconInspect(null)}/>}{inspected && !reconId && <ContextInspector feature={inspected} year={yearLabel} onClose={onCloseInspect} aside={planOpen}/>}<section aria-label="Historical scenario" className="pointer-events-auto absolute right-12 top-28 z-20 max-h-[calc(100dvh-292px)] sm:top-20 sm:max-h-[calc(100dvh-260px)] overflow-y-auto w-[min(340px,calc(100vw-76px))] rounded-2xl border border-panel-border bg-panel p-4 pb-8 shadow-xl backdrop-blur-md sm:right-16">
     <div className="text-[10px] uppercase tracking-[.22em] text-accent">A guided historical journey</div>
     <h1 className="mt-2 text-base font-medium leading-snug">{scenario.title}</h1>
     {!idle && <button className="mt-1 text-[11px] text-accent underline sm:hidden" aria-expanded={!folded} onClick={() => setFolded(f => !f)}>{folded ? 'Show details' : 'Hide details'}</button>}
@@ -176,6 +179,7 @@ function Playback({ map, layer, reconId, onReconInspect, player, streamingStatus
       <ContextLayerList features={features} onInspect={inspectContext} group={historical ? { title: 'Land use c. AD 100 (zoning)', on: zoning, onChange: setZoning, features: zones } : undefined}/>
       {snapshot.warning && <p className="mt-2 text-xs text-white/60">{snapshot.warning}</p>}
     </>}
+    {historical && <ZoningPlanThumbnail year={viewTime.start.year} onOpen={() => { if (!idle) player.pause('Viewing the 2D plan'); setPlanOpen(true); }}/>}
     {rendering && <p role="status" className="my-3 text-xs text-white/65">{rendering}</p>}
     {rendering && local && settlementStatus.errors.length > 0 && <button className="my-2 block text-xs text-accent underline" onClick={() => player.restart()}>Retry journey</button>}
     {historical && !idle && <button className="mt-2 block text-xs text-accent underline" onClick={() => { player.pause('Inspecting reconstruction evidence'); historicalSession?.inspect({ kind: 'place', id: 'place:forum-boarium-temples' }); }}>Inspect building evidence</button>}
