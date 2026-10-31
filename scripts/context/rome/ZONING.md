@@ -194,6 +194,10 @@ the city outline opens its evidence card, docked at the right edge, including th
 | Severan Marble Plan (Stanford Digital FUR) | Reference only | Later than AD 100 and not licensed for derived geometry; nothing traced |
 | Carandini (ed.), *The Atlas of Ancient Rome* (2017) | Copyright | Reference only; nothing traced |
 
+## The fill (v5.19.0)
+
+The zones and the density field now drive the generated city and suburbium: see `FILL.md`. The fill reads the field itself, not the three contour classes, so it has no edge at a threshold.
+
 ## Known gaps
 
 * The generated neighbourhood (1,620 lots) still fills the Forum Boarium and Velabrum with housing; the zoned fill (next stage) will follow the new zone.

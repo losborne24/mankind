@@ -5,12 +5,14 @@ import type { ThreeTestLayer } from '@/map/threeTestLayer';
 import type { HistoricalTime } from '@/lib/scenarios/schema';
 import { forumReconstruction } from '@/lib/history/localContext';
 import { certaintyColour, certaintyShare, reconstructionMatch, reconstructionOverlay } from '@/map/reconstructionOverlay';
+import { romeFillOverlay } from '@/map/romeFillOverlay';
+import type { RomeFill } from '@/lib/scenarios/romeFill';
 import type { ReconstructionCertainty, ReconstructionObject } from '@/map/settlements/reconstructionSpec';
 import { contextPeriod } from '@/components/ContextLayers';
 import { DEFAULT_TERRAIN_EXAGGERATION, TERRAIN_SOURCE } from '@/map/mapStyle';
 import { DEFAULT_LOCAL_HILLSHADE, LOCAL_RELIEF_EXAGGERATION, LOCAL_RELIEF_HILLSHADE } from '@/lib/scenarios/relief';
 import { LOCAL_HILLSHADE_STRENGTH } from '@/map/hillshade';
-import type { Coordinate } from '@/map/settlements/romanSettlement';
+import { offsetCoordinate, type Coordinate } from '@/map/settlements/romanSettlement';
 
 const label: Record<ReconstructionCertainty, string> = { documented: 'Documented', 'evidence-based': 'Evidence-based', 'best-guess': 'Best guess' };
 const meaning: Record<ReconstructionCertainty, string> = { documented: 'survives, or is directly recorded', 'evidence-based': 'placed or shaped from a source', 'best-guess': 'plausible for the period and place, with a note on what it is based on' };
@@ -26,7 +28,8 @@ export function ReconstructionControls({ map, layer, at, onInspect, inspectedId,
 }) {
   const spec = forumReconstruction, origin = useMemo(() => spec.origin as unknown as Coordinate, [spec]);
   const [showGuess, setShowGuess] = useState(true), [tint, setTint] = useState(false), [view, setView] = useState(0), [relief, setRelief] = useState(true);
-  const overlay = useRef<ReturnType<typeof reconstructionOverlay> | null>(null);
+  const overlay = useRef<ReturnType<typeof reconstructionOverlay> | null>(null), fillOverlay = useRef<ReturnType<typeof romeFillOverlay> | null>(null);
+  const [fill, setFill] = useState<RomeFill['counts'] | null>(null);
   // The parent re-renders on every playback tick with a fresh onInspect; keep the overlay (and its data) alive across that.
   const inspect = useRef(onInspect), latest = useRef({ at, showGuess, tint, inspectedId });
   useEffect(() => { inspect.current = onInspect; latest.current = { at, showGuess, tint, inspectedId }; });
@@ -34,10 +37,14 @@ export function ReconstructionControls({ map, layer, at, onInspect, inspectedId,
     overlay.current = reconstructionOverlay(map, spec, origin, id => inspect.current(id), point => layer?.pickReconstruction(point));
     const { at, showGuess, tint, inspectedId } = latest.current;
     overlay.current.update(at, showGuess, tint, inspectedId ?? undefined);
+    // The rest of the city, kept clear of everything the neighbourhood already models.
+    const keepOut = spec.objects.map(o => o.footprint.map(p => offsetCoordinate(origin, p as [number, number]) as [number, number]));
+    fillOverlay.current = romeFillOverlay(map, keepOut, origin as [number, number], f => setFill(f.counts));
+    fillOverlay.current.update(at, showGuess, tint);
     const move = () => setView(v => v + 1); map.on('moveend', move);
-    return () => { map.off('moveend', move); overlay.current?.dispose(); overlay.current = null; };
+    return () => { map.off('moveend', move); overlay.current?.dispose(); overlay.current = null; fillOverlay.current?.dispose(); fillOverlay.current = null; };
   }, [map, spec, origin, layer]);
-  useEffect(() => { overlay.current?.update(at, showGuess, tint, inspectedId ?? undefined); }, [at, showGuess, tint, inspectedId, map]);
+  useEffect(() => { overlay.current?.update(at, showGuess, tint, inspectedId ?? undefined); fillOverlay.current?.update(at, showGuess, tint); }, [at, showGuess, tint, inspectedId, map]);
   useEffect(() => { layer?.setBestGuessVisible(showGuess); }, [layer, showGuess]);
   useEffect(() => { layer?.setReconstructionTint(tint); }, [layer, tint]);
   // Local relief correction: the global DEM is coarse and understates Rome's hills, so the journey exaggerates relief (labelled below).
@@ -54,8 +61,8 @@ export function ReconstructionControls({ map, layer, at, onInspect, inspectedId,
     {share && share.sum > 0 && <p aria-label="Share of the view that is best guess" title="Share of the mapped object area in view (streets, buildings, quays, bridge, stalls and the two temples), and the number of documented buildings in view">
       <span style={{ color: certaintyColour['best-guess'] }}>{percent('best-guess')} best guess</span> · <span style={{ color: certaintyColour['evidence-based'] }}>{percent('evidence-based')} evidence-based</span> · <span style={{ color: certaintyColour.documented }}>{percent('documented')} documented</span> <span className="text-white/40">of the mapped area in view</span>
       {documented > 0 && <> · <span style={{ color: certaintyColour.documented }}>{documented} documented {documented === 1 ? 'building' : 'buildings'}</span></>}</p>}
-    {!share && showGuess && <p aria-label="Basis of the distant city" title="The distant roofscape is drawn from the lot layout generated for this journey: terraced blocks, lanes and open courts packed between the mapped sites and the river. Its edge is where that layout stops, not where Rome's built-up area ended in AD 100, so it is shown feathered.">
-      <span style={{ color: certaintyColour['best-guess'] }}>City roofscape: best guess</span> <span className="text-white/40">· extent of the {lots.toLocaleString()} generated lots around the mapped sites, not a survey of Rome in AD 100</span></p>}
+    {!share && showGuess && <p aria-label="Basis of the distant city" title="Each building, villa, tomb and field strip beyond the mapped sites is generated, not surveyed. Where they stand follows the AD 100 land-use zoning: the continuous city and its housing classes drawn from the fourteen regions (Pleiades), Platner's topographical dictionary and Lanciani's plan; the consular roads from OpenStreetMap streets that keep their line; the aqueduct arches from OpenStreetMap; floodplain and slope from the Mapterhorn elevation. Density thins with distance from the city and the roads, with no edge drawn. Monumental areas are left open.">
+      <span style={{ color: certaintyColour['best-guess'] }}>City roofscape: best guess</span> <span className="text-white/40">· {fill ? `${(fill.insula + fill.house + fill.domus + fill.warehouse + fill.villa).toLocaleString()} generated buildings, ${fill.tomb.toLocaleString()} tombs and the aqueduct arches across Rome and its suburbs, placed by the AD 100 zoning (Pleiades regions, Platner, Lanciani; roads and arches from OpenStreetMap) and thinning with distance from the city and the roads, plus` : 'the'} {lots.toLocaleString()} lots around the mapped sites. Not a survey of Rome in AD 100</span></p>}
     <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1">
       <label className="flex items-center gap-1.5"><input type="checkbox" checked={showGuess} onChange={e => setShowGuess(e.target.checked)} />Show best guesses</label>
       <label className="flex items-center gap-1.5"><input type="checkbox" checked={tint} onChange={e => setTint(e.target.checked)} />Colour by certainty</label>

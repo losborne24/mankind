@@ -215,3 +215,14 @@ Not modelled: the other Tiber Island buildings (Jupiter Jurarius and the Faunus 
 * Plates 22 (Fori Imperiali), 29 (Forum Romanum) and 35 (Circus Maximus end) were not traced; plate 35 shows the circus with its Marrana channel but not the river.
 * The Porticus Octaviae lies off the top of plate 28, on a plate not traced.
 * The ground mesh is coarse (about 9 m near the temples), so the bank is a soft ramp with a stone coping on top, not a vertical wall face.
+
+## Rome's zoned fill (v5.19.0)
+
+* **The heatmap is gone.** `reconstruction-city-roofscape`, the terracotta "orange haze" from Part 4, has been removed. So has the
+  edge feathering (lower, ground-tinted lots at the rim of the laid-out area). The city now carries on past the neighbourhood as the
+  zoned fill (`scripts/context/rome/FILL.md`), kept clear of everything modelled here, so the rim lots stand at full height.
+* **Crisp footprints from afar.** From zoom 9 to 13.8 the neighbourhood draws one flat roof footprint per lot (plus the circus,
+  palace roofs and bridge decks), the same way the fill draws, until its extrusions take over.
+* **Journey card.** The note still opens "City roofscape: best guess". It now gives the fill's building and tomb counts, names the
+  zoning sources (Pleiades regions, Platner, Lanciani; roads and arches from OpenStreetMap), says that density thins with distance
+  from the city and the roads, and adds the neighbourhood's lot count.
