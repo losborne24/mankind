@@ -62,8 +62,8 @@ export function directCamera(command: CameraCommand, start: CameraPose, scenario
         return () => start;
     if (command.type === 'flyTo') {
         const end = { ...start, ...command, center: command.center };
-        if (command.transition === 'zoomPanZoom') {
-            // Pull back at the origin, pan at a distance-aware scale, then descend.
+        if (command.transition !== 'cinematic') {
+            // Default: pull back at the origin, pan at a distance-aware scale, then descend; never zoom in while still travelling.
             const span = Math.max(1000, distance(start.center, command.center) * 4);
             const zoom = Math.max(0, Math.min(start.zoom - 1, end.zoom - 1, Math.log2(40075000 / span)));
             const departure = { ...start, zoom, pitch: 0 };

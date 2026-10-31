@@ -54,11 +54,11 @@ export const romeZoning = zoning as unknown as {
 export const zoneUseLabel: Record<ZoneUse, string> = { residential: 'Housing', monumental: 'Monumental and public', necropolis: 'Tombs', horti: 'Horti (estate gardens)', port: 'Port and warehouses', open: 'Open ground', 'open-river': 'River', suburban: 'Suburbium', campagna: 'Campagna' };
 export const zoneColour: Record<ZoneUse, string> = { residential: '#c46a4a', monumental: '#f4ecd6', necropolis: '#a99bbd', horti: '#b5e07a', port: '#b08a4e', open: '#d8c76a', 'open-river': '#5f8ea3', suburban: '#8fae68', campagna: '#c9bd8c' };
 export const lineColour: Record<ZoneLine['kind'], string> = { road: '#e8d3a2', aqueduct: '#b7c7d6' };
-/** 1 more than `edgeFade` metres inside the frame, falling to 0 at its edge: how roads and rivers fade out in the plan and on the map. */
+/** 1 more than `edgeFade` metres inside the frame, falling to 0 at its edge (squared, so the fade shows from the start): how roads and rivers fade out in the plan and on the map. */
 export function edgeFade(p: [number, number]) {
   const [[w, s], , [e, n]] = romeZoning.frame, kx = Math.cos(41.892 * Math.PI / 180) * 111320;
   const d = Math.min((p[0] - w) * kx, (e - p[0]) * kx, (p[1] - s) * 110950, (n - p[1]) * 110950);
-  return Math.min(1, Math.max(0, d / romeZoning.edgeFade));
+  return Math.min(1, Math.max(0, d / romeZoning.edgeFade)) ** 2;
 }
 /** Zones the plan and the map leave unlabelled: the suburban classes and the roadside ribbons are legend categories. */
 export const unlabelled = (z: Pick<Zone, 'use' | 'housing'>) => z.use === 'suburban' || z.housing === 'roadside';

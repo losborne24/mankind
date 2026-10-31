@@ -164,6 +164,17 @@ The plan goes back to the flat, crisp look of v5.18.1. The data underneath is un
   * **3D map:** road runs carry a fade value, and river polygons are cut into four 250 m strips at their mid-strip fade.
 * **Size.** The PNG is gone, and the three class outlines are larger than it was: 315 KB raw, 86 KB gzipped (v5.18.2: 257 KB / 78 KB).
 
+## Revision (v5.18.4), after review of the crisp plan
+
+* **Smooth contours.** The class edges came from merging grid cells, so they showed the 60 m grid. They are now traced by marching squares:
+  * each crossing is interpolated along the cell edge, and saddles are settled by the mean of the four corners;
+  * the rings are rounded off (two passes of corner cutting), simplified at 8 m, and filled even-odd, so holes stay holes.
+
+  The data got smaller: 272 KB raw, 71 KB gzipped.
+* **Edge fade you can see.** The fade over the last 1 km was linear, so it only showed in the last ~100 m and the Triumphalis, Portuensis and Nomentana looked full strength to the edge. Opacity is now the square of the distance in, in the plan masks, the map's road runs and the river strips.
+* **Tiber label.** It moved to the open reach north of the city, clear of the Riverfront and the other city labels.
+* **Road arms stay uniform.** Every road gets the same arm width and the same falloff in the field. The zoning sources (Pleiades, Platner, Wikipedia, OSM) don't say how much roadside building one road had compared with another. The one sourced difference, the Appia's tombs, is already its own zone. Weighting roads waits for a source.
+
 ## In the app: the 2D plan
 
 The journey card (start card and every beat) has a **2D plan** thumbnail. It opens the plan full screen, drawn live from the zoning data

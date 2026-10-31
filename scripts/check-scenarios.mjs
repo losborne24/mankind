@@ -17,8 +17,9 @@ const start={center:[-.1,51.5],zoom:12,pitch:30,bearing:170};
 const orbit=directCamera({type:'orbit',center:[0,51.5],zoom:15,pitch:50,degrees:180,duration:1000},start,demo);
 for(let i=20;i<=100;i++)assert.deepEqual(orbit(i/100).center,[0,51.5]);assert.deepEqual(orbit(0),start);
 const fly=directCamera({type:'flyTo',center:[0,52],zoom:15,pitch:50,bearing:-170,duration:1000},start,demo);assert.deepEqual(fly(0),start);
-const cinematic=directCamera({type:'flyTo',center:[0,52],zoom:15,duration:1000,transition:'cinematic'},start,demo);assert.ok(cinematic(.5).zoom<fly(.5).zoom);
-assert.ok(Math.abs(fly(.5).bearing-180)<1e-6);
+const cinematic=directCamera({type:'flyTo',center:[0,52],zoom:15,duration:1000,transition:'cinematic'},start,demo);// Default flights pan before they zoom in: no zoom gain until the pan has finished.
+for(let i=0;i<=60;i++)assert.ok(fly(i/100).zoom<=start.zoom+1e-9);assert.ok(Math.abs(fly(1).zoom-15)<1e-9);
+assert.ok(cinematic(.5).zoom<start.zoom+(15-start.zoom)*.5);
 // Zoom out at the origin, pan at a fixed scale, then zoom in at the destination.
 const approachStart={center:[30,25],zoom:2.1,pitch:0,bearing:0};
 const approachCommand=demo.beats[0].actions[0].camera;

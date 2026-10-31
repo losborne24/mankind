@@ -40,6 +40,7 @@ export interface AtmosphereOptions { haze: boolean; dof: boolean }
  * materials/camera.
  */
 
+import { travelTo } from "@/map/cameraTravel";
 import * as THREE from "three";
 import { DEFAULT_AMBIENT_LIFE, type AmbientLifeOptions } from "@/map/settlements/AmbientLifeView";
 import type { CustomLayerInterface, CustomRenderMethodInput, Map as MapLibreMap, MapSourceDataEvent } from "maplibre-gl";
@@ -422,7 +423,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
   }
   private visitDefinition(definition: import("@/map/settlements/romanSettlement").SettlementDefinition, origin: Coordinate=definition.origin): void {
     this.setDebugDescriptor({id:definition.id,origin,radiusMeters:(definition.groundSizeMeters??140)/2,profile:"village",seed:definition.seed??7,definition:{...definition,origin}});
-    this.map?.flyTo({center:[...origin],zoom:18.4,pitch:55,bearing:-25});
+    if(this.map)travelTo(this.map,{center:[...origin],zoom:18.4,pitch:55,bearing:-25});
   }
   visitSettlement(origin?: Coordinate): void {
     this.visitDefinition(ROMAN_SETTLEMENT,origin??ROMAN_SETTLEMENT.origin);
@@ -430,7 +431,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
   visitProceduralSettlement(seed = 7, origin: Coordinate = DEFAULT_PROCEDURAL_CONFIG.origin, overrides?: Partial<ProceduralSettlementConfig>): void {
     const config={...(overrides?.profile ? settlementProfileConfig(overrides.profile) : DEFAULT_PROCEDURAL_CONFIG),...overrides,seed,origin};
     this.setDebugDescriptor({id:"debug-procedural",origin,radiusMeters:config.extentMeters+25,profile:config.profile??"village",seed,config});
-    this.map?.flyTo({center:[...origin],zoom:18.4,pitch:55,bearing:-25});
+    if(this.map)travelTo(this.map,{center:[...origin],zoom:18.4,pitch:55,bearing:-25});
   }
   private setDebugDescriptor(descriptor: SettlementDescriptor): void {
     this.historicalSignature = undefined;
@@ -448,7 +449,7 @@ export class ThreeTestLayer implements CustomLayerInterface {
   }
   visitStreamingSettlement(id: string): void {
     this.useDevelopmentSettlements();const d=this.descriptors.find(d=>d.id===id);
-    if(d)this.map?.flyTo({center:[...d.origin],zoom:18.4,pitch:55,bearing:-25});
+    if(d&&this.map)travelTo(this.map,{center:[...d.origin],zoom:18.4,pitch:55,bearing:-25});
   }
   /** Dataset selection supplies explicit definitions; an empty set never falls back to fixtures. */
   setHistoricalSettlements(descriptors: readonly SettlementDescriptor[]): void {

@@ -502,21 +502,38 @@ for (let r = 0; r < G.rows; r++) for (let c = 0; c < G.cols; c++) {
   field[i] = Math.max(CAMPAGNA_FLOOR, base * flood * steep);
 }
 // The suburbium as crisp classes cut from the field at contour thresholds: dense (0.5 and over), thinning (0.3 to 0.5) and sparse
-// (0.15 to 0.3). Each threshold's cells are merged row by row into rectangles, the staircase is simplified at 30 m (half a cell),
-// rounded off (three passes of corner cutting, then simplified again at 10 m), and each class is what its threshold holds less the
-// next denser one and everything already placed. The classes are for the plan only: the fill samples the field itself (rome-ad100-suburb-density.json), so it has no edge at a threshold.
+// (0.15 to 0.3). Each threshold is traced as a smooth contour of the field (below), and each class is what its threshold holds less
+// the next denser one and everything already placed. The classes are for the plan only: the fill samples the field itself
+// (rome-ad100-suburb-density.json), so it has no edge at a threshold.
 const CLASSES = [['dense', 0.5, 'nearest the city and along the roads'], ['thinning', 0.3, 'thinning out'], ['sparse', 0.15, 'sparse, at the edge of the Campagna']];
-const simplifyRing = ring => { const open = simplify(ring.slice(0, -1).concat([ring[0]]), 30); return open.length >= 4 ? open : ring; };
-const chaikin = ring => { let r = ring.slice(0, -1); for (let k = 0; k < 3; k++) r = r.flatMap((a, n) => { const b = r[(n + 1) % r.length]; return [[a[0] * .75 + b[0] * .25, a[1] * .75 + b[1] * .25], [a[0] * .25 + b[0] * .75, a[1] * .25 + b[1] * .75]]; }); return [...r, r[0]]; };
+const chaikin = ring => { let r = ring.slice(0, -1); for (let k = 0; k < 2; k++) r = r.flatMap((a, n) => { const b = r[(n + 1) % r.length]; return [[a[0] * .75 + b[0] * .25, a[1] * .75 + b[1] * .25], [a[0] * .25 + b[0] * .75, a[1] * .25 + b[1] * .75]]; }); return [...r, r[0]]; };
+// Contours by marching squares on the cell centres (outside the grid counts as 0, so every contour closes): each crossing is placed
+// by linear interpolation along the cell edge, saddles are settled by the mean of the four corners, and the crossings are joined into
+// rings. The region is the even-odd fill of the rings (a hole is a ring inside a ring), cut to the frame.
 function atLeast(min) {
-  const rects = [];
-  for (let r = 0; r < G.rows; r++) for (let c = 0; c < G.cols;) {
-    if (field[r * G.cols + c] < min) { c++; continue; }
-    let e = c; while (e < G.cols && field[r * G.cols + e] >= min) e++;
-    const [w, n] = [G.west + c * G.cell / KX, G.north - r * G.cell / KY], [east, s] = [G.west + e * G.cell / KX, G.north - (r + 1) * G.cell / KY];
-    rects.push(closed([[w, n], [east, n], [east, s], [w, s]])); c = e;
+  const v = (r, c) => r < 0 || c < 0 || r >= G.rows || c >= G.cols ? 0 : field[r * G.cols + c];
+  const point = key => { const [kind, r, c] = key.split(':'), [rr, cc] = [+r, +c], a = v(rr, cc), b = kind === 'h' ? v(rr, cc + 1) : v(rr + 1, cc), t = (min - a) / (b - a);
+    return [G.west + (cc + 0.5 + (kind === 'h' ? t : 0)) * G.cell / KX, G.north - (rr + 0.5 + (kind === 'v' ? t : 0)) * G.cell / KY]; };
+  const links = new Map(), link = (a, b) => { for (const [x, y] of [[a, b], [b, a]]) { if (!links.has(x)) links.set(x, []); links.get(x).push(y); } };
+  for (let r = -1; r < G.rows; r++) for (let c = -1; c < G.cols; c++) {
+    const tl = v(r, c), tr = v(r, c + 1), br = v(r + 1, c + 1), bl = v(r + 1, c), code = (tl >= min) * 8 + (tr >= min) * 4 + (br >= min) * 2 + (bl >= min);
+    const T = `h:${r}:${c}`, R = `v:${r}:${c + 1}`, B = `h:${r + 1}:${c}`, L = `v:${r}:${c}`, joined = (tl + tr + br + bl) / 4 >= min;
+    const segments = { 1: [[L, B]], 2: [[B, R]], 3: [[L, R]], 4: [[T, R]], 5: joined ? [[L, T], [B, R]] : [[T, R], [L, B]], 6: [[T, B]], 7: [[L, T]],
+      8: [[L, T]], 9: [[T, B]], 10: joined ? [[T, R], [L, B]] : [[L, T], [B, R]], 11: [[T, R]], 12: [[L, R]], 13: [[B, R]], 14: [[L, B]] }[code] ?? [];
+    for (const [a, b] of segments) link(a, b);
   }
-  return polygonClipping.intersection(unionAll(rects).map(poly => poly.map(ring => { const smooth = chaikin(simplifyRing(ring)), open = simplify(smooth, 10); return open.length >= 4 ? open : smooth; })).filter(poly => poly[0].length >= 4), [FRAME]);
+  const rings = [], seen = new Set();
+  for (const start of links.keys()) {
+    if (seen.has(start)) continue;
+    const ring = [start]; seen.add(start);
+    for (let at = start, prev = null; ;) { const next = links.get(at).find(k => k !== prev && !seen.has(k)); if (!next) break; ring.push(next); seen.add(next); prev = at; at = next; }
+    if (ring.length >= 4) rings.push(ring.map(point));
+  }
+  // Rounded off (two passes of corner cutting) and simplified at 8 m, then filled even-odd.
+  const smooth = rings.map(ring => { const round2 = chaikin([...ring, ring[0]]), open = simplify(round2, 8); return open.length >= 4 ? open : round2; });
+  let region = [];
+  for (const ring of smooth.sort((a, b) => areaOf([[b]]) - areaOf([[a]]))) region = polygonClipping.xor(region, [[ring]]);
+  return polygonClipping.intersection(region, [FRAME]);
 }
 const meanField = mp => { let sum = 0, n = 0; for (let r = 0; r < G.rows; r++) for (let c = 0; c < G.cols; c++) if (insideMp(cellCentre(r, c), mp)) { sum += field[r * G.cols + c]; n++; } return n ? sum / n : 0; };
 const SUBURB_SCALE = 0.06;   // a field value of 1 means 0.06 of the dense core's building density
@@ -559,15 +576,17 @@ const shortNames = { 'zone:tiber': 'Tiber', 'zone:forum-palatine': 'Fora · Pala
   'zone:mausoleum-hadriani': "Hadrian's Mausoleum", 'zone:suburb-roadside': 'Roadside', 'zone:suburb-dense': 'Suburbium, dense', 'zone:suburb-thinning': 'Suburbium, thinning', 'zone:suburb-sparse': 'Suburbium, sparse', 'zone:via-appia-tombs': 'Appia tombs', 'zone:campagna': 'Campagna' };
 for (const z of resolved) if (!z.multipolygon.length) throw Error(`${z.id} is empty after the cuts`);
 // Rivers carry a fade per polygon for the 3D map, which cannot fade a fill by position: over the last kilometre inside the frame they
-// are cut into 250 m strips at their mid-strip fade (0.875 down to 0.125), so a river does not stop at the frame's square edge. Roads fade the same way.
+// are cut into 250 m strips at their mid-strip fade, squared like the roads' (0.77 down to 0.02), so a river does not stop at the frame's square edge. Roads fade the same way.
 const EDGE_FADE = 1000, inset = d => closed([[FRAME[0][0] + d / KX, FRAME[0][1] + d / KY], [FRAME[1][0] - d / KX, FRAME[1][1] + d / KY], [FRAME[2][0] - d / KX, FRAME[2][1] - d / KY], [FRAME[3][0] + d / KX, FRAME[3][1] - d / KY]]);
-const STRIPS = [[EDGE_FADE, 1], ...[750, 500, 250, 0].map(d => [d, (d + 125) / EDGE_FADE])];
+const STRIPS = [[EDGE_FADE, 1], ...[750, 500, 250, 0].map(d => [d, ((d + 125) / EDGE_FADE) ** 2])];
 for (const z of resolved.filter(z => z.ring === 'river')) {
   const pieces = STRIPS.map(([d, fade], k) => [+fade.toFixed(3), polygonClipping.difference(polygonClipping.intersection(z.multipolygon, inset(d)), ...(k ? [inset(STRIPS[k - 1][0])] : []))]);
   z.multipolygon = pieces.flatMap(([, mp]) => mp); z.fade = pieces.flatMap(([fade, mp]) => mp.map(() => fade));
 }
+// The Tiber is labelled on an open reach north of the city, where the channel is clear of the city zones and their labels.
+const labelIn = { 'zone:tiber': closed([[12.455, 41.915], [12.49, 41.915], [12.49, 41.94], [12.455, 41.94]])[0] };
 const zones = resolved.sort((a, b) => priority.indexOf(a.use) - priority.indexOf(b.use)).map(z => ({
-  ...z, short: shortNames[z.id], area: Math.round(areaOf(z.multipolygon)), label: labelPoint(z.multipolygon.slice().sort((a, b) => areaOf([b]) - areaOf([a]))[0]),
+  ...z, short: shortNames[z.id], area: Math.round(areaOf(z.multipolygon)), label: labelPoint((labelIn[z.id] ? polygonClipping.intersection(z.multipolygon, [labelIn[z.id]]) : z.multipolygon).slice().sort((a, b) => areaOf([b]) - areaOf([a]))[0]),
   multipolygon: z.multipolygon.map(poly => poly.map(ring => ring.map(round))) }));
 // The Campagna is everything in the frame the other zones leave; its outline would repeat all of theirs, so it is not stored.
 const campagnaZone = zones.find(z => z.id === 'zone:campagna');
