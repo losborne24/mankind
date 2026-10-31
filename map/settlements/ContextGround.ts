@@ -30,9 +30,16 @@ function polarGrid(radius: number) {
   return { points, indices };
 }
 
+/** How far from the water the banks are reshaped (un-exaggerated, see `update`), metres. Buildings stand at least 11 m back. */
+const BANK_REACH = 10;
+
 /**
  * The local ground: a textured, lit mesh draped on MapLibre's terrain, feathered to nothing at its rim,
- * plus a river-surface mesh with its own shader. All surfaces are generated from noise at load.
+ * plus a level river surface with its own shader. All surfaces are generated from noise at load.
+ *
+ * Inside its disc the ground stands in for MapLibre's terrain: a first pass resets the depth over the ground's footprint,
+ * and the ground then writes its own depth. So the river bed can be cut below the water and the banks next to it
+ * reshaped, which MapLibre's terrain (exaggerated about sea level, and blurred with the modern embankments) cannot be.
  */
 export class ContextGround {
   readonly group = new THREE.Group();
@@ -44,13 +51,20 @@ export class ContextGround {
   private readonly waterMaterial: THREE.ShaderMaterial;
   private readonly ground: THREE.Mesh;
   private readonly water: THREE.Mesh;
+  private readonly depthReset: THREE.Mesh;
+  private readonly depthResetMaterial: THREE.ShaderMaterial;
   private readonly maskData: Uint8Array;
+  /** Per vertex: river cover from the mask (0..1), whether it lies in the strip the embankments took, and its nearness to open water (1 at the water, 0 by BANK_REACH). */
+  private readonly cover: Float32Array;
+  private readonly inStrip: boolean[];
+  private readonly nearWater: Float32Array;
   private heights: number[] | undefined;
   private shownSince = 0;
   waterVisible = false;
   /** Height of the river surface in the settlement frame; undefined without water. */
   waterLevel: number | undefined;
   private readonly guess = { value: 1 };
+  private readonly waterUniform = { value: -1e6 };
 
   constructor(spec: ContextGroundSpec, contacts: readonly ContactRect[], sunDirection = SUN_DIRECTION) {
     const radius = spec.sizeMeters / 2;
@@ -62,6 +76,27 @@ export class ContextGround {
     mask.wrapS = mask.wrapT = THREE.ClampToEdgeWrapping; mask.needsUpdate = true;
     const surface = new THREE.DataTexture(buildSurfaceMask(spec), MASK_RESOLUTION, MASK_RESOLUTION, THREE.RGBAFormat);
     surface.magFilter = THREE.LinearFilter; surface.minFilter = THREE.LinearMipmapLinearFilter; surface.generateMipmaps = true; surface.needsUpdate = true;
+    const res = MASK_RESOLUTION, coverAt = (x: number, z: number) => {
+      const u = Math.floor((x / spec.sizeMeters + 0.5) * res), v = Math.floor((z / spec.sizeMeters + 0.5) * res);
+      return u < 0 || v < 0 || u >= res || v >= res ? 0 : this.maskData[(v * res + u) * 4 + 1] / 255;
+    };
+    this.cover = Float32Array.from(this.points, ([x, z]) => coverAt(x, z));
+    // Nearness to the water: the closest of 24 probes (three rings) that lands in open water.
+    this.nearWater = Float32Array.from(this.points, ([x, z], i) => {
+      if (this.cover[i] > 0.5) return 1;
+      let best = 0;
+      for (const r of [BANK_REACH / 3, BANK_REACH * 2 / 3, BANK_REACH]) for (let k = 0; k < 8; k++) {
+        const a = k / 8 * Math.PI * 2;
+        if (coverAt(x + Math.cos(a) * r, z + Math.sin(a) * r) > 0.5) best = Math.max(best, 1 - r / BANK_REACH * 0.9);
+      }
+      return best;
+    });
+    const strip = spec.waterExtra ?? [];
+    this.inStrip = this.points.map(([x, z]) => strip.some(ring => {
+      let c = false;
+      for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) if ((ring[i][1] > z) !== (ring[j][1] > z) && x < (ring[j][0] - ring[i][0]) * (z - ring[i][1]) / (ring[j][1] - ring[i][1]) + ring[i][0]) c = !c;
+      return c;
+    }));
     const earth = earthTexture(), scrub = scrubTexture(), paving = pavingTexture(), cobbles = cobbleTexture();
     this.textures.push(mask, surface, earth, scrub, paving, cobbles);
     for (const geometry of [this.groundGeometry, this.waterGeometry]) {
@@ -72,14 +107,14 @@ export class ContextGround {
     this.groundGeometry.setAttribute("uv", new THREE.Float32BufferAttribute(grid.points.flatMap(([x, z]) => [x / spec.sizeMeters + 0.5, z / spec.sizeMeters + 0.5]), 2));
 
     const shared = { tMask: { value: mask }, uSize: { value: spec.sizeMeters }, uFade: { value: 0 } };
-    this.groundMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, metalness: 0, transparent: true, depthWrite: false });
-    const groundUniforms = { ...shared, tEarth: { value: earth }, tScrub: { value: scrub }, tPaving: { value: paving }, tCobble: { value: cobbles }, tSurface: { value: surface }, uGuess: this.guess };
+    this.groundMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, metalness: 0, transparent: true, depthWrite: true });
+    const groundUniforms = { ...shared, tEarth: { value: earth }, tScrub: { value: scrub }, tPaving: { value: paving }, tCobble: { value: cobbles }, tSurface: { value: surface }, uGuess: this.guess, uWater: this.waterUniform };
     this.groundMaterial.onBeforeCompile = shader => {
       Object.assign(shader.uniforms, groundUniforms);
-      shader.vertexShader = shader.vertexShader.replace("#include <common>", "#include <common>\nvarying vec2 vGround;")
-        .replace("#include <begin_vertex>", "#include <begin_vertex>\nvGround = position.xz;");
+      shader.vertexShader = shader.vertexShader.replace("#include <common>", "#include <common>\nvarying vec2 vGround; varying float vHeight;")
+        .replace("#include <begin_vertex>", "#include <begin_vertex>\nvGround = position.xz; vHeight = position.y;");
       shader.fragmentShader = shader.fragmentShader.replace("#include <common>", `#include <common>
-        varying vec2 vGround; uniform sampler2D tMask, tEarth, tScrub, tPaving, tCobble, tSurface; uniform float uSize, uFade, uGuess;
+        varying vec2 vGround; varying float vHeight; uniform sampler2D tMask, tEarth, tScrub, tPaving, tCobble, tSurface; uniform float uSize, uFade, uGuess, uWater;
         ${noiseGlsl}`).replace("#include <map_fragment>", `
         vec2 muv = vGround / uSize + 0.5;
         vec4 m = texture2D(tMask, muv);
@@ -103,28 +138,40 @@ export class ContextGround {
         vec3 cobble = texture2D(tCobble, vGround / 5.0).rgb * 0.7 + texture2D(tCobble, spin / 2.3).rgb * 0.3;
         col = mix(col, cobble, smoothstep(0.3, 0.7, m2.r) * uGuess);
         col *= 1.0 - 0.5 * m.a;                       // baked contact shadow beside walls
-        float bank = smoothstep(0.0, 0.5, m.g);
-        col = mix(col, col * vec3(0.6, 0.56, 0.48), bank * (1.0 - smoothstep(0.5, 0.9, m.g)));
+        // The river bed (seen through the water) is silt; the bank is darkened in a narrow wet band just above the water line.
+        col = mix(col, vec3(0.27, 0.24, 0.15), smoothstep(0.3, 0.7, m.g));
+        float wet = 1.0 - smoothstep(0.05, 0.9, vHeight - uWater);
+        col *= mix(1.0, 0.68, wet);
         float rim = 1.0 - smoothstep(0.42, 1.0, length(vGround) / (uSize * 0.5));
         diffuseColor.rgb = col;
-        diffuseColor.a *= rim * uFade * (1.0 - smoothstep(0.5, 0.85, m.g));
+        diffuseColor.a *= rim * uFade;
       `);
     };
-    this.groundMaterial.customProgramCacheKey = () => "context-ground-v3";
+    this.groundMaterial.customProgramCacheKey = () => "context-ground-v4";
     this.ground = new THREE.Mesh(this.groundGeometry, this.groundMaterial);
     this.ground.receiveShadow = true; this.ground.renderOrder = 1; this.ground.visible = false; this.ground.frustumCulled = false;
+    // Drawn before everything else in the scene: resets the depth over the ground's footprint so MapLibre's terrain no longer
+    // hides what the ground cuts below it (the river bed). Waits for the fade-in, so the ground is opaque when it takes over.
+    this.depthResetMaterial = new THREE.ShaderMaterial({
+      uniforms: { uFade: shared.uFade }, colorWrite: false, depthWrite: true, depthTest: true, depthFunc: THREE.AlwaysDepth,
+      vertexShader: `void main(){ gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+      fragmentShader: `uniform float uFade; void main(){ if (uFade < 0.99) discard; gl_FragDepth = 1.0; gl_FragColor = vec4(0.0); }`,
+    });
+    this.depthReset = new THREE.Mesh(this.groundGeometry, this.depthResetMaterial);
+    this.depthReset.renderOrder = -100; this.depthReset.visible = false; this.depthReset.frustumCulled = false;
 
     this.waterMaterial = new THREE.ShaderMaterial({
       transparent: true, depthWrite: false,
       uniforms: { ...shared, uTime: { value: 0 }, uSunDir: { value: sunDirection.clone() }, uSunColour: { value: new THREE.Color(SUN_COLOUR) },
         uCam: { value: new THREE.Vector3(0, 400, 0) }, uSkyLow: { value: new THREE.Color(0xe3dccb) }, uSkyHigh: { value: new THREE.Color(0x7fa2c8) },
-        uShallow: { value: new THREE.Color(0x6f7a56) }, uDeep: { value: new THREE.Color(0x2c3a30) } },
+        // "Flavus Tiberis": the yellow, silty Tiber. Muddy ochre-olive in the shallows to olive-brown in the deep channel (best guess).
+        uShallow: { value: new THREE.Color(0xa89458) }, uDeep: { value: new THREE.Color(0x6a5a34) } },
       vertexShader: `varying vec2 vGround; varying vec3 vPos;
         void main(){ vGround = position.xz; vPos = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
       fragmentShader: `uniform sampler2D tMask; uniform float uSize, uTime, uFade; uniform vec3 uSunDir, uSunColour, uCam, uSkyLow, uSkyHigh, uShallow, uDeep;
         varying vec2 vGround; varying vec3 vPos; ${noiseGlsl}
         float swell(vec2 p){ vec2 flow = vec2(0.0, 1.0) * uTime;   // the river runs roughly south here
-          return vnoise(p * 0.32 + flow * 0.28) * 0.5 + vnoise(p * 0.85 - flow * 0.5 + 9.0) * 0.28 + vnoise(p * 2.4 + flow * 0.8 + 3.0) * 0.12; }
+          return vnoise(p * 0.22 + flow * 0.3) * 0.6 + vnoise(p * 0.6 - flow * 0.45 + 9.0) * 0.3 + vnoise(p * 1.6 + flow * 0.7 + 3.0) * 0.04; }
         void main(){
           vec2 muv = vGround / uSize + 0.5;
           vec4 m = texture2D(tMask, muv);
@@ -134,29 +181,35 @@ export class ContextGround {
           vec3 view = uCam - vPos; float dist = length(view); view /= dist;
           float e = 0.35, h = swell(vGround);
           vec2 grad = vec2(swell(vGround + vec2(e, 0.0)) - h, swell(vGround + vec2(0.0, e)) - h) / e;
-          vec3 n = normalize(vec3(-grad.x * 0.34 / (1.0 + dist * 0.004), 1.0, -grad.y * 0.34 / (1.0 + dist * 0.004)));
+          vec3 n = normalize(vec3(-grad.x * 0.16 / (1.0 + dist * 0.004), 1.0, -grad.y * 0.16 / (1.0 + dist * 0.004)));
           vec3 r = reflect(-view, n);
           float up = clamp(r.y, 0.0, 1.0);
           vec3 sky = mix(uSkyLow, uSkyHigh, pow(up, 0.55));
           float fres = clamp(0.03 + 0.97 * pow(1.0 - max(dot(n, view), 0.0), 5.0), 0.0, 0.85);
           float sunGlint = pow(max(dot(r, uSunDir), 0.0), 380.0) * 3.5 + pow(max(dot(r, uSunDir), 0.0), 36.0) * 0.18;
           vec3 body = mix(uShallow, uDeep, smoothstep(0.1, 0.9, inner));
-          body *= 0.55 + 0.45 * max(dot(n, uSunDir), 0.0);
+          body *= 0.72 + 0.28 * max(dot(n, uSunDir), 0.0);
           vec3 col = mix(body, sky, fres) + uSunColour * sunGlint;
-          float foam = smoothstep(0.1, 0.3, m.g) * (1.0 - smoothstep(0.3, 0.52, m.g)) * smoothstep(0.45, 0.7, vnoise(vGround * 1.7 + uTime * 0.2));
-          col = mix(col, vec3(0.74, 0.72, 0.64), foam * 0.45);
-          gl_FragColor = vec4(col, cover * uFade * mix(0.82, 0.97, inner));
+          gl_FragColor = vec4(col, cover * uFade * mix(0.9, 0.97, inner));
           #include <tonemapping_fragment>
           #include <colorspace_fragment>
         }`,
     });
     this.water = new THREE.Mesh(this.waterGeometry, this.waterMaterial);
     this.water.renderOrder = 2; this.water.visible = false; this.water.frustumCulled = false;
-    this.group.add(this.ground, this.water);
+    this.group.add(this.depthReset, this.ground, this.water);
   }
 
-  /** Re-drape on the terrain. Returns false while any vertex has never had a height. */
-  update(resolve: (point: LocalPoint) => HeightResult, spec: ContextGroundSpec): boolean {
+  /**
+   * Re-drape on the terrain. Returns false while any vertex has never had a height. `exaggeration` is the terrain's display
+   * exaggeration (MapLibre scales heights about sea level).
+   *
+   * The river is one level surface. Its level is a low percentile (the 10th) of the terrain over the open channel with the
+   * exaggeration taken out, so it sits near the lowest bed the coarse model shows rather than riding up its embankments.
+   * Under the water the ground is cut 1.5 m below the level. Within BANK_REACH of the water the banks are measured from the
+   * river without the exaggeration, so relief ×2 does not steepen them; buildings stand further back and are unaffected.
+   */
+  update(resolve: (point: LocalPoint) => HeightResult, spec: ContextGroundSpec, exaggeration = 1): boolean {
     const heights: number[] = new Array(this.points.length);
     let retained = false;
     for (let i = 0; i < this.points.length; i++) {
@@ -166,75 +219,34 @@ export class ContextGround {
     }
     if (retained && this.heights) heights.splice(0, heights.length, ...this.heights);
     this.heights = heights;
-    this.cutRiverStrip(heights, spec);
-    const radius = spec.sizeMeters / 2;
+    const radius = spec.sizeMeters / 2, k = exaggeration > 0 ? exaggeration : 1;
     const ground = this.groundGeometry.getAttribute("position") as THREE.BufferAttribute;
     const water = this.waterGeometry.getAttribute("position") as THREE.BufferAttribute;
-    // River mask coverage (0..1) per vertex; the mask is blurred, so it also describes the bank slope.
-    const res = MASK_RESOLUTION, cover: number[] = new Array(heights.length).fill(0), wet: number[] = [];
-    for (let i = 0; i < heights.length; i++) {
-      const [x, z] = this.points[i];
-      const u = Math.floor((x / spec.sizeMeters + 0.5) * res), v = Math.floor((z / spec.sizeMeters + 0.5) * res);
-      if (u < 0 || v < 0 || u >= res || v >= res) continue;
-      const g = this.maskData[(v * res + u) * 4 + 1];
-      cover[i] = g / 255;
-      if (g > 128) wet.push(heights[i]);
-    }
-    this.waterVisible = wet.length > 3;
-    const surface: number[] = new Array(heights.length);
-    if (this.waterVisible) {
-      // The surface follows the river instead of standing at one height: over the channel, take the highest bed within
-      // a few rings (so bumps in the coarse terrain stay covered), then smooth it so it reads as flowing water.
-      const inSet = cover.map(c => c > 0.05), neighbours = (i: number) => {
-        const ring = Math.floor(i / SEGMENTS), k = i % SEGMENTS, out = [ring * SEGMENTS + (k + 1) % SEGMENTS, ring * SEGMENTS + (k + SEGMENTS - 1) % SEGMENTS];
-        if (ring > 0) out.push(i - SEGMENTS);
-        if (ring < RINGS) out.push(i + SEGMENTS);
-        return out.filter(n => inSet[n]);
-      };
-      let w = heights.slice();
-      for (let pass = 0; pass < 3; pass++) w = w.map((h, i) => inSet[i] ? Math.max(h, ...neighbours(i).map(n => w[n])) : h);
-      for (let pass = 0; pass < 14; pass++) w = w.map((h, i) => { if (!inSet[i]) return h; const n = neighbours(i); return (h + n.reduce((sum, j) => sum + w[j], 0)) / (n.length + 1); });
-      for (let i = 0; i < heights.length; i++) surface[i] = Math.max(w[i], inSet[i] ? heights[i] : -Infinity) + 0.25;
-    }
-    // The coarse rim sits higher so the terrain mesh cannot poke through between vertices.
-    for (let i = 0; i < heights.length; i++) ground.setY(i, heights[i] + 0.07 + Math.hypot(this.points[i][0], this.points[i][1]) / radius * 0.8);
-    ground.needsUpdate = true;
-    this.shadeRelief(heights);
-    this.groundGeometry.computeBoundingSphere();
-    if (this.waterVisible) {
-      for (let i = 0; i < heights.length; i++) water.setY(i, surface[i]);
-      water.needsUpdate = true; this.waterGeometry.computeBoundingSphere();
-      // One reference height for the bridge, quays and barges: the median over the open channel.
-      const open = surface.filter((_, i) => cover[i] > 0.5).sort((a, b) => a - b);
-      this.waterLevel = open[Math.floor(open.length / 2)];
-    } else this.waterLevel = undefined;
-    if (!this.shownSince) this.shownSince = performance.now();
-    this.ground.visible = true; this.water.visible = this.waterVisible;
-    return true;
-  }
-
-  /**
-   * The strip of river the modern embankments took stands on made ground today. Cut it down to the river bed, two metres
-   * under the level of the open channel, so the ancient river is water rather than a raised bank with water painted on it.
-   */
-  private cutRiverStrip(heights: number[], spec: ContextGroundSpec) {
-    const strip = spec.waterExtra ?? [];
-    if (!strip.length) return;
-    const res = MASK_RESOLUTION, inStrip = (x: number, z: number) => strip.some(ring => {
-      let c = false;
-      for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) if ((ring[i][1] > z) !== (ring[j][1] > z) && x < (ring[j][0] - ring[i][0]) * (z - ring[i][1]) / (ring[j][1] - ring[i][1]) + ring[i][0]) c = !c;
-      return c;
+    // The open channel today (the strip the embankments took is made ground, so its heights are left out).
+    const channel = heights.map(h => h / k).filter((_, i) => this.cover[i] > 0.9 && !this.inStrip[i]).sort((a, b) => a - b);
+    this.waterVisible = channel.length > 3;
+    const level = this.waterVisible ? channel[Math.floor((channel.length - 1) * 0.1)] * k : undefined;
+    const shaped = heights.map((h, i) => {
+      if (level === undefined) return h;
+      const bank = level + (h - level) / k, near = this.nearWater[i];
+      const g = h + (bank - h) * near;
+      return this.cover[i] > 0.5 ? Math.min(g, level - 1.5) : g;
     });
-    const flags = this.points.map(([x, z]) => inStrip(x, z)), channel: number[] = [];
-    for (let i = 0; i < heights.length; i++) {
-      if (flags[i]) continue;
-      const [x, z] = this.points[i], u = Math.floor((x / spec.sizeMeters + 0.5) * res), v = Math.floor((z / spec.sizeMeters + 0.5) * res);
-      if (u >= 0 && v >= 0 && u < res && v < res && this.maskData[(v * res + u) * 4 + 1] > 128) channel.push(heights[i]);
+    // The coarse rim sits higher so the terrain mesh cannot poke through between vertices.
+    for (let i = 0; i < heights.length; i++) ground.setY(i, shaped[i] + 0.07 + Math.hypot(this.points[i][0], this.points[i][1]) / radius * 0.8);
+    ground.needsUpdate = true;
+    this.shadeRelief(shaped);
+    this.groundGeometry.computeBoundingSphere();
+    if (level !== undefined) {
+      for (let i = 0; i < heights.length; i++) water.setY(i, level);
+      water.needsUpdate = true; this.waterGeometry.computeBoundingSphere();
     }
-    if (channel.length < 4) return;
-    channel.sort((a, b) => a - b);
-    const bed = channel[Math.floor(channel.length / 2)] - 2;
-    for (let i = 0; i < heights.length; i++) if (flags[i]) heights[i] = Math.min(heights[i], bed);
+    // One water level for the bridges, quays, stages and barges.
+    this.waterLevel = level;
+    this.waterUniform.value = level ?? -1e6;
+    if (!this.shownSince) this.shownSince = performance.now();
+    this.ground.visible = this.depthReset.visible = true; this.water.visible = this.waterVisible;
+    return true;
   }
 
   /**
@@ -274,7 +286,7 @@ export class ContextGround {
   get groundFade() { return this.fade; }
 
   dispose() {
-    this.groundGeometry.dispose(); this.waterGeometry.dispose(); this.groundMaterial.dispose(); this.waterMaterial.dispose();
+    this.groundGeometry.dispose(); this.waterGeometry.dispose(); this.groundMaterial.dispose(); this.waterMaterial.dispose(); this.depthResetMaterial.dispose();
     for (const texture of this.textures) texture.dispose();
   }
 }

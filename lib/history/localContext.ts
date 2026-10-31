@@ -10,6 +10,7 @@ const METRES_PER_DEGREE = Math.PI / 180 * 6371008.8;
 function toLocal(origin: Coordinate, [lng, lat]: readonly number[]): LocalPoint {
   return [(lng - origin[0]) * Math.cos(origin[1] * Math.PI / 180) * METRES_PER_DEGREE, -(lat - origin[1]) * METRES_PER_DEGREE];
 }
+const ringArea = (ring: LocalPoint[]) => Math.abs(ring.reduce((a, p, i) => { const q = ring[(i + 1) % ring.length]; return a + p[0] * q[1] - q[0] * p[1]; }, 0)) / 2;
 const rings = (id: string, origin: Coordinate) =>
   (context.geometries.find(g => g.id === id)?.coordinates ?? []).map(ring => (ring as number[][]).map(p => toLocal(origin, p)));
 
@@ -25,7 +26,9 @@ export function contextGroundFor(layoutId: string, origin: Coordinate): ContextG
     // The only paved surface shown is the present-day outline of the Forum Boarium site (approximate, modern geometry).
     paving: rings('forum-boarium', origin),
     // Today's Tiber channel, plus the strip of river the 19th-century embankments took (the bank Lanciani surveyed, about 3-5 m).
-    water: rings('tiber', origin),
+    // Holes under 1,000 m² in today's outline are left out: the Ponte Rotto (the ruin of the Pons Aemilius itself, drawn as
+    // a bridge) and a small islet off Tiber Island, so no patch of modern ground stands up out of the river.
+    water: rings('tiber', origin).filter((ring, i) => i === 0 || ringArea(ring) >= 1000),
     waterExtra: forumReconstruction.waterExtra,
     // Everything below is guessed and switches off with the best-guess toggle.
     streets: forumReconstruction.streets.map(({ width, points }) => ({ width, points })),

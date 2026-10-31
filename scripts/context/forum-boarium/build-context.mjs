@@ -66,7 +66,7 @@ const geometries = [
     note: 'A neutral tone over the scenario area so no beat shows the modern vegetation plane. It carries no information about ancient terrain, paving or surfaces.' },
   { id: 'tiber', title: 'Tiber · modern channel, approximate ancient bank', kind: 'polygon', coordinates: tiberRings,
     certainty: 'approximate', basis: 'modern-geometry', style: 'water', sources: ['source:osm-tiber', 'source:wikipedia-tiber', 'source:pleiades-forum-boarium'],
-    note: `${modernNote}OpenStreetMap water outline of today's river, shown only as an approximation of where the ancient bank lay. The present embankments were begun in 1876, so this is not the ancient course.` },
+    note: `${modernNote}OpenStreetMap water outline of today's river, shown only as an approximation of where the ancient bank lay. The present embankments were begun in 1876, so this is not the ancient course. In the 3D scene the water is drawn level, a muddy ochre-olive after the Roman name flavus Tiberis (the yellow Tiber, for its silt); that colour, the level and the banks beside it are a best guess.` },
   { id: 'forum-boarium', title: 'Forum Boarium · approximate extent', kind: 'polygon', coordinates: polygon('way', 27350575),
     certainty: 'approximate', basis: 'modern-geometry', style: 'extent', time: { start: { year: -330 }, end: { year: 2025 } }, sources: ['source:osm-forum-boarium', 'source:pleiades-forum-boarium'],
     note: `${modernNote}OpenStreetMap outline of the present-day archaeological site, recorded by Pleiades as its location. Not a surveyed boundary of the ancient market. Date range is the Pleiades record span.` },

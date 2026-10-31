@@ -55,8 +55,12 @@ for (let s = BANK_S0; s <= 340; s += 10) bankLine.push([eastBank(s) + bankShift(
 const smoothed = bankLine.map((p, i) => { const w = bankLine.slice(Math.max(0, i - 2), i + 3); return [w.reduce((a, q) => a + q[0], 0) / w.length, p[1]]; });
 const bankAt = s => { const i = Math.max(0, Math.min(smoothed.length - 2, Math.floor((s - BANK_S0) / 10))), t = (s - smoothed[i][1]) / 10; return smoothed[i][0] * (1 - t) + smoothed[i + 1][0] * t; };
 /** The strip of river the modern embankments took: from today's east bank out to the ancient one. Drawn as water and cut into the ground. */
-const stripS = []; for (let s = BANK_S0; s <= 340; s += 10) if (bankShift(s) > 0.4) stripS.push(s);
-const waterExtra = [[...stripS.map(s => pt([Math.max(bankAt(s), eastBank(s) + 0.5), s])), ...stripS.slice().reverse().map(s => pt([eastBank(s) - 2.5, s]))]];
+// The river wall stands on the ancient bank, centred 2.5 m out from it and 1.8 m thick; the water stops at its river face, so no
+// water lies behind it. Where that face is within half a metre of today's bank, today's bank is the water's edge.
+const QUAY_OUT = 2.5, QUAY_HALF = 0.9;
+const stripS = []; for (let s = BANK_S0; s <= 340; s += 10) if (bankAt(s) - QUAY_OUT - QUAY_HALF > eastBank(s) + 0.5) stripS.push(s);
+const waterEdge = s => { const face = bankAt(s) - QUAY_OUT - QUAY_HALF; return face > eastBank(s) + 0.5 ? face : eastBank(s); };
+const waterExtra = [[...stripS.map(s => pt([waterEdge(s), s])), ...stripS.slice().reverse().map(s => pt([eastBank(s) - 2.5, s]))]];
 const bankEdge = stripS.map(s => [bankAt(s), s]);
 
 // ── Small geometry kit ───────────────────────────────────────────────────────────────────────────────────────
@@ -161,7 +165,7 @@ add({ id: 'pons-aemilius', kind: 'bridge', title: 'Pons Aemilius', certainty: BA
 
 // ── River frontage: quay wall, quay road, stages and barges ──────────────────────────────────────────────────
 const quayRuns = [{ id: 'quay-north', from: -262, to: -12 }, { id: 'quay-wall', from: WALL[0], to: WALL[1] }, { id: 'quay-south', from: 126, to: 322 }];
-const quayLine = run => sample(smoothed.filter(p => p[1] >= run.from && p[1] <= run.to), 6).map(q => [q.p[0] - 2.5, q.p[1]]);
+const quayLine = run => sample(smoothed.filter(p => p[1] >= run.from && p[1] <= run.to), 6).map(q => [waterEdge(q.p[1]) + QUAY_HALF, q.p[1]]);
 for (const run of quayRuns) {
   const line = quayLine(run), wall = run.id === 'quay-wall';
   add({ id: run.id, kind: 'quay', title: wall ? 'Tiber quay wall · Forum Boarium frontage' : run.id === 'quay-north' ? 'River quay · Portus Tiberinus frontage' : 'River quay · south of the Forum Boarium', certainty: wall ? BASED : GUESS,

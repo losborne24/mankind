@@ -332,7 +332,7 @@ export class SettlementScene {
       entry.mesh.visible = true;
       if (entry.model) { entry.model.position.y = top!; entry.model.visible = true; }
     }
-    if (this.contextGround && this.definition.contextGround && !this.contextGround.update(resolve, this.definition.contextGround)) this.terrainPending++;
+    if (this.contextGround && this.definition.contextGround && !this.contextGround.update(resolve, this.definition.contextGround, exaggeration)) this.terrainPending++;
     if (this.urban && this.contextGround && !this.urban.update(point => resolve(point).height, this.contextGround.waterLevel, exaggeration)) this.terrainPending++;
     const sceneryGround = this.scenery.updateTerrain(resolve);
     this.terrainPending += sceneryGround.pending;

@@ -188,6 +188,14 @@ Not modelled: the other Tiber Island buildings (Jupiter Jurarius and the Faunus 
 * **Limitation.** The elevation model puts the drawn river surface above the market (water 22.6 m, the market 15 to 17 m at ×1), because its 30 m cells blend the river with the modern embankments. So the arches are mostly below the water line, and at the Pons Aemilius' east end the quay coping (river + 1.6 m) stands above the bridge deck, which meets the market street; with relief ×2 that end's abutment stands 6.4 m above the ground there (0.4 m at ×1).
 * **Labels and legend.** Map labels that fall under the header (wordmark, search) are hidden until the camera moves them clear; the Tiber label is larger (14 to 19 px). The certainty line now shows "<1%" rather than rounding a present share to 0%, and adds the number of documented buildings in view (the two temples).
 
+## Part 6 (v5.14.0): a level, yellow Tiber
+
+* **Level water.** The river used to be draped on the terrain (the highest bed nearby, smoothed), so it varied across the channel, rode up the banks and doubled with relief ×2. It is now one flat surface at the 10th percentile of the terrain over today's open channel with the exaggeration taken out: 18.5 m (37.0 m displayed at ×2). Bridges, quays, stages and barges use the same level. No drop along the flow is modelled.
+* **Ground under and beside it.** MapLibre's terrain cannot be cut, so inside its disc the lit ground now stands in for it: a first pass resets the depth over the ground's footprint and the ground writes its own. Under the water the ground is cut 1.5 m below the level; within 10 m of the water the banks are measured from the river without the exaggeration, so relief ×2 does not steepen them (buildings stand at least 11 m back, so none moves). Holes under 1,000 m² in today's outline (the Ponte Rotto ruin and a small islet off Tiber Island) are drawn as river.
+* **Quays.** The river's east edge now stops at the quay wall's river face (the wall centred 2.5 m out from Lanciani's bank, 1.8 m thick), so no water lies behind the wall. The lot layout shifted slightly with the new edge (1,620 lots).
+* **Look.** The foam band is gone; the bank darkens in a narrow wet band (about 1 m of height) above the water line. The water is muddy ochre-olive in the shallows to olive-brown in the channel, after *flavus Tiberis*; that colour is a best guess and the Tiber layer's note says so. The surface noise is broader and weaker; sky reflection and sun glint are kept. No foam at the bridge piers.
+* **Limitation.** The elevation model still has the market (about 15 m) below the river level (18.5 m), so the quay wall along the market stands higher on its land side than on the water side, more so with relief ×2.
+
 ## Verification notes
 
 * Desktop only, in Chrome, at the explore beat and by moving the camera. At phone width nothing was looked at.
