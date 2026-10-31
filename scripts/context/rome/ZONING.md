@@ -92,6 +92,22 @@ The plan now covers a frame about 14 km square (12.40–12.57 E), with the conti
 * **Not drawn:** brickworks, clay pits and riverside market gardens. No source used here places them.
 * **Plan:** the legend is in a side panel. `plot-zoning.mjs` writes the PNG with headless Chrome at the plan's own size (Quick Look as the fallback).
 
+## Revision (v5.18.1), after review of the suburbium
+
+* **Belt.** The belt is no longer a union of large circles. It is three bands of decreasing density, each within a fixed distance of the city or of a road
+  (roads count out to 2.5 km from the city): within 300 m (density 0.06), 300–700 m (0.03) and 700–1,200 m (0.012). Their colour
+  moves towards the Campagna, so the belt fades out instead of ending in a scalloped edge. It now reaches about 3.7 km at most, instead of 5–7 km.
+* **Via Appia tombs.** A necropolis ribbon 90 m wide runs along the Appia from the edge of the city to about 400 m past the Tomb of Caecilia
+  Metella. That tomb is placed at its Pleiades point (Wikipedia: third mile, built c. 30–10 BC) and marked. The ribbon is approximate: the line is the road's, and the width and length are a guess.
+* **Roads** are one chain each. Second carriageways and parallel pieces are dropped. Jumps that the street's own geometry runs alongside are
+  joined. Only real breaks are kept as gaps, drawn dotted ("road assumed"): Flaminia 351 m (the Pons Mulvius crossing, where today's bridge has another
+  name), Tiburtina 325 m, Labicana 1 km (between the city street and the Casilina), Latina 120 m, Portuensis three short breaks, Triumphalis the hand-drawn
+  link from the bridge.
+* **Via Ostiensis** was checked against the river outline: no segment crosses the Tiber. It runs close to the bend south of the city, on the east bank.
+  The check now asserts that no road crosses the river except at a bridge (the Pons Neronianus, and the Pons Mulvius on the Flaminia).
+* **Not-shown labels** (Trajan's Forum, Baths of Trajan, Baths of Caracalla, Hadrian's Mausoleum) are pinned to their own footprints on two short lines:
+  the name, then what the date means.
+
 ## In the app: the 2D plan
 
 The journey card (start card and every beat) has a **2D plan** thumbnail. It opens the plan full screen, drawn live from the zoning data

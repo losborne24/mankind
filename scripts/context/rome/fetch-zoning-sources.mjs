@@ -23,7 +23,7 @@ const ids = {
   'theatrum-pompei': 541950317, pantheon: 128044615, 'saepta-iulia': 854946506, 'thermae-agrippae': 921692078, 'mausoleum-augusti': 281368358,
   'ara-pacis': 816091000, 'circus-gaii-et-neronis': 395487201, 'horti-agrippinae': 124755045, 'vatican-obelisk': 855632226, 'via-cornelia': 741499023, 'via-triumphalis': 839719167,
   'via-triumphalis-necropolis': 578501279, 'pons-neronianus': 100447491, 'mausoleum-hadriani': 334776904, 'aqua-claudia': 423563, 'aqua-anio-novus': 423559, 'via-nomentana': 699256589,
-  'thermae-antoninianae': 322942899, 'vaticanus-ager': 104629751, 'horologium-augusti': 986274170, 'circus-maximus': 458808506, 'campus-martius': 422863, palatine: 971691208,
+  'thermae-antoninianae': 322942899, 'vaticanus-ager': 104629751, 'caecilia-metella': 423064, 'horologium-augusti': 986274170, 'circus-maximus': 458808506, 'campus-martius': 422863, palatine: 971691208,
 };
 const places = {};
 for (const [key, id] of Object.entries(ids)) {

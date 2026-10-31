@@ -8,6 +8,8 @@ export type HousingClass = 'dense' | 'mixed' | 'elite' | 'roadside';
 interface Dated { id: string; title: string; certainty: ContextCertainty; time: HistoricalTime; note: string; sources: string[] }
 export interface Zone extends Dated {
   use: ZoneUse;
+  /** Suburbium only: 1 nearest the city and the roads to 3 farthest, fading towards the Campagna. */
+  band?: number;
   /** Where the zone lies: the continuous city, the suburbium round it, the Campagna beyond, or the rivers that cross all three. */
   ring: 'city' | 'suburbium' | 'campagna' | 'river';
   /** For features dated after the scene: what the start date means (e.g. a construction start), shown where they are listed as not shown. */
@@ -23,7 +25,12 @@ export interface Zone extends Dated {
 }
 export interface ZoneMarker extends Dated { kind: 'region' | 'anchor'; coordinate: [number, number] }
 /** A consular road or an aqueduct: one or more polylines. */
-export interface ZoneLine extends Dated { kind: 'road' | 'aqueduct'; lines: [number, number][][] }
+export interface ZoneLine extends Dated {
+  kind: 'road' | 'aqueduct';
+  lines: [number, number][][];
+  /** Where the sourced street breaks off and resumes: the road is taken to run on, a guess drawn dashed. */
+  gaps?: [number, number][][];
+}
 export const romeZoning = zoning as unknown as {
   title: string;
   extent: Dated & { area: number; ring: [number, number][] };
@@ -38,7 +45,8 @@ export const zoneUseLabel: Record<ZoneUse, string> = { residential: 'Housing', m
 export const zoneColour: Record<ZoneUse, string> = { residential: '#c46a4a', monumental: '#f4ecd6', necropolis: '#a99bbd', horti: '#b5e07a', port: '#b08a4e', open: '#d8c76a', 'open-river': '#5f8ea3', suburban: '#8fae68', campagna: '#c9bd8c' };
 export const lineColour: Record<ZoneLine['kind'], string> = { road: '#e8d3a2', aqueduct: '#b7c7d6' };
 const housingColour: Record<HousingClass, string> = { dense: '#c46a4a', mixed: '#d98d66', elite: '#ebb596', roadside: '#9a5a40' };
-export const colourOf = (z: Zone) => z.housing ? housingColour[z.housing] : zoneColour[z.use];
+const mix = (a: string, b: string, t: number) => '#' + [0, 2, 4].map(i => Math.round(parseInt(a.slice(1 + i, 3 + i), 16) * (1 - t) + parseInt(b.slice(1 + i, 3 + i), 16) * t).toString(16).padStart(2, '0')).join('');
+export const colourOf = (z: Pick<Zone, 'housing' | 'use' | 'band'>) => z.housing ? housingColour[z.housing] : z.use === 'suburban' && z.band ? mix(zoneColour.suburban, zoneColour.campagna, [0, 0, .4, .75][z.band]) : zoneColour[z.use];
 
 /** The zones, the extent and the markers as inspectable map layers, with their date match. Pure. */
 export function zoningFeatures(at: HistoricalTime): ContextFeature[] {

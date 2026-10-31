@@ -37,7 +37,7 @@ for (const z of data.zones) {
   assert.ok(!ids.has(z.id), `${z.id} is unique`); ids.add(z.id);
   dated(z);
   assert.ok(z.multipolygon.length && z.multipolygon.flat(3).every(Number.isFinite), `${z.id} has geometry`);
-  assert.ok(z.short && z.label.length === 2, `${z.id} has a label`);
+  assert.ok((z.short || z.band > 1) && z.label.length === 2, `${z.id} has a label (outer suburban bands go unlabelled)`);
   // A hand-drawn boundary is never presented as documented, and says it is a guess or approximate.
   if (z.use !== 'open-river') assert.notEqual(z.certainty, 'documented', `${z.id}: hand-drawn outlines are not documented`);
   if (z.use !== 'open-river') assert.match(z.note, /guess|approximate/i, `${z.id}'s note says its edges are a guess`);
@@ -83,13 +83,27 @@ assert.ok(covered > 0.99, `zones cover the frame (${(covered * 100).toFixed(1)}%
 assert.ok(area(polygonClipping.intersection(union, extent)) / area(extent) > 0.99, 'zones cover the continuous city');
 
 // Suburbium: the right bank's named places, the Aniene to its confluence, roads and aqueducts.
-for (const id of ['zone:circus-vaticanus', 'zone:horti-agrippinae', 'zone:vatican-necropolis', 'zone:horti-domitiae', 'zone:suburb-roadside', 'zone:suburb-belt', 'zone:campagna', 'zone:aniene'])
+for (const id of ['zone:circus-vaticanus', 'zone:horti-agrippinae', 'zone:vatican-necropolis', 'zone:horti-domitiae', 'zone:via-appia-tombs', 'zone:suburb-roadside', 'zone:suburb-belt-1', 'zone:suburb-belt-2', 'zone:suburb-belt-3', 'zone:campagna', 'zone:aniene'])
   assert.ok(now.some(q => q.id === id), `${id} is drawn at AD 100`);
-for (const q of now.filter(q => q.ring === 'suburbium' || q.ring === 'campagna')) if (!['zone:circus-vaticanus', 'zone:horti-agrippinae', 'zone:vatican-necropolis', 'zone:horti-domitiae'].includes(q.id)) assert.equal(q.certainty, 'illustrative', `${q.id} is illustrative`);
+for (const q of now.filter(q => q.ring === 'suburbium' || q.ring === 'campagna')) if (!['zone:circus-vaticanus', 'zone:horti-agrippinae', 'zone:vatican-necropolis', 'zone:horti-domitiae', 'zone:via-appia-tombs'].includes(q.id)) assert.equal(q.certainty, 'illustrative', `${q.id} is illustrative`);
+// The belt thins with distance; the Appia's tombs reach the Tomb of Caecilia Metella.
+const bands = [1, 2, 3].map(n => data.zones.find(q => q.id === `zone:suburb-belt-${n}`));
+assert.ok(bands[0].density > bands[1].density && bands[1].density > bands[2].density && bands[2].density > data.zones.find(q => q.id === 'zone:campagna').density, 'suburban density falls off towards the Campagna');
+const caecilia = data.markers.find(m => m.id === 'marker:caecilia-metella').coordinate, tombs = data.zones.find(q => q.id === 'zone:via-appia-tombs');
+assert.ok(tombs.multipolygon.flat(2).some(p => Math.hypot((p[0] - caecilia[0]) * KX, (p[1] - caecilia[1]) * KY) < 120), 'the Appia tombs reach the Tomb of Caecilia Metella');
 const anieneWest = Math.min(...data.zones.find(q => q.id === 'zone:aniene').multipolygon.flat(2).map(p => p[0]));
 assert.ok(anieneWest < 12.506, 'the Aniene reaches its confluence with the Tiber');
 const lines = new Map(data.lines.map(l => [l.id, l]));
-for (const l of data.lines) { dated(l, 60); assert.ok(l.lines.length && l.lines.every(line => line.length > 1 && line.flat().every(Number.isFinite)), `${l.id} has geometry`); assert.ok(at100(l), `${l.id} exists at AD 100`); }
+for (const l of data.lines) { dated(l, 60); assert.ok(l.lines.length && [...l.lines, ...(l.gaps ?? [])].every(line => line.length > 1 && line.flat().every(Number.isFinite)), `${l.id} has geometry`); assert.ok(at100(l), `${l.id} exists at AD 100`); }
+// Roads are joined into one chain each, with at most a few gaps, and no road crosses the Tiber except at a bridge point.
+for (const l of data.lines.filter(l => l.kind === 'road')) assert.ok(l.lines.length <= 4 && (l.gaps ?? []).length <= 3, `${l.id} is one chain with few gaps (${l.lines.length} runs)`);
+const tiber = data.zones.find(q => q.id === 'zone:tiber').multipolygon, riverEdges = tiber.flatMap(poly => poly.flatMap(r => r.slice(1).map((b, n) => [r[n], b])));
+const crosses = (a, b, c, e) => { const o = (p, q, r) => Math.sign((q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0])); return o(a, b, c) !== o(a, b, e) && o(c, e, a) !== o(c, e, b); };
+// Bridges a road may cross at: the Pons Neronianus (a marker) and the Pons Mulvius, where the Via Flaminia crosses 3 km north (Ponte Milvio today).
+const bridges = [data.markers.find(m => m.id === 'marker:pons-neronianus').coordinate, [12.4669, 41.9357]];
+const atBridge = (a, b) => bridges.some(c => [a, b, [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]].some(p => Math.hypot((p[0] - c[0]) * KX, (p[1] - c[1]) * KY) < 150));
+for (const l of data.lines.filter(l => l.kind === 'road')) for (const line of [...l.lines, ...(l.gaps ?? [])]) for (let n = 1; n < line.length; n++)
+  if (!atBridge(line[n - 1], line[n])) assert.ok(!riverEdges.some(([c, e]) => crosses(line[n - 1], line[n], c, e)), `${l.id} does not cross the Tiber at ${line[n]}`);
 for (const r of ['flaminia', 'salaria', 'nomentana', 'tiburtina', 'labicana', 'praenestina', 'latina', 'appia', 'ostiensis', 'portuensis', 'aurelia', 'triumphalis', 'cornelia']) assert.ok(lines.has(`road:via-${r}`), `Via ${r} is drawn`);
 assert.equal(lines.get('road:via-appia').certainty, 'documented', 'the Via Appia is documented');
 assert.equal(lines.get('road:via-cornelia').certainty, 'illustrative', 'the hand-drawn Via Cornelia is illustrative');
@@ -103,7 +117,7 @@ assert.ok(!inside([12.4846, 41.8956], now.filter(q => q.use === 'monumental').fl
 
 // Markers: fourteen regions plus anchors, each dated and inside what it labels.
 const markers = new Map(data.markers.map(m => [m.id, m]));
-const suburbMarkers = new Set(['marker:pons-neronianus', 'marker:via-triumphalis-necropolis']);
+const suburbMarkers = new Set(['marker:pons-neronianus', 'marker:via-triumphalis-necropolis', 'marker:caecilia-metella']);
 for (const m of data.markers) { dated(m, 40); assert.equal(inside(m.coordinate, extent), !suburbMarkers.has(m.id), `${m.id} is ${suburbMarkers.has(m.id) ? 'outside' : 'inside'} the city`); }
 for (const n of ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x', 'xi', 'xii', 'xiii', 'xiv']) assert.ok(markers.has(`marker:regio-${n}`), `Regio ${n.toUpperCase()} has a marker`);
 assert.ok(inside(markers.get('marker:regio-xiv').coordinate, z('zone:residential-trastevere').multipolygon), 'Regio XIV is in Trastevere');

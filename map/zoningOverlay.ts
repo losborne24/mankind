@@ -21,7 +21,7 @@ export function zoningOverlay(map: Map, onInspect: (id: string) => void) {
   const handover = ['-', 1, ['coalesce', ['global-state', 'local-ground'], 0]] as never;
   const hidden = { visibility: 'none' } as const;
   map.addLayer({ id: fill, type: 'fill', source, filter: role('zone'), layout: hidden,
-    paint: { 'fill-color': ['get', 'color'], 'fill-opacity': ['*', ['match', ['get', 'ring'], 'campagna', 0, 'suburbium', ['case', ['==', ['get', 'use'], 'suburban'], .3, .5], certainty(.55, .5, .32)], handover] as never } }, before);
+    paint: { 'fill-color': ['get', 'color'], 'fill-opacity': ['*', ['match', ['get', 'ring'], 'campagna', 0, 'suburbium', ['case', ['==', ['get', 'use'], 'suburban'], ['match', ['get', 'band'], 1, .32, 2, .22, .12], .5], certainty(.55, .5, .32)], handover] as never } }, before);
   map.addLayer({ id: outline, type: 'line', source, filter: ['all', role('zone'), ['!', ['in', ['get', 'ring'], ['literal', ['river', 'campagna']]]], ['!=', ['get', 'use'], 'suburban']] as never, layout: hidden,
     paint: { 'line-color': ['get', 'color'], 'line-width': ['interpolate', ['linear'], ['zoom'], 12, 1, 16, 2] as never, 'line-opacity': ['*', certainty(.95, .9, .45), handover] as never,
       'line-dasharray': certainty(['literal', [1, 0]], ['literal', [3, 2]], ['literal', [1, 2]]) } }, before);
@@ -47,11 +47,13 @@ export function zoningOverlay(map: Map, onInspect: (id: string) => void) {
       const features: Feature[] = [
         ...(shown.has(area.id) ? [{ type: 'Feature', properties: { role: 'extent', id: area.id }, geometry: { type: 'LineString', coordinates: area.ring } } as Feature] : []),
         ...romeZoning.zones.filter(z => shown.has(z.id)).flatMap((z): Feature[] => {
-          const properties = { id: z.id, short: z.short, certainty: z.certainty, color: colourOf(z), ring: z.ring, use: z.use };
+          const properties = { id: z.id, short: z.short ?? '', certainty: z.certainty, color: colourOf(z), ring: z.ring, use: z.use, band: z.band ?? 0 };
           return [...z.multipolygon.map((coordinates): Feature => ({ type: 'Feature', properties: { ...properties, role: 'zone' }, geometry: { type: 'Polygon', coordinates } })),
             { type: 'Feature', properties: { ...properties, role: 'label' }, geometry: { type: 'Point', coordinates: z.label } }];
         }),
-        ...romeZoning.lines.filter(l => shown.has(l.id)).map((l): Feature => ({ type: 'Feature', properties: { role: 'line', id: l.id, kind: l.kind, certainty: l.certainty, color: lineColour[l.kind] }, geometry: { type: 'MultiLineString', coordinates: l.lines } })),
+        ...romeZoning.lines.filter(l => shown.has(l.id)).flatMap((l): Feature[] => [{ type: 'Feature', properties: { role: 'line', id: l.id, kind: l.kind, certainty: l.certainty, color: lineColour[l.kind] }, geometry: { type: 'MultiLineString', coordinates: l.lines } },
+          // Gaps in the source: the road assumed to run on, drawn dotted whatever the road's own certainty.
+          ...(l.gaps?.length ? [{ type: 'Feature', properties: { role: 'line', id: l.id, kind: l.kind, certainty: 'illustrative', color: lineColour[l.kind] }, geometry: { type: 'MultiLineString', coordinates: l.gaps } } as Feature] : [])]),
         ...romeZoning.markers.filter(m => shown.has(m.id)).map((m): Feature => ({ type: 'Feature', properties: { role: 'marker', id: m.id, kind: m.kind, certainty: m.certainty, short: m.title.replace(/ \(.*\)$/, '') }, geometry: { type: 'Point', coordinates: m.coordinate } })),
       ];
       (map.getSource(source) as GeoJSONSource | undefined)?.setData({ type: 'FeatureCollection', features } as FeatureCollection);

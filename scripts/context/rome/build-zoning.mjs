@@ -76,6 +76,8 @@ const ANIENE_WAYS = new Set([184762450, 216887342, 216888510]);
 const fullRiver = polygonClipping.intersection(polygonClipping.union(...tiberSnapshot.elements.filter(e => !ANIENE_WAYS.has(e.id)).map(polygonOf)), [FRAME]);
 const aniene = polygonClipping.difference(polygonClipping.intersection(polygonClipping.union(...tiberSnapshot.elements.filter(e => ANIENE_WAYS.has(e.id)).map(polygonOf),
   ...suburbSnapshot.elements.filter(e => e.id === 16025341).map(polygonOf)), [FRAME]), fullRiver);
+/** Union of many polygons, pairwise in a tree: one call over hundreds of overlapping shapes overflows polygon-clipping's stack. */
+const unionAll = shapes => { let level = shapes.filter(x => x.length); while (level.length > 1) { const next = []; for (let n = 0; n < level.length; n += 2) next.push(n + 1 < level.length ? polygonClipping.union(level[n], level[n + 1]) : level[n]); level = next; } return level[0] ?? []; };
 const closed = ring => [[...ring.map(round), round(ring[0])]];
 // East bank: up today's bank from the Emporium to the Mausoleum, then clockwise round the Pincian gardens, the Castra Praetoria,
 // the Esquiline plateau, the Caelian and the Aventine back to the river below the Emporium.
@@ -91,15 +93,46 @@ const riverBetween = polygonClipping.intersection([[river]],   // outer outline 
 const core = polygonClipping.union(eastCore, westCore, riverBetween);
 
 // ---- Roads: the consular roads, each drawn along the modern streets that keep its line (OpenStreetMap), simplified at 8 m and kept
-// inside the frame. Two short links have no modern street and are drawn by hand: the Via Cornelia west from the Pons Neronianus along
-// the north side of the circus (Pleiades), and the Via Triumphalis from the bridge to where the modern Via Trionfale begins.
+// inside the frame. A road's streets are joined into one chain running out from the city: second carriageways and parallel pieces are
+// dropped and the chain is joined across jumps that the street's own pieces run alongside; where the named street really breaks off and
+// resumes further out (up to 3 km on), the break is kept as a gap, drawn dashed.
+// Two links have no modern street and are drawn by hand: the Via Cornelia west from the Pons Neronianus along the north side of the
+// circus (Pleiades), and the Via Triumphalis from the bridge to where the modern Via Trionfale begins.
 const insideFrame = p => p[0] > FRAME[0][0] && p[0] < FRAME[1][0] && p[1] > FRAME[0][1] && p[1] < FRAME[2][1];
 const streets = name => suburbSnapshot.elements.filter(e => e.type === 'way' && e.name === name).map(e => simplify(e.geometry, 8))
   .flatMap(line => { const runs = [[]]; for (const p of line) { if (insideFrame(p)) runs.at(-1).push(round(p)); else if (runs.at(-1).length) runs.push([]); } return runs.filter(r => r.length > 1); });
-const PONS_NERONIANUS = round(pl('pons-neronianus').reprPoint);
-const trionfale = streets('Via Trionfale'), trionfaleStart = trionfale.flat().reduce((a, p) => p[1] < a[1] ? p : a);
+const PONS_NERONIANUS = round(pl('pons-neronianus').reprPoint), CITY_CENTRE = [12.4885, 41.8925];
+const metres = (a, b) => Math.hypot((b[0] - a[0]) * KX, (b[1] - a[1]) * KY), lengthOf = line => line.slice(1).reduce((sum, b, n) => sum + metres(line[n], b), 0);
+const toLine = (p, line) => Math.min(...line.slice(1).map((b, n) => { const a = line[n], dx = (b[0] - a[0]) * KX, dy = (b[1] - a[1]) * KY, px = (p[0] - a[0]) * KX, py = (p[1] - a[1]) * KY, t = Math.max(0, Math.min(1, (px * dx + py * dy) / (dx * dx + dy * dy || 1))); return Math.hypot(px - t * dx, py - t * dy); }));
+const densify = (line, step) => line.slice(1).reduce((out, b, n) => { const a = line[n], k = Math.max(1, Math.ceil(metres(a, b) / step)); for (let i = 1; i <= k; i++) out.push([a[0] + (b[0] - a[0]) * i / k, a[1] + (b[1] - a[1]) * i / k]); return out; }, [line[0]]);
+/** One road from its pieces: drop pieces that mostly run within 35 m of a longer one, then chain outwards from the city. */
+function chain(pieces, maxGap = 3000) {
+  const kept = [];
+  for (const piece of pieces.slice().sort((a, b) => lengthOf(b) - lengthOf(a))) if (piece.filter(p => kept.some(k => toLine(p, k) < 35)).length / piece.length < 0.6) kept.push(piece);
+  if (!kept.length) return { lines: [], gaps: [] };
+  const fromCentre = p => metres(p, CITY_CENTRE), nearEnd = piece => Math.min(fromCentre(piece[0]), fromCentre(piece.at(-1)));
+  let first = kept.reduce((best, piece) => nearEnd(piece) < nearEnd(best) ? piece : best), rest = kept.filter(piece => piece !== first);
+  if (fromCentre(first.at(-1)) < fromCentre(first[0])) first = first.slice().reverse();
+  const lines = [first.slice()], gaps = [];
+  for (;;) {
+    const end = lines.at(-1).at(-1);
+    let best = null;
+    for (const piece of rest) for (const reversed of [false, true]) {
+      const [a, b] = reversed ? [piece.at(-1), piece[0]] : [piece[0], piece.at(-1)], gap = metres(end, a);
+      if (gap <= maxGap && fromCentre(b) > fromCentre(end) && (!best || gap < best.gap)) best = { piece, gap, reversed };
+    }
+    if (!best) break;
+    rest = rest.filter(piece => piece !== best.piece);
+    const next = best.reversed ? best.piece.slice().reverse() : best.piece;
+    // A jump the street's own pieces run alongside (between carriageways, or over a dropped piece) is road; elsewhere it is a gap.
+    const covered = best.gap < 1 || densify([end, next[0]], 20).every(p => pieces.some(piece => toLine(p, piece) < 40));
+    if (covered) lines.at(-1).push(...(best.gap < 1 ? next.slice(1) : next)); else { gaps.push([end, next[0]]); lines.push(next.slice()); }
+  }
+  return { lines, gaps };
+}
+const trionfaleStart = chain(streets('Via Trionfale')).lines[0][0];
 const roadDefs = [
-  ['via-flaminia', 'Via Flaminia', ['Via Flaminia'], 'approximate', -220, 'Built by Gaius Flaminius in 220 BC; it left the Campus Martius northwards and crossed the Tiber at the Pons Mulvius, 3 km north (Wikipedia). Drawn along today\'s Via Flaminia.', ['source:wikipedia-via-flaminia']],
+  ['via-flaminia', 'Via Flaminia', ['Via Flaminia'], 'approximate', -220, 'Built by Gaius Flaminius in 220 BC; it left the Campus Martius northwards and crossed the Tiber at the Pons Mulvius, 3 km north (Wikipedia). Drawn along today\'s Via Flaminia; the dashed stretch over the river is that crossing, where today\'s bridge (Ponte Milvio) carries another name.', ['source:wikipedia-via-flaminia']],
   ['via-salaria', 'Via Salaria', ['Via Salaria'], 'approximate', -500, 'The salt road to the Sabine country, among the oldest (Wikipedia). Drawn along today\'s Via Salaria.', ['source:wikipedia-via-salaria']],
   ['via-nomentana', 'Via Nomentana', ['Via Nomentana'], 'approximate', -500, 'To Nomentum; it started at the Porta Collina of the Servian wall until the 3rd century (Wikipedia). Drawn along today\'s Via Nomentana.', [P('via-nomentana'), 'source:wikipedia-via-nomentana']],
   ['via-tiburtina', 'Via Tiburtina', ['Via Tiburtina'], 'approximate', -307, 'To Tibur, probably built in 307 BC (Wikipedia). Drawn along today\'s Via Tiburtina.', ['source:wikipedia-via-tiburtina']],
@@ -111,12 +144,15 @@ const roadDefs = [
   ['via-portuensis', 'Via Portuensis', ['Via Portuense'], 'approximate', 46, 'To Portus, Claudius\'s harbour (begun AD 46), along the right bank (Wikipedia). Drawn along today\'s Via Portuense.', ['source:wikipedia-via-portuensis']],
   ['via-aurelia', 'Via Aurelia', ['Via Aurelia Antica'], 'approximate', -241, 'West along the coast of Etruria, built in the middle Republic (Wikipedia). Drawn along today\'s Via Aurelia Antica over the Janiculum.', ['source:wikipedia-via-aurelia']],
   ['via-triumphalis', 'Via Triumphalis', ['Via Trionfale'], 'approximate', -100, 'From the Pons Neronianus towards Monte Mario (Pleiades), with a necropolis along it. Drawn along today\'s Via Trionfale, which keeps its line north of the Vatican; the link from the bridge to it is drawn by hand and is a guess.', [P('via-triumphalis'), 'source:wikipedia-via-triumphalis'],
-    [[PONS_NERONIANUS, [12.4600, 41.9040], trionfaleStart]]],
+    [], [[PONS_NERONIANUS, [12.4600, 41.9040], trionfaleStart]]],
   ['via-cornelia', 'Via Cornelia', [], 'illustrative', 40, 'Ran along the north side of the Circus of Gaius and Nero (Pleiades), perhaps built by Caligula as an approach to the Horti Agrippinae (Wikipedia). No modern street keeps it: the line west from the Pons Neronianus is drawn by hand and is a guess.', [P('via-cornelia'), 'source:wikipedia-via-cornelia'],
     [[PONS_NERONIANUS, [12.4590, 41.9033], [12.4530, 41.9032], [12.4460, 41.9040], [12.4380, 41.9060]]]],
 ];
-const roads = roadDefs.map(([key, title, names, certainty, from, note, sourceIds, hand = []]) => ({ id: `road:${key}`, kind: 'road', title, certainty, time: { start: { year: from }, end: { year: 600 } },
-  note, sources: sourceIds, lines: [...names.flatMap(streets), ...hand.map(line => line.map(round))] }));
+const roads = roadDefs.map(([key, title, names, certainty, from, note, sourceIds, hand = [], handGaps = []]) => {
+  const { lines, gaps } = chain(names.flatMap(streets));
+  return { id: `road:${key}`, kind: 'road', title, certainty, time: { start: { year: from }, end: { year: 600 } }, note: gaps.length || handGaps.length ? `${note} Where the street breaks off, the gap is drawn dashed: the road is taken to run straight on, a guess.` : note,
+    sources: sourceIds, lines: [...lines, ...hand.map(line => line.map(round))], gaps: [...gaps, ...handGaps].map(line => line.map(round)) };
+});
 // Aqueducts. The Aqua Claudia and Anio Novus shared one line of arches into the city at the later Porta Maggiore (Wikipedia). OpenStreetMap
 // maps only the standing arches in the Campagna (the ways below; Pleiades cites the first); the link from them to the city is drawn by hand
 // through Pleiades' point for the Aqua Claudia. The later Acqua Felice (1586), which OpenStreetMap maps along part of that line, is not used.
@@ -145,7 +181,8 @@ const segment = (a, b, wa, wb) => { const dx = (b[0] - a[0]) * KX, dy = (b[1] - 
   const side = (p, w, s, along) => [p[0] + (-uy * w * s + ux * along) / KX, p[1] + (ux * w * s + uy * along) / KY];
   return closed([side(a, wa, 1, -wa / 2), side(b, wb, 1, wb / 2), side(b, wb, -1, wb / 2), side(a, wa, -1, -wa / 2)]); };
 const near = [], far = [];
-for (const line of roads.filter(r => r.certainty !== 'illustrative').flatMap(r => r.lines)) {
+// Gaps of up to 400 m carry the ribbon on; longer ones do not.
+for (const line of roads.filter(r => r.certainty !== 'illustrative').flatMap(r => [...r.lines, ...r.gaps.filter(g => metres(g[0], g[1]) <= 400)])) {
   // Densify to about 100 m so the taper follows distance, not the street's own vertices.
   const dense = line.slice(1).flatMap((b, n) => { const a = line[n], steps = Math.max(1, Math.ceil(Math.hypot((b[0] - a[0]) * KX, (b[1] - a[1]) * KY) / 100)); return Array.from({ length: steps }, (_, k) => [a[0] + (b[0] - a[0]) * (k + 1) / steps, a[1] + (b[1] - a[1]) * (k + 1) / steps]); });
   const pts = [line[0], ...dense], dist = pts.map(toCore);
@@ -155,11 +192,11 @@ for (const line of roads.filter(r => r.certainty !== 'illustrative').flatMap(r =
     (d < NEAR ? near : far).push(segment(pts[n - 1], pts[n], halfWidth(dist[n - 1]), halfWidth(dist[n])));
   }
 }
-const nearRibbons = polygonClipping.union(...near), attached = nearRibbons.filter(poly => polygonClipping.intersection([poly], core).length);
+const nearRibbons = unionAll(near), attached = nearRibbons.filter(poly => polygonClipping.intersection([poly], core).length);
 const extent = polygonClipping.union(core, attached);
 if (extent.length !== 1) throw Error(`extent has ${extent.length} pieces`);
 const ribbonOnly = polygonClipping.difference(attached, core);
-const farRibbons = polygonClipping.difference(polygonClipping.union(...far, ...nearRibbons.filter(poly => !attached.includes(poly)).map(poly => [poly])), extent);
+const farRibbons = polygonClipping.difference(unionAll([...far, ...nearRibbons.filter(poly => !attached.includes(poly)).map(poly => [poly])]), extent);
 
 // ---- Sources. Everything here is cited for text or a point; nothing restricted is used for geometry.
 const src = (id, title, url, licence) => ({ id, title, url, licence });
@@ -187,6 +224,7 @@ const sources = [
   src('source:wikipedia-pons-neronianus', 'Wikipedia · Pons Neronianus', 'https://en.wikipedia.org/wiki/Pons_Neronianus', 'CC BY-SA 4.0 · text read'),
   src('source:wikipedia-castel-sant-angelo', 'Wikipedia · Castel Sant\'Angelo (Hadrian\'s tomb, AD 134-139)', 'https://en.wikipedia.org/wiki/Castel_Sant%27Angelo', 'CC BY-SA 4.0 · text read for dates'),
   src('source:wikipedia-baths-of-caracalla', 'Wikipedia · Baths of Caracalla (built AD 212-216)', 'https://en.wikipedia.org/wiki/Baths_of_Caracalla', 'CC BY-SA 4.0 · text read for dates'),
+  src('source:wikipedia-caecilia-metella', 'Wikipedia · Tomb of Caecilia Metella (third mile of the Via Appia, c. 30-10 BC)', 'https://en.wikipedia.org/wiki/Tomb_of_Caecilia_Metella', 'CC BY-SA 4.0 · text read'),
   src('source:wikipedia-roman-campagna', 'Wikipedia · Roman Campagna', 'https://en.wikipedia.org/wiki/Roman_Campagna', 'CC BY-SA 4.0 · text read'),
   src('source:wikipedia-aniene', 'Wikipedia · Aniene (the ancient Anio)', 'https://en.wikipedia.org/wiki/Aniene', 'CC BY-SA 4.0 · text read'),
   src('source:osm-suburbium', 'OpenStreetMap · streets on the consular roads, Aqua Claudia ways 98554683 and 781857867, Anio Novus way 128274578, Aniene relation 16025341', 'https://www.openstreetmap.org/way/781857867', suburbSnapshot.licence),
@@ -388,23 +426,36 @@ for (const z of suburbDrawn) {
   const { outline: _o, later: _l, ...rest } = z; void _o; void _l;
   resolved.push({ ...rest, ring: 'suburbium', multipolygon: shape });
 }
+// Tombs along the Via Appia: from the edge of the city past the Tomb of Caecilia Metella (third mile), 90 m wide.
+const CAECILIA = round(pl('caecilia-metella').reprPoint), appia = roads.find(r => r.id === 'road:via-appia');
+const appiaPath = [...appia.lines.flat()], cmAt = appiaPath.reduce((best, p, n) => metres(p, CAECILIA) < metres(appiaPath[best], CAECILIA) ? n : best, 0);
+const appiaOut = densify(appiaPath.slice(0, cmAt + 1), 50), beyond = densify(appiaPath.slice(cmAt), 50).filter((p, n, all) => lengthOf(all.slice(0, n + 1)) < 400);
+const tombPath = [...appiaOut, ...beyond.slice(1)].filter(p => toCore(p) > 0);
+const appiaTombs = keep(polygonClipping.difference(polygonClipping.intersection(unionAll(tombPath.slice(1).map((b, n) => segment(tombPath[n], b, 45, 45))), [FRAME]), suburbTaken));
+suburbTaken = polygonClipping.union(suburbTaken, appiaTombs);
+resolved.push({ id: 'zone:via-appia-tombs', use: 'necropolis', ring: 'suburbium', density: 0.3, title: 'Tombs along the Via Appia', certainty: 'approximate', time: { start: { year: -300 }, end: { year: 400 } }, multipolygon: appiaTombs,
+  note: 'The Appian Way was lined with tombs outside the city; the Tomb of Caecilia Metella at the third mile (built c. 30-10 BC) is one of the best preserved (Wikipedia). Drawn along the road from the edge of the continuous city to about 400 m past that tomb, 90 m wide: the line is the road\'s, the width and length are a guess.',
+  sources: ['source:wikipedia-via-appia', 'source:wikipedia-caecilia-metella', P('caecilia-metella')] });
 const suburbRoadside = keep(polygonClipping.difference(polygonClipping.intersection(farRibbons, [FRAME]), suburbTaken));
 suburbTaken = polygonClipping.union(suburbTaken, suburbRoadside);
 resolved.push({ id: 'zone:suburb-roadside', use: 'residential', housing: 'roadside', ring: 'suburbium', density: 0.2, title: 'Suburbium · tombs, inns, workshops and small clusters along the roads', certainty: 'illustrative',
   time: { start: { year: 0 }, end: { year: 300 } }, multipolygon: suburbRoadside,
   note: 'Along each consular road from about 700 m to 2.5 km beyond the continuous city, narrowing from 60 m to 25 m wide: tombs, inns, workshops and small clusters of houses, as the tomb-lined Via Appia and Via Latina show (Wikipedia). The roads are sourced; the ribbons, their width and their length are a guess.',
   sources: ['source:osm-suburbium', 'source:wikipedia-via-appia', 'source:wikipedia-via-latina'] });
-// The belt: within 1.2 km of the continuous city, and within 900 m of a road out to 3.5 km, so it reaches out along the roads the way
-// suburban building did, rather than as a ring. Circles round points every 250 m or so.
-const spaced = (points, step) => points.reduce((out, p) => (!out.length || Math.hypot((p[0] - out.at(-1)[0]) * KX, (p[1] - out.at(-1)[1]) * KY) > step ? [...out, p] : out), []);
-const circle = (c, r) => closed(Array.from({ length: 20 }, (_, k) => [c[0] + Math.cos(k * Math.PI / 10) * r / KX, c[1] + Math.sin(k * Math.PI / 10) * r / KY]));
-const roadPoints = roads.filter(r => r.certainty !== 'illustrative').flatMap(r => r.lines.flatMap(line => spaced(line, 250))).filter(p => toCore(p) < 3500);
-const offset = polygonClipping.union(...spaced(extent[0][0], 250).map(p => circle(p, 1200)), ...roadPoints.map(p => circle(p, 900)));
-const belt = keep(polygonClipping.difference(polygonClipping.intersection(offset, [FRAME]), suburbTaken));
-suburbTaken = polygonClipping.union(suburbTaken, belt);
-resolved.push({ id: 'zone:suburb-belt', use: 'suburban', ring: 'suburbium', density: 0.04, title: 'Suburbium · villas, gardens and farms between the roads', certainty: 'illustrative', time: { start: { year: 0 }, end: { year: 300 } }, multipolygon: belt,
-  note: 'The land within about 1.2 km of the continuous city and up to 3.5 km out along the roads: suburban villas and horti like those named on the Vatican plain and the Esquiline, with farms and pasture. Nothing here is placed from a source; the belt\'s shape and its character are a guess.',
-  sources: [P('vaticanus-ager'), P('horti-agrippinae'), 'source:platner-1929'] });
+// The belt, in three bands that thin out with distance from the city and from the roads (out to 2.5 km from the city): within 300 m,
+// 300-700 m and 700-1,200 m. Each band is the union of circles round points spaced half its width apart, so the edges stay smooth.
+const circle = (c, r) => closed(Array.from({ length: 16 }, (_, k) => [c[0] + Math.cos(k * Math.PI / 8) * r / KX, c[1] + Math.sin(k * Math.PI / 8) * r / KY]));
+const beltRoads = roads.filter(r => r.certainty !== 'illustrative').flatMap(r => r.lines);
+const around = r => unionAll([extent, ...densify(extent[0][0], r / 2).map(p => circle(p, r)),
+  ...beltRoads.flatMap(line => densify(line, r / 2)).filter(p => toCore(p) < 2500).map(p => circle(p, r))]);
+const BANDS = [[300, 0.06, 'Suburbium · villas, gardens and farms close to the city and the roads'], [700, 0.03, 'Suburbium · scattered villas and farms'], [1200, 0.012, 'Suburbium · farms thinning into the Campagna']];
+BANDS.forEach(([radius, density, title], n) => {
+  const band = keep(polygonClipping.difference(polygonClipping.intersection(around(radius), [FRAME]), suburbTaken));
+  suburbTaken = polygonClipping.union(suburbTaken, band);
+  resolved.push({ id: `zone:suburb-belt-${n + 1}`, use: 'suburban', band: n + 1, ring: 'suburbium', density, title, certainty: 'illustrative', time: { start: { year: 0 }, end: { year: 300 } }, multipolygon: band,
+    note: `Land ${n ? `${BANDS[n - 1][0]}-${radius}` : `within ${radius}`} m of the continuous city or of a road (out to 2.5 km from the city), between the roads: suburban villas and horti like those named on the Vatican plain and the Esquiline, with farms and pasture, thinning with distance. Nothing here is placed from a source; the bands and their densities are a guess.`,
+    sources: [P('vaticanus-ager'), P('horti-agrippinae'), 'source:platner-1929'] });
+});
 const campagna = keep(polygonClipping.difference([FRAME], suburbTaken));
 resolved.push({ id: 'zone:campagna', use: 'campagna', ring: 'campagna', density: 0.01, title: 'Roman Campagna · farmland, pasture and scattered villas', certainty: 'illustrative', time: { start: { year: -300 }, end: { year: 400 } }, multipolygon: campagna,
   note: 'The low countryside round Rome beyond the suburbium (Wikipedia, Roman Campagna): farmland, pasture and scattered villas and tombs. Nothing here is placed from a source; where it begins is a guess.',
@@ -429,7 +480,7 @@ const shortNames = { 'zone:tiber': 'Tiber', 'zone:forum-palatine': 'Fora · Pala
   'zone:campus-river': 'Trigarium', 'zone:residential-dense': 'Dense housing', 'zone:residential-hills': 'Hill housing', 'zone:residential-elite': 'Elite houses',
   'zone:residential-trastevere': 'Trastevere', 'zone:residential-roadside': 'Roadside', 'zone:aniene': 'Aniene', 'zone:baths-of-caracalla': 'Baths of Caracalla',
   'zone:circus-vaticanus': 'Circus of Gaius and Nero', 'zone:vatican-necropolis': 'Necropolis', 'zone:horti-domitiae': 'Horti Domitiae', 'zone:horti-agrippinae': 'Horti Agrippinae',
-  'zone:mausoleum-hadriani': "Hadrian's Mausoleum", 'zone:suburb-roadside': 'Roadside tombs', 'zone:suburb-belt': 'Suburbium', 'zone:campagna': 'Campagna' };
+  'zone:mausoleum-hadriani': "Hadrian's Mausoleum", 'zone:suburb-roadside': 'Roadside', 'zone:suburb-belt-1': 'Suburbium', 'zone:via-appia-tombs': 'Appia tombs', 'zone:campagna': 'Campagna' };
 for (const z of resolved) if (!z.multipolygon.length) throw Error(`${z.id} is empty after the cuts`);
 const zones = resolved.sort((a, b) => priority.indexOf(a.use) - priority.indexOf(b.use)).map(z => ({
   ...z, short: shortNames[z.id], area: Math.round(areaOf(z.multipolygon)), label: labelPoint(z.multipolygon.slice().sort((a, b) => areaOf([b]) - areaOf([a]))[0]),
@@ -456,6 +507,8 @@ const markers = [
     note: why ?? 'Placed at the Pleiades representative point; the zone around it is drawn from it.', sources: [P(key), 'source:platner-1929'] })),
   { id: 'marker:pons-neronianus', kind: 'anchor', title: 'Pons Neronianus', coordinate: PONS_NERONIANUS, certainty: 'approximate', time: { start: { year: 40 }, end: { year: 400 } },
     note: 'A bridge built by Caligula or Nero to join the Campus Martius to the Vatican fields (Wikipedia); there is no direct evidence that Nero built it. Placed at the Pleiades point; the Via Triumphalis and Via Cornelia start here.', sources: [P('pons-neronianus'), 'source:wikipedia-pons-neronianus'] },
+  { id: 'marker:caecilia-metella', kind: 'anchor', title: 'Tomb of Caecilia Metella', coordinate: CAECILIA, certainty: 'approximate', time: { start: { year: -20 }, end: { year: 2025 } },
+    note: 'A drum on a square podium at the third mile of the Via Appia, probably built c. 30-10 BC (Wikipedia). At the Pleiades point.', sources: [P('caecilia-metella'), 'source:wikipedia-caecilia-metella'] },
   { id: 'marker:via-triumphalis-necropolis', kind: 'anchor', title: 'Via Triumphalis necropolis', coordinate: round(pl('via-triumphalis-necropolis').reprPoint), certainty: 'approximate', time: { start: { year: -30 }, end: { year: 330 } },
     note: 'A stretch of imperial necropolis preserved along the road (Pleiades), at the Pleiades point.', sources: [P('via-triumphalis-necropolis')] },
 ];
