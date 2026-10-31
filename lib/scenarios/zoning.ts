@@ -8,9 +8,9 @@ export type HousingClass = 'dense' | 'mixed' | 'elite' | 'roadside';
 interface Dated { id: string; title: string; certainty: ContextCertainty; time: HistoricalTime; note: string; sources: string[] }
 export interface Zone extends Dated {
   use: ZoneUse;
-  /** Suburbium only: 1 nearest the city and the roads to 3 farthest, fading towards the Campagna. */
+  /** Suburbium only: the class cut from the density field, 1 dense, 2 thinning, 3 sparse. */
   band?: number;
-  /** Rivers only: an opacity per polygon for the 3D map, fading them out with the suburban field towards the frame. */
+  /** Rivers only: an opacity per polygon for the 3D map, fading them out over the last kilometre inside the frame. */
   fade?: number[];
   /** Where the zone lies: the continuous city, the suburbium round it, the Campagna beyond, or the rivers that cross all three. */
   ring: 'city' | 'suburbium' | 'campagna' | 'river';
@@ -43,8 +43,8 @@ export const romeZoning = zoning as unknown as {
   title: string;
   extent: Dated & { area: number; ring: [number, number][] };
   frame: [number, number][];
-  /** The suburban density field as an image: corners [west, north] and [east, south]; it fades out radially from `fade.from` to `fade.to` metres round `fade.centre`. */
-  suburbImage: { bounds: [[number, number], [number, number]]; fade: { centre: [number, number]; from: number; to: number }; png: string };
+  /** Roads and rivers fade out over this many metres inside the frame, so they do not stop at its square edge. */
+  edgeFade: number;
   lines: ZoneLine[];
   sources: { id: string; title: string; url: string; licence: string }[];
   zones: Zone[];
@@ -54,12 +54,14 @@ export const romeZoning = zoning as unknown as {
 export const zoneUseLabel: Record<ZoneUse, string> = { residential: 'Housing', monumental: 'Monumental and public', necropolis: 'Tombs', horti: 'Horti (estate gardens)', port: 'Port and warehouses', open: 'Open ground', 'open-river': 'River', suburban: 'Suburbium', campagna: 'Campagna' };
 export const zoneColour: Record<ZoneUse, string> = { residential: '#c46a4a', monumental: '#f4ecd6', necropolis: '#a99bbd', horti: '#b5e07a', port: '#b08a4e', open: '#d8c76a', 'open-river': '#5f8ea3', suburban: '#8fae68', campagna: '#c9bd8c' };
 export const lineColour: Record<ZoneLine['kind'], string> = { road: '#e8d3a2', aqueduct: '#b7c7d6' };
-/** 1 within the suburban field's fade radius, falling to 0 at its outer radius: the same radial fade the field and the plan use. */
-export function radialFade(p: [number, number]) {
-  const { centre, from, to } = romeZoning.suburbImage.fade, kx = Math.cos(41.892 * Math.PI / 180) * 111320;
-  const d = Math.hypot((p[0] - centre[0]) * kx, (p[1] - centre[1]) * 110950);
-  return Math.min(1, Math.max(0, (to - d) / (to - from)));
+/** 1 more than `edgeFade` metres inside the frame, falling to 0 at its edge: how roads and rivers fade out in the plan and on the map. */
+export function edgeFade(p: [number, number]) {
+  const [[w, s], , [e, n]] = romeZoning.frame, kx = Math.cos(41.892 * Math.PI / 180) * 111320;
+  const d = Math.min((p[0] - w) * kx, (e - p[0]) * kx, (p[1] - s) * 110950, (n - p[1]) * 110950);
+  return Math.min(1, Math.max(0, d / romeZoning.edgeFade));
 }
+/** Zones the plan and the map leave unlabelled: the suburban classes and the roadside ribbons are legend categories. */
+export const unlabelled = (z: Pick<Zone, 'use' | 'housing'>) => z.use === 'suburban' || z.housing === 'roadside';
 const housingColour: Record<HousingClass, string> = { dense: '#c46a4a', mixed: '#d98d66', elite: '#ebb596', roadside: '#9a5a40' };
 const mix = (a: string, b: string, t: number) => '#' + [0, 2, 4].map(i => Math.round(parseInt(a.slice(1 + i, 3 + i), 16) * (1 - t) + parseInt(b.slice(1 + i, 3 + i), 16) * t).toString(16).padStart(2, '0')).join('');
 export const colourOf = (z: Pick<Zone, 'housing' | 'use' | 'band'>) => z.housing ? housingColour[z.housing] : z.use === 'suburban' && z.band ? mix(zoneColour.suburban, zoneColour.campagna, [0, 0, .4, .75][z.band]) : zoneColour[z.use];

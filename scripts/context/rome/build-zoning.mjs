@@ -8,7 +8,6 @@
 // Output: lib/scenarios/fixtures/rome-ad100-zoning.json, longitude/latitude, zones that never overlap (each is cut by every zone
 // of higher priority), with an evidence tier, an existence interval and a source note each.
 import { readFile, writeFile } from 'node:fs/promises';
-import { deflateSync } from 'node:zlib';
 import polygonClipping from 'polygon-clipping';
 const json = async path => JSON.parse(await readFile(path, 'utf8'));
 const pleiades = await json('data/history/rome/source/pleiades-zoning.json');
@@ -473,7 +472,7 @@ resolved.push({ id: 'zone:suburb-roadside', use: 'residential', housing: 'roadsi
 // ---- The suburbium as a continuous density field on the elevation grid (60 m cells; Mapterhorn / Copernicus GLO-30). Density falls off
 // with distance from the continuous city (scale 700 m) and from the roads (250 m, weakening over 2.5 km from the city); it is zero on
 // water, reduced on the floodplain (ground less than about 8 m above the nearest river surface) and on slopes steeper than 10 %. The
-// zone is where it is at least 0.2; the Campagna is the rest. The field is drawn as an image, not as bands.
+// classes below are contours of it; the Campagna is the rest.
 const G = { west: dem.frame[0], north: dem.frame[3], cell: dem.cell, cols: dem.cols, rows: dem.rows };
 const cellCentre = (r, c) => [G.west + (c + 0.5) * G.cell / KX, G.north - (r + 0.5) * G.cell / KY];
 const edgesOf = mp => mp.flatMap(poly => poly.flatMap(ring => ring.slice(1).map((b, n) => [ring[n], b])));
@@ -502,47 +501,34 @@ for (let r = 0; r < G.rows; r++) for (let c = 0; c < G.cols; c++) {
   if (flood < 1) limits.floodplain++; if (steep < 1) limits.steep++;
   field[i] = Math.max(CAMPAGNA_FLOOR, base * flood * steep);
 }
-// The suburbium zone: cells at 0.2 or more, merged row by row into rectangles, outside everything already placed.
-const SUBURB_MIN = 0.2, rects = [];
-for (let r = 0; r < G.rows; r++) for (let c = 0; c < G.cols;) {
-  if (field[r * G.cols + c] < SUBURB_MIN) { c++; continue; }
-  let e = c; while (e < G.cols && field[r * G.cols + e] >= SUBURB_MIN) e++;
-  const [w, n] = [G.west + c * G.cell / KX, G.north - r * G.cell / KY], [east, s] = [G.west + e * G.cell / KX, G.north - (r + 1) * G.cell / KY];
-  rects.push(closed([[w, n], [east, n], [east, s], [w, s]])); c = e;
-}
-// The cell outline is a staircase; it is only a click target over the field's image, so it is simplified at 30 m (half a cell) first.
+// The suburbium as crisp classes cut from the field at contour thresholds: dense (0.5 and over), thinning (0.3 to 0.5) and sparse
+// (0.15 to 0.3). Each threshold's cells are merged row by row into rectangles, the staircase is simplified at 30 m (half a cell),
+// rounded off (three passes of corner cutting, then simplified again at 10 m), and each class is what its threshold holds less the
+// next denser one and everything already placed. The classes are for the plan only: the fill samples the field itself (rome-ad100-suburb-density.json), so it has no edge at a threshold.
+const CLASSES = [['dense', 0.5, 'nearest the city and along the roads'], ['thinning', 0.3, 'thinning out'], ['sparse', 0.15, 'sparse, at the edge of the Campagna']];
 const simplifyRing = ring => { const open = simplify(ring.slice(0, -1).concat([ring[0]]), 30); return open.length >= 4 ? open : ring; };
-const suburbium = keep(polygonClipping.difference(polygonClipping.intersection(unionAll(rects).map(poly => poly.map(simplifyRing)).filter(poly => poly[0].length >= 4), [FRAME]), suburbTaken));
-suburbTaken = polygonClipping.union(suburbTaken, suburbium);
+const chaikin = ring => { let r = ring.slice(0, -1); for (let k = 0; k < 3; k++) r = r.flatMap((a, n) => { const b = r[(n + 1) % r.length]; return [[a[0] * .75 + b[0] * .25, a[1] * .75 + b[1] * .25], [a[0] * .25 + b[0] * .75, a[1] * .25 + b[1] * .75]]; }); return [...r, r[0]]; };
+function atLeast(min) {
+  const rects = [];
+  for (let r = 0; r < G.rows; r++) for (let c = 0; c < G.cols;) {
+    if (field[r * G.cols + c] < min) { c++; continue; }
+    let e = c; while (e < G.cols && field[r * G.cols + e] >= min) e++;
+    const [w, n] = [G.west + c * G.cell / KX, G.north - r * G.cell / KY], [east, s] = [G.west + e * G.cell / KX, G.north - (r + 1) * G.cell / KY];
+    rects.push(closed([[w, n], [east, n], [east, s], [w, s]])); c = e;
+  }
+  return polygonClipping.intersection(unionAll(rects).map(poly => poly.map(ring => { const smooth = chaikin(simplifyRing(ring)), open = simplify(smooth, 10); return open.length >= 4 ? open : smooth; })).filter(poly => poly[0].length >= 4), [FRAME]);
+}
 const meanField = mp => { let sum = 0, n = 0; for (let r = 0; r < G.rows; r++) for (let c = 0; c < G.cols; c++) if (insideMp(cellCentre(r, c), mp)) { sum += field[r * G.cols + c]; n++; } return n ? sum / n : 0; };
 const SUBURB_SCALE = 0.06;   // a field value of 1 means 0.06 of the dense core's building density
-resolved.push({ id: 'zone:suburbium', use: 'suburban', ring: 'suburbium', density: +(SUBURB_SCALE * meanField(suburbium)).toFixed(4), title: 'Suburbium · villas, gardens and farms between the roads, thinning with distance', certainty: 'illustrative', time: { start: { year: 0 }, end: { year: 300 } }, multipolygon: suburbium,
-  note: 'Where the suburban density field is at least 0.2: it falls off with distance from the continuous city and from the roads, is zero on the rivers, and is lower on the Tiber\'s floodplain and on steep slopes (Mapterhorn elevation, from the modern Copernicus surface model). Villas and horti like those named on the Vatican plain and the Esquiline, farms and pasture. Nothing here is placed from a source; the field and its scales are a guess.',
-  sources: [P('vaticanus-ager'), P('horti-agrippinae'), 'source:platner-1929', 'source:mapterhorn'] });
-// The field as an image: Campagna colour to suburbium colour by density, fading out radially between 5 and 7 km from the frame's centre,
-// so neither the plan nor the 3D map ends at a square edge.
-const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)), [SUB, CAMP] = [hex('#a3b878'), hex('#c4ba8e')];
-const FADE = { centre: [12.485, 41.896], from: 5000, to: 7000 };
-function png(width, height, rgba) {
-  const table = Array.from({ length: 256 }, (_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
-  const crc = buf => { let c = 0xffffffff; for (const b of buf) c = table[(c ^ b) & 0xff] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; };
-  const chunk = (type, data) => { const out = Buffer.alloc(12 + data.length), body = Buffer.concat([Buffer.from(type), data]); out.writeUInt32BE(data.length, 0); body.copy(out, 4); out.writeUInt32BE(crc(body), 8 + data.length); return out; };
-  const header = Buffer.alloc(13); header.writeUInt32BE(width, 0); header.writeUInt32BE(height, 4); header[8] = 8; header[9] = 6;
-  const raw = Buffer.alloc((width * 4 + 1) * height);
-  for (let y = 0; y < height; y++) { raw[y * (width * 4 + 1)] = 0; rgba.copy(raw, y * (width * 4 + 1) + 1, y * width * 4, (y + 1) * width * 4); }
-  return Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk('IHDR', header), chunk('IDAT', deflateSync(raw, { level: 9 })), chunk('IEND', Buffer.alloc(0))]);
-}
-// Two cells to a pixel (120 m): drawn with smoothing, and the rivers are drawn over it, so the finer grid adds size, not detail.
-const IW = Math.floor(G.cols / 2), IH = Math.floor(G.rows / 2), pixels = Buffer.alloc(IW * IH * 4);
-for (let y = 0; y < IH; y++) for (let x = 0; x < IW; x++) {
-  const cells = [[2 * y, 2 * x], [2 * y, 2 * x + 1], [2 * y + 1, 2 * x], [2 * y + 1, 2 * x + 1]].map(([r, c]) => r * G.cols + c), dry = cells.filter(i => !wet[i]);
-  const value = dry.length ? dry.reduce((sum, i) => sum + field[i], 0) / dry.length : 0, t = Math.min(1, (value - CAMPAGNA_FLOOR) / (1 - CAMPAGNA_FLOOR)) ** 0.7;
-  const fade = Math.min(1, Math.max(0, (FADE.to - metres(cellCentre(2 * y + 1, 2 * x + 1), FADE.centre)) / (FADE.to - FADE.from)));
-  const o = (y * IW + x) * 4;
-  for (let k = 0; k < 3; k++) pixels[o + k] = Math.round(CAMP[k] + (SUB[k] - CAMP[k]) * t);
-  pixels[o + 3] = Math.round(255 * fade * (0.7 + 0.3 * t) * dry.length / 4);
-}
-const suburbImage = { bounds: [round([G.west, G.north]), round([G.west + IW * 2 * G.cell / KX, G.north - IH * 2 * G.cell / KY])], fade: FADE, png: png(IW, IH, pixels).toString('base64') };
+let denser = [];
+CLASSES.forEach(([name, min, what], k) => {
+  const reach = atLeast(min), shape = keep(polygonClipping.difference(reach, suburbTaken, ...(denser.length ? [denser] : [])));
+  denser = polygonClipping.union(denser, reach);
+  resolved.push({ id: `zone:suburb-${name}`, use: 'suburban', band: k + 1, ring: 'suburbium', density: +(SUBURB_SCALE * meanField(shape)).toFixed(4), title: `Villas, gardens and farms, ${what} (field ${k ? `${min} to ${CLASSES[k - 1][1]}` : `${min} and over`})`, certainty: 'illustrative', time: { start: { year: 0 }, end: { year: 300 } }, multipolygon: shape,
+    note: `One of three classes cut from the suburban density field at 0.5, 0.3 and 0.15. The field falls off with distance from the continuous city and from the roads, is zero on the rivers, and is lower on the Tiber's floodplain and on steep slopes (Mapterhorn elevation, from the modern Copernicus surface model), so the classes follow those limits. Villas and horti like those named on the Vatican plain and the Esquiline, farms and pasture. Nothing here is placed from a source; the field, its scales and the thresholds are a guess.`,
+    sources: [P('vaticanus-ager'), P('horti-agrippinae'), 'source:platner-1929', 'source:mapterhorn'] });
+});
+suburbTaken = polygonClipping.union(suburbTaken, denser);
 // The raw field for the zoned fill (not loaded by the app): one byte per cell, 0-255 for 0-1.
 await writeFile('lib/scenarios/fixtures/rome-ad100-suburb-density.json', JSON.stringify({ about: 'Suburban density field, AD 100 (build-zoning.mjs). Row 0 is the north edge; value/255 times scale is the building density relative to the dense core.',
   west: round([G.west, 0])[0], north: round([0, G.north])[1], cell: G.cell, cols: G.cols, rows: G.rows, scale: SUBURB_SCALE, values: Buffer.from(field.map(v => Math.round(v * 255))).toString('base64') }) + '\n');
@@ -570,14 +556,14 @@ const shortNames = { 'zone:tiber': 'Tiber', 'zone:forum-palatine': 'Fora · Pala
   'zone:campus-river': 'Trigarium', 'zone:residential-dense': 'Dense housing', 'zone:residential-hills': 'Hill housing', 'zone:residential-elite': 'Elite houses',
   'zone:residential-trastevere': 'Trastevere', 'zone:residential-roadside': 'Roadside', 'zone:aniene': 'Aniene', 'zone:baths-of-caracalla': 'Baths of Caracalla',
   'zone:circus-vaticanus': 'Circus of Gaius and Nero', 'zone:vatican-necropolis': 'Necropolis', 'zone:horti-domitiae': 'Horti Domitiae', 'zone:horti-agrippinae': 'Horti Agrippinae',
-  'zone:mausoleum-hadriani': "Hadrian's Mausoleum", 'zone:suburb-roadside': 'Roadside', 'zone:suburbium': 'Suburbium', 'zone:via-appia-tombs': 'Appia tombs', 'zone:campagna': 'Campagna' };
+  'zone:mausoleum-hadriani': "Hadrian's Mausoleum", 'zone:suburb-roadside': 'Roadside', 'zone:suburb-dense': 'Suburbium, dense', 'zone:suburb-thinning': 'Suburbium, thinning', 'zone:suburb-sparse': 'Suburbium, sparse', 'zone:via-appia-tombs': 'Appia tombs', 'zone:campagna': 'Campagna' };
 for (const z of resolved) if (!z.multipolygon.length) throw Error(`${z.id} is empty after the cuts`);
-// Rivers carry a fade per polygon for the 3D map, which cannot fade a fill by position: they are cut into rings round the field's fade
-// centre (whole within 5 km, then 0.8 to 0.2 in 500 m steps, 0 beyond 7 km).
-const ringAt = r => closed(Array.from({ length: 96 }, (_, k) => [FADE.centre[0] + Math.cos(k * Math.PI / 48) * r / KX, FADE.centre[1] + Math.sin(k * Math.PI / 48) * r / KY]));
-const RINGS = [[0, 5000, 1], [5000, 5500, 0.8], [5500, 6000, 0.6], [6000, 6500, 0.4], [6500, 7000, 0.2], [7000, Infinity, 0]];
+// Rivers carry a fade per polygon for the 3D map, which cannot fade a fill by position: over the last kilometre inside the frame they
+// are cut into 250 m strips at their mid-strip fade (0.875 down to 0.125), so a river does not stop at the frame's square edge. Roads fade the same way.
+const EDGE_FADE = 1000, inset = d => closed([[FRAME[0][0] + d / KX, FRAME[0][1] + d / KY], [FRAME[1][0] - d / KX, FRAME[1][1] + d / KY], [FRAME[2][0] - d / KX, FRAME[2][1] - d / KY], [FRAME[3][0] + d / KX, FRAME[3][1] - d / KY]]);
+const STRIPS = [[EDGE_FADE, 1], ...[750, 500, 250, 0].map(d => [d, (d + 125) / EDGE_FADE])];
 for (const z of resolved.filter(z => z.ring === 'river')) {
-  const pieces = RINGS.map(([a, b, fade]) => [fade, polygonClipping.difference(b === Infinity ? z.multipolygon : polygonClipping.intersection(z.multipolygon, ringAt(b)), ...(a ? [ringAt(a)] : []))]);
+  const pieces = STRIPS.map(([d, fade], k) => [+fade.toFixed(3), polygonClipping.difference(polygonClipping.intersection(z.multipolygon, inset(d)), ...(k ? [inset(STRIPS[k - 1][0])] : []))]);
   z.multipolygon = pieces.flatMap(([, mp]) => mp); z.fade = pieces.flatMap(([fade, mp]) => mp.map(() => fade));
 }
 const zones = resolved.sort((a, b) => priority.indexOf(a.use) - priority.indexOf(b.use)).map(z => ({
@@ -620,7 +606,7 @@ const out = {
   extent: { id: 'zone:extent', title: 'Continuous city c. AD 100 · approximate extent', certainty: 'approximate', time: { start: { year: 64 }, end: { year: 200 } },
     note: 'Where building was more or less continuous around AD 100, drawn by hand at about 150 m precision from the topography of the fourteen regions (Pleiades), Platner and the general layout in Lanciani\'s plan, with modern atlases as reference only. It includes the gardens at the edge of the city (Pincian, Esquiline) and ribbons along the consular roads within about 700 m of it; Trastevere stops at the foot of the Janiculum. The edge is a guess: building thinned out gradually rather than stopping at a line. It is not taken from any wall; the Aurelian Walls were built in AD 271-275.',
     sources: [...regions, 'source:platner-1929', 'source:lanciani-fur', 'source:atlas-ancient-rome', 'source:osm-tiber'], area: Math.round(areaOf(extent)), ring: extent[0][0].map(round) },
-  frame: FRAME.map(round), suburbImage,
+  frame: FRAME.map(round), edgeFade: EDGE_FADE,
   lines: [...roads, ...aqueducts],
   sources: sources.filter(s => used.has(s.id)),
   zones, markers,

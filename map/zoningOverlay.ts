@@ -1,25 +1,26 @@
 import type { GeoJSONSource, Map, MapLayerMouseEvent } from 'maplibre-gl';
 import type { Feature, FeatureCollection } from 'geojson';
-import { colourOf, lineColour, radialFade, romeZoning, zoningFeatures } from '@/lib/scenarios/zoning';
+import { colourOf, edgeFade, lineColour, romeZoning, unlabelled, zoningFeatures } from '@/lib/scenarios/zoning';
 import type { HistoricalTime } from '@/lib/scenarios/schema';
 
-const source = 'rome-zoning', field = 'rome-zoning-suburb', fill = 'rome-zoning-fill', outline = 'rome-zoning-outline', extent = 'rome-zoning-extent', roads = 'rome-zoning-roads', markers = 'rome-zoning-markers', labels = 'rome-zoning-labels';
-const all = [labels, markers, roads, extent, outline, fill, field];
+const source = 'rome-zoning', fill = 'rome-zoning-fill', outline = 'rome-zoning-outline', extent = 'rome-zoning-extent', roads = 'rome-zoning-roads', markers = 'rome-zoning-markers', labels = 'rome-zoning-labels';
+const all = [labels, markers, roads, extent, outline, fill];
 const certainty = (documented: unknown, approximate: unknown, illustrative: unknown) => ['match', ['get', 'certainty'], 'documented', documented, 'approximate', approximate, illustrative] as never;
 const role = (value: string) => ['==', ['get', 'role'], value] as never;
 
 /**
  * The AD 100 land-use zoning as a 2D map layer: a tinted fill per zone, outlined solid (documented), dashed (approximate) or pale
  * (illustrative), the same convention as the other map layers; the approximate extent of the continuous city as a dashed line; and
- * the region and anchor markers. Everything is date-filtered. It sits under the reconstruction and the scenario layers, and gives
+ * the region and anchor markers; the suburbium as its three density classes, unoutlined. Roads and rivers fade out over the last
+ * kilometre inside the frame. Everything is date-filtered. It sits under the reconstruction and the scenario layers, and gives
  * way to the lit 3D ground close in, like the flat ground does. The Campagna is left unfilled on the map (its square frame would show
  * on the globe); it is drawn in the 2D plan. Hidden until switched on.
  */
-/** Cut lines into runs of equal fade (in tenths), dropping what lies beyond the fade's outer radius. */
+/** Cut lines into runs of equal edge fade (in tenths), dropping what lies on the frame's edge. */
 function fadedRuns(lines: [number, number][][]): [number, [number, number][]][] {
   const runs: [number, [number, number][]][] = [];
   for (const line of lines) for (let n = 1; n < line.length; n++) {
-    const fade = Math.round(radialFade([(line[n - 1][0] + line[n][0]) / 2, (line[n - 1][1] + line[n][1]) / 2]) * 10) / 10, last = runs.at(-1);
+    const fade = Math.round(edgeFade([(line[n - 1][0] + line[n][0]) / 2, (line[n - 1][1] + line[n][1]) / 2]) * 10) / 10, last = runs.at(-1);
     if (!fade) continue;
     if (last && last[0] === fade && last[1].at(-1) === line[n - 1]) last[1].push(line[n]); else runs.push([fade, [line[n - 1], line[n]]]);
   }
@@ -31,12 +32,8 @@ export function zoningOverlay(map: Map, onInspect: (id: string) => void) {
   const before = ['reconstruction-fill', 'scenario-context-fill'].find(id => map.getLayer(id));
   const handover = ['-', 1, ['coalesce', ['global-state', 'local-ground'], 0]] as never;
   const hidden = { visibility: 'none' } as const;
-  // The suburban density field as an image, under the zones; it fades out radially towards the frame by itself.
-  const [[w, n], [e, s]] = romeZoning.suburbImage.bounds;
-  map.addSource(field, { type: 'image', url: `data:image/png;base64,${romeZoning.suburbImage.png}`, coordinates: [[w, n], [e, n], [e, s], [w, s]] });
-  map.addLayer({ id: field, type: 'raster', source: field, layout: hidden, paint: { 'raster-opacity': .6, 'raster-resampling': 'linear', 'raster-fade-duration': 0 } }, before);
   map.addLayer({ id: fill, type: 'fill', source, filter: role('zone'), layout: hidden,
-    paint: { 'fill-color': ['get', 'color'], 'fill-opacity': ['*', ['*', ['coalesce', ['get', 'fade'], 1], ['match', ['get', 'ring'], 'campagna', 0, 'suburbium', ['case', ['==', ['get', 'use'], 'suburban'], 0, .5], certainty(.55, .5, .32)]], handover] as never } }, before);
+    paint: { 'fill-color': ['get', 'color'], 'fill-opacity': ['*', ['*', ['coalesce', ['get', 'fade'], 1], ['match', ['get', 'ring'], 'campagna', 0, 'suburbium', ['case', ['==', ['get', 'use'], 'suburban'], .4, .5], certainty(.55, .5, .32)]], handover] as never } }, before);
   map.addLayer({ id: outline, type: 'line', source, filter: ['all', role('zone'), ['!', ['in', ['get', 'ring'], ['literal', ['river', 'campagna']]]], ['!=', ['get', 'use'], 'suburban']] as never, layout: hidden,
     paint: { 'line-color': ['get', 'color'], 'line-width': ['interpolate', ['linear'], ['zoom'], 12, 1, 16, 2] as never, 'line-opacity': ['*', certainty(.95, .9, .45), handover] as never,
       'line-dasharray': certainty(['literal', [1, 0]], ['literal', [3, 2]], ['literal', [1, 2]]) } }, before);
@@ -64,9 +61,9 @@ export function zoningOverlay(map: Map, onInspect: (id: string) => void) {
         ...romeZoning.zones.filter(z => shown.has(z.id)).flatMap((z): Feature[] => {
           const properties = { id: z.id, short: z.short ?? '', certainty: z.certainty, color: colourOf(z), ring: z.ring, use: z.use, band: z.band ?? 0 };
           return [...z.multipolygon.map((coordinates, k): Feature => ({ type: 'Feature', properties: { ...properties, role: 'zone', fade: z.fade?.[k] ?? 1 }, geometry: { type: 'Polygon', coordinates } })).filter(f => f.properties!.fade > 0),
-            { type: 'Feature', properties: { ...properties, role: 'label' }, geometry: { type: 'Point', coordinates: z.label } }];
+            ...(unlabelled(z) ? [] : [{ type: 'Feature', properties: { ...properties, role: 'label' }, geometry: { type: 'Point', coordinates: z.label } } as Feature])];
         }),
-        // Roads and aqueducts in short runs, each faded by distance like the field; gaps dotted; the ways in to the gates fainter, over the city.
+        // Roads and aqueducts in short runs, each faded near the frame's edge; gaps dotted; the ways in to the gates fainter, over the city.
         ...romeZoning.lines.filter(l => shown.has(l.id)).flatMap(l => [
           ...fadedRuns(l.lines).map(([fade, coordinates]): Feature => ({ type: 'Feature', properties: { role: 'line', id: l.id, kind: l.kind, certainty: l.certainty, color: lineColour[l.kind], fade }, geometry: { type: 'LineString', coordinates } })),
           ...fadedRuns(l.gaps ?? []).map(([fade, coordinates]): Feature => ({ type: 'Feature', properties: { role: 'line', id: l.id, kind: l.kind, certainty: 'illustrative', color: lineColour[l.kind], fade }, geometry: { type: 'LineString', coordinates } })),
@@ -79,7 +76,7 @@ export function zoningOverlay(map: Map, onInspect: (id: string) => void) {
     dispose() {
       map.off('click', fill, click); map.off('click', markers, click); map.off('click', roads, click);
       for (const id of all) if (map.getLayer(id)) map.removeLayer(id);
-      for (const id of [source, field]) if (map.getSource(id)) map.removeSource(id);
+      if (map.getSource(source)) map.removeSource(source);
     },
   };
 }

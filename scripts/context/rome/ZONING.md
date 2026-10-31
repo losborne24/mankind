@@ -148,6 +148,22 @@ The plan now covers a frame about 14 km square (12.40–12.57 E), with the conti
 
   The Campagna's outline is no longer stored: it is the frame less every other zone, and the check verifies it.
 
+## Revision (v5.18.3): crisp cartographic plan, suburbium as contour classes
+
+The plan goes back to the flat, crisp look of v5.18.1. The data underneath is unchanged from v5.18.2: the same density field, roads and links.
+
+* **Suburbium classes.** The field is no longer drawn as a blurred image. The plan and the map draw three crisp-edged classes cut from it at contour thresholds:
+  * **dense:** 0.5 and over;
+  * **thinning:** 0.3 to 0.5;
+  * **sparse:** 0.15 to 0.3.
+
+  Each class is built the same way. Its cells are merged into rectangles, the staircase is simplified at 30 m, rounded off with three passes of corner cutting, and simplified again at 10 m. It then takes its threshold's area, less the denser classes and less everything already placed. Because the field is zero on water and reduced on the floodplain and on slopes, the classes follow those limits; the check confirms that the cells inside each class sit at its threshold. The classes have no outline. They are legend categories and carry no map label, and neither do the roadside ribbons.
+* **Fill.** The Stage 3 fill samples the field itself (`rome-ad100-suburb-density.json`, unchanged), not the classes, so it has no edge at a threshold.
+* **Edges.** There is no radial vignette, and the background is the flat Campagna colour. Only roads, aqueducts and rivers fade, over the last 1 km inside the frame (`edgeFade` in the data):
+  * **2D plan:** two linear-gradient masks, across and down.
+  * **3D map:** road runs carry a fade value, and river polygons are cut into four 250 m strips at their mid-strip fade.
+* **Size.** The PNG is gone, and the three class outlines are larger than it was: 315 KB raw, 86 KB gzipped (v5.18.2: 257 KB / 78 KB).
+
 ## In the app: the 2D plan
 
 The journey card (start card and every beat) has a **2D plan** thumbnail. It opens the plan full screen, drawn live from the zoning data

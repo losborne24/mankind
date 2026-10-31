@@ -37,7 +37,7 @@ for (const z of data.zones) {
   assert.ok(!ids.has(z.id), `${z.id} is unique`); ids.add(z.id);
   dated(z);
   assert.ok((z.multipolygon.length || z.implicit) && z.multipolygon.flat(3).every(Number.isFinite), `${z.id} has geometry`);
-  assert.ok((z.short || z.band > 1) && z.label.length === 2, `${z.id} has a label (outer suburban bands go unlabelled)`);
+  assert.ok(z.short && z.label.length === 2, `${z.id} has a short name and a label point`);
   // A hand-drawn boundary is never presented as documented, and says it is a guess or approximate.
   if (z.use !== 'open-river') assert.notEqual(z.certainty, 'documented', `${z.id}: hand-drawn outlines are not documented`);
   if (z.use !== 'open-river') assert.match(z.note, /guess|approximate/i, `${z.id}'s note says its edges are a guess`);
@@ -73,8 +73,8 @@ assert.equal(z('zone:forum-boarium').use, 'monumental');
 const extent = [[data.extent.ring]], frame = [[data.frame]];
 let union = [];
 for (const q of now) {
-  // Coordinates are rounded to 1e-6°, so edges shared with a large zone leave slivers: allow 50 m² or one part per million of its area.
-  assert.ok(area(polygonClipping.intersection(union, q.multipolygon)) < Math.max(50, area(q.multipolygon) * 1e-6), `${q.id} overlaps no other zone`);
+  // Coordinates are rounded to 1e-6°, so edges shared with a large zone leave slivers: allow 50 m² or ten parts per million of its area (the suburban classes share long rounded edges).
+  assert.ok(area(polygonClipping.intersection(union, q.multipolygon)) < Math.max(50, area(q.multipolygon) * 1e-5), `${q.id} overlaps no other zone (${area(polygonClipping.intersection(union, q.multipolygon)).toFixed(1)} m²)`);
   if (q.ring === 'city') assert.ok(area(polygonClipping.difference(q.multipolygon, extent)) < 50, `${q.id} stays inside the extent`);
   if (q.ring === 'suburbium' || q.ring === 'campagna') assert.ok(area(polygonClipping.intersection(q.multipolygon, extent)) < 50, `${q.id} stays outside the extent`);
   union = polygonClipping.union(union, q.multipolygon);
@@ -90,11 +90,11 @@ assert.ok(covered > 0.99, `zones cover the frame (${(covered * 100).toFixed(1)}%
 assert.ok(area(polygonClipping.intersection(union, extent)) / area(extent) > 0.99, 'zones cover the continuous city');
 
 // Suburbium: the right bank's named places, the Aniene to its confluence, roads and aqueducts.
-for (const id of ['zone:circus-vaticanus', 'zone:horti-agrippinae', 'zone:vatican-necropolis', 'zone:horti-domitiae', 'zone:via-appia-tombs', 'zone:suburb-roadside', 'zone:suburbium', 'zone:campagna', 'zone:aniene'])
+for (const id of ['zone:circus-vaticanus', 'zone:horti-agrippinae', 'zone:vatican-necropolis', 'zone:horti-domitiae', 'zone:via-appia-tombs', 'zone:suburb-roadside', 'zone:suburb-dense', 'zone:suburb-thinning', 'zone:suburb-sparse', 'zone:campagna', 'zone:aniene'])
   assert.ok(now.some(q => q.id === id), `${id} is drawn at AD 100`);
 for (const q of now.filter(q => q.ring === 'suburbium' || q.ring === 'campagna')) if (!['zone:circus-vaticanus', 'zone:horti-agrippinae', 'zone:vatican-necropolis', 'zone:horti-domitiae', 'zone:via-appia-tombs'].includes(q.id)) assert.equal(q.certainty, 'illustrative', `${q.id} is illustrative`);
-// The suburbium is a continuous field: zero on the rivers, falling off with distance from the city, lower on the floodplain; its image
-// fades to nothing by the frame's corners. The Appia's tombs reach the Tomb of Caecilia Metella.
+// The suburbium is a continuous field: zero on the rivers, falling off with distance from the city, lower on the floodplain; the plan
+// draws it as three crisp classes cut at contour thresholds, denser to sparser, none on the rivers. Rivers fade out at the frame's edge. The Appia's tombs reach the Tomb of Caecilia Metella.
 const fieldFile = JSON.parse(await readFile('lib/scenarios/fixtures/rome-ad100-suburb-density.json', 'utf8')), values = Buffer.from(fieldFile.values, 'base64');
 assert.equal(values.length, fieldFile.rows * fieldFile.cols, 'the field has one value per cell');
 const cellOf = p => { const c = Math.floor((p[0] - fieldFile.west) * KX / fieldFile.cell), r = Math.floor((fieldFile.north - p[1]) * KY / fieldFile.cell); return values[r * fieldFile.cols + c] / 255; };
@@ -104,11 +104,18 @@ for (let r = 0; r < fieldFile.rows; r += 3) for (let c = 0; c < fieldFile.cols; 
 assert.ok(wetCells > 20 && wetZero === wetCells, `no suburban density on the river (${wetZero}/${wetCells} river cells are zero)`);
 const along = [[12.505, 41.904], [12.535, 41.915], [12.56, 41.925]].map(cellOf);   // out from the city towards the north-east, off the roads
 assert.ok(along[0] > along[1] && along[1] >= along[2], `the field falls off with distance (${along.map(v => v.toFixed(2))})`);
-assert.ok(data.zones.find(q => q.id === 'zone:suburbium').density > data.zones.find(q => q.id === 'zone:campagna').density, 'the suburbium is denser than the Campagna');
-assert.ok(/floodplain/.test(data.zones.find(q => q.id === 'zone:suburbium').note) && /slope/.test(data.zones.find(q => q.id === 'zone:suburbium').note), 'the suburbium note names the floodplain and slope limits');
-const png = Buffer.from(data.suburbImage.png, 'base64');
-assert.equal(png.subarray(1, 4).toString(), 'PNG', 'the field image is a PNG');
-assert.ok(data.suburbImage.fade.to <= Math.min(data.frame[1][0] - data.frame[0][0], data.frame[2][1] - data.frame[0][1]) / 2 * KY, 'the field fades out before the frame edge');
+const classes = ['dense', 'thinning', 'sparse'].map(k => data.zones.find(q => q.id === `zone:suburb-${k}`));
+classes.forEach((q, k) => { assert.equal(q.band, k + 1, `${q.id} is band ${k + 1}`); assert.ok(/floodplain/.test(q.note) && /slope/.test(q.note), `${q.id} names the floodplain and slope limits`); });
+assert.ok(classes[0].density > classes[1].density && classes[1].density > classes[2].density && classes[2].density > data.zones.find(q => q.id === 'zone:campagna').density, `the classes thin out towards the Campagna (${classes.map(q => q.density)})`);
+// Each class's cells sit at or above its threshold (allowing for the rounded edge): sample cell centres well inside each class.
+for (const [q, min] of [[classes[0], 0.5], [classes[1], 0.3], [classes[2], 0.15]]) {
+  let n = 0, low = 0;
+  for (let r = 0; r < fieldFile.rows; r += 2) for (let c = 0; c < fieldFile.cols; c += 2) { const p = [fieldFile.west + (c + 0.5) * fieldFile.cell / KX, fieldFile.north - (r + 0.5) * fieldFile.cell / KY]; if (inside(p, q.multipolygon)) { n++; if (values[r * fieldFile.cols + c] / 255 < min - 0.1) low++; } }
+  assert.ok(n > 50 && low / n < 0.05, `${q.id} follows its contour (${low}/${n} sampled cells well below ${min})`);
+}
+assert.ok(!('suburbImage' in data), 'the field is not shipped as an image');
+assert.equal(data.edgeFade, 1000, 'roads and rivers fade over the last kilometre inside the frame');
+assert.ok(tiberZone.fade.length === tiberZone.multipolygon.length && Math.min(...tiberZone.fade) < 0.2 && tiberZone.fade.includes(1), 'the Tiber fades out at the frame edge');
 const caecilia = data.markers.find(m => m.id === 'marker:caecilia-metella').coordinate, tombs = data.zones.find(q => q.id === 'zone:via-appia-tombs');
 assert.ok(tombs.multipolygon.flat(2).some(p => Math.hypot((p[0] - caecilia[0]) * KX, (p[1] - caecilia[1]) * KY) < 120), 'the Appia tombs reach the Tomb of Caecilia Metella');
 const anieneWest = Math.min(...data.zones.find(q => q.id === 'zone:aniene').multipolygon.flat(2).map(p => p[0]));
