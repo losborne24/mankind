@@ -28,6 +28,7 @@ plan gaps ─► research queue ─► fetch-place (allow-list) ─► quarantin
 | `lib/ai/claims.ts` (`placeDocuments`) | One fixed text document per fetched record, so claims can quote it. Wikidata dates are written as recorded ("700 BCE") |
 | `lib/research/queue.ts`, `scripts/research/queue.mjs` | A plan's gaps as tasks, each listing the sources that could close it and the command to start it |
 | `scripts/ai/draft-blueprint.mjs --place <slug>` | Drafts a blueprint from accepted claims inside the fetch radius. The draft carries the sources it cites as a `sources@1` layer, so journeys can cite them |
+| `scripts/research/run.mjs` | Runs the steps below for one place, resuming from what's on disk and stopping only for pasted replies and reviews |
 | `scripts/research/publish-accepted.mjs` | Copies drafts accepted by a named reviewer into `lib/plan/accepted/blueprints.json`, after re-checking them against Checkpoint A. The app's planning context loads that file |
 
 The fetch script runs a fixed sequence:
@@ -65,26 +66,35 @@ test of the code path, not an extraction:
 - The Capitolium and the Baths of the Trinacria (both dated 120 CE by Wikidata) were reported as not yet standing
   at AD 100.
 
-No claims for Ostia have been reviewed for real. The steps to get there:
+No claims for Ostia have been reviewed for real. To get there, run:
 
 ```sh
-node scripts/ai/manual-batch.mjs export claims --place ostia --from 0 --count 25
-node scripts/ai/manual-batch.mjs import claims data/ai/manual/batches/claims.reply.txt --source "claude.ai" --place ostia --from 0 --count 25
-node scripts/ai/review.mjs list
-node scripts/ai/review.mjs accept claims wikidata-Q1012797 --reviewer "Your name"
-MANKIND_AI_MODE=manual MANKIND_AI_MANUAL_SOURCE=claude.ai node scripts/ai/draft-blueprint.mjs --place ostia --title "Ostia" --year 100
-node scripts/ai/review.mjs accept blueprint draft-ostia --reviewer "Your name"
-node scripts/research/publish-accepted.mjs
+node scripts/research/run.mjs --place ostia --year 100 --source "claude.ai" --reviewer "Your name"
 ```
 
-Some notes on these steps:
-- **Chunked export:** repeat the first two commands with `--from 25`, `--from 50` and so on, so each reply fits in a
-  chat.
-- **Review:** accept or reject each claims draft after reading it.
-- **Drafting:** the draft step writes a prompt file and stops. Paste the chat's reply into the `.reply.txt` beside
-  it, then run the command again.
+`run.mjs` works out from disk what's already done, runs the next step, and keeps going until a person is needed.
+It then stops and prints what to do and the command to run next (the same command). In order, it:
 
-With an API key, `extract-claims.mjs` and `draft-blueprint.mjs` run the same steps without pasting.
+1. **Fetches sources**, only if the place has no snapshots. Pass `--title`, `--lng`, `--lat` and optionally
+   `--radius` for a new place.
+2. **Extracts claims.** With an API key, every source is extracted in turn, within the spend caps. Without one, it
+   writes fixed chunks of 25 sources to `data/ai/manual/batches/<place>/claims-NN.prompt.md`, each with an empty
+   `.reply.txt` beside it. Paste each prompt into a chat app and save the reply beside it. The next run imports
+   every filled reply, sets it aside, and rewrites the prompt with any sources the reply missed or got wrong.
+3. **Reviews claims.** With `--reviewer`, each claims draft is shown with its claims and quotes, and you answer
+   `y`, `n`, `s` (skip) or `q`. Without it, the drafts awaiting review are listed. Drafts with no verified claims
+   need no decision.
+4. **Drafts the blueprint** from every accepted claim (`draft-blueprint.mjs`). In manual mode it writes the prompt
+   and stops for the reply. If more claims are accepted after drafting, it says so; `--redraft` drafts again.
+5. **Reviews the blueprint**, in the same way as the claims.
+6. **Publishes** the blueprint, unless the accepted draft is already what the app loads (`publish-accepted.mjs`).
+7. **Prints the remaining gaps** (`queue.mjs`).
+
+By default it waits until every source is extracted and reviewed before drafting. `--partial` drafts from the
+claims accepted so far. Nothing is ever accepted without a named reviewer's answer.
+
+The individual scripts (`manual-batch.mjs`, `review.mjs`, `draft-blueprint.mjs`, `publish-accepted.mjs`) still work
+on their own.
 
 ## What a fetched place looks like
 
