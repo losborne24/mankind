@@ -485,3 +485,15 @@ node scripts/check-phase4-acceptance.mjs docs/previews/phase4-final
 pnpm build
 pnpm start
 ```
+
+### Phase 5A: spatial scene planning
+
+**Plan a journey** in the top bar takes a structured request (place, date, spatial scope, optional landmark).
+It plans it over reusable spatial blueprints (empire, region, city, neighbourhood, site) and shows what is
+ready, missing and deferred before playing a composed journey. A plan can be reviewed in 2D or saved
+compactly. [Contracts, golden references, results and limits](docs/phase5a-planning.md).
+
+```sh
+node scripts/check-plan-golden.mjs
+node scripts/check-phase5a-planning.mjs docs/previews/phase5a
+```

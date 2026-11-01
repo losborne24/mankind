@@ -291,7 +291,9 @@ export class ScenarioPlayer {
                         if (this.action.camera.type === 'flyTo')
                             this.publish({ elapsed: this.action.camera.duration });
                     }
-                    this.ports.streaming?.(this.intent);
+                    // While holding for the scene, keep the parked intent holdForScene sent: re-sending the flight's would mark the
+                    // camera as travelling again and stop the very detail being waited for.
+                    if (!this.waiting) this.ports.streaming?.(this.intent);
                 }
             }
             else {

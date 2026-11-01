@@ -1,8 +1,9 @@
 "use client";
+import { ScenarioRequestBar } from "@/components/ScenarioRequestBar";
 
 /**
- * Compact cinematic top bar: a provisional wordmark and a non-functional
- * location/search placeholder (wired up in a later phase).
+ * Compact cinematic top bar: a provisional wordmark and the structured
+ * journey request (place, date, spatial scope), planned before it plays.
  */
 export function TopBar() {
   return (
@@ -16,15 +17,7 @@ export function TopBar() {
         </span>
       </div>
 
-      <div className="pointer-events-auto w-40 sm:w-64">
-        <input
-          type="search"
-          disabled
-          placeholder="Search a place…"
-          aria-label="Search a place (coming soon)"
-          className="w-full cursor-not-allowed rounded-full border border-panel-border bg-panel px-4 py-1.5 text-sm text-white/60 placeholder:text-white/30 backdrop-blur-md"
-        />
-      </div>
+      <ScenarioRequestBar />
     </header>
   );
 }

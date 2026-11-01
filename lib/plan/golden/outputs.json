@@ -1,0 +1,19 @@
+{
+  "recordedAt": "v5.21.1 (ff1a51b), before Phase 5A",
+  "digests": {
+    "lib/scenarios/fixtures/forum-boarium-context.json": "72eff7aa01bdc62135e13668a73f7bbf375f3563dfea68ceef977118b22dfb72",
+    "lib/scenarios/fixtures/forum-boarium-reconstruction.json": "2256dc5f65770816f974096974234287ac013fce1ce9c102d43dea8892f936ee",
+    "lib/scenarios/fixtures/rome-ad100-landmarks.json": "9c548ba20e6973e805438b8ac187e69ead9eda64beff49b60a0a225ee7062445",
+    "lib/scenarios/fixtures/rome-ad100-suburb-density.json": "76fe1c778127325e6b1f7d913b87a9c209cbc7a492c0c5300110ca3fd06e91d3",
+    "lib/scenarios/fixtures/rome-ad100-zoning.json": "47de40ec39c4d35d998c3268b3251df9bfc3873aeec12ab070b4a2f5370ecd21",
+    "lib/history/fixtures/forum-boarium.json": "e0abd5c7622d4343c80c92dc96c83e0b2c886768cd5f1dc66e3588c05b5e4e5f",
+    "lib/history/fixtures/portunus.json": "f688ad9e18e3536573c971113db670f3aa0fa6a510371eedcb6e9168af575e15",
+    "rome fill items": "46d790eff8de4bcb4750e2b86a1c895bfbe248aac3ad3855bdbcf83d72c63d41",
+    "rome landmark pieces": "fbe5c32493981677129b2f4d5267350c5264648e3c0636bd0225a498e9ddea14",
+    "rome zoning features AD 100": "7bd4951a1351379cc8cb03dd58f5270296601ab250fe95ff8e41af0d224da2d6",
+    "rome zoning plan svg AD 100": "36d149a7f4da12dfc99b262f5add4491b7dcccd0e479fb8c44d5495b8664a7a7",
+    "forum reconstruction": "a3e588364d33f539f3ebd3e60cd2af3458e22ba1d658bb49afaa93cca27276fe",
+    "forum context ground": "0c9f1572f592c1445a0a1595465a46fcb31f67a0a83c47c785db830db3257830",
+    "portunus journey": "8e00f31f37825012b6f8a77f17009dfb41ed10e8c6f567754561d990eb10bd0b"
+  }
+}
