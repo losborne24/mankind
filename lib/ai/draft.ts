@@ -13,7 +13,9 @@ import type { Coordinate } from '@/lib/scenarios/schema';
  * must pass the contract and Checkpoint A, and is used only after a person accepts it.
  */
 export const DRAFT_VERSION = 'draft-1';
-export interface DraftFrame { id: string; title: string; placeId: string; placeTitle: string; aliases: string[]; lod: SpatialLOD; bounds: Bounds; applicability: HistoricalPeriod; traditions: string[]; parent?: BlueprintRef }
+export interface DraftFrame { id: string; title: string; placeId: string; placeTitle: string; aliases: string[]; lod: SpatialLOD; bounds: Bounds; applicability: HistoricalPeriod; traditions: string[]; parent?: BlueprintRef; anchor?: Coordinate }
+/** The sources a draft cites, carried in the draft as a `sources@1` layer so journeys can cite them (lib/plan/sources.ts). */
+export interface DraftSource { id: string; title: string; url: string; licence: string }
 export interface InferredFeature { title: string; kind: FeatureKind; longitude: number; latitude: number; startYear: number | null; endYear: number | null; reason: string; claimIds: string[] }
 
 const KINDS: FeatureKind[] = ['landmark', 'structure', 'open-space', 'route', 'zone', 'settlement', 'water', 'terrain', 'marker'];
@@ -63,7 +65,7 @@ function dates(start: number | null, end: number | null, frame: DraftFrame): Pic
 }
 
 /** Deterministic assembly: documented features copied from claims, then the model's inferred features. */
-export function assembleDraft(frame: DraftFrame, claims: Claim[], inferred: InferredFeature[]): SpatialBlueprint {
+export function assembleDraft(frame: DraftFrame, claims: Claim[], inferred: InferredFeature[], sources: DraftSource[] = [], sourcesFile = 'data/plan/drafts/sources.json'): SpatialBlueprint {
   const features: PlanFeature[] = [], ids = new Set<string>();
   const unique = (base: string) => { let id = base, n = 2; while (ids.has(id)) id = `${base}-${n++}`; ids.add(id); return id; };
   for (const c of claims) {
@@ -82,9 +84,10 @@ export function assembleDraft(frame: DraftFrame, claims: Claim[], inferred: Infe
   }
   const draft: SpatialBlueprint = {
     schema: 1, id: frame.id, version: 1, title: frame.title, lod: frame.lod,
-    place: { id: frame.placeId, title: frame.placeTitle, aliases: frame.aliases, anchor: [(frame.bounds[0] + frame.bounds[2]) / 2, (frame.bounds[1] + frame.bounds[3]) / 2], refs: [] },
+    place: { id: frame.placeId, title: frame.placeTitle, aliases: frame.aliases, anchor: frame.anchor ?? [(frame.bounds[0] + frame.bounds[2]) / 2, (frame.bounds[1] + frame.bounds[3]) / 2], refs: [] },
     bounds: frame.bounds, boundsEvidence: { certainty: 'illustrative', sources: [], note: 'Drafting frame chosen for the request; not a boundary.' },
-    applicability: frame.applicability, traditions: frame.traditions, ...(frame.parent ? { parent: frame.parent } : {}), children: [], layers: [], features, generators: [],
+    applicability: frame.applicability, traditions: frame.traditions, ...(frame.parent ? { parent: frame.parent } : {}), children: [], features, generators: [],
+    layers: (() => { const cited = new Set(features.flatMap(f => f.evidence.sources)), used = sources.filter(s => cited.has(s.id)).sort((a, b) => a.id.localeCompare(b.id)); return used.length ? [{ id: 'sources', role: 'sources' as const, codec: 'sources@1', output: sourcesFile, serialisation: { indent: 1 as const }, order: ['sources'], header: {}, collections: { sources: used } }] : []; })(),
     provenance: { builtFrom: [...new Set(claims.map(c => c.sourceId))], note: `AI-drafted (${DRAFT_VERSION}) from ${claims.length} accepted claims; documented positions copied from the claims, ${inferred.length} inferred features proposed. A draft until reviewed.` },
     versions: { schema: 1, codecs: { ...CODEC_VERSIONS } },
   };

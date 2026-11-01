@@ -219,6 +219,10 @@ labelled inference.
 
 ## 5C: research and acquisition
 
+**Status:** the source half is built (November 2026). See [Phase 5C](phase5c-research.md). Sources are fetched for
+new places from an allow-list, then go through claims, review and drafting, and are published into the app.
+Ostia's sources are fetched and its pipeline is tested; its claims await real review. Model acquisition is not built.
+
 ### Step 11: research and acquisition queue
 
 Offline tooling (scripts and a review surface), not a runtime service.

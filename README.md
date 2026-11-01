@@ -508,3 +508,14 @@ offline scripts whose output a named reviewer must accept. Every call is schema-
 ```sh
 node scripts/check-ai-boundary.mjs
 ```
+
+### Phase 5C: research and acquisition (sources)
+
+New places get blueprints from open sources: Wikidata, Pleiades, Wikipedia summaries and OpenStreetMap, fetched
+from an allow-list into licensed, digested snapshots. Claims and drafts are reviewed, then published into the app.
+[How it works, and Ostia's status](docs/phase5c-research.md).
+
+```sh
+node scripts/check-research.mjs
+node scripts/research/queue.mjs '{"place":{"title":"Ostia","coordinate":[12.2923,41.7556],"tradition":"roman"},"year":100}'
+```

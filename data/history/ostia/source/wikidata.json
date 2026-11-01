@@ -1,0 +1,456 @@
+{
+ "accessed": "2026-11-01",
+ "licence": "CC0 1.0",
+ "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+ "query": "SELECT ?item ?itemLabel ?itemDescription ?coord ?pleiades ?inception ?dissolved ?article WHERE {\n  SERVICE wikibase:around { ?item wdt:P625 ?coord . bd:serviceParam wikibase:center \"Point(12.2923 41.7556)\"^^geo:wktLiteral . bd:serviceParam wikibase:radius \"2\" . }\n  OPTIONAL { ?item wdt:P1584 ?pleiades . }\n  OPTIONAL { ?item wdt:P571 ?inception . }\n  OPTIONAL { ?item wdt:P576 ?dissolved . }\n  OPTIONAL { ?article schema:about ?item ; schema:isPartOf <https://en.wikipedia.org/> . }\n  FILTER(BOUND(?pleiades) || (BOUND(?inception) && YEAR(?inception) < 1500))\n  SERVICE wikibase:label { bd:serviceParam wikibase:language \"en\" . }\n} LIMIT 80",
+ "places": [
+  {
+   "qid": "Q123433",
+   "uri": "https://www.wikidata.org/wiki/Q123433",
+   "label": "Ostia Synagogue",
+   "description": "synagogue",
+   "coordinate": [
+    12.28861111,
+    41.74888889
+   ],
+   "pleiadesId": "101249988",
+   "inception": null,
+   "dissolved": null,
+   "article": "https://en.wikipedia.org/wiki/Ostia_Synagogue"
+  },
+  {
+   "qid": "Q249991",
+   "uri": "https://www.wikidata.org/wiki/Q249991",
+   "label": "House of Cupid and Psyche",
+   "description": "a Roman domus located in Ostia, Italy",
+   "coordinate": [
+    12.286057,
+    41.754044
+   ],
+   "pleiadesId": "868515126",
+   "inception": null,
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q392878",
+   "uri": "https://www.wikidata.org/wiki/Q392878",
+   "label": "Piazzale delle Corporazioni",
+   "description": "mercantile center in ancient Ostia",
+   "coordinate": [
+    12.2911,
+    41.7564
+   ],
+   "pleiadesId": "489630692",
+   "inception": null,
+   "dissolved": null,
+   "article": "https://en.wikipedia.org/wiki/Piazzale_delle_Corporazioni"
+  },
+  {
+   "qid": "Q810067",
+   "uri": "https://www.wikidata.org/wiki/Q810067",
+   "label": "Christian Basilica",
+   "description": null,
+   "coordinate": [
+    12.2865,
+    41.753
+   ],
+   "pleiadesId": "732059512",
+   "inception": null,
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q1012797",
+   "uri": "https://www.wikidata.org/wiki/Q1012797",
+   "label": "Ostia",
+   "description": "ancient Roman city and colony",
+   "coordinate": [
+    12.2875,
+    41.754166666
+   ],
+   "pleiadesId": "422995",
+   "inception": "-0700-01-01T00:00:00Z",
+   "dissolved": null,
+   "article": "https://en.wikipedia.org/wiki/Ostia_Antica"
+  },
+  {
+   "qid": "Q1047006",
+   "uri": "https://www.wikidata.org/wiki/Q1047006",
+   "label": "House of Bacchus and Ariadne",
+   "description": null,
+   "coordinate": [
+    12.28384,
+    41.75355
+   ],
+   "pleiadesId": "432599299",
+   "inception": null,
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q1238778",
+   "uri": "https://www.wikidata.org/wiki/Q1238778",
+   "label": "Domus della Fortuna Annonaria",
+   "description": null,
+   "coordinate": [
+    12.2905,
+    41.754
+   ],
+   "pleiadesId": "338131054",
+   "inception": null,
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q1728612",
+   "uri": "https://www.wikidata.org/wiki/Q1728612",
+   "label": "Capitolium",
+   "description": "Roman temple in Ostia",
+   "coordinate": [
+    12.288043,
+    41.754397
+   ],
+   "pleiadesId": null,
+   "inception": "0120-01-01T00:00:00Z",
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q2887127",
+   "uri": "https://www.wikidata.org/wiki/Q2887127",
+   "label": "Santa Aurea",
+   "description": "church building in Rome, Italy",
+   "coordinate": [
+    12.301810139,
+    41.759367384
+   ],
+   "pleiadesId": null,
+   "inception": "1401-01-01T00:00:00Z",
+   "dissolved": null,
+   "article": "https://en.wikipedia.org/wiki/Santa_Aurea"
+  },
+  {
+   "qid": "Q3661636",
+   "uri": "https://www.wikidata.org/wiki/Q3661636",
+   "label": "Case a giardino",
+   "description": "archaeological site in Ostia, Rome Italy",
+   "coordinate": [
+    12.284577135,
+    41.751884216
+   ],
+   "pleiadesId": "223974298",
+   "inception": null,
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q3939487",
+   "uri": "https://www.wikidata.org/wiki/Q3939487",
+   "label": "Rocca di Ostia",
+   "description": "castle in Ostia Antica, Italy",
+   "coordinate": [
+    12.301276,
+    41.759308
+   ],
+   "pleiadesId": null,
+   "inception": "1483-01-01T00:00:00Z",
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q3982370",
+   "uri": "https://www.wikidata.org/wiki/Q3982370",
+   "label": "Roman Theatre of Ostia",
+   "description": "ancient Roman theatre of Ostia, Rome, Italy",
+   "coordinate": [
+    12.291388888,
+    41.755833333
+   ],
+   "pleiadesId": "443253553",
+   "inception": null,
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q3993549",
+   "uri": "https://www.wikidata.org/wiki/Q3993549",
+   "label": "Tor Boacciana",
+   "description": "Medieval tower at Rome",
+   "coordinate": [
+    12.2778,
+    41.7526
+   ],
+   "pleiadesId": "823844103",
+   "inception": null,
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q5747948",
+   "uri": "https://www.wikidata.org/wiki/Q5747948",
+   "label": "Necropolis of Via Ostiense",
+   "description": "necropolis in Ostia, Rome, Italy",
+   "coordinate": [
+    12.296606715,
+    41.757586356
+   ],
+   "pleiadesId": "617979990",
+   "inception": null,
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q55096569",
+   "uri": "https://www.wikidata.org/wiki/Q55096569",
+   "label": "tomb of Caius Cartilius Poplicola",
+   "description": "a first century B.C. tomb located in Ostia",
+   "coordinate": [
+    12.28543,
+    41.75036
+   ],
+   "pleiadesId": "328100889",
+   "inception": null,
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q55685926",
+   "uri": "https://www.wikidata.org/wiki/Q55685926",
+   "label": "Pianabella basilica",
+   "description": "Christian basilica located near the Porta Laurentina of Ostia Antica",
+   "coordinate": [
+    12.301303,
+    41.749348
+   ],
+   "pleiadesId": "422998",
+   "inception": "0300-01-01T00:00:00Z",
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q56293166",
+   "uri": "https://www.wikidata.org/wiki/Q56293166",
+   "label": "Basilica of Constantine (Ostia)",
+   "description": "remains of a Roman basilica in Ostia, Italy",
+   "coordinate": [
+    12.2971,
+    41.7535
+   ],
+   "pleiadesId": "198393847",
+   "inception": null,
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q104876336",
+   "uri": "https://www.wikidata.org/wiki/Q104876336",
+   "label": "Palazzo Imperiale, Ostia Antica",
+   "description": "archaeological site",
+   "coordinate": [
+    12.2816,
+    41.75395
+   ],
+   "pleiadesId": "411301347",
+   "inception": null,
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q107085956",
+   "uri": "https://www.wikidata.org/wiki/Q107085956",
+   "label": "Baths of the Swimmer",
+   "description": null,
+   "coordinate": [
+    12.2917445,
+    41.7545232
+   ],
+   "pleiadesId": "589881342",
+   "inception": null,
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q107095495",
+   "uri": "https://www.wikidata.org/wiki/Q107095495",
+   "label": "Temple of the Ship Carpenters",
+   "description": "a Roman temple in Ostia built at the time of the emperor Commodus atop an earlier fullerry.",
+   "coordinate": [
+    12.2859544,
+    41.7527351
+   ],
+   "pleiadesId": "282772660",
+   "inception": null,
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q108511009",
+   "uri": "https://www.wikidata.org/wiki/Q108511009",
+   "label": "Domus Fulminata",
+   "description": "Roman domus at Ostia Antica",
+   "coordinate": [
+    12.285031,
+    41.750671
+   ],
+   "pleiadesId": "1554484",
+   "inception": null,
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q112181347",
+   "uri": "https://www.wikidata.org/wiki/Q112181347",
+   "label": "Mithraeum of Lucretius Menander",
+   "description": "shrine sacred to Mithras located at Ostia",
+   "coordinate": [
+    12.288613727,
+    41.755262722
+   ],
+   "pleiadesId": "103030031",
+   "inception": null,
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q123469072",
+   "uri": "https://www.wikidata.org/wiki/Q123469072",
+   "label": "Mithraeum of Felicissimus",
+   "description": null,
+   "coordinate": [
+    12.291472,
+    41.754468
+   ],
+   "pleiadesId": "81616357",
+   "inception": null,
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q124218142",
+   "uri": "https://www.wikidata.org/wiki/Q124218142",
+   "label": "Domus and Mitreo delle Pareti Dipinte",
+   "description": null,
+   "coordinate": [
+    12.286333333,
+    41.753222222
+   ],
+   "pleiadesId": "834171137",
+   "inception": null,
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q126181252",
+   "uri": "https://www.wikidata.org/wiki/Q126181252",
+   "label": "Baths of the Trinacria",
+   "description": "thermae located in regio III of Ostia Antica",
+   "coordinate": [
+    12.284155,
+    41.753407
+   ],
+   "pleiadesId": "238098310",
+   "inception": "0120-01-01T00:00:00Z",
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q127872528",
+   "uri": "https://www.wikidata.org/wiki/Q127872528",
+   "label": "Guild Temple and Mithraeum of Fructosus",
+   "description": null,
+   "coordinate": [
+    12.287841,
+    41.753182
+   ],
+   "pleiadesId": "352230499",
+   "inception": null,
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q127990752",
+   "uri": "https://www.wikidata.org/wiki/Q127990752",
+   "label": "Round temple",
+   "description": "temple at ancient Ostia",
+   "coordinate": [
+    12.2878637,
+    41.7534337
+   ],
+   "pleiadesId": null,
+   "inception": "0225-01-01T00:00:00Z",
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q130507607",
+   "uri": "https://www.wikidata.org/wiki/Q130507607",
+   "label": "Mithraeum of the Seven Spheres",
+   "description": null,
+   "coordinate": [
+    12.290493747,
+    41.755777917
+   ],
+   "pleiadesId": "981681540",
+   "inception": null,
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q133296401",
+   "uri": "https://www.wikidata.org/wiki/Q133296401",
+   "label": "Baths of the Philosopher",
+   "description": null,
+   "coordinate": [
+    12.290602499,
+    41.753865272
+   ],
+   "pleiadesId": "233060586",
+   "inception": null,
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q133886353",
+   "uri": "https://www.wikidata.org/wiki/Q133886353",
+   "label": "Sanctuary of the Bona Dea (Ostia)",
+   "description": "ancient temple in Ostia Antica",
+   "coordinate": [
+    12.2915854,
+    41.7546215
+   ],
+   "pleiadesId": "510922209",
+   "inception": null,
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q135678823",
+   "uri": "https://www.wikidata.org/wiki/Q135678823",
+   "label": "Shrine of Sabazius (V,XII,3)",
+   "description": "shrine in regio V of ancient Ostia",
+   "coordinate": [
+    12.2931285,
+    41.7557906
+   ],
+   "pleiadesId": "233060587",
+   "inception": null,
+   "dissolved": null,
+   "article": null
+  },
+  {
+   "qid": "Q141868139",
+   "uri": "https://www.wikidata.org/wiki/Q141868139",
+   "label": "Baths of the Christian Basilica",
+   "description": "baths at Ostia Antica",
+   "coordinate": [
+    12.2869065,
+    41.7532631
+   ],
+   "pleiadesId": "367085720",
+   "inception": null,
+   "dissolved": null,
+   "article": null
+  }
+ ]
+}

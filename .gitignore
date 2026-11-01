@@ -60,3 +60,6 @@ __pycache__/
 
 # Phase 5B AI call log and spend ledger (local, may contain request text)
 /data/ai/
+
+# Phase 5C raw research responses (quarantine; promoted snapshots live in data/history)
+/data/research/

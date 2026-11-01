@@ -16,7 +16,7 @@ const results = [], errors = [];
 for (const doc of docs) {
   const r = await runAi(claimsTask(doc));
   if (!r.ok) { errors.push({ sourceId: doc.sourceId, error: r.error, message: r.message }); console.log(`error ${doc.sourceId}: ${r.message}`); continue; }
-  const result = verifyClaims(doc, r.value);
+  const result = { ...verifyClaims(doc, r.value), extractedBy: r.record.servedBy ?? r.record.model, promptVersion: CLAIMS_VERSION };
   saveDraft('claims', doc.sourceId.replace(/^source:/, ''), result);
   results.push(result);
   console.log(`${doc.sourceId}: ${result.accepted.length} kept, ${result.discarded.length} discarded`);

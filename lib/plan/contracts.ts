@@ -62,7 +62,7 @@ export interface PlanFeature {
 /** A source file kept verbatim as records, so compiling the blueprint gives back the exact bytes the generators read. */
 export interface BlueprintLayer {
   id: string;
-  role: 'world' | 'context' | 'layout' | 'zoning' | 'landmarks' | 'density';
+  role: 'world' | 'context' | 'layout' | 'zoning' | 'landmarks' | 'density' | 'sources';
   codec: string;
   /** The existing file this layer compiles to. */
   output: string;
@@ -338,7 +338,7 @@ export function validateBlueprint(value: unknown): SpatialBlueprint {
     const v = record(l, ['id', 'role', 'codec', 'output', 'serialisation', 'order', 'header', 'collections'], `${what}.layer`);
     if (layerIds.has(text(v.id, what))) throw Error(`${what}: duplicate layer ${v.id}`);
     layerIds.add(v.id as string);
-    oneOf(v.role, ['world', 'context', 'layout', 'zoning', 'landmarks', 'density'], `${what}.layer.role`); text(v.codec, what); text(v.output, what);
+    oneOf(v.role, ['world', 'context', 'layout', 'zoning', 'landmarks', 'density', 'sources'], `${what}.layer.role`); text(v.codec, what); text(v.output, what);
     oneOf(record(v.serialisation, ['indent'], what).indent as never, [0, 1, 2] as never[], `${what}.layer.indent`);
     const order = list(v.order, what) as string[], header = record(v.header, order, `${what}.layer.header`), collections = record(v.collections, order, `${what}.layer.collections`);
     for (const key of order) if ((key in header) === (key in collections)) throw Error(`${what}: layer key ${key} must be in exactly one of header or collections`);

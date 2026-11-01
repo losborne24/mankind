@@ -8,7 +8,7 @@ import type { HistoricalPeriod } from '@/lib/history/schema';
  * top-level key order and indentation, so `compileLayer` returns the exact bytes the generators already read. Features are an index
  * over those records: what planning needs (kind, dates, evidence, extent), with the coordinates left in the record.
  */
-export const CODEC_VERSIONS = { 'world@1': 1, 'forum-context@1': 1, 'forum-reconstruction@1': 1, 'rome-zoning@1': 1, 'rome-landmarks@1': 1, 'rome-density@1': 1 } as const;
+export const CODEC_VERSIONS = { 'world@1': 1, 'forum-context@1': 1, 'forum-reconstruction@1': 1, 'rome-zoning@1': 1, 'rome-landmarks@1': 1, 'rome-density@1': 1, 'sources@1': 1 } as const;
 export type Codec = keyof typeof CODEC_VERSIONS;
 
 export function layerFromFile(id: string, role: BlueprintLayer['role'], codec: Codec, output: string, json: Record<string, unknown>, indent: 0 | 1 | 2, collections: string[]): BlueprintLayer {

@@ -1,0 +1,574 @@
+{
+ "accessed": "2026-11-01",
+ "licence": "CC BY 3.0 · Pleiades contributors",
+ "licenceUrl": "https://creativecommons.org/licenses/by/3.0/",
+ "places": [
+  {
+   "id": 101249988,
+   "uri": "https://pleiades.stoa.org/places/101249988",
+   "title": "Ostia Synagogue",
+   "description": "The ancient synagogue located in Ostia Antica is one of the oldest known synagogues in the world. The structure's earliest phase dates to the reign of Claudius and it continued in use until the fifth century.",
+   "reprPoint": [
+    12.288556732496069,
+    41.7488680805183
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "Imagery Location of Synagogue",
+     "provenance": "Pleiades",
+     "accuracy": 4.2,
+     "start": -30,
+     "end": 640
+    },
+    {
+     "title": "OSM location of Ostia synagogue",
+     "provenance": "OpenStreetMap (Way 218815234, version 7, osm:changeset=130379633, 2022-12-22T14:41:22Z)",
+     "accuracy": 20,
+     "start": -30,
+     "end": 640
+    }
+   ]
+  },
+  {
+   "id": 868515126,
+   "uri": "https://pleiades.stoa.org/places/868515126",
+   "title": "House of Amor and Psyche",
+   "description": "A domus in Ostia Antica on the Via del Tempio d’Ercole, between the Via della Foce to the south and the Tiber to the north. Installed in late antiquity, and incorporating large parts of a preexisting tenement, this house had a wide central corridor, which opened through an arcade onto a small garden (viridarium) backed by a nymphaeum.",
+   "reprPoint": [
+    12.286083897127632,
+    41.7540547046886
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of House of Amor and Psyche",
+     "provenance": "OpenStreetMap (Way 949827087, version 5, osm:changeset=149669782, 2024-04-06T19:50:27Z)",
+     "accuracy": 20,
+     "start": -30,
+     "end": 640
+    }
+   ]
+  },
+  {
+   "id": 489630692,
+   "uri": "https://pleiades.stoa.org/places/489630692",
+   "title": "The Forum of Corporations",
+   "description": "A key commercial center occupying the quadriporticus of the theater of Ostia, the Forum of Corporations dates initially to the Augustan period but is substantially rebuilt in the second century.",
+   "reprPoint": [
+    12.291007512869603,
+    41.7563893179929
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM Location of the Piazzale delle Corporazioni",
+     "provenance": "OpenStreetMap (Way 52050483, version 4, osm:changeset=16643099, 2013-06-21T12:20:45Z)",
+     "accuracy": 20,
+     "start": -30,
+     "end": 300
+    }
+   ]
+  },
+  {
+   "id": 732059512,
+   "uri": "https://pleiades.stoa.org/places/732059512",
+   "title": "Christian Basilica, Ostia",
+   "description": "The so-called Christian Basilica, located in Regio III of ancient Ostia, was discovered by Guido Calza in 1939. The structure likely dates to the fourth and fifth centuries CE. The interpretation of the structure and its remains has proven difficult, resulting in numerous theories that are often at odds with one another. One possibility is that the complex functioned as a xenodochium (a guest house for pilgrims).",
+   "reprPoint": [
+    12.28642387711046,
+    41.75297123275858
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Basilica Cristiana (III,I,4)",
+     "provenance": "OpenStreetMap (Way 950143356, version 2, osm:changeset=128190239, 2022-10-28T20:21:36Z)",
+     "accuracy": 20,
+     "start": 300,
+     "end": 499
+    }
+   ]
+  },
+  {
+   "id": 422995,
+   "uri": "https://pleiades.stoa.org/places/422995",
+   "title": "Ostia",
+   "description": "The port city of ancient Rome located at the mouth of the river Tiber.",
+   "reprPoint": [
+    12.289357418323796,
+    41.753575752221614
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Ostia Antica",
+     "provenance": "OpenStreetMap (Relation 15824763, version 2, osm:changeset=138539870, 2023-07-15T10:52:17Z)",
+     "accuracy": 20,
+     "start": -550,
+     "end": 640
+    }
+   ]
+  },
+  {
+   "id": 432599299,
+   "uri": "https://pleiades.stoa.org/places/432599299",
+   "title": "Caseggiato di Bacco e Arianna",
+   "description": "The House of Bacchus and Ariadne at Ostia dates to the Hadrianic period and adjoined the Serapeum.",
+   "reprPoint": [
+    12.28378934699338,
+    41.75348408769547
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Caseggiato di Bacco e Arianna (III,XVII,5)",
+     "provenance": "OpenStreetMap (Way 1069720695, version 1, osm:changeset=122390884, 2022-06-14T21:42:55Z)",
+     "accuracy": 20,
+     "start": 100,
+     "end": 640
+    }
+   ]
+  },
+  {
+   "id": 338131054,
+   "uri": "https://pleiades.stoa.org/places/338131054",
+   "title": "Domus della Fortuna Annonaria",
+   "description": "The so-called \"Domus della Fortuna Annonaria\" (V,II,8) is an ancient peristyle house with a nymphaeum located in Ostia. Its initial construction likely dates to the reign of Antoninus Pius.",
+   "reprPoint": [
+    12.2905171,
+    41.7539998
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Domus della Fortuna Annonaria (V,II,8)",
+     "provenance": "OpenStreetMap (Node 9460745511, version 5, osm:changeset=138539870, 2023-07-15T10:52:10Z)",
+     "accuracy": 20,
+     "start": null,
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": 223974298,
+   "uri": "https://pleiades.stoa.org/places/223974298",
+   "title": "Garden Houses",
+   "description": "A large residential complex, built in ca. 128 CE as part of the Hadrianic remodeling of Ostia. Its central area was occupied by two blocks, each comprising four houses, surrounded by a garden furnished with six fountains.",
+   "reprPoint": [
+    12.28475557429241,
+    41.75181609784248
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Garden Houses",
+     "provenance": "OpenStreetMap (Way 955088972, version 3, osm:changeset=138539870, 2023-07-15T10:52:13Z)",
+     "accuracy": 20,
+     "start": -30,
+     "end": 300
+    }
+   ]
+  },
+  {
+   "id": 443253553,
+   "uri": "https://pleiades.stoa.org/places/443253553",
+   "title": "Roman theater at Ostia",
+   "description": "The Roman theater at Ostia was built under the patronage of Marcus Agrippa.",
+   "reprPoint": [
+    12.29147340477965,
+    41.755783949874804
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Teatro romano di Ostia",
+     "provenance": "OpenStreetMap (Way 157918854, version 8, osm:changeset=134428501, 2023-04-02T20:14:29Z)",
+     "accuracy": 20,
+     "start": -30,
+     "end": 300
+    }
+   ]
+  },
+  {
+   "id": 823844103,
+   "uri": "https://pleiades.stoa.org/places/823844103",
+   "title": "Tor Boacciana",
+   "description": "A Medieval tower, perhaps of the twelfth century, connected with the Bobazani family.",
+   "reprPoint": [
+    12.27775017247281,
+    41.75263738541222
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Tor Boaciana",
+     "provenance": "OpenStreetMap (Way 117808991, version 2, osm:changeset=25139021, 2014-08-31T13:59:49Z)",
+     "accuracy": 20,
+     "start": 640,
+     "end": 1453
+    }
+   ]
+  },
+  {
+   "id": 617979990,
+   "uri": "https://pleiades.stoa.org/places/617979990",
+   "title": "Via Ostiensis necropolis",
+   "description": "A necropolis at Ostia that began during the second century B.C. on the south side of the Via Ostiensis.",
+   "reprPoint": [
+    12.2965651,
+    41.757571
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Necropoli della Via Ostiense",
+     "provenance": "OpenStreetMap (Node 1573904451, version 5, osm:changeset=114562176, 2021-12-04T17:57:05Z)",
+     "accuracy": 20,
+     "start": -30,
+     "end": 640
+    }
+   ]
+  },
+  {
+   "id": 328100889,
+   "uri": "https://pleiades.stoa.org/places/328100889",
+   "title": "Tomb of Caius Cartilius Poplicola",
+   "description": "The Tomb of Caius Cartilius Poplicola, dating to ca. 30-20 B.C., is a monumental tomb outside the Porta Marina of Ostia. Poplicola was a prominent citizen of Ostia.",
+   "reprPoint": [
+    12.285441209029875,
+    41.75036454527718
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Tomb of C. Cartilius Poplicola",
+     "provenance": "OpenStreetMap (Way 218815246, version 9, osm:changeset=135856497, 2023-05-08T14:42:47Z)",
+     "accuracy": 20,
+     "start": -30,
+     "end": 300
+    }
+   ]
+  },
+  {
+   "id": 422998,
+   "uri": "https://pleiades.stoa.org/places/422998",
+   "title": "Pianabella",
+   "description": "A large Christian basilica discovered in 1976 several hundred meters southeast of the Porta Laurentina of Ostia. The original phase dates to the end of the fourth century A.D.",
+   "reprPoint": [
+    12.29368378837802,
+    41.75003676402477
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Basilica di Pianabella",
+     "provenance": "OpenStreetMap (Way 384187529, version 2, osm:changeset=159725883, 2024-11-29T04:05:44Z)",
+     "accuracy": 20,
+     "start": 300,
+     "end": 640
+    }
+   ]
+  },
+  {
+   "id": 198393847,
+   "uri": "https://pleiades.stoa.org/places/198393847",
+   "title": "Basilica of Constantine (Ostia)",
+   "description": "The presence of a basilica created with funds donated by Constantine I in region 5 of ancient Ostia was known from textual sources and then confirmed via geophysical prospection and, ultimately, excavation.",
+   "reprPoint": [
+    12.2936805,
+    41.7541808
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Basilica costantiniana di Ostia",
+     "provenance": "OpenStreetMap (Node 13054673400, version 1, osm:changeset=170077362, 2025-08-06T20:19:40Z)",
+     "accuracy": 20,
+     "start": 300,
+     "end": 640
+    }
+   ]
+  },
+  {
+   "id": 411301347,
+   "uri": "https://pleiades.stoa.org/places/411301347",
+   "title": "Palazzo Imperiale (Ostia)",
+   "description": "The so-called Palazzo Imperiale at Ostia is located at the western margin of Regio I. This building complex was initially excavated between 1855 and 1871 and many of its finds, especially mosaics, were transported to the Vatican Museum. The complex dates to the second and third centuries CE and includes a variety of installations - shops, storehouses, bathing facilities - but is most likely not a palace despite its modern sobriquet.",
+   "reprPoint": [
+    12.281604341781065,
+    41.75394025843379
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Palazzo imperiale",
+     "provenance": "OpenStreetMap (Way 538110674, version 3, osm:changeset=135842689, 2023-05-08T09:00:38Z)",
+     "accuracy": 20,
+     "start": -30,
+     "end": 300
+    }
+   ]
+  },
+  {
+   "id": 589881342,
+   "uri": "https://pleiades.stoa.org/places/589881342",
+   "title": "Terme del Nuotatore",
+   "description": "The so-called \"Baths of the Swimmer\" or \"Terme del Nuotatore\" (V,X,3) in region 5 of the ancient city of Ostia takes its modern name from a partially preserved black-and-white mosaic pavement. These baths were built in the late first century CE during the reign of Domitian. The complex was rebuilt during the Antonine period. The complex remained in use until ca. 250. The site was first excavated during 1938-1942. Andrea Carandini directed another campaign of excavation from 1966 to 1975.",
+   "reprPoint": [
+    12.2917445,
+    41.7545232
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Terme del Nuotatore (V,X,3)",
+     "provenance": "OpenStreetMap (Node 10558410752, version 1, osm:changeset=131318579, 2023-01-16T00:57:30Z)",
+     "accuracy": 20,
+     "start": null,
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": 282772660,
+   "uri": "https://pleiades.stoa.org/places/282772660",
+   "title": "Temple of the Fabri Navales",
+   "description": "The Temple of the Ship Carpenters at Ostia dates to the later second century CE.",
+   "reprPoint": [
+    12.286156670437753,
+    41.75274412340301
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Tempio dei Fabri Navales (III,II,1-2)",
+     "provenance": "OpenStreetMap (Way 950143355, version 2, osm:changeset=116021881, 2022-01-11T12:13:00Z)",
+     "accuracy": 20,
+     "start": 1,
+     "end": 640
+    }
+   ]
+  },
+  {
+   "id": 1554484,
+   "uri": "https://pleiades.stoa.org/places/1554484",
+   "title": "House of the Thunderbolt",
+   "description": "A Vespasianic domus in Ostia Antica, built ca. 70-75 CE, situated outside the Porta Marina, and north of the continuation of the Decumanus Maximus. It had a slightly concave façade, comprising six shops and an entrance corridor leading to an interior peristyle garden.",
+   "reprPoint": [
+    12.285019218505552,
+    41.750658622806384
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of House of the Thunderbolt",
+     "provenance": "OpenStreetMap (Way 955085928, version 4, osm:changeset=138539870, 2023-07-15T10:52:13Z)",
+     "accuracy": 20,
+     "start": -30,
+     "end": 300
+    }
+   ]
+  },
+  {
+   "id": 103030031,
+   "uri": "https://pleiades.stoa.org/places/103030031",
+   "title": "Mithraeum of Lucretius Menander",
+   "description": "The Mithraeum of Lucretius Menander located in ancient Ostia dates to the third century CE.",
+   "reprPoint": [
+    12.288613727801723,
+    41.75526272235201
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Mitreo di Lucrezio Menandro (I,III,5)",
+     "provenance": "OpenStreetMap (Way 1065383694, version 1, osm:changeset=121743288, 2022-05-31T02:14:10Z)",
+     "accuracy": 20,
+     "start": -30,
+     "end": 300
+    }
+   ]
+  },
+  {
+   "id": 81616357,
+   "uri": "https://pleiades.stoa.org/places/81616357",
+   "title": "Mithraeum of Felicissimus",
+   "description": "The so-called Mithraeum of Felicissimus is a Mithraic shrine located in ancient Ostia. The shrine itself was installed in a second-century CE building and likely dates to the later third-century CE.",
+   "reprPoint": [
+    12.2916387,
+    41.7543294
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Mithraeum of Felicissimus",
+     "provenance": "OpenStreetMap (Node 10873805531, version 2, osm:changeset=137846259, 2023-06-27T17:45:41Z)",
+     "accuracy": 20,
+     "start": 100,
+     "end": 299
+    }
+   ]
+  },
+  {
+   "id": 834171137,
+   "uri": "https://pleiades.stoa.org/places/834171137",
+   "title": "Domus and Mitreo delle Pareti Dipinte",
+   "description": "The complex known as \"Domus and Mitreo delle Pareti Dipinte\" began its life in the later second century BCE and was remodeled during the time of Augustus. A mithraeum is built in the northwest part of the building in the later second century CE.",
+   "reprPoint": [
+    12.286497517904607,
+    41.75333836523909
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Domus and Mitreo delle Pareti Dipinte (III,I,6)",
+     "provenance": "OpenStreetMap (Way 950143807, version 2, osm:changeset=154464298, 2024-07-26T23:41:21Z)",
+     "accuracy": 20,
+     "start": -30,
+     "end": 300
+    }
+   ]
+  },
+  {
+   "id": 238098310,
+   "uri": "https://pleiades.stoa.org/places/238098310",
+   "title": "Terme della Trinacria",
+   "description": "The so-called Terme della Trinacria in Regio III of Ostia Antica were built in the Hadrianic period at the same time as the Temple of Serapis (III,XVII,4). The modern toponym is derived from a triskelion included in a mosaic decoration.",
+   "reprPoint": [
+    12.284180515833434,
+    41.75338472697575
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Terme della Trinacria (III,XVI,7)",
+     "provenance": "OpenStreetMap (Way 1069797946, version 4, osm:changeset=138539870, 2023-07-15T10:52:13Z)",
+     "accuracy": 20,
+     "start": -30,
+     "end": 300
+    }
+   ]
+  },
+  {
+   "id": 352230499,
+   "uri": "https://pleiades.stoa.org/places/352230499",
+   "title": "Guild Temple and Mithraeum of Fructosus",
+   "description": "An architectural complex excavated in 1938 at the intersection of Via del Pomerio and Via del Tempio Rotondo in Ostia. The guild temple dates to the reign of Alexander Severus (222 - 235 CE). Based on epigraphic evidence, this shrine may belong to the guild of the stuppatores. A mithraic shrine with a patron named Fructosus is to be found in the substructure of the podium.",
+   "reprPoint": [
+    12.28780443970903,
+    41.75318654844685
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Tempio Collegiale and Mitreo di Fructosus (I,X,4)",
+     "provenance": "OpenStreetMap (Way 1303982479, version 1, osm:changeset=154462117, 2024-07-26T21:42:46Z)",
+     "accuracy": 20,
+     "start": -30,
+     "end": 300
+    }
+   ]
+  },
+  {
+   "id": 981681540,
+   "uri": "https://pleiades.stoa.org/places/981681540",
+   "title": "Mithraeum of the Seven Spheres",
+   "description": "The so-called Mithraeum of the Seven Spheres is located in ancient Ostia near to the theater-cum-quadriporticus complex. The so-called Quattro tempietti screen it from the Decumanus Maximus.",
+   "reprPoint": [
+    12.290493747852391,
+    41.75577791715897
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Mitreo delle Sette Sfere (II,VIII,6)",
+     "provenance": "OpenStreetMap (Way 1105017198, version 2, osm:changeset=137927561, 2023-06-29T17:13:00Z)",
+     "accuracy": 20,
+     "start": 100,
+     "end": 299
+    }
+   ]
+  },
+  {
+   "id": 233060586,
+   "uri": "https://pleiades.stoa.org/places/233060586",
+   "title": "Baths of the Philosopher",
+   "description": "The so-called \"Baths of the Philosopher\" or \"Terme del Filosofo\" in region V of the ancient city of Ostia take their modern sobriquet from a bust of Plotinus dating to the middle of the third century CE.",
+   "reprPoint": [
+    12.2906412,
+    41.7538906
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Terme del Filosofo (V,II,7)",
+     "provenance": "OpenStreetMap (Node 10873805535, version 1, osm:changeset=135785476, 2023-05-06T17:15:34Z)",
+     "accuracy": 20,
+     "start": -30,
+     "end": 640
+    }
+   ]
+  },
+  {
+   "id": 510922209,
+   "uri": "https://pleiades.stoa.org/places/510922209",
+   "title": "Sanctuary of the Bona Dea",
+   "description": "The Sanctuary of the Bona Dea at Ostia dates to the republican period (second century BCE?) and was renovated in the second century CE.",
+   "reprPoint": [
+    12.2915854,
+    41.7546215
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Santuario della Bona Dea (V,X,2)",
+     "provenance": "OpenStreetMap (Node 10873805529, version 1, osm:changeset=135785476, 2023-05-06T17:15:34Z)",
+     "accuracy": 20,
+     "start": null,
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": 233060587,
+   "uri": "https://pleiades.stoa.org/places/233060587",
+   "title": "Shrine of Sabazius",
+   "description": "The Shrine of Sabazius was installed in part of a horreum (V, XII, 2) that was initially built ca. 120-125 CE. The Sabazius shrine likely dates to the early third century. Dante Vaglieri excavated the shrine in 1909.",
+   "reprPoint": [
+    12.293087057654555,
+    41.75573407554868
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Shrine of Sabazius (V,XII,3)",
+     "provenance": "OpenStreetMap (Way 1132340577, version 4, osm:changeset=137920089, 2023-06-29T13:56:05Z)",
+     "accuracy": 20,
+     "start": null,
+     "end": null
+    }
+   ]
+  },
+  {
+   "id": 367085720,
+   "uri": "https://pleiades.stoa.org/places/367085720",
+   "title": "Terme della Basilica Cristiana (III,I,2-3)",
+   "description": "The Baths of the Christian Basilica date to the reign of Trajan, with restorations in the early third century.",
+   "reprPoint": [
+    12.286571005752066,
+    41.753157933108376
+   ],
+   "rights": "Copyright © The Contributors. Sharing and remixing permitted under terms of the Creative Commons Attribution 3.0 License (cc-by).",
+   "locations": [
+    {
+     "title": "OSM location of Terme della Basilica Cristiana (III,I,2-3)",
+     "provenance": "OpenStreetMap (Way 950143357, version 6, osm:changeset=138539870, 2023-07-15T10:52:13Z)",
+     "accuracy": 20,
+     "start": -30,
+     "end": 300
+    }
+   ]
+  }
+ ]
+}

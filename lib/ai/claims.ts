@@ -4,13 +4,15 @@ import type { Evidence } from '@/lib/history/schema';
 import type { Coordinate } from '@/lib/scenarios/schema';
 import type { SpatialBlueprint } from '@/lib/plan/contracts';
 import { MAX_YEAR, MIN_YEAR } from '@/lib/historicalDate';
+import { wikidataYearWords, type WikidataPlace } from '@/lib/research/sources';
 
 /**
  * Claim extraction (Phase 5B step 9): discrete, quotable claims from sources already cached and licensed, never the open web.
  * A source is rendered to a fixed text document; every claim must quote it exactly, and any coordinate or year a claim states
  * must appear in its quote. Claims that fail are discarded and counted. Surviving claims are drafts until a person accepts them.
  */
-export const CLAIMS_VERSION = 'claims-1';
+/** claims-2: documents from Wikidata, Wikipedia and OpenStreetMap as well as Pleiades; dates written in words. */
+export const CLAIMS_VERSION = 'claims-2';
 export interface SourceDocument { sourceId: string; title: string; url: string; licence: string; text: string }
 export interface Claim {
   id: string;
@@ -23,7 +25,7 @@ export interface Claim {
   confidence: 'high' | 'medium' | 'low';
   note: string;
 }
-export interface ExtractionResult { sourceId: string; accepted: Claim[]; discarded: { claim: unknown; reason: string }[] }
+export interface ExtractionResult { sourceId: string; accepted: Claim[]; discarded: { claim: unknown; reason: string }[]; /** Who produced the claims: the model served, or `manual:<chat app>`. */ extractedBy?: string; promptVersion?: string }
 
 type PleiadesPlace = { id: number; uri: string; title: string; description: string; reprPoint: Coordinate | null; locations: { title: string; provenance: string; accuracy: number | null; start: number | null; end: number | null }[] };
 type PleiadesFile = { accessed: string; licence: string; licenceUrl: string; places: Record<string, PleiadesPlace> };
@@ -36,15 +38,45 @@ export function pleiadesDocuments(files = PLEIADES_FILES): SourceDocument[] {
     const data = JSON.parse(readFileSync(file, 'utf8')) as PleiadesFile;
     for (const [key, p] of Object.entries(data.places)) {
       const sourceId = `source:pleiades-${key}`;
-      if (docs.has(sourceId)) continue;
-      const lines = [`Source: Pleiades place ${p.id} (${p.uri}), accessed ${data.accessed}.`, `Title: ${p.title}`, `Description: ${p.description || '(none)'}`,
-        p.reprPoint ? `Representative point: longitude ${p.reprPoint[0].toFixed(6)}, latitude ${p.reprPoint[1].toFixed(6)}.` : 'Representative point: none.',
-        ...p.locations.map((l, n) => `Location ${n + 1}: "${l.title}". Provenance: ${l.provenance}. Accuracy: ${l.accuracy ?? 'unknown'} m. This location record is attested for ${l.start ?? '?'} to ${l.end ?? '?'} (the dates of the mapping, not of the feature).`)];
-      docs.set(sourceId, { sourceId, title: p.title, url: p.uri, licence: data.licence, text: lines.join('\n') });
+      if (!docs.has(sourceId)) docs.set(sourceId, pleiadesDocument(sourceId, p, data.accessed, data.licence));
     }
   }
   return [...docs.values()].sort((a, b) => a.sourceId.localeCompare(b.sourceId));
 }
+const pleiadesDocument = (sourceId: string, p: PleiadesPlace, accessed: string, licence: string): SourceDocument => ({ sourceId, title: p.title, url: p.uri, licence, text: [
+  `Source: Pleiades place ${p.id} (${p.uri}), accessed ${accessed}.`, `Title: ${p.title}`, `Description: ${p.description || '(none)'}`,
+  p.reprPoint ? `Representative point: longitude ${p.reprPoint[0].toFixed(6)}, latitude ${p.reprPoint[1].toFixed(6)}.` : 'Representative point: none.',
+  ...p.locations.map((l, n) => `Location ${n + 1}: "${l.title}". Provenance: ${l.provenance}. Accuracy: ${l.accuracy ?? 'unknown'} m. This location record is attested for ${l.start ?? '?'} to ${l.end ?? '?'} (the dates of the mapping, not of the feature).`)].join('\n') });
+
+/**
+ * Documents for a place fetched by Phase 5C (data/history/<slug>/source/): one per Wikidata item, Pleiades record, Wikipedia
+ * summary and OpenStreetMap feature, rendered deterministically so claims can quote them. Wikidata dates are written in words as
+ * recorded ("100 BCE"); the claim prompt converts them to astronomical years and the verifier accepts either form.
+ */
+export function placeDocuments(slug: string): SourceDocument[] {
+  const dir = `data/history/${slug}/source`;
+  function read<T>(f: string): T | undefined { try { return JSON.parse(readFileSync(`${dir}/${f}`, 'utf8')) as T; } catch { return undefined; } }
+  const docs: SourceDocument[] = [];
+  const wd = read<{ accessed: string; licence: string; places: WikidataPlace[] }>('wikidata.json');
+  for (const w of wd?.places ?? []) docs.push({ sourceId: `source:wikidata-${w.qid}`, title: w.label, url: w.uri, licence: wd!.licence, text: [
+    `Source: Wikidata item ${w.qid} (${w.uri}), accessed ${wd!.accessed}.`, `Label: ${w.label}`, `Description: ${w.description ?? '(none)'}`,
+    `Coordinate: longitude ${w.coordinate[0].toFixed(6)}, latitude ${w.coordinate[1].toFixed(6)}.`,
+    `Inception: ${w.inception ? wikidataYearWords(w.inception) : 'not recorded'}.`, `Dissolved, abolished or demolished: ${w.dissolved ? wikidataYearWords(w.dissolved) : 'not recorded'}.`,
+    `Pleiades ID: ${w.pleiadesId ?? 'none'}.`].join('\n') });
+  const pl = read<{ accessed: string; licence: string; places: PleiadesPlace[] }>('pleiades.json');
+  for (const p of pl?.places ?? []) docs.push(pleiadesDocument(`source:pleiades-${p.id}`, p, pl!.accessed, pl!.licence));
+  const wp = read<{ accessed: string; licence: string; summaries: { title: string; url: string; extract: string; revision: string | null }[] }>('wikipedia.json');
+  for (const a of wp?.summaries ?? []) docs.push({ sourceId: `source:wikipedia-${a.title.replace(/\s+/g, '_')}`, title: a.title, url: a.url, licence: wp!.licence, text:
+    `Source: Wikipedia article "${a.title}" (${a.url}), revision ${a.revision ?? 'unknown'}, accessed ${wp!.accessed}.\nSummary: ${a.extract}` });
+  const osm = read<{ accessed: string; licence: string; features: { type: string; id: number; name: string; historic: string; centre: Coordinate; tags: Record<string, string> }[] }>('osm.json');
+  for (const f of osm?.features ?? []) docs.push({ sourceId: `source:osm-${f.type}-${f.id}`, title: f.name, url: `https://www.openstreetmap.org/${f.type}/${f.id}`, licence: osm!.licence, text: [
+    `Source: OpenStreetMap ${f.type} ${f.id} (https://www.openstreetmap.org/${f.type}/${f.id}), accessed ${osm!.accessed}. Present-day mapping of what survives.`,
+    `Name: ${f.name}`, `Historic: ${f.historic}`, `Centre: longitude ${f.centre[0].toFixed(6)}, latitude ${f.centre[1].toFixed(6)}.`,
+    `Tags: ${Object.entries(f.tags).map(([k, v]) => `${k}=${v}`).join('; ')}`].join('\n') });
+  return docs.sort((a, b) => a.sourceId.localeCompare(b.sourceId, 'en', { numeric: true }));
+}
+/** Sources as the planner and journeys cite them: id, title, public URL, licence. */
+export const sourceEntries = (docs: SourceDocument[]) => docs.map(d => ({ id: d.sourceId, title: d.title, url: d.url, licence: d.licence }));
 
 const nullable = (schema: Record<string, unknown>) => ({ anyOf: [schema, { type: 'null' }] });
 export const CLAIMS_SCHEMA = {
@@ -60,7 +92,7 @@ Rules:
 - One claim per feature the document locates or dates. A claim names the feature, its kind, and where and when it stood, as far as the document says.
 - quote: copy the exact words from the document that support the claim, character for character. Every number you give (longitude, latitude, a year) must appear in your quote.
 - longitude / latitude: only from a representative point or coordinate written in the document; otherwise null.
-- startYear / endYear: only when the document dates the feature itself, in astronomical years (1 BCE = 0). The attestation dates of location records are dates of the mapping, not of the feature: never use them. Unknown stays null.
+- startYear / endYear: only when the document dates the feature itself, in astronomical years (1 BCE = 0, so "700 BCE" is -699 and "120 CE" is 120). A Wikidata inception is the start; "dissolved, abolished or demolished" is the end. The attestation dates of location records, and OpenStreetMap's present-day mapping, are not dates of the feature: never use them. Unknown stays null.
 - confidence: "high" when the document states it plainly, "medium" when it is approximate, "low" when it is only implied.
 - note: one sentence of context, or an empty string.
 Do not add knowledge from outside the document.`;
@@ -92,8 +124,10 @@ export function claimProblem(claim: Omit<Claim, 'id' | 'sourceId'>, doc: SourceD
   for (const y of [claim.existence.startYear, claim.existence.endYear]) {
     if (y === null) continue;
     if (!Number.isInteger(y) || y < MIN_YEAR || y > MAX_YEAR) return 'year out of range';
-    // A BCE year y appears as its era year 1 - y.
-    if (!new RegExp(`\\b(${Math.abs(y)}|${1 - y})\\b`).test(quote)) return `year ${y} not in the quote`;
+    // CE years appear as written. A BCE year y (astronomical, 1 BCE = 0) appears as its era year 1 - y beside BCE/BC, or exactly
+    // as a signed number: so a conversion that is one year off (700 BCE given as -700) is caught.
+    const ok = y > 0 ? new RegExp(`\\b${y}\\b`).test(quote) : new RegExp(`\\b${1 - y}\\s*(BCE|BC|B\\.C\\.)`).test(quote) || new RegExp(`(^|[^\\d])${y}\\b`).test(quote);
+    if (!ok) return `year ${y} not in the quote`;
   }
   if (claim.existence.startYear !== null && claim.existence.endYear !== null && claim.existence.endYear < claim.existence.startYear) return 'reversed dates';
   return null;
@@ -125,7 +159,8 @@ export function scoreClaims(results: ExtractionResult[], blueprints: readonly Sp
   const distance = (a: Coordinate, b: Coordinate) => Math.hypot((a[0] - b[0]) * Math.cos(a[1] * Math.PI / 180) * 111320, (a[1] - b[1]) * 110950);
   let located = 0, matchedClaims = 0, expected = 0, found = 0;
   const perSource = results.map(r => {
-    const want = curated.get(r.sourceId) ?? [], claims = r.accepted.filter(c => c.coordinate);
+    // A source with no curated counterpart (a newly fetched place) is reported but not scored.
+    const want = curated.get(r.sourceId) ?? [], claims = want.length ? r.accepted.filter(c => c.coordinate) : [];
     const hits = claims.filter(c => want.some(w => distance(c.coordinate!, w.at) <= metres));
     const covered = want.filter(w => claims.some(c => distance(c.coordinate!, w.at) <= metres));
     located += claims.length; matchedClaims += hits.length; expected += want.length; found += covered.length;

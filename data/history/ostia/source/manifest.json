@@ -1,0 +1,94 @@
+{
+ "place": {
+  "title": "Ostia",
+  "slug": "ostia",
+  "centre": [
+   12.2923,
+   41.7556
+  ],
+  "radiusKm": 2
+ },
+ "fetchedAt": "2026-11-01T13:25:23.152Z",
+ "quarantine": "data/research/quarantine/ostia/2026-11-01T13-25-23-152Z",
+ "entries": [
+  {
+   "source": "wikidata",
+   "file": "data/history/ostia/source/wikidata.json",
+   "requests": [
+    "https://query.wikidata.org/sparql?format=json&query=SELECT%20%3Fitem%20%3FitemLabel%20%3FitemDescription%20%3Fcoord%20%3Fpleiades%20%3Finception%20%3Fdissolved%20%3Farticle%20WHERE%20%7B%0A%20%20SERVICE%20wikibase%3Aaround%20%7B%20%3Fitem%20wdt%3AP625%20%3Fcoord%20.%20bd%3AserviceParam%20wikibase%3Acenter%20%22Point(12.2923%2041.7556)%22%5E%5Egeo%3AwktLiteral%20.%20bd%3AserviceParam%20wikibase%3Aradius%20%222%22%20.%20%7D%0A%20%20OPTIONAL%20%7B%20%3Fitem%20wdt%3AP1584%20%3Fpleiades%20.%20%7D%0A%20%20OPTIONAL%20%7B%20%3Fitem%20wdt%3AP571%20%3Finception%20.%20%7D%0A%20%20OPTIONAL%20%7B%20%3Fitem%20wdt%3AP576%20%3Fdissolved%20.%20%7D%0A%20%20OPTIONAL%20%7B%20%3Farticle%20schema%3Aabout%20%3Fitem%20%3B%20schema%3AisPartOf%20%3Chttps%3A%2F%2Fen.wikipedia.org%2F%3E%20.%20%7D%0A%20%20FILTER(BOUND(%3Fpleiades)%20%7C%7C%20(BOUND(%3Finception)%20%26%26%20YEAR(%3Finception)%20%3C%201500))%0A%20%20SERVICE%20wikibase%3Alabel%20%7B%20bd%3AserviceParam%20wikibase%3Alanguage%20%22en%22%20.%20%7D%0A%7D%20LIMIT%2080"
+   ],
+   "accessed": "2026-11-01",
+   "licence": "CC0 1.0",
+   "licenceUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+   "sha256": "2eb4cfedd9ebb6a1714e870f06660bc0c41ec7550a6474dc0f6495c17e97b214",
+   "records": 32
+  },
+  {
+   "source": "pleiades",
+   "file": "data/history/ostia/source/pleiades.json",
+   "requests": [
+    "https://pleiades.stoa.org/places/101249988/json",
+    "https://pleiades.stoa.org/places/868515126/json",
+    "https://pleiades.stoa.org/places/489630692/json",
+    "https://pleiades.stoa.org/places/732059512/json",
+    "https://pleiades.stoa.org/places/422995/json",
+    "https://pleiades.stoa.org/places/432599299/json",
+    "https://pleiades.stoa.org/places/338131054/json",
+    "https://pleiades.stoa.org/places/223974298/json",
+    "https://pleiades.stoa.org/places/443253553/json",
+    "https://pleiades.stoa.org/places/823844103/json",
+    "https://pleiades.stoa.org/places/617979990/json",
+    "https://pleiades.stoa.org/places/328100889/json",
+    "https://pleiades.stoa.org/places/422998/json",
+    "https://pleiades.stoa.org/places/198393847/json",
+    "https://pleiades.stoa.org/places/411301347/json",
+    "https://pleiades.stoa.org/places/589881342/json",
+    "https://pleiades.stoa.org/places/282772660/json",
+    "https://pleiades.stoa.org/places/1554484/json",
+    "https://pleiades.stoa.org/places/103030031/json",
+    "https://pleiades.stoa.org/places/81616357/json",
+    "https://pleiades.stoa.org/places/834171137/json",
+    "https://pleiades.stoa.org/places/238098310/json",
+    "https://pleiades.stoa.org/places/352230499/json",
+    "https://pleiades.stoa.org/places/981681540/json",
+    "https://pleiades.stoa.org/places/233060586/json",
+    "https://pleiades.stoa.org/places/510922209/json",
+    "https://pleiades.stoa.org/places/233060587/json",
+    "https://pleiades.stoa.org/places/367085720/json"
+   ],
+   "accessed": "2026-11-01",
+   "licence": "CC BY 3.0 · Pleiades contributors",
+   "licenceUrl": "https://creativecommons.org/licenses/by/3.0/",
+   "sha256": "01f0aa1420e84099dc05a742133f4cfdeffbd8c75a67c79d82fc3b10d85a5531",
+   "records": 28
+  },
+  {
+   "source": "wikipedia",
+   "file": "data/history/ostia/source/wikipedia.json",
+   "requests": [
+    "https://en.wikipedia.org/api/rest_v1/page/summary/Ostia_Synagogue",
+    "https://en.wikipedia.org/api/rest_v1/page/summary/Piazzale_delle_Corporazioni",
+    "https://en.wikipedia.org/api/rest_v1/page/summary/Ostia_Antica",
+    "https://en.wikipedia.org/api/rest_v1/page/summary/Santa_Aurea"
+   ],
+   "accessed": "2026-11-01",
+   "licence": "CC BY-SA 4.0 · Wikipedia contributors (summaries quoted for claims, not republished)",
+   "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+   "sha256": "7ca267a1cb0910893a6d4e1330e020df09e05f552f7c853f2f2153d90ef6b514",
+   "records": 4
+  },
+  {
+   "source": "osm",
+   "file": "data/history/ostia/source/osm.json",
+   "requests": [
+    "https://overpass-api.de/api/interpreter"
+   ],
+   "accessed": "2026-11-01",
+   "licence": "ODbL 1.0 · © OpenStreetMap contributors",
+   "licenceUrl": "https://www.openstreetmap.org/copyright",
+   "sha256": "a9c71e2e577d2116d68f0679a5b64b6de38989e0420680e05e6564aff6abf8ab",
+   "records": 161
+  }
+ ],
+ "errors": []
+}

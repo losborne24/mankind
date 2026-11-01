@@ -1,0 +1,2457 @@
+{
+ "accessed": "2026-11-01",
+ "licence": "ODbL 1.0 · © OpenStreetMap contributors",
+ "licenceUrl": "https://www.openstreetmap.org/copyright",
+ "query": "[out:json][timeout:60];(nwr(around:2000,41.7556,12.2923)[\"historic\"~\"archaeological_site|ruins|monument|building|city_gate|tomb\"][\"name\"];);out center tags;",
+ "baseTimestamp": "2026-11-01T13:24:35Z",
+ "features": [
+  {
+   "type": "node",
+   "id": 663491063,
+   "name": "Porta Romana",
+   "historic": "city_gate",
+   "centre": [
+    12.2957532,
+    41.7573892
+   ],
+   "tags": {
+    "historic": "city_gate",
+    "name": "Porta Romana",
+    "wikidata": "Q107085780"
+   }
+  },
+  {
+   "type": "node",
+   "id": 1573148843,
+   "name": "Piazzale delle Corporazioni",
+   "historic": "ruins",
+   "centre": [
+    12.2910242,
+    41.7563626
+   ],
+   "tags": {
+    "historic": "ruins",
+    "name": "Piazzale delle Corporazioni",
+    "wikidata": "Q392878",
+    "wikipedia": "en:Piazzale delle Corporazioni"
+   }
+  },
+  {
+   "type": "node",
+   "id": 1573148901,
+   "name": "Casa di Diana",
+   "historic": "ruins",
+   "centre": [
+    12.2887874,
+    41.754925
+   ],
+   "tags": {
+    "historic": "ruins",
+    "historic:civilization": "ancient_roman",
+    "name": "Casa di Diana",
+    "wikidata": "Q106813831"
+   }
+  },
+  {
+   "type": "node",
+   "id": 1573148905,
+   "name": "Thermopolium (Reg. I, Is. II, 5)",
+   "historic": "ruins",
+   "centre": [
+    12.2885337,
+    41.7546111
+   ],
+   "tags": {
+    "historic": "ruins",
+    "historic:civilization": "ancient_roman",
+    "name": "Thermopolium (Reg. I, Is. II, 5)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 1573904451,
+   "name": "Necropoli della Via Ostiense",
+   "historic": "ruins",
+   "centre": [
+    12.2965651,
+    41.757571
+   ],
+   "tags": {
+    "historic": "ruins",
+    "historic:civilization": "ancient_roman",
+    "name": "Necropoli della Via Ostiense",
+    "wikidata": "Q109923783"
+   }
+  },
+  {
+   "type": "node",
+   "id": 1926239997,
+   "name": "Mitreo delle Terme del Mitra",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2851213,
+    41.7542479
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Mitreo delle Terme del Mitra",
+    "name:en": "Mithraeum at the Baths of Mithra",
+    "wikidata": "Q1939738"
+   }
+  },
+  {
+   "type": "node",
+   "id": 2391690485,
+   "name": "Magazzini Repubblicani (II,II,1-2)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2952413,
+    41.7572584
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Magazzini Repubblicani (II,II,1-2)",
+    "wikidata": "Q131358210"
+   }
+  },
+  {
+   "type": "node",
+   "id": 2391690486,
+   "name": "Piazzale della Vittoria",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2954838,
+    41.7571311
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Piazzale della Vittoria"
+   }
+  },
+  {
+   "type": "node",
+   "id": 2391690555,
+   "name": "Mosaici delle terme di Nettuno",
+   "historic": "ruins",
+   "centre": [
+    12.2926721,
+    41.7564275
+   ],
+   "tags": {
+    "historic": "ruins",
+    "name": "Mosaici delle terme di Nettuno"
+   }
+  },
+  {
+   "type": "node",
+   "id": 2391690604,
+   "name": "Caupona di Fortunato",
+   "historic": "ruins",
+   "centre": [
+    12.2923487,
+    41.7561058
+   ],
+   "tags": {
+    "historic": "ruins",
+    "name": "Caupona di Fortunato"
+   }
+  },
+  {
+   "type": "node",
+   "id": 2674837030,
+   "name": "Campo della Magna Mater",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2908308,
+    41.7525475
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Campo della Magna Mater",
+    "wikidata": "Q106603820"
+   }
+  },
+  {
+   "type": "node",
+   "id": 4610337594,
+   "name": "Agli eroici figli di Ostia",
+   "historic": "monument",
+   "centre": [
+    12.3018493,
+    41.7602112
+   ],
+   "tags": {
+    "historic": "monument",
+    "name": "Agli eroici figli di Ostia"
+   }
+  },
+  {
+   "type": "node",
+   "id": 5209336529,
+   "name": "Caseggiato degli Aurighi",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2850493,
+    41.7530077
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Caseggiato degli Aurighi",
+    "wikidata": "Q107095409"
+   }
+  },
+  {
+   "type": "node",
+   "id": 5209343628,
+   "name": "Terme dei Sette Sapienti",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2851512,
+    41.7532098
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Terme dei Sette Sapienti",
+    "wikidata": "Q2419840",
+    "wikipedia": "de:Thermen der Sieben Weisen"
+   }
+  },
+  {
+   "type": "node",
+   "id": 6441045560,
+   "name": "Terme dei Cisiarii (II,II,3)",
+   "historic": "ruins",
+   "centre": [
+    12.2949771,
+    41.7575645
+   ],
+   "tags": {
+    "historic": "ruins",
+    "historic:civilization": "ancient_roman",
+    "name": "Terme dei Cisiarii (II,II,3)",
+    "wikidata": "Q114639153"
+   }
+  },
+  {
+   "type": "node",
+   "id": 7300715208,
+   "name": "Porta Laurentina",
+   "historic": "city_gate",
+   "centre": [
+    12.2916228,
+    41.7526715
+   ],
+   "tags": {
+    "historic": "city_gate",
+    "historic:civilization": "ancient_roman",
+    "name": "Porta Laurentina",
+    "wikidata": "Q112057514"
+   }
+  },
+  {
+   "type": "node",
+   "id": 7300715214,
+   "name": "Porta Marina",
+   "historic": "city_gate",
+   "centre": [
+    12.2855009,
+    41.7510842
+   ],
+   "tags": {
+    "historic": "city_gate",
+    "name": "Porta Marina",
+    "wikidata": "Q107084485"
+   }
+  },
+  {
+   "type": "node",
+   "id": 8499785317,
+   "name": "Domus di Apuleio (II,VIII,5)",
+   "historic": "ruins",
+   "centre": [
+    12.2907561,
+    41.7558326
+   ],
+   "tags": {
+    "historic": "ruins",
+    "historic:civilization": "ancient_roman",
+    "name": "Domus di Apuleio (II,VIII,5)",
+    "wikidata": "Q116221293"
+   }
+  },
+  {
+   "type": "node",
+   "id": 8927293913,
+   "name": "Terme di Porta Marina",
+   "historic": "archaeological_site",
+   "centre": [
+    12.286441,
+    41.7498866
+   ],
+   "tags": {
+    "archaeological_site": "baths",
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Terme di Porta Marina",
+    "wikidata": "Q114639407"
+   }
+  },
+  {
+   "type": "node",
+   "id": 8927332517,
+   "name": "Regio IV - Insula VIII - Edificio IV,VIII,5",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2858538,
+    41.7504775
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Regio IV - Insula VIII - Edificio IV,VIII,5"
+   }
+  },
+  {
+   "type": "node",
+   "id": 8927475418,
+   "name": "Terme delle Sei Colonne",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2869496,
+    41.7527083
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Terme delle Sei Colonne"
+   }
+  },
+  {
+   "type": "node",
+   "id": 9082299075,
+   "name": "Terme del Mitra (I,XVII,2)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2853643,
+    41.7540994
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Terme del Mitra (I,XVII,2)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 9311336647,
+   "name": "Caseggiato del Cane Monnus (II,I,1)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2954034,
+    41.7575308
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Caseggiato del Cane Monnus (II,I,1)",
+    "wikidata": "Q112057564"
+   }
+  },
+  {
+   "type": "node",
+   "id": 9311460884,
+   "name": "Fullonica II,XI,1",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2913652,
+    41.7570657
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Fullonica II,XI,1"
+   }
+  },
+  {
+   "type": "node",
+   "id": 9460745511,
+   "name": "Domus della Fortuna Annonaria (V,II,8)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2905171,
+    41.7539998
+   ],
+   "tags": {
+    "archaeological_site": "settlement",
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Domus della Fortuna Annonaria (V,II,8)",
+    "wikidata": "Q1238778"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10100638855,
+   "name": "Piccolo Mercato (I,VIII,1)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2871918,
+    41.7547779
+   ],
+   "tags": {
+    "archaeological_site": "ruins",
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Piccolo Mercato (I,VIII,1)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10106139087,
+   "name": "Caseggiato I,IX,2",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2873631,
+    41.7540748
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Caseggiato I,IX,2"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10106139088,
+   "name": "Caseggiato del Larario (I,IX,3)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2875746,
+    41.7539804
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Caseggiato del Larario (I,IX,3)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10106139089,
+   "name": "Caseggiato I,VIII,8",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2872116,
+    41.7538897
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Caseggiato I,VIII,8"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10106158629,
+   "name": "Caseggiato dei Misuratori del Grano (Ostia Antica R1,VII,1-2)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2868052,
+    41.7552318
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Caseggiato dei Misuratori del Grano (Ostia Antica R1,VII,1-2)",
+    "wikidata": "Q128007723"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10111875135,
+   "name": "Horrea di Hortensius (V,XII,1)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2926176,
+    41.7552863
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Horrea di Hortensius (V,XII,1)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10111875136,
+   "name": "Sacello II,II,4",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2947499,
+    41.7571352
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Sacello II,II,4"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10274653605,
+   "name": "Caseggiato I,XIV,4",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2863239,
+    41.7541599
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Caseggiato I,XIV,4"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10274667191,
+   "name": "Horrea dei Mensores (I,XIX,4)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2846874,
+    41.7540914
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Horrea dei Mensores (I,XIX,4)",
+    "wikidata": "Q140506533"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10274667192,
+   "name": "Caseggiato con Fornace (I,XVII,1)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2854195,
+    41.7537855
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Caseggiato con Fornace (I,XVII,1)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10274668958,
+   "name": "Terme del bagnino Buticosus (I,XIV,8)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.286612,
+    41.75401
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Terme del bagnino Buticosus (I,XIV,8)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10312862776,
+   "name": "Palestra delle terme (RE G. II. INS IV.)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2922935,
+    41.756458
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Palestra delle terme (RE G. II. INS IV.)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10313028761,
+   "name": "Molino del Silvano (Reg. I, Is. III, 1-2)",
+   "historic": "ruins",
+   "centre": [
+    12.2889407,
+    41.7551314
+   ],
+   "tags": {
+    "historic": "ruins",
+    "historic:civilization": "ancient_roman",
+    "name": "Molino del Silvano (Reg. I, Is. III, 1-2)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10313028762,
+   "name": "Palestra delle Terme del Foro (Reg. I, XII, 6-10)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2897628,
+    41.7534646
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Palestra delle Terme del Foro (Reg. I, XII, 6-10)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10558410752,
+   "name": "Terme del Nuotatore (V,X,3)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2917445,
+    41.7545232
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Terme del Nuotatore (V,X,3)",
+    "wikidata": "Q107085956"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10873805527,
+   "name": "Portico degli Archi Trionfali (V,XI,7)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.291647,
+    41.7554424
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Portico degli Archi Trionfali (V,XI,7)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10873805528,
+   "name": "Tempio Collegiale tra via degli Augustali e Decumano (V,XI,1)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2910831,
+    41.7550657
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Tempio Collegiale tra via degli Augustali e Decumano (V,XI,1)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10873805529,
+   "name": "Santuario della Bona Dea (V,X,2)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2915854,
+    41.7546215
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Santuario della Bona Dea (V,X,2)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10873805530,
+   "name": "Domus su via deglia Augustali (V,X,1)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2913646,
+    41.7547225
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Domus su via deglia Augustali (V,X,1)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10873805531,
+   "name": "Mitreo del felicissimo (V,IX,1)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2916387,
+    41.7543294
+   ],
+   "tags": {
+    "archaeological_site": "temple",
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Mitreo del felicissimo (V,IX,1)",
+    "name:en": "Mithraeum of Felicissimus",
+    "wikidata": "Q123469072"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10873805532,
+   "name": "Domus del Pozzo (V,III,3)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2912188,
+    41.753887
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Domus del Pozzo (V,III,3)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10873805533,
+   "name": "Caseggiato dei Lottatori (V,III,1)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2909404,
+    41.7541996
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Caseggiato dei Lottatori (V,III,1)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10873805534,
+   "name": "Caseggiato tra via Semita dei Cippi e via della Domus del Pozzo (V,II,2)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2908128,
+    41.7540151
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Caseggiato tra via Semita dei Cippi e via della Domus del Pozzo (V,II,2)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10873805535,
+   "name": "Terme del Filosofo (V,II,7)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2906412,
+    41.7538906
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Terme del Filosofo (V,II,7)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10873805536,
+   "name": "Domus del Protiro (V,II,5)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2907558,
+    41.753752
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Domus del Protiro (V,II,5)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10873805537,
+   "name": "Caseggiato a sud della Domus del Protiro (V,II,3)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2908538,
+    41.7536387
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Caseggiato a sud della Domus del Protiro (V,II,3)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10873805538,
+   "name": "Caseggiato tra via della Fortuna Annonaria e via dell'Invidioso (V,IV,2-3)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2902866,
+    41.7541979
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Caseggiato tra via della Fortuna Annonaria e via dell'Invidioso (V,IV,2-3)",
+    "wikidata": "Q135677139"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10873805539,
+   "name": "Insula dell'Invidioso (V,V,1)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2899227,
+    41.7543405
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Insula dell'Invidioso (V,V,1)",
+    "wikidata": "Q135677137"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10873805540,
+   "name": "Terme dell'Invidioso (V,V,2)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2899766,
+    41.7545802
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Terme dell'Invidioso (V,V,2)",
+    "wikidata": "Q116213352"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10873805541,
+   "name": "Caseggiato del Sole (V,VI,1)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2903186,
+    41.7546136
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Caseggiato del Sole (V,VI,1)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10873805542,
+   "name": "Mitreo dei Serpenti (V,VI,6)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2904095,
+    41.7546849
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Mitreo dei Serpenti (V,VI,6)",
+    "wikidata": "Q124251336"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10873805543,
+   "name": "Collegio degli Augustali (V,VII,2)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2907062,
+    41.7548389
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Collegio degli Augustali (V,VII,2)",
+    "wikidata": "Q135678584"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10878076642,
+   "name": "Cisterna di Porta Marina (IV,VIII,2)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2861381,
+    41.7508758
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Cisterna di Porta Marina (IV,VIII,2)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10878076643,
+   "name": "Ninfeo di Porta Marina (IV,VIII,3)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2853832,
+    41.750731
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Ninfeo di Porta Marina (IV,VIII,3)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10878076644,
+   "name": "Tempio della Bona Dea (IV,VIII,3)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2853437,
+    41.7506287
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Tempio della Bona Dea (IV,VIII,3)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 10878486962,
+   "name": "Loggia di Cartilio Poplicola (IV,IX,1)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2852569,
+    41.7503561
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Loggia di Cartilio Poplicola (IV,IX,1)"
+   }
+  },
+  {
+   "type": "node",
+   "id": 11799594217,
+   "name": "Tomba degli Archetti",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2963844,
+    41.7574626
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Tomba degli Archetti",
+    "wikidata": "Q131358224"
+   }
+  },
+  {
+   "type": "node",
+   "id": 11799779729,
+   "name": "Casa di Diana",
+   "historic": "archaeological_site",
+   "centre": [
+    12.28896,
+    41.7549341
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Casa di Diana"
+   }
+  },
+  {
+   "type": "node",
+   "id": 11968350253,
+   "name": "Latrina presso le Terme del Foro",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2890828,
+    41.753966
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Latrina presso le Terme del Foro"
+   }
+  },
+  {
+   "type": "node",
+   "id": 12383614321,
+   "name": "Porta Laurentina necropolis",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2947176,
+    41.7520174
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Porta Laurentina necropolis"
+   }
+  },
+  {
+   "type": "node",
+   "id": 12385251959,
+   "name": "Temple of Bellona",
+   "historic": "ruins",
+   "centre": [
+    12.2915365,
+    41.7526531
+   ],
+   "tags": {
+    "historic": "ruins",
+    "name": "Temple of Bellona"
+   }
+  },
+  {
+   "type": "node",
+   "id": 12385251964,
+   "name": "Guild house of the hastiferi",
+   "historic": "ruins",
+   "centre": [
+    12.2912162,
+    41.7526849
+   ],
+   "tags": {
+    "historic": "ruins",
+    "name": "Guild house of the hastiferi"
+   }
+  },
+  {
+   "type": "node",
+   "id": 12385251965,
+   "name": "Shrine of Attis",
+   "historic": "ruins",
+   "centre": [
+    12.2913701,
+    41.7526002
+   ],
+   "tags": {
+    "historic": "ruins",
+    "name": "Shrine of Attis"
+   }
+  },
+  {
+   "type": "node",
+   "id": 13054451679,
+   "name": "Aula del Buon Pastore",
+   "historic": "ruins",
+   "centre": [
+    12.2862829,
+    41.7530201
+   ],
+   "tags": {
+    "historic": "ruins",
+    "name": "Aula del Buon Pastore"
+   }
+  },
+  {
+   "type": "node",
+   "id": 13054673400,
+   "name": "Basilica costantiniana di Ostia",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2936805,
+    41.7541808
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Basilica costantiniana di Ostia",
+    "wikidata": "Q56293166"
+   }
+  },
+  {
+   "type": "node",
+   "id": 13973368255,
+   "name": "Villa Romana Costiera",
+   "historic": "ruins",
+   "centre": [
+    12.2964165,
+    41.7440952
+   ],
+   "tags": {
+    "historic": "ruins",
+    "historic:civilization": "ancient_roman",
+    "name": "Villa Romana Costiera"
+   }
+  },
+  {
+   "type": "node",
+   "id": 14074899836,
+   "name": "Domus del Tempio Rotondo",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2883822,
+    41.753476
+   ],
+   "tags": {
+    "archaeological_site": "building",
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Domus del Tempio Rotondo",
+    "wikidata": "Q127991492"
+   }
+  },
+  {
+   "type": "relation",
+   "id": 14700813,
+   "name": "Horrea Epagathiana et Epaphroditiana (I,VIII,3)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2869846,
+    41.7543394
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Horrea Epagathiana et Epaphroditiana (I,VIII,3)"
+   }
+  },
+  {
+   "type": "relation",
+   "id": 15824763,
+   "name": "Ostia Antica",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2885567,
+    41.7534696
+   ],
+   "tags": {
+    "archaeological_site": "city",
+    "heritage": "1",
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Ostia Antica",
+    "wikidata": "Q1012797",
+    "wikipedia": "it:Ostia (città antica)"
+   }
+  },
+  {
+   "type": "relation",
+   "id": 15826226,
+   "name": "Foro di Porta Marina (IV,VIII,1)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2858303,
+    41.7507898
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Foro di Porta Marina (IV,VIII,1)",
+    "wikidata": "Q108511421"
+   }
+  },
+  {
+   "type": "way",
+   "id": 52050478,
+   "name": "Piazzale della Vittoria",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2955023,
+    41.757068
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Piazzale della Vittoria"
+   }
+  },
+  {
+   "type": "way",
+   "id": 143828572,
+   "name": "Terme di Nettuno",
+   "historic": "ruins",
+   "centre": [
+    12.2924397,
+    41.7564843
+   ],
+   "tags": {
+    "historic": "ruins",
+    "name": "Terme di Nettuno",
+    "name:en": "Baths of Neptune"
+   }
+  },
+  {
+   "type": "way",
+   "id": 218815246,
+   "name": "Tomb of C. Cartilius Poplicola",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2854404,
+    41.7503641
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Tomb of C. Cartilius Poplicola",
+    "wikidata": "Q55096569",
+    "wikipedia": "de:Gaius Cartilius Poplicola"
+   }
+  },
+  {
+   "type": "way",
+   "id": 226402471,
+   "name": "Casa dell'Ercole Bambino (Ostia Antica RII,VI,3-4)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2920703,
+    41.7561138
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Casa dell'Ercole Bambino (Ostia Antica RII,VI,3-4)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 227913459,
+   "name": "Caserma dei Vigili",
+   "historic": "ruins",
+   "centre": [
+    12.2920382,
+    41.7569858
+   ],
+   "tags": {
+    "historic": "ruins",
+    "name": "Caserma dei Vigili",
+    "name:en": "Barracks of the Vigiles",
+    "wikidata": "Q3661716"
+   }
+  },
+  {
+   "type": "way",
+   "id": 228049982,
+   "name": "Fullonica (Reg. V, Is. VII, 3)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2911464,
+    41.7547204
+   ],
+   "tags": {
+    "archaeological_site": "industrial",
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Fullonica (Reg. V, Is. VII, 3)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 375078505,
+   "name": "Casa delle Volte Dipinte",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2857601,
+    41.7520541
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Casa delle Volte Dipinte"
+   }
+  },
+  {
+   "type": "way",
+   "id": 384187529,
+   "name": "Basilica di Pianabella",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2936898,
+    41.7500396
+   ],
+   "tags": {
+    "archaeological_site": "basilica",
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Basilica di Pianabella",
+    "wikidata": "Q55685926"
+   }
+  },
+  {
+   "type": "way",
+   "id": 408362779,
+   "name": "Aereo",
+   "historic": "monument",
+   "centre": [
+    12.2892098,
+    41.7417522
+   ],
+   "tags": {
+    "historic": "monument",
+    "name": "Aereo"
+   }
+  },
+  {
+   "type": "way",
+   "id": 538110674,
+   "name": "Palazzo imperiale",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2814717,
+    41.7538656
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Palazzo imperiale",
+    "wikidata": "Q104876336"
+   }
+  },
+  {
+   "type": "way",
+   "id": 538110970,
+   "name": "Tempio di Ercole",
+   "historic": "ruins",
+   "centre": [
+    12.2861658,
+    41.7537746
+   ],
+   "tags": {
+    "historic": "ruins",
+    "historic:civilization": "ancient_roman",
+    "name": "Tempio di Ercole",
+    "wikidata": "Q107081445"
+   }
+  },
+  {
+   "type": "way",
+   "id": 701785400,
+   "name": "Grandi Horrea (Reg. II, Ins. IX)",
+   "historic": "ruins",
+   "centre": [
+    12.289394,
+    41.7554374
+   ],
+   "tags": {
+    "historic": "ruins",
+    "historic:civilization": "ancient_roman",
+    "name": "Grandi Horrea (Reg. II, Ins. IX)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 701791185,
+   "name": "Horrea centrali",
+   "historic": "ruins",
+   "centre": [
+    12.2894642,
+    41.7553814
+   ],
+   "tags": {
+    "historic": "ruins",
+    "historic:civilization": "ancient_roman",
+    "name": "Horrea centrali"
+   }
+  },
+  {
+   "type": "way",
+   "id": 701791732,
+   "name": "Terme del Foro",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2895011,
+    41.7538448
+   ],
+   "tags": {
+    "archaeological_site": "baths",
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Terme del Foro",
+    "wikidata": "Q16253542",
+    "wikipedia": "it:Terme del Foro"
+   }
+  },
+  {
+   "type": "way",
+   "id": 896371517,
+   "name": "Terme del Sileno",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2854678,
+    41.7499217
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Terme del Sileno",
+    "wikidata": "Q140375653"
+   }
+  },
+  {
+   "type": "way",
+   "id": 949827087,
+   "name": "Domus di Amore e Psiche",
+   "historic": "ruins",
+   "centre": [
+    12.2860781,
+    41.7540505
+   ],
+   "tags": {
+    "archaeological_site": "building",
+    "historic": "ruins",
+    "historic:civilization": "ancient_roman",
+    "name": "Domus di Amore e Psiche",
+    "name:en": "House of Cupid and Psyche",
+    "wikidata": "Q249991",
+    "wikipedia": "it:Domus di Amore e Psiche"
+   }
+  },
+  {
+   "type": "way",
+   "id": 950143355,
+   "name": "Tempio dei Fabri Navales (III,II,1-2)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2861675,
+    41.7527459
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Tempio dei Fabri Navales (III,II,1-2)",
+    "wikidata": "Q107095495"
+   }
+  },
+  {
+   "type": "way",
+   "id": 950143356,
+   "name": "Basilica Cristiana (III,I,4)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2864162,
+    41.752965
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Basilica Cristiana (III,I,4)",
+    "wikidata": "Q810067"
+   }
+  },
+  {
+   "type": "way",
+   "id": 950143357,
+   "name": "Terme della Basilica Cristiana (III,I,2-3)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2865703,
+    41.7531947
+   ],
+   "tags": {
+    "archaeological_site": "baths",
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Terme della Basilica Cristiana (III,I,2-3)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 950143807,
+   "name": "Domus and Mitreo delle Pareti Dipinte (III,I,6)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2864958,
+    41.7533432
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Domus and Mitreo delle Pareti Dipinte (III,I,6)",
+    "wikidata": "Q124218142"
+   }
+  },
+  {
+   "type": "way",
+   "id": 950196094,
+   "name": "Caseggiato a tabernae (I,XII,10)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2893737,
+    41.753359
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Caseggiato a tabernae (I,XII,10)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 952683659,
+   "name": "Horrea (Ostia Antica R1,VIII,2)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2866971,
+    41.7547202
+   ],
+   "tags": {
+    "archaeological_site": "ruins",
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Horrea (Ostia Antica R1,VIII,2)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 955071141,
+   "name": "Insula dei Dipinti",
+   "historic": "ruins",
+   "centre": [
+    12.2882085,
+    41.7548968
+   ],
+   "tags": {
+    "historic": "ruins",
+    "historic:civilization": "ancient_roman",
+    "name": "Insula dei Dipinti"
+   }
+  },
+  {
+   "type": "way",
+   "id": 955085928,
+   "name": "House of the Thunderbolt",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2850188,
+    41.7506594
+   ],
+   "tags": {
+    "archaeological_site": "building",
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "House of the Thunderbolt",
+    "wikidata": "Q108511009"
+   }
+  },
+  {
+   "type": "way",
+   "id": 955088972,
+   "name": "Garden Houses",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2847237,
+    41.7517819
+   ],
+   "tags": {
+    "archaeological_site": "building",
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Garden Houses"
+   }
+  },
+  {
+   "type": "way",
+   "id": 955115181,
+   "name": "House of the Fishes",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2892261,
+    41.7527202
+   ],
+   "tags": {
+    "archaeological_site": "building",
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "House of the Fishes",
+    "wikidata": "Q132769038"
+   }
+  },
+  {
+   "type": "way",
+   "id": 965035685,
+   "name": "Terme del sceletro (IV,IX,6)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2859367,
+    41.749595
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Terme del sceletro (IV,IX,6)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 965035686,
+   "name": "Caseggiato delle Due Scale (IV,IX,6)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.285856,
+    41.7497257
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Caseggiato delle Due Scale (IV,IX,6)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 965035687,
+   "name": "Caupona del Dio Pan e Mitreo dei Marmi Colorati (IV,IX,5)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2859975,
+    41.7498545
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Caupona del Dio Pan e Mitreo dei Marmi Colorati (IV,IX,5)",
+    "wikidata": "Q140375477"
+   }
+  },
+  {
+   "type": "way",
+   "id": 965049381,
+   "name": "Schola del Traiano (IV,V,15)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2869631,
+    41.7523965
+   ],
+   "tags": {
+    "archaeological_site": "building",
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Schola del Traiano (IV,V,15)",
+    "wikidata": "Q114637664"
+   }
+  },
+  {
+   "type": "way",
+   "id": 965052524,
+   "name": "Edificio IV,V,14",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2873738,
+    41.7523867
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Edificio IV,V,14"
+   }
+  },
+  {
+   "type": "way",
+   "id": 965052525,
+   "name": "Mitreo delle Sette Porte (IV,V,13)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2874585,
+    41.7524991
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Mitreo delle Sette Porte (IV,V,13)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 965094787,
+   "name": "Domus delle Colonne (IV,III,1)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.289315,
+    41.7529854
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Domus delle Colonne (IV,III,1)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 965094788,
+   "name": "Edificio IV,III,2",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2892065,
+    41.7531097
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Edificio IV,III,2"
+   }
+  },
+  {
+   "type": "way",
+   "id": 965094799,
+   "name": "Ninfeo degli Eroti",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2891147,
+    41.753235
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Ninfeo degli Eroti"
+   }
+  },
+  {
+   "type": "way",
+   "id": 982027344,
+   "name": "Monumento Funerario (III,VII,2)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2851488,
+    41.7508887
+   ],
+   "tags": {
+    "archaeological_site": "tomb",
+    "historic": "archaeological_site",
+    "name": "Monumento Funerario (III,VII,2)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1009195803,
+   "name": "Ninfei II,VII,6-7",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2912321,
+    41.755453
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Ninfei II,VII,6-7"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1009198630,
+   "name": "Tempietto repubblicano (II,IX,4)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2895592,
+    41.75472
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Tempietto repubblicano (II,IX,4)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1009198671,
+   "name": "Ninfeo II,IX,1",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2904056,
+    41.7550701
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Ninfeo II,IX,1"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1009198674,
+   "name": "Caseggiato II,IX,2",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2899576,
+    41.7549082
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Caseggiato II,IX,2"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1065383694,
+   "name": "Mitreo di Lucrezio Menandro (I,III,5)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2886143,
+    41.7552632
+   ],
+   "tags": {
+    "archaeological_site": "temple",
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Mitreo di Lucrezio Menandro (I,III,5)",
+    "wikidata": "Q112181347"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1069678047,
+   "name": "Horrea III,XVII,1 and Terme",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2840562,
+    41.752679
+   ],
+   "tags": {
+    "archaeological_site": "baths",
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Horrea III,XVII,1 and Terme"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1069678048,
+   "name": "Regio III - Insula XVI - Botteghe III,XVI,1",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2842333,
+    41.7526761
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Regio III - Insula XVI - Botteghe III,XVI,1"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1069678049,
+   "name": "Regio III - Insula XVI - Caseggiato III,XVI,2",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2842681,
+    41.7529399
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Regio III - Insula XVI - Caseggiato III,XVI,2"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1069678050,
+   "name": "Caseggiato di Annio (III,XIV,4)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2845007,
+    41.7526929
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Caseggiato di Annio (III,XIV,4)",
+    "wikidata": "Q112047885"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1069679075,
+   "name": "Magazziono dei doli",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2844413,
+    41.7528547
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Magazziono dei doli"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1069719889,
+   "name": "Temple of Serapis",
+   "historic": "ruins",
+   "centre": [
+    12.2837165,
+    41.7532833
+   ],
+   "tags": {
+    "historic": "ruins",
+    "name": "Temple of Serapis"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1069719890,
+   "name": "Serapeum (III,XVII,4)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2837816,
+    41.7532986
+   ],
+   "tags": {
+    "archaeological_site": "temple",
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Serapeum (III,XVII,4)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1069720695,
+   "name": "Caseggiato di Bacco e Arianna (III,XVII,5)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2837784,
+    41.7534945
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Caseggiato di Bacco e Arianna (III,XVII,5)",
+    "wikidata": "Q1047006"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1069797006,
+   "name": "Caseggiato III,XI,1",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2847687,
+    41.7534929
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Caseggiato III,XI,1"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1069797007,
+   "name": "Casette Tipo (III,XII,1-2 - III,XIII,1-2)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2847055,
+    41.753222
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Casette Tipo (III,XII,1-2 - III,XIII,1-2)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1069797030,
+   "name": "Edificio III,XVI,3",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2844881,
+    41.7532506
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Edificio III,XVI,3"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1069797331,
+   "name": "Edificio III,XVI,4",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2843414,
+    41.7532518
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Edificio III,XVI,4"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1069797946,
+   "name": "Terme della Trinacria (III,XVI,7)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2842095,
+    41.7533411
+   ],
+   "tags": {
+    "archaeological_site": "baths",
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Terme della Trinacria (III,XVI,7)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1101272281,
+   "name": "Suburbio Ostiense",
+   "historic": "archaeological_site",
+   "centre": [
+    12.3044211,
+    41.7454533
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Suburbio Ostiense"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1105017198,
+   "name": "Mitreo delle Sette Sfere (II,VIII,6)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2904937,
+    41.7557779
+   ],
+   "tags": {
+    "archaeological_site": "temple",
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Mitreo delle Sette Sfere (II,VIII,6)",
+    "wikidata": "Q130507607"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1105017199,
+   "name": "Quattro Tempietti (II,VIII,2)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2907448,
+    41.755735
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Quattro Tempietti (II,VIII,2)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1105017200,
+   "name": "Quattro Tempietti (II,VIII,2)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2906963,
+    41.7557131
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Quattro Tempietti (II,VIII,2)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1105017201,
+   "name": "Quattro Tempietti (II,VIII,2)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.290685,
+    41.7557128
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Quattro Tempietti (II,VIII,2)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1105017202,
+   "name": "Quattro Tempietti (II,VIII,2)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2906556,
+    41.7556962
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Quattro Tempietti (II,VIII,2)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1105017203,
+   "name": "Quattro Tempietti (II,VIII,2)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2906609,
+    41.7557023
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Quattro Tempietti (II,VIII,2)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1105017204,
+   "name": "Quattro Tempietti (II,VIII,2)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2905915,
+    41.755695
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Quattro Tempietti (II,VIII,2)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1105017205,
+   "name": "Quattro Tempietti (II,VIII,2)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2905402,
+    41.7556731
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Quattro Tempietti (II,VIII,2)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1105017206,
+   "name": "Quattro Tempietti (II,VIII,2)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2904853,
+    41.7556485
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Quattro Tempietti (II,VIII,2)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1105017207,
+   "name": "Quattro Tempietti (II,VIII,2)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2904214,
+    41.755591
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Quattro Tempietti (II,VIII,2)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1105017208,
+   "name": "Quattro Tempietti (II,VIII,2)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2904533,
+    41.7556347
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Quattro Tempietti (II,VIII,2)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1105017209,
+   "name": "Quattro Tempietti (II,VIII,2)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2905781,
+    41.7556665
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Quattro Tempietti (II,VIII,2)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1106017613,
+   "name": "Piazza dei Lari",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2889083,
+    41.7547445
+   ],
+   "tags": {
+    "archaeological_site": "ruins",
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Piazza dei Lari"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1108115846,
+   "name": "Caupona di Alexander e Helix",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2856135,
+    41.751097
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Caupona di Alexander e Helix"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1123506089,
+   "name": "Aula dei Mensores (I,XIX,1.3)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2849795,
+    41.7537523
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Aula dei Mensores (I,XIX,1.3)",
+    "wikidata": "Q131936641"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1123506090,
+   "name": "Tempio dei Mensores",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2850897,
+    41.7537384
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Tempio dei Mensores"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1123506258,
+   "name": "Tempio tetrastilo (I,XV,2)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2863372,
+    41.7539576
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Tempio tetrastilo (I,XV,2)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1132338136,
+   "name": "Caseggiato del Temistocle (V,XI,2)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2915475,
+    41.7549329
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Caseggiato del Temistocle (V,XI,2)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1132340014,
+   "name": "Portico del Monumento Repubblicano e Magazzino Annonario (V,XI,4-5)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2917532,
+    41.7552049
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Portico del Monumento Repubblicano e Magazzino Annonario (V,XI,4-5)",
+    "wikidata": "Q135683070"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1132340577,
+   "name": "Shrine of Sabazius (V,XII,3)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2930891,
+    41.7557324
+   ],
+   "tags": {
+    "archaeological_site": "temple",
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Shrine of Sabazius (V,XII,3)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1185805705,
+   "name": "Domus di Apuleio (II,VIII,5)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.290715,
+    41.7558389
+   ],
+   "tags": {
+    "archaeological_site": "building",
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Domus di Apuleio (II,VIII,5)",
+    "wikidata": "Q116221293"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1185806554,
+   "name": "Sacello dell'Ara dei Gemelli (II,VII,3)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2908951,
+    41.7558684
+   ],
+   "tags": {
+    "archaeological_site": "shrine",
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Sacello dell'Ara dei Gemelli (II,VII,3)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1240185741,
+   "name": "Shrine inside Horrea di Hortensius (V,XII,1)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2921959,
+    41.7554847
+   ],
+   "tags": {
+    "archaeological_site": "temple",
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Shrine inside Horrea di Hortensius (V,XII,1)"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1270615441,
+   "name": "Caseggiato dei Doli",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2880183,
+    41.7552716
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Caseggiato dei Doli"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1270634264,
+   "name": "Galleria Lapidaria",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2875223,
+    41.7548071
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Galleria Lapidaria"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1287529331,
+   "name": "Domus delle Gorgoni (I,XIII,6)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2908716,
+    41.7530136
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Domus delle Gorgoni (I,XIII,6)",
+    "wikidata": "Q131357854"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1287532567,
+   "name": "Domus del Serapeo (III,XVII,3)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2839046,
+    41.7531261
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Domus del Serapeo (III,XVII,3)",
+    "wikidata": "Q136342073"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1287550066,
+   "name": "Mitreo della Planta Pedis",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2839507,
+    41.7528486
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Mitreo della Planta Pedis",
+    "wikidata": "Q123497173"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1338948704,
+   "name": "shrine",
+   "historic": "ruins",
+   "centre": [
+    12.2911756,
+    41.7526351
+   ],
+   "tags": {
+    "historic": "ruins",
+    "name": "shrine"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1338948705,
+   "name": "Temple of Cybele",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2903242,
+    41.7521302
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "name": "Temple of Cybele"
+   }
+  },
+  {
+   "type": "way",
+   "id": 1338952501,
+   "name": "Terme del Faro (IV,II,1)",
+   "historic": "archaeological_site",
+   "centre": [
+    12.2902525,
+    41.7525552
+   ],
+   "tags": {
+    "historic": "archaeological_site",
+    "historic:civilization": "ancient_roman",
+    "name": "Terme del Faro (IV,II,1)",
+    "wikidata": "Q2802986"
+   }
+  }
+ ]
+}
