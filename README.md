@@ -497,3 +497,14 @@ compactly. [Contracts, golden references, results and limits](docs/phase5a-plann
 node scripts/check-plan-golden.mjs
 node scripts/check-phase5a-planning.mjs docs/previews/phase5a
 ```
+
+### Phase 5B: AI drafting
+
+With `ANTHROPIC_API_KEY` set on the server, **Plan a journey** also takes free text. It is interpreted into the
+same structured request, then planned. Claim extraction from cached sources and blueprint drafting are
+offline scripts whose output a named reviewer must accept. Every call is schema-validated, capped and logged.
+[Decisions, verification and how to run the live evals](docs/phase5b-ai.md).
+
+```sh
+node scripts/check-ai-boundary.mjs
+```

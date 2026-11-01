@@ -149,6 +149,10 @@ request produces a correct gap report. The gate includes every new check.
 
 ## 5B: AI drafting
 
+**Status:** built, not yet measured live (November 2026). See [Phase 5B](phase5b-ai.md). Steps 7–10 are
+implemented with defaults for the step 7 decisions and pass an offline gate check. The live evals need an
+API key and have not been run.
+
 ### Step 7: AI provider decision and server boundary
 
 This step starts with your decisions (see below). Then it builds:

@@ -39,7 +39,7 @@ export function composeScenario(plan: ScenePlan, ctx: PlanningContext): Scenario
   const locations: ScenarioDefinition['content']['locations'] = [], geometries: NonNullable<ScenarioDefinition['content']['geometries']> = [], layerIds: string[] = [];
   for (const { f, b } of ready) {
     // A feature known only from its construction was confirmed by the planner up to the requested date: say so, rather than a single year.
-    const sources = cite(f.evidence.sources), time = !f.existence ? undefined : f.chronology === 'from-start' ? { start: f.existence.start, end: plan.request.time.end ?? plan.request.time.start } : { start: f.existence.start, ...(f.existence.end ? { end: f.existence.end } : {}) };
+    const sources = cite(f.evidence.sources), time = !f.existence ? undefined : f.chronology === 'from-start' ? { start: f.existence.start, end: plan.moment.time.end ?? plan.moment.time.start } : { start: f.existence.start, ...(f.existence.end ? { end: f.existence.end } : {}) };
     const ctxCertainty = sources.length ? contextCertainty[f.evidence.certainty] : 'illustrative';
     // The same place id in a site and its neighbourhood is one place: the focus's record (listed first) is kept.
     if (f.geometry.type === 'point' && f.geometry.anchor && inFrame(f.geometry.anchor) && !locations.some(l => l.id === f.id)) {
@@ -68,11 +68,11 @@ export function composeScenario(plan: ScenePlan, ctx: PlanningContext): Scenario
   const order: Record<string, number> = { place: 0, coverage: 1, spatial: 2, evidence: 3, chronology: 4, asset: 5 };
   const listed = plan.gaps.filter(g => g.kind !== 'asset' || !g.assetRequestId).sort((a, b) => Number(b.blocking) - Number(a.blocking) || order[a.kind] - order[b.kind]);
   const parent = plan.context[0] && store.get(plan.context[0]);
-  const focusTitle = plan.place?.title ?? plan.initial.title, when = timeLabel(plan.request.time);
+  const focusTitle = plan.place?.title ?? plan.initial.title, when = timeLabel(plan.moment.time);
   const topSources = cite([...new Set(ready.filter(r => r.f.evidence.certainty === 'documented').flatMap(r => r.f.evidence.sources))]).slice(0, 8);
   const cards: ScenarioOverlay[] = [
     ...(parent ? [{ id: 'card:approach', type: 'card' as const, title: parent.title, text: plan.components.some(c => c.ref.blueprint === parent.id) ? `${focusTitle} stands in ${parent.title}, shown round it as its setting.` : `${focusTitle} lies within ${parent.title}. The approach shows it as context; its own detail is deferred.` }] : []),
-    { id: 'card:shown', type: 'card', title: `${plan.initial.title} · ${when}`, text: `Shown: ${plural(by('documented'), 'documented feature')}, ${by('inferred')} inferred, ${by('illustrative')} illustrative${by('unknown') ? ` and ${by('unknown')} modern-default` : ''}. ${models ? `${plural(models, 'specific model')} from the catalogue, ` : ''}${rung(3) ? `${plural(rung(3), 'massing placeholder')}, ` : ''}${rung(4) + rung(5)} plan layers and markers. Tap a marker or layer for its sources and certainty.`, ...(topSources.length ? { sources: topSources } : {}) },
+    { id: 'card:shown', type: 'card', title: `${plan.initial.title} · ${when}`, text: `Shown: ${plural(by('documented'), 'documented feature')}, ${by('inferred')} inferred, ${by('illustrative')} illustrative${by('unknown') ? ` and ${by('unknown')} modern-default` : ''}. ${models ? `${plural(models, 'specific model')} from the catalogue, ` : ''}${rung(3) ? `${plural(rung(3), 'massing placeholder')}, ` : ''}${rung(4) + rung(5)} plan layers and markers. Tap a marker or layer for its sources and certainty.${plan.moment.chosen ? ` ${plan.moment.reason}` : ''}`, ...(topSources.length ? { sources: topSources } : {}) },
     ...(plan.gaps.length || plan.deferred.length || plan.absent.length ? [{ id: 'card:gaps', type: 'card' as const, title: 'What this scene does not show', text: [
       listed.length ? `Not yet available: ${listed.slice(0, 3).map(g => g.title).join('; ')}${listed.length > 3 ? `; and ${plural(listed.length - 3, 'more gap')}` : ''}.` : '',
       missing.length ? `${plural(missing.length, 'feature')} cannot be confirmed for ${when}.` : '',
@@ -91,10 +91,10 @@ export function composeScenario(plan: ScenePlan, ctx: PlanningContext): Scenario
   const beats: ScenarioDefinition['beats'] = [];
   if (parent) {
     const p = viewpointFor(parent.bounds, parent.lod);
-    beats.push({ id: 'approach', title: parent.title, actions: [{ camera: { type: 'flyTo', transition: 'zoomPanZoom', center: p.center, zoom: p.zoom, pitch: p.pitch, bearing: p.bearing, duration: 9000 }, time: plan.request.time, overlays: ['card:approach'] }] });
+    beats.push({ id: 'approach', title: parent.title, actions: [{ camera: { type: 'flyTo', transition: 'zoomPanZoom', center: p.center, zoom: p.zoom, pitch: p.pitch, bearing: p.bearing, duration: 9000 }, time: plan.moment.time, overlays: ['card:approach'] }] });
   }
   beats.push({ id: 'arrive', title: plan.initial.title, ...(scenes.length ? { sceneRequirements: scenes.map(s => s.id) } : {}), actions: [
-    { camera: parent ? arrive : { ...arrive, transition: 'zoomPanZoom' }, ...(parent ? {} : { time: plan.request.time }), overlays: ['card:shown', ...shown] },
+    { camera: parent ? arrive : { ...arrive, transition: 'zoomPanZoom' }, ...(parent ? {} : { time: plan.moment.time }), overlays: ['card:shown', ...shown] },
     { camera: { type: 'hold', duration: 6000 }, overlays: ['card:shown', ...shown] }] });
   if (cards.some(c => c.id === 'card:gaps')) beats.push({ id: 'gaps', title: 'What is not shown', ...(scenes.length ? { sceneRequirements: scenes.map(s => s.id) } : {}), actions: [{ camera: { type: 'hold', duration: 8000 }, overlays: ['card:gaps', ...shown] }] });
   beats.push({ id: 'explore', title: 'Explore', ...(scenes.length ? { sceneRequirements: scenes.map(s => s.id) } : {}), explorationPrompt: 'Inspect the evidence or explore freely.', actions: [{ camera: { type: 'hold', duration: 5000 }, overlays: ['card:explore', ...shown] }] });
@@ -103,7 +103,7 @@ export function composeScenario(plan: ScenePlan, ctx: PlanningContext): Scenario
     version: 1, id: `composed-${plan.id.slice(5, 17)}`, ...(dataset ? { historicalDataset: dataset } : {}),
     title: `${focusTitle} · ${when}`,
     description: `Composed from plan ${plan.id} (${plan.status}): ${plural(ready.length, 'ready feature')}, ${plural(missing.length, 'missing feature')}, ${plural(plan.deferred.length, 'deferred area')}.`,
-    scope: { bounds, time: plan.request.time },
+    scope: { bounds, time: plan.moment.time },
     content: { sources: [...used].sort().map(id => index.get(id)!), locations, routes: [], geometries, ...(scenes.length ? { scenes } : {}), overlays },
     beats,
   };

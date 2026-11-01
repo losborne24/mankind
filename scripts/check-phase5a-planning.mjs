@@ -84,6 +84,21 @@ const portunus150 = plan(structuredRequest('place:temple-of-portunus', 150));
 assert.equal(portunus150.components.find(x => x.ref.blueprint === 'blueprint:temple-of-portunus').state, 'missing', 'the AD 100 catalogue phase is not reused at AD 150');
 assert.deepEqual(portunus150.scenes, [], 'no AD 100 scene is requested for AD 150');
 
+// A requested range (a reign, a century) containing the blueprint's own date is planned at that date, and says so.
+const trajan = plan({ schema: 1, place: { id: 'place:rome' }, time: { start: { year: 98 }, end: { year: 117 } }, scope: 'auto', intent: 'tour' });
+assert.ok(trajan.validation.ok); assert.equal(trajan.moment.chosen, true); assert.deepEqual(trajan.moment.time, { start: { year: 100 } });
+assert.match(trajan.moment.reason, /describes 100 CE, a moment within the requested 98 CE–117 CE/);
+assert.equal(trajan.reuse.case, 'same-place-same-date'); assert.equal(by(trajan, 'ready').length, by(b, 'ready').length, 'the reign plans like AD 100');
+assert.deepEqual(trajan.request.time, { start: { year: 98 }, end: { year: 117 } }, 'the request itself is kept as asked');
+const trajanJourney = composeScenario(trajan, ctx);
+assert.deepEqual(trajanJourney.scope.time, { start: { year: 100 } }); assert.ok(trajanJourney.content.overlays.find(o => o.id === 'card:shown').text.includes('a moment within the requested'));
+const fbTrajan = plan({ schema: 1, place: { id: 'place:temple-of-portunus' }, time: { start: { year: 98 }, end: { year: 117 } }, scope: 'auto', intent: 'tour' });
+assert.equal(fbTrajan.components.find(x => x.ref.blueprint === 'blueprint:temple-of-portunus').state, 'ready', 'the AD 100 model shows for a range containing AD 100');
+const secondCentury = plan({ schema: 1, place: { id: 'place:rome' }, time: { start: { year: 101 }, end: { year: 200 } }, scope: 'auto', intent: 'tour' });
+assert.equal(secondCentury.moment.chosen, false, 'a range that does not contain AD 100 is not pulled to it');
+assert.equal(secondCentury.reuse.case, 'same-place-other-date');
+assert.equal(b.moment.chosen, false, 'a single date is planned as asked');
+
 // The other reuse cases and refusals.
 const colosseum = plan(structuredRequest('landmark:colosseum', 100));
 assert.equal(colosseum.reuse.case, 'within-existing'); assert.equal(colosseum.lod, 'site'); assert.ok(colosseum.validation.ok);
@@ -95,6 +110,11 @@ assert.equal(ostia.typology.tradition, 'roman'); assert.equal(ostia.components.l
 assert.ok(ostia.gaps.some(g => g.blocking && /No blueprint for Ostia/.test(g.title)));
 const notRoman = plan({ schema: 1, place: { title: 'Ostia', coordinate: [12.2923, 41.7556], tradition: 'roman' }, time: { start: { year: 1500 } }, scope: 'auto', intent: 'tour' });
 assert.equal(notRoman.typology, null, 'a Roman typology is not offered for AD 1500');
+const london = plan({ schema: 1, place: { title: 'London', coordinate: [-0.1276, 51.5072] }, time: { start: { year: 2012 } }, scope: 'auto', intent: 'tour' });
+assert.deepEqual(london.context, [], 'a frame is not context outside its dates (London 2012 is not in the Roman Empire)');
+assert.equal(london.typology, null); assert.ok(london.validation.ok && london.gaps.some(g => g.blocking));
+const londinium = plan({ schema: 1, place: { title: 'Londinium', coordinate: [-0.0918, 51.5128] }, time: { start: { year: 200 } }, scope: 'auto', intent: 'tour' });
+assert.equal(londinium.context[0]?.id, 'blueprint:roman-empire'); assert.equal(londinium.typology?.tradition, 'roman', 'at AD 200 the same spot takes the Roman typology');
 const unknown = plan(structuredRequest('place:atlantis', 100));
 assert.equal(unknown.status, 'unresolved'); assert.ok(unknown.gaps.every(g => g.kind === 'place' && g.blocking)); assert.equal(unknown.components.length, 0, 'no nearby place is substituted');
 assert.throws(() => composeScenario(unknown, ctx), /resolved no place/);

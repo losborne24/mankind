@@ -170,6 +170,8 @@ export interface ScenePlan {
   schema: 1;
   id: string;
   request: ScenarioRequest;
+  /** The date actually planned: the request's, or the blueprint's own date when the request is a range containing it. */
+  moment: { time: HistoricalTime; chosen: boolean; reason?: string };
   status: 'ready' | 'partial' | 'unresolved';
   place?: { id: string; title: string };
   focus?: BlueprintRef;
@@ -384,9 +386,11 @@ export function validateAssetRequest(value: unknown): AssetRequest {
 
 export function validateScenePlan(value: unknown): ScenePlan {
   plain(value, 'plan');
-  const p = record(value, ['schema', 'id', 'request', 'status', 'place', 'focus', 'context', 'lod', 'initial', 'components', 'gaps', 'assetRequests', 'deferred', 'absent', 'reuse', 'revisions', 'typology', 'scenes', 'versions', 'validation'], 'plan');
+  const p = record(value, ['schema', 'id', 'request', 'moment', 'status', 'place', 'focus', 'context', 'lod', 'initial', 'components', 'gaps', 'assetRequests', 'deferred', 'absent', 'reuse', 'revisions', 'typology', 'scenes', 'versions', 'validation'], 'plan');
   if (p.schema !== 1) throw Error('plan: unsupported schema');
-  text(p.id, 'plan.id'); validateScenarioRequest(p.request); oneOf(p.status, ['ready', 'partial', 'unresolved'], 'plan.status');
+  text(p.id, 'plan.id'); validateScenarioRequest(p.request);
+  const moment = record(p.moment, ['time', 'chosen', 'reason'], 'plan.moment'); time(moment.time, 'plan.moment.time');
+  if (typeof moment.chosen !== 'boolean' || (moment.chosen && typeof moment.reason !== 'string')) throw Error('plan.moment: a chosen moment needs a reason'); oneOf(p.status, ['ready', 'partial', 'unresolved'], 'plan.status');
   if (p.place !== undefined) { const v = record(p.place, ['id', 'title'], 'plan.place'); text(v.id, 'plan.place'); text(v.title, 'plan.place'); }
   if (p.focus !== undefined) pin(p.focus, 'plan.focus');
   list(p.context, 'plan.context').forEach(c => pin(c, 'plan.context'));

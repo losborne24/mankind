@@ -165,6 +165,12 @@ The planner works in steps:
 7. Defer children, ancestors and city districts without a blueprint.
 8. Pick the nearest renderable 3D scene.
 
+A requested range that contains the focus blueprint's own date, such as a reign or a century, is
+planned at that date (`ScenePlan.moment`). The request is kept as asked. The plan, the result panel and the
+journey's card all say which moment was shown and why. A range that doesn't contain the date, and any single
+date, is planned as asked. This was added in planner `5a.2`; saves made with `5a.1` are refused with a version
+message.
+
 Planning is pure and deterministic: the same inputs give the same plan id and
 digest, in this process or another.
 

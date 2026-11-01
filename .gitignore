@@ -57,3 +57,6 @@ __pycache__/
 /public/**/tilejson.json
 *.tif
 *.part
+
+# Phase 5B AI call log and spend ledger (local, may contain request text)
+/data/ai/

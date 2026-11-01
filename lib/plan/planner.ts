@@ -1,6 +1,6 @@
 import type { AssetCatalogue } from '@/lib/assets/catalogueValidation';
 import { resolveHistoricalAsset } from '@/lib/history/assetResolution';
-import { matchHistoricalTime } from '@/lib/history/time';
+import { matchHistoricalTime, periodBounds } from '@/lib/history/time';
 import type { AssetRequest, Bounds, ContentGap, DeferredRegion, FeatureRef, PlanComponent, PlanFeature, ReuseDecision, ScenarioRequest, ScenePlan, SpatialBlueprint, SpatialLOD, Viewpoint } from '@/lib/plan/contracts';
 import { lodRank, normaliseRequest } from '@/lib/plan/contracts';
 import { architecturalAssetRequest, landmarkAssetRequest } from '@/lib/plan/assetRequests';
@@ -13,7 +13,8 @@ import { checkpointA } from '@/lib/plan/checkpointA';
 import { intersects, type BlueprintStore, type GazetteerEntry } from '@/lib/plan/store';
 import type { Coordinate } from '@/lib/scenarios/schema';
 
-export const PLANNER_VERSION = '5a.1';
+/** 5a.2: a requested range containing the blueprint's own date is planned at that date (ScenePlan.moment). */
+export const PLANNER_VERSION = '5a.2';
 /** 3D scenes the app can render today, by dataset (ScenarioPanel registers the Forum Boarium world only). */
 export const RENDERABLE_SCENES: Record<string, string[]> = { 'forum-boarium': ['scene:forum-boarium-temples'] };
 export interface PlanningContext { store: BlueprintStore; catalogue: AssetCatalogue; overrides?: readonly BlueprintOverride[]; renderable?: Record<string, string[]> }
@@ -83,6 +84,7 @@ export function planScenario(input: unknown, ctx: PlanningContext): ScenePlan {
 
   let focus: SpatialBlueprint | undefined, lod: SpatialLOD, initialBounds: Bounds, initialTitle: string, reuse: ReuseDecision, typology: ScenePlan['typology'] = null;
   let local: SpatialBlueprint | undefined, subFeature: PlanFeature | undefined, placeInfo: ScenePlan['place'];
+  let momentInfo: ScenePlan['moment'] = { time: request.time, chosen: false };
 
   if (!entry && !elsewhere) {
     // Unknown id: nothing to plan against. Never a nearest match.
@@ -93,7 +95,8 @@ export function planScenario(input: unknown, ctx: PlanningContext): ScenePlan {
 
   if (elsewhere) {
     // 4th reuse case: a place with no blueprint. Context from the finest frame containing it; typology by tradition only.
-    const context = store.containing(elsewhere.coordinate)[0];
+    // A frame is context only at dates it covers: London in 2012 is not inside the Roman Empire, and takes no tradition from it.
+    const context = store.containing(elsewhere.coordinate).find(b => matchHistoricalTime(b.applicability, request.time) !== 'outside');
     lod = request.scope === 'auto' ? 'city' : request.scope;
     placeInfo = { id: `place:new/${slug(elsewhere.title)}`, title: elsewhere.title };
     initialBounds = around(elsewhere.coordinate, lodRank(lod) <= lodRank('city') ? 3000 : 300); initialTitle = elsewhere.title;
@@ -119,7 +122,7 @@ export function planScenario(input: unknown, ctx: PlanningContext): ScenePlan {
     else gap({ kind: 'coverage', lod, title: `No ${lod} blueprint contains ${entry!.title}`, detail: `${entry!.title} has no ${lod}-scale parent blueprint.`, subject: { place: entry!.placeId }, needed: [`A ${lod}-scale frame containing ${entry!.title}`], blocking: true });
   } else if (!subFeature && lodRank(lod) > lodRank(base.lod)) {
     const below = (b: SpatialBlueprint): SpatialBlueprint[] => store.children(b).flatMap(c => [c, ...below(c)]);
-    const candidates = below(base).filter(c => c.lod === lod && withinApplicability(c, request.time));
+    const candidates = below(base).filter(c => c.lod === lod && (withinApplicability(c, request.time) || momentWithin(c, request.time)));
     const chosen = candidates.find(c => c.place.id === request.target || c.id === request.target) ?? (candidates.length === 1 ? candidates[0] : undefined);
     if (chosen) base = view(chosen);
     else gap({ kind: 'spatial', lod, title: `No ${lod} blueprint chosen in ${base.title}`, detail: candidates.length ? `${candidates.length} ${lod} blueprints exist; name one as the target.` : `${base.title} has no ${lod}-scale blueprint for ${timeLabel(request.time)}.`, subject: { blueprint: base.id }, needed: [`A ${lod}-scale blueprint`], blocking: lod !== 'architectural' });
@@ -129,11 +132,15 @@ export function planScenario(input: unknown, ctx: PlanningContext): ScenePlan {
   if (focus.lod === 'site' && focus.parent) local = view(store.require(focus.parent));
   const ancestors = store.ancestors(focus);
 
+  // A range that contains the blueprint's own date (a reign, a century) is planned at that date, and the plan says so.
+  const moment = momentWithin(focus, request.time), time = moment ?? request.time;
+  momentInfo = moment ? { time: moment, chosen: true, reason: `${focus.title} describes ${timeLabel(moment)}, a moment within the requested ${timeLabel(request.time)}.` } : { time: request.time, chosen: false };
+
   // 3. Components: chronology, catalogue identity and representation of every feature in scope.
-  const same = withinApplicability(focus, request.time);
+  const same = withinApplicability(focus, time);
   const atOwn = { start: focus.applicability.start, ...(focus.applicability.end ? { end: focus.applicability.end } : {}) };
   const consider = (b: SpatialBlueprint, f: PlanFeature, scope: 'focus' | 'local') => {
-    const ref: FeatureRef = { blueprint: b.id, feature: f.id }, p = presence(f, b, request.time);
+    const ref: FeatureRef = { blueprint: b.id, feature: f.id }, p = presence(f, b, time);
     if (scope === 'focus' && !same) {
       const before = presence(f, b, atOwn);
       if (p.present === 'yes' && before.present !== 'yes') revisions.added.push(ref);
@@ -142,13 +149,13 @@ export function planScenario(input: unknown, ctx: PlanningContext): ScenePlan {
     }
     if (p.present === 'no' && f.kind === 'fill' && scope === 'focus' && !same && presence(f, b, atOwn).present === 'yes') {
       // Generated layers are tied to their date. The city still needs one: missing, with what would regenerate it.
-      const id = gap({ kind: 'spatial', lod: b.lod, title: `${f.title} for ${timeLabel(request.time)}`, detail: `${p.reason} It cannot be reused at another date; regenerating it needs zoning for ${timeLabel(request.time)}.`, subject: { blueprint: b.id, feature: f.id }, needed: [`Land-use zoning for ${timeLabel(request.time)}`, 'Regenerated fill reviewed against it'], blocking: false, refs: f.refs });
+      const id = gap({ kind: 'spatial', lod: b.lod, title: `${f.title} for ${timeLabel(time)}`, detail: `${p.reason} It cannot be reused at another date; regenerating it needs zoning for ${timeLabel(time)}.`, subject: { blueprint: b.id, feature: f.id }, needed: [`Land-use zoning for ${timeLabel(time)}`, 'Regenerated fill reviewed against it'], blocking: false, refs: f.refs });
       components.push({ ref, title: f.title, kind: f.kind, state: 'missing', rung: f.rung, match: p.match, reason: p.reason, gapIds: [id] });
       return;
     }
     if (p.present === 'no') { absent.push({ ref, title: f.title, reason: p.reason }); return; }
     if (p.present === 'unconfirmed') {
-      const id = gap({ kind: 'chronology', lod: b.lod, title: `Confirm ${f.title} at ${timeLabel(request.time)}`, detail: p.reason, subject: { blueprint: b.id, feature: f.id }, needed: [`A dated source for ${f.title} at ${timeLabel(request.time)}`], blocking: false, refs: f.refs });
+      const id = gap({ kind: 'chronology', lod: b.lod, title: `Confirm ${f.title} at ${timeLabel(time)}`, detail: p.reason, subject: { blueprint: b.id, feature: f.id }, needed: [`A dated source for ${f.title} at ${timeLabel(time)}`], blocking: false, refs: f.refs });
       components.push({ ref, title: f.title, kind: f.kind, state: 'missing', rung: f.rung, match: p.match, reason: p.reason, gapIds: [id] });
       return;
     }
@@ -158,9 +165,9 @@ export function planScenario(input: unknown, ctx: PlanningContext): ScenePlan {
       const placeId = f.refs.find(r => r.store.startsWith('world:'))?.id ?? entryPlace ?? b.place.id;
       // A request for the site itself, or a landmark request, is the explicit interpretation choice Phase 4 requires for approximate phases.
       const explicit = request.intent === 'landmark' || b.lod === 'site' || (local !== undefined && b === local);
-      const binding = resolveHistoricalAsset({ id: f.id, category: 'building', catalogueRef: f.asset.catalogue, evidence: f.evidence }, placeId, request.time, catalogue, explicit);
+      const binding = resolveHistoricalAsset({ id: f.id, category: 'building', catalogueRef: f.asset.catalogue, evidence: f.evidence }, placeId, time, catalogue, explicit);
       if (binding.status !== 'registered') {
-        const id = gap({ kind: 'asset', lod: b.lod, title: `${f.title}: model unavailable at ${timeLabel(request.time)}`, detail: binding.reason ?? `Catalogue binding is ${binding.status}.`, subject: { blueprint: b.id, feature: f.id }, needed: ['A catalogue version whose phase and rights cover the requested date'], blocking: b === focus, refs: f.refs });
+        const id = gap({ kind: 'asset', lod: b.lod, title: `${f.title}: model unavailable at ${timeLabel(time)}`, detail: binding.reason ?? `Catalogue binding is ${binding.status}.`, subject: { blueprint: b.id, feature: f.id }, needed: ['A catalogue version whose phase and rights cover the requested date'], blocking: b === focus, refs: f.refs });
         components.push({ ...component, state: 'missing', rung: 5, reason: binding.reason ?? binding.status, gapIds: [id] });
         return;
       }
@@ -197,23 +204,23 @@ export function planScenario(input: unknown, ctx: PlanningContext): ScenePlan {
   } else {
     for (const f of focus.features) consider(focus, f, 'focus');
     if (local) for (const f of local.features) consider(local, f, 'local');
-    const extent = focus.features.find(f => f.kind === 'extent' && presence(f, focus!, request.time).present === 'yes');
+    const extent = focus.features.find(f => f.kind === 'extent' && presence(f, focus!, time).present === 'yes');
     const target = request.target ? [...focus.features, ...(local?.features ?? [])].find(f => f.id === request.target) : undefined;
     initialBounds = target && featureBounds(target) ? featureBounds(target)! : extent?.geometry.bbox ?? focus.bounds;
     initialTitle = target?.title ?? (extent ? extent.title : focus.title);
-    for (const req of REQUIRED[focus.lod]) if (!req.has(focus.features.filter(f => presence(f, focus!, request.time).present !== 'no'))) gap({ kind: req.kind, lod: focus.lod, title: `${req.title} for ${focus.place.title}`, detail: `${focus.title} holds no ${req.title.toLowerCase()} for ${timeLabel(request.time)}.`, subject: { blueprint: focus.id }, needed: req.needed, blocking: false });
+    for (const req of REQUIRED[focus.lod]) if (!req.has(focus.features.filter(f => presence(f, focus!, time).present !== 'no'))) gap({ kind: req.kind, lod: focus.lod, title: `${req.title} for ${focus.place.title}`, detail: `${focus.title} holds no ${req.title.toLowerCase()} for ${timeLabel(time)}.`, subject: { blueprint: focus.id }, needed: req.needed, blocking: false });
     if (lodRank(focus.lod) <= lodRank('region')) {
       const settlements = components.filter(c => c.kind === 'settlement' && c.state === 'ready').map(c => c.title);
-      gap({ kind: 'coverage', lod: focus.lod, title: `Settlement coverage in ${focus.place.title}`, detail: `${settlements.length ? `Only ${settlements.join(', ')} ${settlements.length === 1 ? 'is' : 'are'} registered` : 'No settlement is registered'} at this scale for ${timeLabel(request.time)}. Other cities and towns are not covered; they are not invented.`, subject: { blueprint: focus.id }, needed: ['A sourced, dated settlement list for the frame (for example from Pleiades)'], blocking: false });
+      gap({ kind: 'coverage', lod: focus.lod, title: `Settlement coverage in ${focus.place.title}`, detail: `${settlements.length ? `Only ${settlements.join(', ')} ${settlements.length === 1 ? 'is' : 'are'} registered` : 'No settlement is registered'} at this scale for ${timeLabel(time)}. Other cities and towns are not covered; they are not invented.`, subject: { blueprint: focus.id }, needed: ['A sourced, dated settlement list for the frame (for example from Pleiades)'], blocking: false });
     }
-    if (!same) gap({ kind: 'chronology', lod: focus.lod, title: `${focus.title} describes ${timeLabel(atOwn)}`, detail: `The blueprint was made for ${timeLabel(atOwn)}. Features whose own dates cover ${timeLabel(request.time)} are reused; generated layers and undated survivals are not assumed.`, subject: { blueprint: focus.id }, needed: [`A ${timeLabel(request.time)} revision as a derived layer of ${focus.id}@${focus.version}`], blocking: false });
+    if (!same) gap({ kind: 'chronology', lod: focus.lod, title: `${focus.title} describes ${timeLabel(atOwn)}`, detail: `The blueprint was made for ${timeLabel(atOwn)}. Features whose own dates cover ${timeLabel(time)} are reused; generated layers and undated survivals are not assumed.`, subject: { blueprint: focus.id }, needed: [`A ${timeLabel(time)} revision as a derived layer of ${focus.id}@${focus.version}`], blocking: false });
     // Children: valid finer detail, deferred, unless they do not exist at the date.
     for (const child of store.children(focus)) {
-      if (matchHistoricalTime(child.applicability, request.time) === 'outside') absent.push({ ref: { blueprint: child.id, feature: child.place.id }, title: child.title, reason: `${child.title} covers ${timeLabel({ start: child.applicability.start, ...(child.applicability.end ? { end: child.applicability.end } : {}) })} only.` });
+      if (matchHistoricalTime(child.applicability, time) === 'outside') absent.push({ ref: { blueprint: child.id, feature: child.place.id }, title: child.title, reason: `${child.title} covers ${timeLabel({ start: child.applicability.start, ...(child.applicability.end ? { end: child.applicability.end } : {}) })} only.` });
       else if (child !== local) deferred.push({ title: child.title, lod: child.lod, bounds: child.bounds, blueprint: { id: child.id, version: child.version }, reason: 'Finer detail exists and is valid; it is not needed for the first scene.' });
     }
     // City districts without a blueprint of their own are refinement areas, not gaps.
-    if (focus.lod === 'city') for (const m of focus.features.filter(f => f.kind === 'marker' && /^Regio /.test(f.title) && presence(f, focus!, request.time).present === 'yes'))
+    if (focus.lod === 'city') for (const m of focus.features.filter(f => f.kind === 'marker' && /^Regio /.test(f.title) && presence(f, focus!, time).present === 'yes'))
       deferred.push({ title: `${m.title} · neighbourhood detail`, lod: 'neighbourhood', bounds: around(m.geometry.anchor!, 500), reason: 'No neighbourhood blueprint yet; planned only when refinement is requested. The area is 500 m round the region marker.' });
   }
   for (const a of ancestors) if (a !== local) deferred.push({ title: a.title, lod: a.lod, bounds: a.bounds, blueprint: { id: a.id, version: a.version }, reason: 'Context for the approach; its own detail is not needed for the first scene.' });
@@ -222,21 +229,21 @@ export function planScenario(input: unknown, ctx: PlanningContext): ScenePlan {
   const scenes: ScenePlan['scenes'] = [];
   if (lodRank(focus.lod) >= lodRank('neighbourhood') && !subFeature) for (const b of [focus, ...ancestors]) {
     const world = b.layers.find(l => l.role === 'world'), dataset = world?.output.match(/fixtures\/(.+)\.json$/)?.[1];
-    const found = !dataset ? [] : (world!.collections.scenes as { id: string; period: { start: { year: number }; end?: { year: number }; approximate?: boolean }; layoutIds: string[] }[]).filter(s => renderable[dataset]?.includes(s.id) && s.layoutIds.length === 1 && (matchHistoricalTime(s.period, request.time) === 'within' || (matchHistoricalTime(s.period, request.time) === 'possible' && withinApplicability(b, request.time))));
+    const found = !dataset ? [] : (world!.collections.scenes as { id: string; period: { start: { year: number }; end?: { year: number }; approximate?: boolean }; layoutIds: string[] }[]).filter(s => renderable[dataset]?.includes(s.id) && s.layoutIds.length === 1 && (matchHistoricalTime(s.period, time) === 'within' || (matchHistoricalTime(s.period, time) === 'possible' && withinApplicability(b, time))));
     if (found.length) { scenes.push(...found.map(s => ({ dataset: dataset!, sceneId: s.id, layoutId: s.layoutIds[0], blueprint: b.id }))); break; }
   }
 
   const reused = components.filter(c => c.state === 'ready').length, rejected = components.filter(c => c.state === 'missing').length + revisions.removed.length;
   reuse = same
     ? { case: subFeature ? 'within-existing' : 'same-place-same-date', blueprint: { id: focus.id, version: focus.version }, detail: subFeature ? `${subFeature.title} planned inside ${focus.title}; its context is reused.` : `${focus.title} reused as stored; nothing regenerated.`, reused, revalidated: 0, rejected: 0 }
-    : { case: 'same-place-other-date', blueprint: { id: focus.id, version: focus.version }, detail: `${focus.title} revalidated for ${timeLabel(request.time)}: ${revisions.added.length} added, ${revisions.removed.length} removed, ${revisions.unconfirmed.length} unconfirmed. Stable geography reused unchanged.`, reused, revalidated: components.length + absent.length, rejected };
+    : { case: 'same-place-other-date', blueprint: { id: focus.id, version: focus.version }, detail: `${focus.title} revalidated for ${timeLabel(time)}: ${revisions.added.length} added, ${revisions.removed.length} removed, ${revisions.unconfirmed.length} unconfirmed. Stable geography reused unchanged.`, reused, revalidated: components.length + absent.length, rejected };
   const blocking = [...gaps.values()].some(g => g.blocking) || components.some(c => c.state === 'missing' && c.gapIds?.some(id => gaps.get(id)?.blocking));
   return finish({ status: blocking ? 'partial' : components.some(c => c.state === 'missing') ? 'partial' : 'ready', lod: subFeature || focus.lod === lod ? lod : focus.lod, initial: { title: initialTitle, bounds: initialBounds, viewpoint: viewpointFor(initialBounds, lodRank(lod) > lodRank(focus.lod) ? lod : focus.lod) }, reuse, focus, context: [...(local ? [local, ...store.ancestors(local)] : ancestors)], scenes });
 
   function finish(o: { status: ScenePlan['status']; lod: SpatialLOD; initial: ScenePlan['initial']; reuse: ReuseDecision; focus?: SpatialBlueprint; context?: SpatialBlueprint[]; scenes?: ScenePlan['scenes'] }): ScenePlan {
     const usedBlueprints = [...new Map([...(o.focus ? [o.focus] : []), ...(o.context ?? [])].map(b => [`${b.id}@${b.version}`, b])).values()];
     const body: Omit<ScenePlan, 'id' | 'validation'> = {
-      schema: 1, request, status: o.status, ...(placeInfo ? { place: placeInfo } : {}), ...(o.focus ? { focus: { id: o.focus.id, version: o.focus.version } } : {}),
+      schema: 1, request, moment: momentInfo, status: o.status, ...(placeInfo ? { place: placeInfo } : {}), ...(o.focus ? { focus: { id: o.focus.id, version: o.focus.version } } : {}),
       context: (o.context ?? []).map(b => ({ id: b.id, version: b.version })), lod: o.lod, initial: o.initial,
       components, gaps: [...gaps.values()], assetRequests: [...requests.values()].sort((a, b) => a.id.localeCompare(b.id)), deferred, absent, reuse: o.reuse, revisions, typology, scenes: o.scenes ?? [],
       versions: { schema: 1, planner: PLANNER_VERSION, catalogue: digestOf(catalogue), blueprints: usedBlueprints.map(b => ({ id: b.id, version: b.version, digest: store.digest(b) })).sort((a, b) => a.id.localeCompare(b.id)), generators: generatorVersions() },
@@ -245,6 +252,14 @@ export function planScenario(input: unknown, ctx: PlanningContext): ScenePlan {
     plan.validation = checkpointA(plan, ctx);
     return plan;
   }
+}
+
+/** The blueprint's own date when it lies inside a requested range (not a single date); otherwise undefined. */
+export function momentWithin(blueprint: SpatialBlueprint, asked: ScenarioRequest['time']): ScenarioRequest['time'] | undefined {
+  if (!asked.end || periodBounds(asked)[0] === periodBounds({ start: asked.end })[0]) return undefined;
+  const own = { start: blueprint.applicability.start, ...(blueprint.applicability.end ? { end: blueprint.applicability.end } : {}) };
+  const [lo, hi] = periodBounds(asked), [a, b] = periodBounds(own);
+  return a >= lo && b <= hi ? own : undefined;
 }
 
 /** The ScenarioRequest a structured form produces; Phase 5B's text interpreter must produce the same shape. */

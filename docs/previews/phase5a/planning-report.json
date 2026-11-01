@@ -1,7 +1,7 @@
 {
   "plans": {
     "A": {
-      "id": "plan:ec4bde91f53ce44fde7d",
+      "id": "plan:51b9b3d959d75d455d62",
       "status": "ready",
       "lod": "site",
       "focus": "blueprint:temple-of-portunus",
@@ -16,7 +16,7 @@
       "warnings": 1
     },
     "B": {
-      "id": "plan:9d0c854970c827e9811f",
+      "id": "plan:0013dcd63558af6ecac2",
       "status": "ready",
       "lod": "city",
       "focus": "blueprint:rome",
@@ -31,7 +31,7 @@
       "warnings": 0
     },
     "C": {
-      "id": "plan:ac752d77f9209da0fc7f",
+      "id": "plan:3fc46aebb50b71af6ad8",
       "status": "ready",
       "lod": "empire",
       "focus": "blueprint:roman-empire",
@@ -46,7 +46,7 @@
       "warnings": 0
     },
     "D": {
-      "id": "plan:fa71f57ef02ad6ac9139",
+      "id": "plan:82a0a9e0fb8ec68d28f3",
       "status": "partial",
       "lod": "city",
       "focus": "blueprint:rome",
@@ -61,7 +61,7 @@
       "warnings": 0
     },
     "colosseum": {
-      "id": "plan:364b8728be70fb91b183",
+      "id": "plan:0540e773a13578e8bc11",
       "status": "ready",
       "lod": "site",
       "focus": "blueprint:rome",
@@ -76,7 +76,7 @@
       "warnings": 0
     },
     "ostia": {
-      "id": "plan:7076cd5dd457524cf8bd",
+      "id": "plan:498383cf13be2a0e4021",
       "status": "partial",
       "lod": "city",
       "reuse": "typology-elsewhere",
@@ -90,7 +90,7 @@
       "warnings": 0
     },
     "unknown": {
-      "id": "plan:a9d72cec825046acfb45",
+      "id": "plan:dc1aa17234072ebadadc",
       "status": "unresolved",
       "lod": "empire",
       "reuse": "none",

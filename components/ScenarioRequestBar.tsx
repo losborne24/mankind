@@ -8,7 +8,9 @@ import { composeScenario } from '@/lib/plan/composer';
 import { planScenario } from '@/lib/plan/planner';
 import { reopenScenario, saveScenario, scenarioBytes, type SavedScenario } from '@/lib/plan/persistence';
 import { timeLabel } from '@/lib/plan/chronology';
-import { fromHistoricalYearParts, type Era } from '@/lib/historicalDate';
+import { fromHistoricalYearParts, toHistoricalYearParts, type Era } from '@/lib/historicalDate';
+import { interpretTask, type Interpretation } from '@/lib/ai/interpret';
+import { manualPrompt, parseManualReply } from '@/lib/ai/manual';
 
 const SAVES = 'mankind.plan.saves';
 type SaveRow = { title: string; savedAt: string; saved: SavedScenario };
@@ -26,6 +28,8 @@ export function ScenarioRequestBar() {
   const [open, setOpen] = useState(false), [placeId, setPlaceId] = useState('place:rome'), [year, setYear] = useState(100), [era, setEra] = useState<Era>('CE');
   const [scope, setScope] = useState<ScenarioRequest['scope']>('auto'), [target, setTarget] = useState(''), [custom, setCustom] = useState({ title: '', lng: '', lat: '', tradition: 'roman' });
   const [plan, setPlan] = useState<ScenePlan | null>(null), [error, setError] = useState(''), [review, setReview] = useState(false), [saves, setSaves] = useState<SaveRow[]>([]), [note, setNote] = useState('');
+  // Free text (Phase 5B): interpreted on the server into the same structured request; unavailable without a server credential.
+  const [aiMode, setAiMode] = useState<string | null>(null), [text, setText] = useState(''), [busy, setBusy] = useState(false), [asked, setAsked] = useState<Extract<Interpretation, { outcome: 'clarify' }> | null>(null), [reading, setReading] = useState('');
   const entry = places.find(p => p.placeId === placeId);
   const targets = useMemo(() => { const b = entry && ctx.store.get(entry.blueprint); return b && !entry.feature ? b.features.filter(f => f.kind === 'landmark').map(f => ({ id: f.id, title: f.title })) : []; }, [entry, ctx]);
 
@@ -34,9 +38,49 @@ export function ScenarioRequestBar() {
     const place = placeId === 'custom' ? { title: custom.title.trim(), coordinate: [Number(custom.lng), Number(custom.lat)] as [number, number], ...(custom.tradition ? { tradition: custom.tradition } : {}) } : { id: placeId };
     return { schema: 1, place, time: { start: { year: y } }, scope, intent: target ? 'landmark' : 'tour', ...(target ? { target } : {}) };
   };
-  const run = () => {
+  const run = (given?: ScenarioRequest) => {
     setError(''); setNote('');
-    try { setPlan(planScenario(request(), ctx)); } catch (e) { setPlan(null); setError((e as Error).message); }
+    try { setPlan(planScenario(given ?? request(), ctx)); } catch (e) { setPlan(null); setError((e as Error).message); }
+  };
+  /** Shows the interpreted request in the fields, so the person sees exactly what will be planned, then plans it. */
+  const adopt = (r: ScenarioRequest) => {
+    if ('id' in r.place) setPlaceId(r.place.id);
+    else { setPlaceId('custom'); setCustom({ title: r.place.title, lng: String(r.place.coordinate[0]), lat: String(r.place.coordinate[1]), tradition: r.place.tradition ?? '' }); }
+    const parts = toHistoricalYearParts(r.time.start.year); setYear(parts.year); setEra(parts.era);
+    setScope(r.scope); setTarget(r.target ?? '');
+    run(r);
+  };
+  const apply = (i: Interpretation) => {
+    setReading(i.rationale);
+    if (i.outcome === 'request') adopt(i.request);
+    else if (i.outcome === 'clarify') setAsked(i);
+    else setError(`Not planned: ${i.reason}`);
+  };
+  // Without a server key, the same prompt is pasted into a chat app (Claude, ChatGPT) and its reply pasted back: it is validated by
+  // the same contract as an API answer, in the browser, and nothing is sent to the server.
+  const manual = aiMode !== null && aiMode !== 'live' && aiMode !== 'record' && aiMode !== 'replay';
+  const [prompt, setPrompt] = useState(''), [reply, setReply] = useState('');
+  const interpret = async (input: string) => {
+    setBusy(true); setError(''); setAsked(null); setReading(''); setPlan(null);
+    try {
+      if (manual) {
+        const p = manualPrompt(interpretTask(input, ctx.store));
+        setPrompt(p); setReply('');
+        try { await navigator.clipboard.writeText(p); setNote('Prompt copied. Paste it into Claude or ChatGPT, then paste the reply below.'); }
+        catch { setNote('Copy the prompt below into Claude or ChatGPT, then paste the reply.'); }
+        return;
+      }
+      const response = await fetch('/api/plan/interpret', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text: input }) });
+      const body = await response.json() as { ok: true; interpretation: Interpretation } | { ok: false; error: string; message: string };
+      if (!body.ok) { setError(body.message); return; }
+      apply(body.interpretation);
+    } catch (e) { setError((e as Error).message); }
+    finally { setBusy(false); }
+  };
+  const useReply = () => {
+    setError(''); setAsked(null); setReading('');
+    try { const i = interpretTask(text, ctx.store).validate(parseManualReply(reply)); setPrompt(''); setNote(''); apply(i); }
+    catch (e) { setError(`The reply was not accepted: ${(e as Error).message}`); }
   };
   const play = (p: ScenePlan) => {
     try { const scenario = composeScenario(p, ctx); player?.load(scenario); player?.play(); setOpen(false); }
@@ -56,11 +100,26 @@ export function ScenarioRequestBar() {
   const counts = plan && { ready: plan.components.filter(c => c.state === 'ready').length, missing: plan.components.filter(c => c.state === 'missing').length };
 
   return <div className="pointer-events-auto relative">
-    <button aria-expanded={open} aria-controls="scenario-request" onClick={() => { setOpen(o => !o); setSaves(readSaves()); }}
+    <button aria-expanded={open} aria-controls="scenario-request" onClick={() => { setOpen(o => !o); setSaves(readSaves()); if (aiMode === null) fetch('/api/plan/interpret').then(r => r.json()).then((b: { mode: string }) => setAiMode(b.mode), () => setAiMode('off')); }}
       className="w-40 rounded-full border border-panel-border bg-panel px-4 py-1.5 text-left text-sm text-white/70 backdrop-blur-md hover:border-accent sm:w-64">
       Plan a journey…
     </button>
     {open && <section id="scenario-request" aria-label="Plan a journey" className="absolute right-0 top-11 z-30 max-h-[calc(100dvh-5rem)] w-[min(24rem,calc(100vw-2rem))] overflow-y-auto rounded-2xl border border-panel-border bg-panel p-4 text-xs text-white/75 backdrop-blur-md">
+      <form onSubmit={e => { e.preventDefault(); if (text.trim()) void interpret(text); }} className="mb-3 border-b border-white/10 pb-3">
+        <label className="block">Describe a journey<input className={field} value={text} onChange={e => setText(e.target.value)} placeholder="e.g. the cattle market in Rome under Trajan" maxLength={500}/></label>
+        <div className="mt-2 flex items-center gap-2">
+          <button type="submit" disabled={busy || !text.trim()} className="rounded-full border border-white/20 px-3 py-1 hover:border-accent disabled:opacity-40">{busy ? 'Reading…' : manual ? 'Copy prompt' : 'Interpret'}</button>
+          <span className="text-[11px] text-white/45">{manual ? 'No server key: read by your Claude or ChatGPT chat instead.' : 'Read by AI into the fields below, then planned.'}</span>
+        </div>
+        {manual && prompt && <div className="mt-2 space-y-2">
+          {note && !plan && <p role="status" className="text-white/60">{note}</p>}
+          <label className="block text-[11px] text-white/55">Prompt for your chat<textarea readOnly className={`${field} h-16 font-mono text-[10px]`} value={prompt} onFocus={e => e.currentTarget.select()}/></label>
+          <label className="block">Paste the chat&apos;s reply<textarea className={`${field} h-20 font-mono text-[10px]`} value={reply} onChange={e => setReply(e.target.value)} placeholder='{"outcome": "request", ...}'/></label>
+          <button type="button" disabled={!reply.trim()} className="rounded-full bg-accent px-3 py-1 font-medium text-black disabled:opacity-40" onClick={useReply}>Use reply</button>
+        </div>}
+        {reading && <p className="mt-2 text-white/55">Read as: {reading}</p>}
+        {asked && <div className="mt-2"><p className="text-white">{asked.question}</p><div className="mt-1 flex flex-wrap gap-1.5">{asked.options.map(o => <button type="button" key={o} className="rounded-full border border-white/20 px-2.5 py-0.5 hover:border-accent" onClick={() => { const next = `${text} (${o})`; setText(next); void interpret(next); }}>{o}</button>)}</div></div>}
+      </form>
       <form onSubmit={e => { e.preventDefault(); run(); }}>
         <label className="block">Place<select className={field} value={placeId} onChange={e => { setPlaceId(e.target.value); setTarget(''); setPlan(null); }}>
           {SPATIAL_LODS.map(lod => { const group = places.filter(p => p.lod === lod && !p.feature); return group.length ? <optgroup key={lod} label={lod}>{group.map(p => <option key={p.placeId} value={p.placeId}>{p.title}</option>)}</optgroup> : null; })}
@@ -83,7 +142,8 @@ export function ScenarioRequestBar() {
       </form>
       {error && <p role="alert" className="mt-3 text-red-300">{error}</p>}
       {plan && counts && <div className="mt-4 border-t border-white/10 pt-3" aria-live="polite">
-        <p className="text-sm text-white">{plan.place?.title ?? 'Unresolved place'} · {timeLabel(plan.request.time)}</p>
+        <p className="text-sm text-white">{plan.place?.title ?? 'Unresolved place'} · {timeLabel(plan.request.time)}{plan.moment.chosen && <span className="text-accent"> · shown at {timeLabel(plan.moment.time)}</span>}</p>
+        {plan.moment.chosen && <p className="mt-1 text-white/55">{plan.moment.reason}</p>}
         <p className="mt-1">{plan.lod} scale · <span className={plan.status === 'ready' ? 'text-accent' : plan.status === 'partial' ? 'text-amber-300' : 'text-red-300'}>{plan.status}</span> · Checkpoint A {plan.validation.ok ? 'passed' : 'failed'}</p>
         <p className="mt-1">{counts.ready} ready · {counts.missing} missing · {plan.deferred.length} deferred {plan.deferred.length === 1 ? 'area' : 'areas'} · {plan.assetRequests.length} {plan.assetRequests.length === 1 ? 'model' : 'models'} requested</p>
         <p className="mt-1 text-white/55">Reuse: {plan.reuse.detail}</p>

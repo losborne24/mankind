@@ -98,7 +98,7 @@ export function checkpointA(plan: ScenePlan, ctx: Ctx): PlanValidation {
   for (const c of plan.components) {
     const b = view(c.ref.blueprint), f = b?.features.find(x => x.id === c.ref.feature), key = `${c.ref.blueprint}#${c.ref.feature}`;
     if (!b || !f) { error('identifiers', `${key} does not resolve in the pinned blueprints.`, key); continue; }
-    if (c.state === 'ready' && presence(f, b, plan.request.time).present !== 'yes') error('chronology', `${f.title} is ready but not confirmed at the requested date.`, key);
+    if (c.state === 'ready' && presence(f, b, plan.moment.time).present !== 'yes') error('chronology', `${f.title} is ready but not confirmed at the requested date.`, key);
     if (c.state === 'ready' && f.evidence.certainty === 'documented' && !f.evidence.sources.length) error('provenance', `${f.title} is shown as documented without a source.`, key);
     if (c.state === 'ready' && c.rung === 1) {
       const pin = f.asset?.catalogue, entry = pin && catalogue.entries.find(e => e.id === pin.id && e.version === pin.version);
