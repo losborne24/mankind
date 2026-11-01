@@ -23,7 +23,9 @@ const obs=(descriptor,distance,visible=true)=>({descriptor,distance,visible});
 assert.equal(controller.update([obs(a,500),obs(b,400)]).descriptor.id,b.id);
 assert.equal(controller.update([obs(a,350),obs(b,400)]).descriptor.id,b.id,'Switch margin retains incumbent');
 assert.equal(controller.update([obs(a,200),obs(b,400)]).descriptor.id,a.id);
-assert.equal(controller.update([obs(a,200,false)]).lod,'global');
+assert.equal(controller.update([obs(a,200,false)]).descriptor.id,a.id,'A hidden incumbent within its exit distance stays loaded');
+assert.equal(controller.update([obs(a,13000,false)]).lod,'global','A hidden incumbent beyond regional exit is released');
+assert.equal(controller.update([obs(b,200,false)]).lod,'global','Visibility still gates entry');
 for(let i=0;i<100;i++) assert.ok(['global','local'].includes(controller.update([obs(fixtures[i%3],i%2?10:50000)]).lod));
 
 const original=GLTFLoader.prototype.loadAsync;
@@ -45,7 +47,8 @@ try {
  for(let i=0;i<30;i++)assert.equal(old.updateAmbientLife(200+i*33,false),false);
  assert.equal(JSON.stringify(old.ambientLife.simulation.villagers),state);assert.equal(paints,p);
  old.updateAmbientLife(1300,true);old.updateAmbientLife(1333,true);assert.notEqual(JSON.stringify(old.ambientLife.simulation.villagers),state);
- approach(a,1500);assert.equal(layer.settlement,null);assert.equal(old.ambientLife.actors.length,0);assert.equal(glbCache.snapshot().users,0);assert.ok(glbCache.snapshot().idle>0);
+ approach(a,1500);assert.equal(layer.getStreamingStatus().lod,'regional');assert.ok(layer.settlement===old,'Within preparing distance the built scene stays, hidden');
+ approach(a,2500);assert.ok(layer.settlement===null,'Beyond preparing exit the scene is released');assert.equal(old.ambientLife.actors.length,0);assert.equal(glbCache.snapshot().users,0);assert.ok(glbCache.snapshot().idle>0);
  const before=requests;approach(a);await settle();assert.equal(requests,before,'Return reuses decoded GLBs');assert.equal(layer.settlement.timing.totals.cpuTextures,0,'Return reuses CPU maps');
  approach(b);await settle();assert.equal(layer.getStreamingStatus().activeId,b.id);assert.equal(layer.getStreamingStatus().detailedScenes,1);assert.equal(layer.settlement.loaded,22);
  approach(fixtures[2]);await settle();assert.equal(layer.settlement.loaded,40);assert.equal(layer.getStreamingStatus().activeId,fixtures[2].id);

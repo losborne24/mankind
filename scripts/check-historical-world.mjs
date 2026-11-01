@@ -62,7 +62,8 @@ const bound = bindHistoricalScenario(fixture, direction);
 let pose = { center: [0, 0], zoom: 2, pitch: 0, bearing: 0 }, frames = new Map(), id = 0, date;
 const player = new ScenarioPlayer({ camera: { read: () => pose, write: p => pose = p, stop: () => {} }, timeline: t => date = t, overlays: () => {}, frame: cb => { frames.set(++id, cb); return id; }, cancelFrame: key => frames.delete(key) });
 player.load(JSON.parse(JSON.stringify(bound.scenario))); player.play();
-for (let now = 0; now <= 500; now += 100) { const callbacks = [...frames.values()]; frames.clear(); callbacks.forEach(cb => cb(now)); assert.ok(frames.size <= 1); }
+// Starting far away, the first step flies a lead-in (up to 4.2 s) before its own actions.
+for (let now = 0; now <= 6000; now += 100) { const callbacks = [...frames.values()]; frames.clear(); callbacks.forEach(cb => cb(now)); assert.ok(frames.size <= 1); }
 assert.equal(player.snapshot.state, 'completed'); assert.deepEqual(date.start, at); player.dispose(); assert.equal(frames.size, 0);
 const wrongDate = structuredClone(direction); wrongDate.scope.time = { start: { year: 2013 } }; wrongDate.beats[0].actions[0].time = wrongDate.scope.time;
 assert.throws(() => bindHistoricalScenario(fixture, wrongDate), /outside action date/);

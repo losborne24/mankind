@@ -33,7 +33,7 @@ player.exploreFreely(); assert.equal(frames.size, 0); assert.equal(applied.descr
 pose = { ...pose, center: [12.5, 41.9] }; time = { start: { year: 101 } }; listener();
 assert.equal(applied.descriptors.length, 0);
 player.resume(); assert.equal(time.start.year, 100); assert.equal(applied.descriptors.length, 1);
-assert.equal(player.snapshot.elapsed, elapsed); advance(20); assert.equal(player.snapshot.returning, false);
+assert.equal(player.snapshot.elapsed, elapsed); advance(45); assert.equal(player.snapshot.returning, false, 'The return flight takes at most 4.2 s');
 player.jump(5); assert.equal(applied.descriptors.length, 1); assert.equal(player.snapshot.beat, 5);
 player.restart(); assert.equal(applied.descriptors.length, 0, 'Restart releases detail before the approach');
 player.jump(6); advance(60); assert.equal(player.snapshot.state, 'completed'); assert.equal(applied.descriptors.length, 1);
