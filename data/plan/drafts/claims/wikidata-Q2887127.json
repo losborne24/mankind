@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:wikidata-Q2887127",
+  "accepted": [
+    {
+      "feature": "Santa Aurea",
+      "kind": "structure",
+      "coordinate": [
+        12.30181,
+        41.759367
+      ],
+      "existence": {
+        "startYear": 1401,
+        "endYear": null
+      },
+      "quote": "Coordinate: longitude 12.301810, latitude 41.759367. Inception: 1401 CE.",
+      "confidence": "high",
+      "note": "A church building.",
+      "id": "claim:wikidata-Q2887127:1",
+      "sourceId": "source:wikidata-Q2887127"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

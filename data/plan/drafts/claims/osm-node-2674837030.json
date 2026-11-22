@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-2674837030",
+  "accepted": [
+    {
+      "feature": "Campo della Magna Mater",
+      "kind": "open-space",
+      "coordinate": [
+        12.290831,
+        41.752547
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.290831, latitude 41.752547.",
+      "confidence": "high",
+      "note": "OpenStreetMap maps this as an ancient Roman archaeological site.",
+      "id": "claim:osm-node-2674837030:1",
+      "sourceId": "source:osm-node-2674837030"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

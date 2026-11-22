@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-1069719889",
+  "accepted": [
+    {
+      "feature": "Temple of Serapis",
+      "kind": "structure",
+      "coordinate": [
+        12.283717,
+        41.753283
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.283717, latitude 41.753283.",
+      "confidence": "high",
+      "note": "Mapped as ruins.",
+      "id": "claim:osm-way-1069719889:1",
+      "sourceId": "source:osm-way-1069719889"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

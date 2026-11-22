@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-1069797007",
+  "accepted": [
+    {
+      "feature": "Casette Tipo (III,XII,1-2 - III,XIII,1-2)",
+      "kind": "structure",
+      "coordinate": [
+        12.284705,
+        41.753222
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.284705, latitude 41.753222.",
+      "confidence": "high",
+      "note": "Ancient Roman archaeological site, mapped as present-day remains.",
+      "id": "claim:osm-way-1069797007:1",
+      "sourceId": "source:osm-way-1069797007"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

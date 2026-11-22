@@ -1,0 +1,26 @@
+{
+  "sourceId": "source:pleiades-328100889",
+  "accepted": [],
+  "discarded": [
+    {
+      "claim": {
+        "feature": "Tomb of Caius Cartilius Poplicola",
+        "kind": "structure",
+        "coordinate": [
+          12.285441,
+          41.750365
+        ],
+        "existence": {
+          "startYear": -29,
+          "endYear": null
+        },
+        "quote": "Description: The Tomb of Caius Cartilius Poplicola, dating to ca. 30-20 B.C., is a monumental tomb outside the Porta Marina of Ostia. Poplicola was a prominent citizen of Ostia.\nRepresentative point: longitude 12.285441, latitude 41.750365.",
+        "confidence": "medium",
+        "note": "A monumental tomb outside the Porta Marina, dated ca. 30-20 B.C."
+      },
+      "reason": "year -29 not in the quote"
+    }
+  ],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

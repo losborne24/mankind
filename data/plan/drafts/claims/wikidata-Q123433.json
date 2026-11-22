@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:wikidata-Q123433",
+  "accepted": [
+    {
+      "feature": "Ostia Synagogue",
+      "kind": "structure",
+      "coordinate": [
+        12.288611,
+        41.748889
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Label: Ostia Synagogue Description: synagogue Coordinate: longitude 12.288611, latitude 41.748889.",
+      "confidence": "high",
+      "note": "",
+      "id": "claim:wikidata-Q123433:1",
+      "sourceId": "source:wikidata-Q123433"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

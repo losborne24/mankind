@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-12385251965",
+  "accepted": [
+    {
+      "feature": "Shrine of Attis",
+      "kind": "structure",
+      "coordinate": [
+        12.29137,
+        41.7526
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.291370, latitude 41.752600.",
+      "confidence": "high",
+      "note": "Ruins mapped by OpenStreetMap.",
+      "id": "claim:osm-node-12385251965:1",
+      "sourceId": "source:osm-node-12385251965"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

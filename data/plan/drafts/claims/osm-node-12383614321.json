@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-12383614321",
+  "accepted": [
+    {
+      "feature": "Porta Laurentina necropolis",
+      "kind": "landmark",
+      "coordinate": [
+        12.294718,
+        41.752017
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.294718, latitude 41.752017.",
+      "confidence": "high",
+      "note": "Ancient Roman archaeological site mapped by OpenStreetMap.",
+      "id": "claim:osm-node-12383614321:1",
+      "sourceId": "source:osm-node-12383614321"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-9311460884",
+  "accepted": [
+    {
+      "feature": "Fullonica II,XI,1",
+      "kind": "structure",
+      "coordinate": [
+        12.291365,
+        41.757066
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.291365, latitude 41.757066.",
+      "confidence": "high",
+      "note": "OpenStreetMap maps this as an ancient Roman archaeological site.",
+      "id": "claim:osm-node-9311460884:1",
+      "sourceId": "source:osm-node-9311460884"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-1009195803",
+  "accepted": [
+    {
+      "feature": "Ninfei II,VII,6-7",
+      "kind": "structure",
+      "coordinate": [
+        12.291232,
+        41.755453
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.291232, latitude 41.755453.",
+      "confidence": "high",
+      "note": "Mapped as an ancient Roman archaeological site.",
+      "id": "claim:osm-way-1009195803:1",
+      "sourceId": "source:osm-way-1009195803"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

@@ -1,0 +1,22 @@
+{
+  "sourceId": "source:wikipedia-Piazzale_delle_Corporazioni",
+  "accepted": [
+    {
+      "feature": "Piazzale delle Corporazioni (Forum of Corporations)",
+      "kind": "open-space",
+      "coordinate": null,
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Located in the major port city of Ostia, this open-air market was essential for Rome as a place of varying and exotic goods from foreign lands.",
+      "confidence": "high",
+      "note": "It was Rome's main centre of commerce and trade, mainly during the Age of Augustus.",
+      "id": "claim:wikipedia-Piazzale_delle_Corporazioni:1",
+      "sourceId": "source:wikipedia-Piazzale_delle_Corporazioni"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-1240185741",
+  "accepted": [
+    {
+      "feature": "Shrine inside Horrea di Hortensius (V,XII,1)",
+      "kind": "structure",
+      "coordinate": [
+        12.292196,
+        41.755485
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.292196, latitude 41.755485.",
+      "confidence": "high",
+      "note": "Ancient Roman temple or shrine inside a horrea, mapped as an archaeological site.",
+      "id": "claim:osm-way-1240185741:1",
+      "sourceId": "source:osm-way-1240185741"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

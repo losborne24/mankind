@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:pleiades-411301347",
+  "accepted": [
+    {
+      "feature": "Palazzo Imperiale (Ostia)",
+      "kind": "structure",
+      "coordinate": [
+        12.281604,
+        41.75394
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "The complex dates to the second and third centuries CE and includes a variety of installations - shops, storehouses, bathing facilities - but is most likely not a palace despite its modern sobriquet. Representative point: longitude 12.281604, latitude 41.753940.",
+      "confidence": "high",
+      "note": "A complex of shops, storehouses and baths at the western edge of Regio I, dated to the second and third centuries CE.",
+      "id": "claim:pleiades-411301347:1",
+      "sourceId": "source:pleiades-411301347"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

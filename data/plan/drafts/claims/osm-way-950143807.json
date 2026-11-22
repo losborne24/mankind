@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-950143807",
+  "accepted": [
+    {
+      "feature": "Domus and Mitreo delle Pareti Dipinte (III,I,6)",
+      "kind": "structure",
+      "coordinate": [
+        12.286496,
+        41.753343
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.286496, latitude 41.753343.",
+      "confidence": "high",
+      "note": "OpenStreetMap tags it as an ancient Roman archaeological site.",
+      "id": "claim:osm-way-950143807:1",
+      "sourceId": "source:osm-way-950143807"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

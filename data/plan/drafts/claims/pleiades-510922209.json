@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:pleiades-510922209",
+  "accepted": [
+    {
+      "feature": "Sanctuary of the Bona Dea",
+      "kind": "structure",
+      "coordinate": [
+        12.291585,
+        41.754621
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "The Sanctuary of the Bona Dea at Ostia dates to the republican period (second century BCE?) and was renovated in the second century CE. Representative point: longitude 12.291585, latitude 41.754621.",
+      "confidence": "high",
+      "note": "Dated, with a question mark, to the republican period (second century BCE?) and renovated in the second century CE.",
+      "id": "claim:pleiades-510922209:1",
+      "sourceId": "source:pleiades-510922209"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

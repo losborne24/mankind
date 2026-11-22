@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-10873805532",
+  "accepted": [
+    {
+      "feature": "Domus del Pozzo (V,III,3)",
+      "kind": "structure",
+      "coordinate": [
+        12.291219,
+        41.753887
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.291219, latitude 41.753887.",
+      "confidence": "high",
+      "note": "An ancient Roman house, mapped by OpenStreetMap as an archaeological site.",
+      "id": "claim:osm-node-10873805532:1",
+      "sourceId": "source:osm-node-10873805532"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

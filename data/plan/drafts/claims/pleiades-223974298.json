@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:pleiades-223974298",
+  "accepted": [
+    {
+      "feature": "Garden Houses",
+      "kind": "structure",
+      "coordinate": [
+        12.284756,
+        41.751816
+      ],
+      "existence": {
+        "startYear": 128,
+        "endYear": null
+      },
+      "quote": "Description: A large residential complex, built in ca. 128 CE as part of the Hadrianic remodeling of Ostia. Its central area was occupied by two blocks, each comprising four houses, surrounded by a garden furnished with six fountains. Representative point: longitude 12.284756, latitude 41.751816.",
+      "confidence": "medium",
+      "note": "Built ca. 128 CE as part of Hadrian's remodelling of Ostia.",
+      "id": "claim:pleiades-223974298:1",
+      "sourceId": "source:pleiades-223974298"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

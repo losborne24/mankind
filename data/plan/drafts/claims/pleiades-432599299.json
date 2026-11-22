@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:pleiades-432599299",
+  "accepted": [
+    {
+      "feature": "Caseggiato di Bacco e Arianna (House of Bacchus and Ariadne)",
+      "kind": "structure",
+      "coordinate": [
+        12.283789,
+        41.753484
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "The House of Bacchus and Ariadne at Ostia dates to the Hadrianic period and adjoined the Serapeum. Representative point: longitude 12.283789, latitude 41.753484.",
+      "confidence": "high",
+      "note": "Dated to the Hadrianic period and next to the Serapeum.",
+      "id": "claim:pleiades-432599299:1",
+      "sourceId": "source:pleiades-432599299"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

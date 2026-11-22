@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-1069679075",
+  "accepted": [
+    {
+      "feature": "Magazziono dei doli",
+      "kind": "structure",
+      "coordinate": [
+        12.284441,
+        41.752855
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.284441, latitude 41.752855.",
+      "confidence": "high",
+      "note": "Mapped as an ancient Roman archaeological site.",
+      "id": "claim:osm-way-1069679075:1",
+      "sourceId": "source:osm-way-1069679075"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

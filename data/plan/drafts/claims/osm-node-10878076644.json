@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-10878076644",
+  "accepted": [
+    {
+      "feature": "Tempio della Bona Dea (IV,VIII,3)",
+      "kind": "structure",
+      "coordinate": [
+        12.285344,
+        41.750629
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.285344, latitude 41.750629.",
+      "confidence": "high",
+      "note": "Ancient Roman archaeological site mapped by OpenStreetMap.",
+      "id": "claim:osm-node-10878076644:1",
+      "sourceId": "source:osm-node-10878076644"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

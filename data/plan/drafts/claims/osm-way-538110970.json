@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-538110970",
+  "accepted": [
+    {
+      "feature": "Tempio di Ercole",
+      "kind": "structure",
+      "coordinate": [
+        12.286166,
+        41.753775
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.286166, latitude 41.753775.",
+      "confidence": "high",
+      "note": "OpenStreetMap maps the ancient Roman temple as ruins.",
+      "id": "claim:osm-way-538110970:1",
+      "sourceId": "source:osm-way-538110970"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

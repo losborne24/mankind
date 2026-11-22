@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-10873805537",
+  "accepted": [
+    {
+      "feature": "Caseggiato a sud della Domus del Protiro (V,II,3)",
+      "kind": "structure",
+      "coordinate": [
+        12.290854,
+        41.753639
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.290854, latitude 41.753639.",
+      "confidence": "high",
+      "note": "Ancient Roman archaeological site mapped by OpenStreetMap.",
+      "id": "claim:osm-node-10873805537:1",
+      "sourceId": "source:osm-node-10873805537"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

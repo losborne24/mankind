@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-1270615441",
+  "accepted": [
+    {
+      "feature": "Caseggiato dei Doli",
+      "kind": "structure",
+      "coordinate": [
+        12.288018,
+        41.755272
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.288018, latitude 41.755272.",
+      "confidence": "high",
+      "note": "Mapped as an archaeological site.",
+      "id": "claim:osm-way-1270615441:1",
+      "sourceId": "source:osm-way-1270615441"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

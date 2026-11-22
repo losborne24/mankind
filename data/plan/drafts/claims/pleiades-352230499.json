@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:pleiades-352230499",
+  "accepted": [
+    {
+      "feature": "Guild Temple and Mithraeum of Fructosus",
+      "kind": "structure",
+      "coordinate": [
+        12.287804,
+        41.753187
+      ],
+      "existence": {
+        "startYear": 222,
+        "endYear": null
+      },
+      "quote": "The guild temple dates to the reign of Alexander Severus (222 - 235 CE). Based on epigraphic evidence, this shrine may belong to the guild of the stuppatores. A mithraic shrine with a patron named Fructosus is to be found in the substructure of the podium. Representative point: longitude 12.287804, latitude 41.753187.",
+      "confidence": "medium",
+      "note": "The source dates the guild temple to the reign of Alexander Severus (222-235 CE), so the start is approximate; the mithraeum lies in the substructure of the podium.",
+      "id": "claim:pleiades-352230499:1",
+      "sourceId": "source:pleiades-352230499"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

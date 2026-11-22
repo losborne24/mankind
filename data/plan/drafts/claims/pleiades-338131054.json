@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:pleiades-338131054",
+  "accepted": [
+    {
+      "feature": "Domus della Fortuna Annonaria (V,II,8)",
+      "kind": "structure",
+      "coordinate": [
+        12.290517,
+        41.754
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Representative point: longitude 12.290517, latitude 41.754000.",
+      "confidence": "high",
+      "note": "A peristyle house with a nymphaeum, probably first built under Antoninus Pius.",
+      "id": "claim:pleiades-338131054:1",
+      "sourceId": "source:pleiades-338131054"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

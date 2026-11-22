@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-1108115846",
+  "accepted": [
+    {
+      "feature": "Caupona di Alexander e Helix",
+      "kind": "structure",
+      "coordinate": [
+        12.285614,
+        41.751097
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.285614, latitude 41.751097.",
+      "confidence": "high",
+      "note": "Ancient Roman caupona (tavern), tagged as an archaeological site.",
+      "id": "claim:osm-way-1108115846:1",
+      "sourceId": "source:osm-way-1108115846"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

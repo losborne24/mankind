@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-10873805533",
+  "accepted": [
+    {
+      "feature": "Caseggiato dei Lottatori (V,III,1)",
+      "kind": "structure",
+      "coordinate": [
+        12.29094,
+        41.7542
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.290940, latitude 41.754200.",
+      "confidence": "high",
+      "note": "An ancient Roman building block, mapped by OpenStreetMap as an archaeological site.",
+      "id": "claim:osm-node-10873805533:1",
+      "sourceId": "source:osm-node-10873805533"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

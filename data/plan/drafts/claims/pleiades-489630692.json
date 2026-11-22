@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:pleiades-489630692",
+  "accepted": [
+    {
+      "feature": "Forum of Corporations (Piazzale delle Corporazioni)",
+      "kind": "open-space",
+      "coordinate": [
+        12.291008,
+        41.756389
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "A key commercial center occupying the quadriporticus of the theater of Ostia, the Forum of Corporations dates initially to the Augustan period but is substantially rebuilt in the second century. Representative point: longitude 12.291008, latitude 41.756389.",
+      "confidence": "high",
+      "note": "A commercial center in the theater's quadriporticus, first built in the Augustan period and largely rebuilt in the second century.",
+      "id": "claim:pleiades-489630692:1",
+      "sourceId": "source:pleiades-489630692"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:wikidata-Q126181252",
+  "accepted": [
+    {
+      "feature": "Baths of the Trinacria",
+      "kind": "structure",
+      "coordinate": [
+        12.284155,
+        41.753407
+      ],
+      "existence": {
+        "startYear": 120,
+        "endYear": null
+      },
+      "quote": "Coordinate: longitude 12.284155, latitude 41.753407. Inception: 120 CE.",
+      "confidence": "high",
+      "note": "Baths in regio III of Ostia Antica.",
+      "id": "claim:wikidata-Q126181252:1",
+      "sourceId": "source:wikidata-Q126181252"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

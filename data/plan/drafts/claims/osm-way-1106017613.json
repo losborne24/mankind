@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-1106017613",
+  "accepted": [
+    {
+      "feature": "Piazza dei Lari",
+      "kind": "open-space",
+      "coordinate": [
+        12.288908,
+        41.754745
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.288908, latitude 41.754745.",
+      "confidence": "high",
+      "note": "Ancient Roman ruins, tagged as an archaeological site.",
+      "id": "claim:osm-way-1106017613:1",
+      "sourceId": "source:osm-way-1106017613"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

@@ -518,8 +518,9 @@ from an allow-list into licensed, digested snapshots. Claims and drafts are revi
 ```sh
 node scripts/check-research.mjs
 node scripts/research/queue.mjs '{"place":{"title":"Ostia","coordinate":[12.2923,41.7556],"tradition":"roman"},"year":100}'
-node scripts/research/run.mjs --place ostia --year 100 --reviewer "Your name"
+node scripts/research/run.mjs --place ostia --year 100 --via claude --reviewer "Your name"
 ```
 
-`run.mjs` runs the whole pipeline for a place and stops only where a person is needed (pasting chat replies, reviews).
+`run.mjs` runs the whole pipeline for a place and stops only where a person is needed (reviews, and pasting chat replies
+unless `--via claude` has the local Claude Code CLI answer the prompt files).
 Run the same command again to continue.

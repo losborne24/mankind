@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:wikidata-Q55685926",
+  "accepted": [
+    {
+      "feature": "Pianabella basilica",
+      "kind": "structure",
+      "coordinate": [
+        12.301303,
+        41.749348
+      ],
+      "existence": {
+        "startYear": 300,
+        "endYear": null
+      },
+      "quote": "Coordinate: longitude 12.301303, latitude 41.749348. Inception: 300 CE.",
+      "confidence": "high",
+      "note": "Christian basilica near the Porta Laurentina of Ostia Antica.",
+      "id": "claim:wikidata-Q55685926:1",
+      "sourceId": "source:wikidata-Q55685926"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

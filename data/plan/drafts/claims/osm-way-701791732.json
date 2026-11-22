@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-701791732",
+  "accepted": [
+    {
+      "feature": "Terme del Foro",
+      "kind": "structure",
+      "coordinate": [
+        12.289501,
+        41.753845
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.289501, latitude 41.753845.",
+      "confidence": "high",
+      "note": "OpenStreetMap tags it as an ancient Roman baths archaeological site.",
+      "id": "claim:osm-way-701791732:1",
+      "sourceId": "source:osm-way-701791732"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

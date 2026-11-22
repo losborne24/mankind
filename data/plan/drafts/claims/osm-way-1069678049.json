@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-1069678049",
+  "accepted": [
+    {
+      "feature": "Caseggiato III,XVI,2",
+      "kind": "structure",
+      "coordinate": [
+        12.284268,
+        41.75294
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.284268, latitude 41.752940.",
+      "confidence": "high",
+      "note": "Building in Regio III, Insula XVI, mapped as an ancient Roman archaeological site.",
+      "id": "claim:osm-way-1069678049:1",
+      "sourceId": "source:osm-way-1069678049"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

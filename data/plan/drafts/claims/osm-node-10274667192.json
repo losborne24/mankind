@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-10274667192",
+  "accepted": [
+    {
+      "feature": "Caseggiato con Fornace (I,XVII,1)",
+      "kind": "structure",
+      "coordinate": [
+        12.285419,
+        41.753785
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.285419, latitude 41.753785.",
+      "confidence": "high",
+      "note": "An ancient Roman building with a furnace, mapped by OpenStreetMap as an archaeological site.",
+      "id": "claim:osm-node-10274667192:1",
+      "sourceId": "source:osm-node-10274667192"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

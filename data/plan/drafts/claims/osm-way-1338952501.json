@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-1338952501",
+  "accepted": [
+    {
+      "feature": "Terme del Faro (IV,II,1)",
+      "kind": "structure",
+      "coordinate": [
+        12.290252,
+        41.752555
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.290252, latitude 41.752555.",
+      "confidence": "high",
+      "note": "Ancient Roman baths mapped as an archaeological site.",
+      "id": "claim:osm-way-1338952501:1",
+      "sourceId": "source:osm-way-1338952501"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

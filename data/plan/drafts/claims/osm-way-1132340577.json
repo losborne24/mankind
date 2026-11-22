@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-1132340577",
+  "accepted": [
+    {
+      "feature": "Shrine of Sabazius (V,XII,3)",
+      "kind": "structure",
+      "coordinate": [
+        12.293089,
+        41.755732
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.293089, latitude 41.755732.",
+      "confidence": "high",
+      "note": "Ancient Roman temple, tagged as an archaeological site.",
+      "id": "claim:osm-way-1132340577:1",
+      "sourceId": "source:osm-way-1132340577"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-950143355",
+  "accepted": [
+    {
+      "feature": "Tempio dei Fabri Navales (III,II,1-2)",
+      "kind": "structure",
+      "coordinate": [
+        12.286167,
+        41.752746
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.286167, latitude 41.752746.",
+      "confidence": "high",
+      "note": "OpenStreetMap tags it as an archaeological site.",
+      "id": "claim:osm-way-950143355:1",
+      "sourceId": "source:osm-way-950143355"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

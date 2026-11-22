@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:pleiades-732059512",
+  "accepted": [
+    {
+      "feature": "Christian Basilica, Ostia",
+      "kind": "structure",
+      "coordinate": [
+        12.286424,
+        41.752971
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Representative point: longitude 12.286424, latitude 41.752971.",
+      "confidence": "medium",
+      "note": "The structure in Regio III likely dates to the fourth and fifth centuries CE, and its interpretation is disputed (one theory is a xenodochium).",
+      "id": "claim:pleiades-732059512:1",
+      "sourceId": "source:pleiades-732059512"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

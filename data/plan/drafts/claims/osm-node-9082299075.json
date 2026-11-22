@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-9082299075",
+  "accepted": [
+    {
+      "feature": "Terme del Mitra (I,XVII,2)",
+      "kind": "structure",
+      "coordinate": [
+        12.285364,
+        41.754099
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.285364, latitude 41.754099.",
+      "confidence": "high",
+      "note": "OpenStreetMap maps these baths as an archaeological site.",
+      "id": "claim:osm-node-9082299075:1",
+      "sourceId": "source:osm-node-9082299075"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:wikidata-Q55096569",
+  "accepted": [
+    {
+      "feature": "Tomb of Caius Cartilius Poplicola",
+      "kind": "structure",
+      "coordinate": [
+        12.28543,
+        41.75036
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Coordinate: longitude 12.285430, latitude 41.750360.",
+      "confidence": "high",
+      "note": "Described as a first century B.C. tomb located in Ostia; no exact year is given.",
+      "id": "claim:wikidata-Q55096569:1",
+      "sourceId": "source:wikidata-Q55096569"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

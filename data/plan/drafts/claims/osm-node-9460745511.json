@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-9460745511",
+  "accepted": [
+    {
+      "feature": "Domus della Fortuna Annonaria (V,II,8)",
+      "kind": "structure",
+      "coordinate": [
+        12.290517,
+        41.754
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.290517, latitude 41.754000.",
+      "confidence": "high",
+      "note": "OpenStreetMap maps this as an ancient Roman archaeological site.",
+      "id": "claim:osm-node-9460745511:1",
+      "sourceId": "source:osm-node-9460745511"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

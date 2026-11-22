@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-384187529",
+  "accepted": [
+    {
+      "feature": "Basilica di Pianabella",
+      "kind": "structure",
+      "coordinate": [
+        12.29369,
+        41.75004
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.293690, latitude 41.750040.",
+      "confidence": "high",
+      "note": "OpenStreetMap tags it as an ancient Roman basilica archaeological site.",
+      "id": "claim:osm-way-384187529:1",
+      "sourceId": "source:osm-way-384187529"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:pleiades-233060587",
+  "accepted": [
+    {
+      "feature": "Shrine of Sabazius",
+      "kind": "structure",
+      "coordinate": [
+        12.293087,
+        41.755734
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Representative point: longitude 12.293087, latitude 41.755734.",
+      "confidence": "high",
+      "note": "Set up in a horreum built ca. 120-125 CE; the shrine itself probably dates to the early third century.",
+      "id": "claim:pleiades-233060587:1",
+      "sourceId": "source:pleiades-233060587"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

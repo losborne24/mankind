@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:pleiades-981681540",
+  "accepted": [
+    {
+      "feature": "Mithraeum of the Seven Spheres",
+      "kind": "structure",
+      "coordinate": [
+        12.290494,
+        41.755778
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "The so-called Mithraeum of the Seven Spheres is located in ancient Ostia near to the theater-cum-quadriporticus complex. The so-called Quattro tempietti screen it from the Decumanus Maximus. Representative point: longitude 12.290494, latitude 41.755778.",
+      "confidence": "high",
+      "note": "Near the theater and quadriporticus, screened from the Decumanus Maximus by the Quattro tempietti.",
+      "id": "claim:pleiades-981681540:1",
+      "sourceId": "source:pleiades-981681540"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

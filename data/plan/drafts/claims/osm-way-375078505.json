@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-375078505",
+  "accepted": [
+    {
+      "feature": "Casa delle Volte Dipinte",
+      "kind": "structure",
+      "coordinate": [
+        12.28576,
+        41.752054
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.285760, latitude 41.752054.",
+      "confidence": "high",
+      "note": "OpenStreetMap tags it as an archaeological site.",
+      "id": "claim:osm-way-375078505:1",
+      "sourceId": "source:osm-way-375078505"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:wikidata-Q107095495",
+  "accepted": [
+    {
+      "feature": "Temple of the Ship Carpenters",
+      "kind": "structure",
+      "coordinate": [
+        12.285954,
+        41.752735
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Coordinate: longitude 12.285954, latitude 41.752735.",
+      "confidence": "high",
+      "note": "Roman temple in Ostia built in the time of the emperor Commodus on top of an earlier fullery.",
+      "id": "claim:wikidata-Q107095495:1",
+      "sourceId": "source:wikidata-Q107095495"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

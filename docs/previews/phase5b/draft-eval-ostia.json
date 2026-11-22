@@ -1,0 +1,17 @@
+{
+  "promptVersion": "draft-1",
+  "at": "2026-11-01T18:30:22.649Z",
+  "servedBy": "manual:claude-code:opus",
+  "claims": 220,
+  "draft": "data/plan/drafts/blueprint/draft-ostia.json",
+  "checkpointA": {
+    "errors": [],
+    "warnings": 0
+  },
+  "features": {
+    "documented": 220,
+    "inferred": 3
+  },
+  "costUsd": 0,
+  "review": "draft"
+}

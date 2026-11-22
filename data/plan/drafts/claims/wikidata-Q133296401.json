@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:wikidata-Q133296401",
+  "accepted": [
+    {
+      "feature": "Baths of the Philosopher",
+      "kind": "structure",
+      "coordinate": [
+        12.290602,
+        41.753865
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Coordinate: longitude 12.290602, latitude 41.753865.",
+      "confidence": "high",
+      "note": "",
+      "id": "claim:wikidata-Q133296401:1",
+      "sourceId": "source:wikidata-Q133296401"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

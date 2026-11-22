@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-7300715214",
+  "accepted": [
+    {
+      "feature": "Porta Marina",
+      "kind": "structure",
+      "coordinate": [
+        12.285501,
+        41.751084
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.285501, latitude 41.751084.",
+      "confidence": "high",
+      "note": "OpenStreetMap maps this as a city gate.",
+      "id": "claim:osm-node-7300715214:1",
+      "sourceId": "source:osm-node-7300715214"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-1287550066",
+  "accepted": [
+    {
+      "feature": "Mitreo della Planta Pedis",
+      "kind": "structure",
+      "coordinate": [
+        12.283951,
+        41.752849
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.283951, latitude 41.752849.",
+      "confidence": "high",
+      "note": "Ancient Roman mithraeum mapped as an archaeological site.",
+      "id": "claim:osm-way-1287550066:1",
+      "sourceId": "source:osm-way-1287550066"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

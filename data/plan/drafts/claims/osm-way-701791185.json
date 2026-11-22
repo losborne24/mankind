@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-701791185",
+  "accepted": [
+    {
+      "feature": "Horrea centrali",
+      "kind": "structure",
+      "coordinate": [
+        12.289464,
+        41.755381
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.289464, latitude 41.755381.",
+      "confidence": "high",
+      "note": "OpenStreetMap maps the ancient Roman warehouses as ruins.",
+      "id": "claim:osm-way-701791185:1",
+      "sourceId": "source:osm-way-701791185"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

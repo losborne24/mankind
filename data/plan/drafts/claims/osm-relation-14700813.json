@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-relation-14700813",
+  "accepted": [
+    {
+      "feature": "Horrea Epagathiana et Epaphroditiana (I,VIII,3)",
+      "kind": "structure",
+      "coordinate": [
+        12.286985,
+        41.754339
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.286985, latitude 41.754339.",
+      "confidence": "high",
+      "note": "Archaeological site mapped by OpenStreetMap.",
+      "id": "claim:osm-relation-14700813:1",
+      "sourceId": "source:osm-relation-14700813"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:wikidata-Q249991",
+  "accepted": [
+    {
+      "feature": "House of Cupid and Psyche",
+      "kind": "structure",
+      "coordinate": [
+        12.286057,
+        41.754044
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Label: House of Cupid and Psyche Description: a Roman domus located in Ostia, Italy Coordinate: longitude 12.286057, latitude 41.754044.",
+      "confidence": "high",
+      "note": "A Roman domus in Ostia.",
+      "id": "claim:wikidata-Q249991:1",
+      "sourceId": "source:wikidata-Q249991"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

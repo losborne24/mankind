@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-1105017205",
+  "accepted": [
+    {
+      "feature": "Quattro Tempietti (II,VIII,2)",
+      "kind": "structure",
+      "coordinate": [
+        12.29054,
+        41.755673
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.290540, latitude 41.755673.",
+      "confidence": "high",
+      "note": "One mapped part of the Quattro Tempietti archaeological site.",
+      "id": "claim:osm-way-1105017205:1",
+      "sourceId": "source:osm-way-1105017205"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

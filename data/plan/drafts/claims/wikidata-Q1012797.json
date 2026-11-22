@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:wikidata-Q1012797",
+  "accepted": [
+    {
+      "feature": "Ostia",
+      "kind": "settlement",
+      "coordinate": [
+        12.2875,
+        41.754167
+      ],
+      "existence": {
+        "startYear": -699,
+        "endYear": null
+      },
+      "quote": "Coordinate: longitude 12.287500, latitude 41.754167. Inception: 700 BCE.",
+      "confidence": "high",
+      "note": "An ancient Roman city and colony.",
+      "id": "claim:wikidata-Q1012797:1",
+      "sourceId": "source:wikidata-Q1012797"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

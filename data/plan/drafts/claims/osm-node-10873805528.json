@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-10873805528",
+  "accepted": [
+    {
+      "feature": "Tempio Collegiale tra via degli Augustali e Decumano (V,XI,1)",
+      "kind": "structure",
+      "coordinate": [
+        12.291083,
+        41.755066
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.291083, latitude 41.755066.",
+      "confidence": "high",
+      "note": "An ancient Roman guild temple between Via degli Augustali and the Decumanus, mapped by OpenStreetMap as an archaeological site.",
+      "id": "claim:osm-node-10873805528:1",
+      "sourceId": "source:osm-node-10873805528"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

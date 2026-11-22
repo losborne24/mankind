@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:wikidata-Q127990752",
+  "accepted": [
+    {
+      "feature": "Round temple",
+      "kind": "structure",
+      "coordinate": [
+        12.287864,
+        41.753434
+      ],
+      "existence": {
+        "startYear": 225,
+        "endYear": null
+      },
+      "quote": "Coordinate: longitude 12.287864, latitude 41.753434. Inception: 225 CE.",
+      "confidence": "high",
+      "note": "Temple at ancient Ostia.",
+      "id": "claim:wikidata-Q127990752:1",
+      "sourceId": "source:wikidata-Q127990752"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:pleiades-834171137",
+  "accepted": [
+    {
+      "feature": "Domus and Mitreo delle Pareti Dipinte",
+      "kind": "structure",
+      "coordinate": [
+        12.286498,
+        41.753338
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "The complex known as \"Domus and Mitreo delle Pareti Dipinte\" began its life in the later second century BCE and was remodeled during the time of Augustus. A mithraeum is built in the northwest part of the building in the later second century CE. Representative point: longitude 12.286498, latitude 41.753338.",
+      "confidence": "high",
+      "note": "Begun in the later second century BCE and remodeled under Augustus; a mithraeum was added in the later second century CE.",
+      "id": "claim:pleiades-834171137:1",
+      "sourceId": "source:pleiades-834171137"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

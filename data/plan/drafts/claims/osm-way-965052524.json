@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-965052524",
+  "accepted": [
+    {
+      "feature": "Edificio IV,V,14",
+      "kind": "structure",
+      "coordinate": [
+        12.287374,
+        41.752387
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.287374, latitude 41.752387.",
+      "confidence": "high",
+      "note": "Mapped as an archaeological site.",
+      "id": "claim:osm-way-965052524:1",
+      "sourceId": "source:osm-way-965052524"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

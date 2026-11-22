@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-143828572",
+  "accepted": [
+    {
+      "feature": "Terme di Nettuno (Baths of Neptune)",
+      "kind": "structure",
+      "coordinate": [
+        12.29244,
+        41.756484
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.292440, latitude 41.756484.",
+      "confidence": "high",
+      "note": "OpenStreetMap maps the baths as ruins.",
+      "id": "claim:osm-way-143828572:1",
+      "sourceId": "source:osm-way-143828572"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

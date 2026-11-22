@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:wikidata-Q392878",
+  "accepted": [
+    {
+      "feature": "Piazzale delle Corporazioni",
+      "kind": "open-space",
+      "coordinate": [
+        12.2911,
+        41.7564
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Label: Piazzale delle Corporazioni Description: mercantile center in ancient Ostia Coordinate: longitude 12.291100, latitude 41.756400.",
+      "confidence": "high",
+      "note": "A mercantile center in ancient Ostia.",
+      "id": "claim:wikidata-Q392878:1",
+      "sourceId": "source:wikidata-Q392878"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

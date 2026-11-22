@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-218815246",
+  "accepted": [
+    {
+      "feature": "Tomb of C. Cartilius Poplicola",
+      "kind": "structure",
+      "coordinate": [
+        12.28544,
+        41.750364
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.285440, latitude 41.750364.",
+      "confidence": "high",
+      "note": "OpenStreetMap tags it as an ancient Roman archaeological site.",
+      "id": "claim:osm-way-218815246:1",
+      "sourceId": "source:osm-way-218815246"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

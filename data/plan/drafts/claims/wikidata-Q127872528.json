@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:wikidata-Q127872528",
+  "accepted": [
+    {
+      "feature": "Guild Temple and Mithraeum of Fructosus",
+      "kind": "structure",
+      "coordinate": [
+        12.287841,
+        41.753182
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Coordinate: longitude 12.287841, latitude 41.753182.",
+      "confidence": "high",
+      "note": "",
+      "id": "claim:wikidata-Q127872528:1",
+      "sourceId": "source:wikidata-Q127872528"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

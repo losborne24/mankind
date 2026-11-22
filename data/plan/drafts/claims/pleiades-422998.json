@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:pleiades-422998",
+  "accepted": [
+    {
+      "feature": "Pianabella basilica",
+      "kind": "structure",
+      "coordinate": [
+        12.293684,
+        41.750037
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Representative point: longitude 12.293684, latitude 41.750037.",
+      "confidence": "high",
+      "note": "A large Christian basilica southeast of the Porta Laurentina; its first phase dates to the end of the fourth century A.D.",
+      "id": "claim:pleiades-422998:1",
+      "sourceId": "source:pleiades-422998"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

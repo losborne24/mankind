@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:wikidata-Q123469072",
+  "accepted": [
+    {
+      "feature": "Mithraeum of Felicissimus",
+      "kind": "structure",
+      "coordinate": [
+        12.291472,
+        41.754468
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Coordinate: longitude 12.291472, latitude 41.754468.",
+      "confidence": "high",
+      "note": "",
+      "id": "claim:wikidata-Q123469072:1",
+      "sourceId": "source:wikidata-Q123469072"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

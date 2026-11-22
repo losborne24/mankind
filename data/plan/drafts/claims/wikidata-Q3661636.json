@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:wikidata-Q3661636",
+  "accepted": [
+    {
+      "feature": "Case a giardino",
+      "kind": "structure",
+      "coordinate": [
+        12.284577,
+        41.751884
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Label: Case a giardino Description: archaeological site in Ostia, Rome Italy Coordinate: longitude 12.284577, latitude 41.751884.",
+      "confidence": "high",
+      "note": "An archaeological site in Ostia.",
+      "id": "claim:wikidata-Q3661636:1",
+      "sourceId": "source:wikidata-Q3661636"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

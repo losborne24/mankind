@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-10312862776",
+  "accepted": [
+    {
+      "feature": "Palestra delle terme (RE G. II. INS IV.)",
+      "kind": "open-space",
+      "coordinate": [
+        12.292293,
+        41.756458
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.292293, latitude 41.756458.",
+      "confidence": "high",
+      "note": "The palaestra of a bath complex, mapped by OpenStreetMap as an archaeological site.",
+      "id": "claim:osm-node-10312862776:1",
+      "sourceId": "source:osm-node-10312862776"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

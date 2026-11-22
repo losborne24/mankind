@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-52050478",
+  "accepted": [
+    {
+      "feature": "Piazzale della Vittoria",
+      "kind": "open-space",
+      "coordinate": [
+        12.295502,
+        41.757068
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.295502, latitude 41.757068.",
+      "confidence": "high",
+      "note": "OpenStreetMap tags it as an archaeological site.",
+      "id": "claim:osm-way-52050478:1",
+      "sourceId": "source:osm-way-52050478"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

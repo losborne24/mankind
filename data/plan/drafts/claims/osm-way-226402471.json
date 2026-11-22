@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-226402471",
+  "accepted": [
+    {
+      "feature": "Casa dell'Ercole Bambino (Ostia Antica RII,VI,3-4)",
+      "kind": "structure",
+      "coordinate": [
+        12.29207,
+        41.756114
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.292070, latitude 41.756114.",
+      "confidence": "high",
+      "note": "OpenStreetMap tags this house at Ostia Antica as an archaeological site.",
+      "id": "claim:osm-way-226402471:1",
+      "sourceId": "source:osm-way-226402471"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

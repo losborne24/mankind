@@ -1,0 +1,22 @@
+{
+  "sourceId": "source:wikipedia-Santa_Aurea",
+  "accepted": [
+    {
+      "feature": "Basilica of Santa Aurea",
+      "kind": "structure",
+      "coordinate": null,
+      "existence": {
+        "startYear": 1483,
+        "endYear": null
+      },
+      "quote": "The present-day church, completed in 1483, is the cathedral of the suburbicarian diocese of Ostia.",
+      "confidence": "high",
+      "note": "Church in the Ostia Antica district of Ostia, Italy.",
+      "id": "claim:wikipedia-Santa_Aurea:1",
+      "sourceId": "source:wikipedia-Santa_Aurea"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-1009198630",
+  "accepted": [
+    {
+      "feature": "Tempietto repubblicano (II,IX,4)",
+      "kind": "structure",
+      "coordinate": [
+        12.289559,
+        41.75472
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.289559, latitude 41.754720.",
+      "confidence": "high",
+      "note": "Mapped as an ancient Roman archaeological site.",
+      "id": "claim:osm-way-1009198630:1",
+      "sourceId": "source:osm-way-1009198630"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

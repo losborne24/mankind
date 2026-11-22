@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-relation-15826226",
+  "accepted": [
+    {
+      "feature": "Foro di Porta Marina (IV,VIII,1)",
+      "kind": "open-space",
+      "coordinate": [
+        12.28583,
+        41.75079
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.285830, latitude 41.750790.",
+      "confidence": "high",
+      "note": "Ancient Roman archaeological site mapped by OpenStreetMap.",
+      "id": "claim:osm-relation-15826226:1",
+      "sourceId": "source:osm-relation-15826226"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

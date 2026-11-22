@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-10111875136",
+  "accepted": [
+    {
+      "feature": "Sacello II,II,4",
+      "kind": "structure",
+      "coordinate": [
+        12.29475,
+        41.757135
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.294750, latitude 41.757135.",
+      "confidence": "high",
+      "note": "A small shrine (sacello) mapped by OpenStreetMap as an archaeological site.",
+      "id": "claim:osm-node-10111875136:1",
+      "sourceId": "source:osm-node-10111875136"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

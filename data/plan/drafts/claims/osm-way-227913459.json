@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-227913459",
+  "accepted": [
+    {
+      "feature": "Caserma dei Vigili (Barracks of the Vigiles)",
+      "kind": "structure",
+      "coordinate": [
+        12.292038,
+        41.756986
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.292038, latitude 41.756986.",
+      "confidence": "high",
+      "note": "OpenStreetMap maps the barracks as ruins.",
+      "id": "claim:osm-way-227913459:1",
+      "sourceId": "source:osm-way-227913459"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

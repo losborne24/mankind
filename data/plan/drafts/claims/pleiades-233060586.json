@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:pleiades-233060586",
+  "accepted": [
+    {
+      "feature": "Baths of the Philosopher (Terme del Filosofo)",
+      "kind": "structure",
+      "coordinate": [
+        12.290641,
+        41.753891
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Representative point: longitude 12.290641, latitude 41.753891.",
+      "confidence": "high",
+      "note": "Baths in region V, named after a mid-third-century bust of Plotinus; the bust's date is not the date of the baths.",
+      "id": "claim:pleiades-233060586:1",
+      "sourceId": "source:pleiades-233060586"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

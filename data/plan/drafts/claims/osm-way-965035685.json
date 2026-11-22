@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-965035685",
+  "accepted": [
+    {
+      "feature": "Terme del sceletro (IV,IX,6)",
+      "kind": "structure",
+      "coordinate": [
+        12.285937,
+        41.749595
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.285937, latitude 41.749595.",
+      "confidence": "high",
+      "note": "Mapped as an archaeological site of baths.",
+      "id": "claim:osm-way-965035685:1",
+      "sourceId": "source:osm-way-965035685"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

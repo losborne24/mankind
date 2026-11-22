@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-11799594217",
+  "accepted": [
+    {
+      "feature": "Tomba degli Archetti",
+      "kind": "structure",
+      "coordinate": [
+        12.296384,
+        41.757463
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.296384, latitude 41.757463.",
+      "confidence": "high",
+      "note": "Ancient Roman archaeological site mapped by OpenStreetMap.",
+      "id": "claim:osm-node-11799594217:1",
+      "sourceId": "source:osm-node-11799594217"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

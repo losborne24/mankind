@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-1069797331",
+  "accepted": [
+    {
+      "feature": "Edificio III,XVI,4",
+      "kind": "structure",
+      "coordinate": [
+        12.284341,
+        41.753252
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.284341, latitude 41.753252.",
+      "confidence": "high",
+      "note": "Ancient Roman archaeological site, mapped as present-day remains.",
+      "id": "claim:osm-way-1069797331:1",
+      "sourceId": "source:osm-way-1069797331"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

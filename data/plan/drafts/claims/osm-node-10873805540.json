@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-10873805540",
+  "accepted": [
+    {
+      "feature": "Terme dell'Invidioso (V,V,2)",
+      "kind": "structure",
+      "coordinate": [
+        12.289977,
+        41.75458
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.289977, latitude 41.754580.",
+      "confidence": "high",
+      "note": "Ancient Roman archaeological site mapped by OpenStreetMap.",
+      "id": "claim:osm-node-10873805540:1",
+      "sourceId": "source:osm-node-10873805540"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

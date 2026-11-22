@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-8927475418",
+  "accepted": [
+    {
+      "feature": "Terme delle Sei Colonne",
+      "kind": "structure",
+      "coordinate": [
+        12.28695,
+        41.752708
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.286950, latitude 41.752708.",
+      "confidence": "high",
+      "note": "OpenStreetMap maps these baths as an archaeological site.",
+      "id": "claim:osm-node-8927475418:1",
+      "sourceId": "source:osm-node-8927475418"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

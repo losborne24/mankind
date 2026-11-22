@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:pleiades-282772660",
+  "accepted": [
+    {
+      "feature": "Temple of the Fabri Navales",
+      "kind": "landmark",
+      "coordinate": [
+        12.286157,
+        41.752744
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Representative point: longitude 12.286157, latitude 41.752744.",
+      "confidence": "high",
+      "note": "The Temple of the Ship Carpenters dates to the later second century CE.",
+      "id": "claim:pleiades-282772660:1",
+      "sourceId": "source:pleiades-282772660"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-10313028761",
+  "accepted": [
+    {
+      "feature": "Molino del Silvano (Reg. I, Is. III, 1-2)",
+      "kind": "structure",
+      "coordinate": [
+        12.288941,
+        41.755131
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.288941, latitude 41.755131.",
+      "confidence": "high",
+      "note": "Ruins of an ancient Roman mill, mapped by OpenStreetMap.",
+      "id": "claim:osm-node-10313028761:1",
+      "sourceId": "source:osm-node-10313028761"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

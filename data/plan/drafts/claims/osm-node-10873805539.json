@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-10873805539",
+  "accepted": [
+    {
+      "feature": "Insula dell'Invidioso (V,V,1)",
+      "kind": "structure",
+      "coordinate": [
+        12.289923,
+        41.75434
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.289923, latitude 41.754340.",
+      "confidence": "high",
+      "note": "Ancient Roman archaeological site mapped by OpenStreetMap.",
+      "id": "claim:osm-node-10873805539:1",
+      "sourceId": "source:osm-node-10873805539"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

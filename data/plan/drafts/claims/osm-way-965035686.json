@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-965035686",
+  "accepted": [
+    {
+      "feature": "Caseggiato delle Due Scale (IV,IX,6)",
+      "kind": "structure",
+      "coordinate": [
+        12.285856,
+        41.749726
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.285856, latitude 41.749726.",
+      "confidence": "high",
+      "note": "Mapped as an ancient Roman archaeological site.",
+      "id": "claim:osm-way-965035686:1",
+      "sourceId": "source:osm-way-965035686"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

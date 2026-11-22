@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-663491063",
+  "accepted": [
+    {
+      "feature": "Porta Romana",
+      "kind": "structure",
+      "coordinate": [
+        12.295753,
+        41.757389
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.295753, latitude 41.757389.",
+      "confidence": "high",
+      "note": "OpenStreetMap maps this as a city gate (historic=city_gate).",
+      "id": "claim:osm-node-663491063:1",
+      "sourceId": "source:osm-node-663491063"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-2391690555",
+  "accepted": [
+    {
+      "feature": "Mosaici delle terme di Nettuno",
+      "kind": "structure",
+      "coordinate": [
+        12.292672,
+        41.756428
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.292672, latitude 41.756428.",
+      "confidence": "high",
+      "note": "OpenStreetMap maps the mosaics of the Baths of Neptune as ruins.",
+      "id": "claim:osm-node-2391690555:1",
+      "sourceId": "source:osm-node-2391690555"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

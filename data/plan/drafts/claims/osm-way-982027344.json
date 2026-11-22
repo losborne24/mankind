@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-982027344",
+  "accepted": [
+    {
+      "feature": "Monumento Funerario (III,VII,2)",
+      "kind": "structure",
+      "coordinate": [
+        12.285149,
+        41.750889
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.285149, latitude 41.750889.",
+      "confidence": "high",
+      "note": "Mapped as an archaeological site of a tomb.",
+      "id": "claim:osm-way-982027344:1",
+      "sourceId": "source:osm-way-982027344"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

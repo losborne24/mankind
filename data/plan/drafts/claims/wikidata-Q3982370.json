@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:wikidata-Q3982370",
+  "accepted": [
+    {
+      "feature": "Roman Theatre of Ostia",
+      "kind": "structure",
+      "coordinate": [
+        12.291389,
+        41.755833
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Coordinate: longitude 12.291389, latitude 41.755833.",
+      "confidence": "high",
+      "note": "Ancient Roman theatre of Ostia, Rome, Italy.",
+      "id": "claim:wikidata-Q3982370:1",
+      "sourceId": "source:wikidata-Q3982370"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

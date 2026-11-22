@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:pleiades-367085720",
+  "accepted": [
+    {
+      "feature": "Terme della Basilica Cristiana (Baths of the Christian Basilica)",
+      "kind": "structure",
+      "coordinate": [
+        12.286571,
+        41.753158
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "The Baths of the Christian Basilica date to the reign of Trajan, with restorations in the early third century. Representative point: longitude 12.286571, latitude 41.753158.",
+      "confidence": "high",
+      "note": "The source dates the baths to the reign of Trajan and says they were restored in the early third century, without giving a year.",
+      "id": "claim:pleiades-367085720:1",
+      "sourceId": "source:pleiades-367085720"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

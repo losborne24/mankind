@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-10106139087",
+  "accepted": [
+    {
+      "feature": "Caseggiato I,IX,2",
+      "kind": "structure",
+      "coordinate": [
+        12.287363,
+        41.754075
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.287363, latitude 41.754075.",
+      "confidence": "high",
+      "note": "A building block mapped by OpenStreetMap as an archaeological site.",
+      "id": "claim:osm-node-10106139087:1",
+      "sourceId": "source:osm-node-10106139087"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-950143356",
+  "accepted": [
+    {
+      "feature": "Basilica Cristiana (III,I,4)",
+      "kind": "structure",
+      "coordinate": [
+        12.286416,
+        41.752965
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.286416, latitude 41.752965.",
+      "confidence": "high",
+      "note": "OpenStreetMap tags it as an archaeological site.",
+      "id": "claim:osm-way-950143356:1",
+      "sourceId": "source:osm-way-950143356"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

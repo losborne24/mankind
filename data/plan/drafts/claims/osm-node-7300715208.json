@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-7300715208",
+  "accepted": [
+    {
+      "feature": "Porta Laurentina",
+      "kind": "structure",
+      "coordinate": [
+        12.291623,
+        41.752671
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.291623, latitude 41.752671.",
+      "confidence": "high",
+      "note": "OpenStreetMap maps this as an ancient Roman city gate.",
+      "id": "claim:osm-node-7300715208:1",
+      "sourceId": "source:osm-node-7300715208"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

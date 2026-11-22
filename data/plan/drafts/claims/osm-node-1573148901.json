@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-1573148901",
+  "accepted": [
+    {
+      "feature": "Casa di Diana",
+      "kind": "structure",
+      "coordinate": [
+        12.288787,
+        41.754925
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.288787, latitude 41.754925.",
+      "confidence": "high",
+      "note": "OpenStreetMap maps this as ancient Roman ruins.",
+      "id": "claim:osm-node-1573148901:1",
+      "sourceId": "source:osm-node-1573148901"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

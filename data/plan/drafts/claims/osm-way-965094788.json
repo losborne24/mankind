@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-965094788",
+  "accepted": [
+    {
+      "feature": "Edificio IV,III,2",
+      "kind": "structure",
+      "coordinate": [
+        12.289207,
+        41.75311
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.289207, latitude 41.753110.",
+      "confidence": "high",
+      "note": "Mapped as an archaeological site.",
+      "id": "claim:osm-way-965094788:1",
+      "sourceId": "source:osm-way-965094788"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

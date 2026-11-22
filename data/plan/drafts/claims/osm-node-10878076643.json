@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-10878076643",
+  "accepted": [
+    {
+      "feature": "Ninfeo di Porta Marina (IV,VIII,3)",
+      "kind": "structure",
+      "coordinate": [
+        12.285383,
+        41.750731
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.285383, latitude 41.750731.",
+      "confidence": "high",
+      "note": "Ancient Roman archaeological site mapped by OpenStreetMap.",
+      "id": "claim:osm-node-10878076643:1",
+      "sourceId": "source:osm-node-10878076643"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

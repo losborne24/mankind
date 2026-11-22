@@ -69,8 +69,10 @@ test of the code path, not an extraction:
 No claims for Ostia have been reviewed for real. To get there, run:
 
 ```sh
-node scripts/research/run.mjs --place ostia --year 100 --source "claude.ai" --reviewer "Your name"
+node scripts/research/run.mjs --place ostia --year 100 --via claude --reviewer "Your name"
 ```
+
+Or, pasting into a chat app yourself: `--source "claude.ai"` in place of `--via claude`.
 
 `run.mjs` works out from disk what's already done, runs the next step, and keeps going until a person is needed.
 It then stops and prints what to do and the command to run next (the same command). In order, it:
@@ -81,11 +83,18 @@ It then stops and prints what to do and the command to run next (the same comman
    writes fixed chunks of 25 sources to `data/ai/manual/batches/<place>/claims-NN.prompt.md`, each with an empty
    `.reply.txt` beside it. Paste each prompt into a chat app and save the reply beside it. The next run imports
    every filled reply, sets it aside, and rewrites the prompt with any sources the reply missed or got wrong.
-3. **Reviews claims.** With `--reviewer`, each claims draft is shown with its claims and quotes, and you answer
-   `y`, `n`, `s` (skip) or `q`. Without it, the drafts awaiting review are listed. Drafts with no verified claims
-   need no decision.
+   With `--via claude`, nothing is pasted: the Claude Code CLI on this machine (`claude -p`, no tools, run outside
+   the project) reads each prompt file and writes its reply file, three chunks at a time. It uses your Claude Code
+   login rather than an API key. Its replies are constrained to the task's schema, then validated and verified
+   exactly like pasted ones, and recorded as `manual:claude-code:<model>`.
+3. **Reviews claims.** With `--reviewer "Your name"`, claims are reviewed in groups by source type (OSM,
+   Pleiades, Wikidata, Wikipedia). Every claim in the group is listed, one line each with its quote. You answer `a`
+   to accept the whole group, `o` to go through it one draft at a time (`y`, `n` with an optional reason, `s`,
+   `q`), `s` to skip it or `q` to stop. A group acceptance is still logged per draft, noting it was made as a group.
+   Without `--reviewer`, the drafts awaiting review are listed. Drafts with no verified claims need no decision.
 4. **Drafts the blueprint** from every accepted claim (`draft-blueprint.mjs`). In manual mode it writes the prompt
-   and stops for the reply. If more claims are accepted after drafting, it says so; `--redraft` drafts again.
+   and stops for the reply (with `--via claude`, Claude Code writes the reply and the draft is finished in the same
+   run). If more claims are accepted after drafting, it says so; `--redraft` drafts again.
 5. **Reviews the blueprint**, in the same way as the claims.
 6. **Publishes** the blueprint, unless the accepted draft is already what the app loads (`publish-accepted.mjs`).
 7. **Prints the remaining gaps** (`queue.mjs`).

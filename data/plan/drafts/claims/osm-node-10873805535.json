@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-10873805535",
+  "accepted": [
+    {
+      "feature": "Terme del Filosofo (V,II,7)",
+      "kind": "structure",
+      "coordinate": [
+        12.290641,
+        41.753891
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.290641, latitude 41.753891.",
+      "confidence": "high",
+      "note": "Ancient Roman baths, mapped by OpenStreetMap as an archaeological site.",
+      "id": "claim:osm-node-10873805535:1",
+      "sourceId": "source:osm-node-10873805535"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

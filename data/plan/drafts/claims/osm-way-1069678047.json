@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-1069678047",
+  "accepted": [
+    {
+      "feature": "Horrea III,XVII,1 and Terme",
+      "kind": "structure",
+      "coordinate": [
+        12.284056,
+        41.752679
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.284056, latitude 41.752679.",
+      "confidence": "high",
+      "note": "Mapped as an ancient Roman archaeological site of baths.",
+      "id": "claim:osm-way-1069678047:1",
+      "sourceId": "source:osm-way-1069678047"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

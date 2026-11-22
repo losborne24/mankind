@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:pleiades-238098310",
+  "accepted": [
+    {
+      "feature": "Terme della Trinacria",
+      "kind": "structure",
+      "coordinate": [
+        12.284181,
+        41.753385
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Representative point: longitude 12.284181, latitude 41.753385.",
+      "confidence": "high",
+      "note": "Baths in Regio III, built in the Hadrianic period at the same time as the Temple of Serapis.",
+      "id": "claim:pleiades-238098310:1",
+      "sourceId": "source:pleiades-238098310"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

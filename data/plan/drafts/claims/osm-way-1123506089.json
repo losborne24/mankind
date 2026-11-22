@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-1123506089",
+  "accepted": [
+    {
+      "feature": "Aula dei Mensores (I,XIX,1.3)",
+      "kind": "structure",
+      "coordinate": [
+        12.28498,
+        41.753752
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.284980, latitude 41.753752.",
+      "confidence": "high",
+      "note": "Archaeological site, mapped as present-day remains.",
+      "id": "claim:osm-way-1123506089:1",
+      "sourceId": "source:osm-way-1123506089"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

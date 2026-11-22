@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:pleiades-198393847",
+  "accepted": [
+    {
+      "feature": "Basilica of Constantine (Ostia)",
+      "kind": "structure",
+      "coordinate": [
+        12.293681,
+        41.754181
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Representative point: longitude 12.293681, latitude 41.754181.",
+      "confidence": "high",
+      "note": "A basilica in region 5 paid for by Constantine I, confirmed by geophysical survey and excavation.",
+      "id": "claim:pleiades-198393847:1",
+      "sourceId": "source:pleiades-198393847"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

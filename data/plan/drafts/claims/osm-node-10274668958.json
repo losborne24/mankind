@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-10274668958",
+  "accepted": [
+    {
+      "feature": "Terme del bagnino Buticosus (I,XIV,8)",
+      "kind": "structure",
+      "coordinate": [
+        12.286612,
+        41.75401
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.286612, latitude 41.754010.",
+      "confidence": "high",
+      "note": "Baths mapped by OpenStreetMap as an archaeological site.",
+      "id": "claim:osm-node-10274668958:1",
+      "sourceId": "source:osm-node-10274668958"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

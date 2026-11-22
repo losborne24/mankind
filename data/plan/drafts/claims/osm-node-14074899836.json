@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-14074899836",
+  "accepted": [
+    {
+      "feature": "Domus del Tempio Rotondo",
+      "kind": "structure",
+      "coordinate": [
+        12.288382,
+        41.753476
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.288382, latitude 41.753476.",
+      "confidence": "high",
+      "note": "Ancient Roman building archaeological site mapped by OpenStreetMap.",
+      "id": "claim:osm-node-14074899836:1",
+      "sourceId": "source:osm-node-14074899836"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

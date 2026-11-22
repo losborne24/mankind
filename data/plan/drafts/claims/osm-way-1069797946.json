@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-1069797946",
+  "accepted": [
+    {
+      "feature": "Terme della Trinacria (III,XVI,7)",
+      "kind": "structure",
+      "coordinate": [
+        12.284209,
+        41.753341
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.284209, latitude 41.753341.",
+      "confidence": "high",
+      "note": "Ancient Roman baths, tagged as an archaeological site.",
+      "id": "claim:osm-way-1069797946:1",
+      "sourceId": "source:osm-way-1069797946"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

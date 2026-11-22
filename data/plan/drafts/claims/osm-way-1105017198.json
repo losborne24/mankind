@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-1105017198",
+  "accepted": [
+    {
+      "feature": "Mitreo delle Sette Sfere (II,VIII,6)",
+      "kind": "structure",
+      "coordinate": [
+        12.290494,
+        41.755778
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.290494, latitude 41.755778.",
+      "confidence": "high",
+      "note": "Ancient Roman temple (mithraeum), tagged as an archaeological site.",
+      "id": "claim:osm-way-1105017198:1",
+      "sourceId": "source:osm-way-1105017198"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

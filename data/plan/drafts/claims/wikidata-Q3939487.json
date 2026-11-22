@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:wikidata-Q3939487",
+  "accepted": [
+    {
+      "feature": "Rocca di Ostia",
+      "kind": "structure",
+      "coordinate": [
+        12.301276,
+        41.759308
+      ],
+      "existence": {
+        "startYear": 1483,
+        "endYear": null
+      },
+      "quote": "Coordinate: longitude 12.301276, latitude 41.759308. Inception: 1483 CE.",
+      "confidence": "high",
+      "note": "A castle in Ostia Antica.",
+      "id": "claim:wikidata-Q3939487:1",
+      "sourceId": "source:wikidata-Q3939487"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-1123506090",
+  "accepted": [
+    {
+      "feature": "Tempio dei Mensores",
+      "kind": "structure",
+      "coordinate": [
+        12.28509,
+        41.753738
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.285090, latitude 41.753738.",
+      "confidence": "high",
+      "note": "Ancient Roman temple, tagged as an archaeological site.",
+      "id": "claim:osm-way-1123506090:1",
+      "sourceId": "source:osm-way-1123506090"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-1065383694",
+  "accepted": [
+    {
+      "feature": "Mitreo di Lucrezio Menandro (I,III,5)",
+      "kind": "structure",
+      "coordinate": [
+        12.288614,
+        41.755263
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.288614, latitude 41.755263.",
+      "confidence": "high",
+      "note": "Mapped as an ancient Roman archaeological site of a temple.",
+      "id": "claim:osm-way-1065383694:1",
+      "sourceId": "source:osm-way-1065383694"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

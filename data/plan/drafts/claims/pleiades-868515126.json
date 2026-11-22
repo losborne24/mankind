@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:pleiades-868515126",
+  "accepted": [
+    {
+      "feature": "House of Amor and Psyche",
+      "kind": "structure",
+      "coordinate": [
+        12.286084,
+        41.754055
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Representative point: longitude 12.286084, latitude 41.754055.",
+      "confidence": "high",
+      "note": "A late-antique domus on the Via del Tempio d'Ercole, between the Via della Foce and the Tiber.",
+      "id": "claim:pleiades-868515126:1",
+      "sourceId": "source:pleiades-868515126"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

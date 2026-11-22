@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-1101272281",
+  "accepted": [
+    {
+      "feature": "Suburbio Ostiense",
+      "kind": "zone",
+      "coordinate": [
+        12.304421,
+        41.745453
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.304421, latitude 41.745453.",
+      "confidence": "high",
+      "note": "Ancient Roman suburban area, mapped as an archaeological site.",
+      "id": "claim:osm-way-1101272281:1",
+      "sourceId": "source:osm-way-1101272281"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

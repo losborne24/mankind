@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-9311336647",
+  "accepted": [
+    {
+      "feature": "Caseggiato del Cane Monnus (II,I,1)",
+      "kind": "structure",
+      "coordinate": [
+        12.295403,
+        41.757531
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.295403, latitude 41.757531.",
+      "confidence": "high",
+      "note": "OpenStreetMap maps this as an archaeological site.",
+      "id": "claim:osm-node-9311336647:1",
+      "sourceId": "source:osm-node-9311336647"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

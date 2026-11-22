@@ -1,0 +1,22 @@
+{
+  "sourceId": "source:wikipedia-Ostia_Synagogue",
+  "accepted": [
+    {
+      "feature": "Ostia Synagogue",
+      "kind": "structure",
+      "coordinate": null,
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "The synagogue building dates from the reign of Claudius and continued in use as a synagogue into the 5th century AD.",
+      "confidence": "medium",
+      "note": "The building dates from the reign of Claudius and stayed in use into the 5th century AD; the article gives no exact years.",
+      "id": "claim:wikipedia-Ostia_Synagogue:1",
+      "sourceId": "source:wikipedia-Ostia_Synagogue"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

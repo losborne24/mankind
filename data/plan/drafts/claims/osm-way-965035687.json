@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-way-965035687",
+  "accepted": [
+    {
+      "feature": "Caupona del Dio Pan e Mitreo dei Marmi Colorati (IV,IX,5)",
+      "kind": "structure",
+      "coordinate": [
+        12.285998,
+        41.749854
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.285998, latitude 41.749854.",
+      "confidence": "high",
+      "note": "Mapped as an ancient Roman archaeological site.",
+      "id": "claim:osm-way-965035687:1",
+      "sourceId": "source:osm-way-965035687"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

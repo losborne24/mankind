@@ -1,0 +1,22 @@
+{
+  "sourceId": "source:wikipedia-Ostia_Antica",
+  "accepted": [
+    {
+      "feature": "Ostia Antica",
+      "kind": "settlement",
+      "coordinate": null,
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "It became the port city of Rome located at the mouth of the Tiber and is near modern Ostia, 25 km (16 mi) southwest of Rome.",
+      "confidence": "high",
+      "note": "Because the coastline silted up, the site now lies 3 km from the sea.",
+      "id": "claim:wikipedia-Ostia_Antica:1",
+      "sourceId": "source:wikipedia-Ostia_Antica"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

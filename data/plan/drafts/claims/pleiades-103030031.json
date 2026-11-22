@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:pleiades-103030031",
+  "accepted": [
+    {
+      "feature": "Mithraeum of Lucretius Menander",
+      "kind": "structure",
+      "coordinate": [
+        12.288614,
+        41.755263
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Representative point: longitude 12.288614, latitude 41.755263.",
+      "confidence": "high",
+      "note": "Dates to the third century CE.",
+      "id": "claim:pleiades-103030031:1",
+      "sourceId": "source:pleiades-103030031"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}

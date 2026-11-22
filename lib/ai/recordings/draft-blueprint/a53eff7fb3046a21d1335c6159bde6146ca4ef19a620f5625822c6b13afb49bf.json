@@ -1,0 +1,16 @@
+{
+  "task": "draft-blueprint",
+  "promptVersion": "draft-1",
+  "digest": "a53eff7fb3046a21d1335c6159bde6146ca4ef19a620f5625822c6b13afb49bf",
+  "recordedAt": "2026-11-01T18:30:22.634Z",
+  "source": "manual:claude-code:opus",
+  "response": {
+    "text": "{\"inferred\":[{\"title\":\"Decumanus Maximus\",\"kind\":\"route\",\"longitude\":12.2911,\"latitude\":41.7553,\"startYear\":null,\"endYear\":null,\"reason\":\"Several claims name the Decumanus Maximus as the main street running from Porta Romana to Porta Marina, passing between the theatre with its Quattro Tempietti and the Collegial Temple that stands 'between via degli Augustali and Decumano', so its line must run through this point.\",\"claimIds\":[\"claim:pleiades-981681540:1\",\"claim:osm-node-10873805528:1\",\"claim:pleiades-1554484:1\",\"claim:osm-node-663491063:1\",\"claim:osm-node-7300715214:1\"]},{\"title\":\"Via degli Augustali\",\"kind\":\"route\",\"longitude\":12.29095,\"latitude\":41.7548,\"startYear\":null,\"endYear\":null,\"reason\":\"The Collegial Temple is described as lying between via degli Augustali and the Decumanus, and a domus is named as being on that street, so the street runs south from the Decumanus past these buildings and the Collegio degli Augustali.\",\"claimIds\":[\"claim:osm-node-10873805528:1\",\"claim:osm-node-10873805530:1\",\"claim:osm-node-10873805543:1\"]},{\"title\":\"Via Ostiensis outside Porta Romana\",\"kind\":\"route\",\"longitude\":12.297,\"latitude\":41.758,\"startYear\":null,\"endYear\":null,\"reason\":\"The necropolis is said to lie on the south side of the Via Ostiensis outside Porta Romana, so the road leaves the gate eastward just north of the necropolis.\",\"claimIds\":[\"claim:pleiades-617979990:1\",\"claim:osm-node-1573904451:1\",\"claim:osm-node-663491063:1\"]}]}",
+    "stopReason": "end_turn",
+    "model": "manual:claude-code:opus",
+    "usage": {
+      "input_tokens": 0,
+      "output_tokens": 0
+    }
+  }
+}

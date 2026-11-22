@@ -1,0 +1,25 @@
+{
+  "sourceId": "source:osm-node-10274667191",
+  "accepted": [
+    {
+      "feature": "Horrea dei Mensores (I,XIX,4)",
+      "kind": "structure",
+      "coordinate": [
+        12.284687,
+        41.754091
+      ],
+      "existence": {
+        "startYear": null,
+        "endYear": null
+      },
+      "quote": "Centre: longitude 12.284687, latitude 41.754091.",
+      "confidence": "high",
+      "note": "Warehouses (horrea) mapped by OpenStreetMap as an archaeological site.",
+      "id": "claim:osm-node-10274667191:1",
+      "sourceId": "source:osm-node-10274667191"
+    }
+  ],
+  "discarded": [],
+  "extractedBy": "manual:claude-code:opus",
+  "promptVersion": "claims-2"
+}
